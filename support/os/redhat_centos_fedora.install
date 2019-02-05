@@ -1,0 +1,182 @@
+#!/bin/bash
+
+redhat_os(){
+install_log="$ldir/os-install.log";
+failed=0;
+prefix="sudo";
+packages="";
+
+echo -n >"$install_log" &2>/dev/null;
+
+echo -e "$w_l\n  INSTALLATION\n  ============\n";
+
+rh_version=$(sed -n 's/^[^0-9]*\([0-9][0-9]*\).*$/\1/p' /etc/redhat-release 2>/dev/null);
+! [[ $rh_version ]] && { echo -e "$r_l  System not recognised -> Abort!\n"; return 1; }
+
+sshpass_src="ftp://rpmfind.net/linux/dag/redhat/el6/en/x86_64/dag/RPMS/sshpass-1.05-1.el6.rf.x86_64.rpm";
+sshpass86_src="ftp://rpmfind.net/linux/dag/redhat/el6/en/i386/dag/RPMS/sshpass-1.05-1.el6.rf.i686.rpm";
+installer="yum";
+
+case $rh_version in
+	5)
+		echo -e "$r_l  Five - Has a too old glibc!"; return 1;
+		sshpass_src="ftp://rpmfind.net/linux/epel/5/x86_64/sshpass-1.05-1.el5.x86_64.rpm";
+		sshpass86_src="ftp://rpmfind.net/linux/epel/5/i386/sshpass-1.05-1.el5.i386.rpm";
+		;;
+	[6-7])
+		# Redhat/CentOS 6+7 ok
+		;;
+	2[2-3])
+		# Fedora 22+23 ok
+		installer="dnf";
+		;;
+	24)
+		# Fedora 24 still beta
+		installer="dnf";
+		echo -e "$r_l  This installer is still in the testing stage!";
+		;;
+	*)
+		echo "This version is not supported!" >"$install_log" 2>/dev/null;
+		echo -e "$r_l  \"$(cat /etc/redhat-release)\" is not supported!";
+		return 1;
+esac
+
+# without sudo no user installation allowed
+hash sudo 2>/dev/null || { [ "$(whoami)" != "root" ] && { echo -e "$r_l  You need to be root for that!\n"; return 1; } }
+
+# root needs no sudo
+[ "$(whoami)" == "root" ] && prefix="";
+
+# care about the repos on Redhat
+if hash subscription-manager 2>/dev/null; then
+	$prefix subscription-manager status >/dev/null || { echo -e "$r_l  You need an active subscription!\n"; return 1; }
+	echo -e "$w_l  Retreiving repo list...";
+	if ! $prefix subscription-manager repos --list-enabled | grep -q "server-optional-rpms"; then
+		cmdline="subscription-manager repos --enable=rhel-$rh_version-server-optional-rpms";
+		echo -e "$w_l  Add needed repo$g_l optional:$y_l $cmdline";
+		echo "+++ $(date): $cmdline" >> "$install_log";
+		$prefix $cmdline >> "$install_log" 2>&1 || failed=1;
+	fi
+fi
+
+for e in "${binvars[@]}";
+do
+	if ! hash "$e" 2>/dev/null; then
+		inst="$e";
+		case $e in
+		svn)
+			inst="subversion";
+			;;
+		# the following guys have no official packages
+		sshpass)
+			continue;
+			;;
+		upx)
+			continue;
+			;;
+		esac;
+		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
+		packages="$packages $inst";
+	fi;
+done;
+
+for e in "${headervars[@]}";
+do
+	e1=$(find /usr/include/* |grep -m1 "$e");
+	if [ ! ${#e1} -gt 8 ]; then
+		case $e in
+		crypto.h)
+				inst="openssl-devel";
+			;;
+		libusb.h)
+				# no official package for older versions
+				[ "$rh_version" -lt 6 ] && continue;
+				# hopelully they stick to it from now :-)
+				inst="libusbx-devel";
+				[ "$rh_version" == 6 ] && inst="libusb1-devel";
+			;;
+		pcsclite.h)
+				inst="pcsc-lite-devel";
+			;;
+		pthread.h)
+				inst="glibc-headers";
+			;;
+		esac;
+		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
+		packages="$packages $inst";
+	fi;
+done;
+
+for e in "${libvars[@]}";
+do
+	e1=$(find /usr/lib* 2>/dev/null | grep -m1 "$e");
+	if [ ! ${#e1} -gt 8 ]; then
+		case $e in
+		libccidtwin.so)
+				inst="ccid";
+				[ "$rh_version" -gt 6 ] && inst="pcsc-lite-ccid";
+			;;
+		esac;
+		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
+		packages="$packages $inst";
+	fi;
+done;
+
+if [ "$(uname -m)" == "x86_64" ] && [ ! -f /usr/lib/libz.so ]; then
+	if [ ! -f /usr/lib/libz.so ]; then
+		e="zlib32";
+		inst="zlib-devel.i686";
+		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
+		packages="$packages $inst";
+	fi
+fi
+
+if [ ${#packages} -gt 0 ]; then
+	echo -n -e "$w_l  update$g_l package list...";
+	echo "+++ $(date): $installer -y check-update" >> "$install_log"
+	$prefix $installer -y check-update >> "$install_log" 2>&1;
+	echo -e "$y_l done";
+	echo -n -e "$w_l  install$g_l selected packages$y_l please wait...";
+	echo "+++ $(date): $installer -y install$packages" >> "$install_log"
+	$prefix $installer -y install $packages >> "$install_log" 2>&1 || failed=1;
+	if [ $failed == 0 ]; then
+		echo -e "$y_l  done";
+	else
+		echo -e "$r_l  failed!";
+	fi
+fi
+
+# additional rpm
+if ! hash sshpass 2>/dev/null; then
+	[ "$(arch)" == "i686" ] && sshpass_src=$sshpass86_src;
+	echo -e "$w_l  install$g_l sshpass$y_l\tfrom: $sshpass_src";
+	echo "+++ $(date): rpm -i $sshpass_src" >> "$install_log";
+	$prefix rpm -i $sshpass_src >> "$install_log" 2>&1 || failed=1;
+fi
+
+if ! hash upx 2>/dev/null; then
+	[ -f "$bindir"/upx ] && rm -f "$bindir"/upx &>/dev/null;
+	if [ "$(uname -m)" == "x86_64" ]; then
+		upxarch="upx-3.95-amd64_linux";
+	else
+		upxarch="upx-3.95-i386_linux";
+	fi
+	upxarchive=$upxarch".tar.bz2";
+	[ -f "$dldir"/$upxarchive ] && rm -f "$dldir"/$upxarchive &>/dev/null;
+	upxurl="http://upx.sourceforge.net/download/$upxarchive";
+	echo -e "$w_l  get$g_l upx$y_l\tfrom: $upxurl";
+	echo "+++ $(date): wget $upxurl" >> "$install_log";
+	if wget --directory-prefix="$dldir" --append-output="$install_log" $upxurl; then
+		echo "+++ $(date): tar xjvf $upxarchive" >> "$install_log";
+		tar xjvf "$dldir"/$upxarchive --directory="$bindir" $upxarch/upx --strip-components=1 >> "$install_log" 2>&1 || failed=1;
+		[ -f "$dldir"/$upxarchive ] && rm -f "$dldir"/$upxarchive &>/dev/null;
+	else
+		failed=1;
+	fi
+fi
+
+
+[ $failed == 1 ] && echo -e "\n$r_l  Installation with errors - see: $install_log";
+
+return $failed;
+}

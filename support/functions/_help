@@ -1,0 +1,55 @@
+#!/bin/bash
+
+_help_toolchain(){
+	echo -e "$w_l  toolchains :\n  ------------$g_n";
+	helpline1 "${AVAI_TCLIST[@]}";
+	echo -e "\n";
+};
+helpline0(){
+	ll=0;
+	echo -en "  ";
+	for s in "$@";do
+		ll=$((ll + (${#s} + 4)));
+		if [ "$ll" -lt "30" ];then
+			echo -en "$s(_off) ";
+		else
+			echo -en "$s(_off)\n  ";
+			ll="";
+		fi;
+	done;
+};
+helpline1(){
+	ll=0;
+	echo -en "  ";
+	for s in "$@";do
+		ll=$((ll + (${#s} + 4)));
+		if [ "$ll" -lt "45" ];then
+			echo -en "$s "      ;
+		else
+			echo -en "$s\n  "      ;
+			ll="";
+		fi;
+	done;
+};
+_help(){ clear;s3logo;
+echo -e "  ----------------------------------";
+echo -e "  $txt_help1 $0 menu";
+echo -e "  $txt_help2";
+echo -e "  ----------------------------------";
+echo -e "$w_l\n  toolchains :\n  ------------$g_n";
+helpline1 "${AVAI_TCLIST[@]}";
+echo -e "$w_l\n  simplebuild options :\n  ---------------------$c_n";
+helpline1 "${s3opts[@]}";_wait;
+echo -e "$w_l  config_cases:\n  --------$c_n";
+helpline0 "${config_cases[@]}";
+echo -e "$w_l\n\n  addons :\n  --------$p_l";
+helpline0 "${SHORT_ADDONS[@]}";_wait;
+echo -e "$w_l  protocols :\n  -----------$y_l";
+helpline0 "${SHORT_PROTOCOLS[@]}";
+echo -e "$w_l\n  readers :\n  ---------$r_l";
+helpline0 "${SHORT_READERS[@]}";_wait;
+echo -e "$w_l  card_readers :\n  --------------$b_l";
+helpline0 "${SHORT_CARD_READERS[@]}";
+echo -e "$w_l\n  use_vars :\n  --------$w_n";
+helpline0 "${!USE_vars[@]}";_wait;
+};

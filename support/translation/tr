@@ -1,0 +1,115 @@
+#!/bin/bash 
+
+#turkish
+
+txt_as='as';
+txt_of='/';
+txt_for='için';
+txt_b2="yapı";
+txt_to="after";
+txt_now='şimdi';
+txt_b1='build';
+txt_menu='Menü';
+txt_no='none';
+txt_name='Ad';
+txt_use='kullanım';
+txt_back='geri dön';
+txt_done='hazır';
+txt_error='hata';
+txt_missing='eksik';
+txt_sel='seçmek';
+txt_delete='sil';
+txt_found='bulundu';
+txt_create='oluştur';
+txt_loading='load'; #7karakter
+txt_profile='profil';
+txt_profiles='Profiller';
+txt_conf='yapılandırma';
+txt_parameter='Parametre';
+txt_extracting='ayıklanıyor'; #10karakter
+txt_wait='lütfen bekleyin...';
+txt_existing='var';
+txt_ssh_profiles="SSH $txt_profiles";
+txt_not_found='bulunamadı';
+txt_n_installed='yüklü değil';
+txt_start_menu='Ana menü';
+txt_back_main="$txt_start_menu'ye geri dön";
+txt_too_old='(çok eski desteklenmiyor)';
+txt_selected='seçildi';
+txt_update='güncelleniyor';
+txt_example_name='Örnek:dm820.stube';
+txt_save='kayıt';
+txt_filename='dosya adı';
+txt_LOAD="UPLOAD";
+txt_tc="Toolchain";
+
+# menu txt 
+txt_start_menu='Ana menü'; 
+txt_remove_menu="$txt_tc kaldır"; 
+txt_add_menu="$txt_tc ekle"; 
+txt_main_revision="\n yerel SVN revizyonu : r";
+
+# help txt 
+txt_help1="ile başla" 
+txt_help2="komut satırıyla başlayın Parametreler" 
+txt_help3="[ENTER] ile devam eder ..." 
+
+# firstmenu #################### ########################### 
+txt_firstmenu_continue="yerel SVN ile devam et";
+   txt_firstmenu_chose="Farklı bir SVN yükle (7000+)";
+   txt_firstmenu_cedit="yapılandırma düzenleyicisini başlat"; 
+    txt_firstmenu_lang="sistem dili seç"; 
+    txt_firstmenu_exit="Simplebuild'i kapat"; 
+
+# _toolchain_config_menu ##################################### 
+     txt_config_menu="yapılandırma menüsü"; 
+      txt_back_build="menüye geri dön"; 
+txt_module_configure="oscam modüllerini seç";
+     txt_oscam_extra="USB/PCSC ekstralarını seçin"; 
+     txt_build_extra="build ekstralar sıkıştır / yama seç"; 
+      txt_build_load="son yapılandırmayı yükle"; 
+      txt_build_save="konfigürasyonu kaydet"; 
+     txt_build_reset="yapılandırmayı sıfırla";
+       txt_use_targz='oscam derlemeden sonra file.tar.gz';
+       txt_use_patch="patch yamasını oscam'a ekle";
+    txt_use_compress="Oscam'den ikili sıkıştırma";
+
+# _toolchain_build_menu ####################################
+ txt_bmenu_title="menü oluşturma"; 
+  txt_bmenu_user="kullanıcı adı        ";
+  txt_bmenu_comp="derleyici            ";
+  txt_bmenu_debu="hata ayıklama bilgisi";
+   txt_bmenu_use="USE_değişkenler     ";
+ txt_bmenu_build="şimdi oscam oluştur";
+txt_bmenu_config="oscam/build yapılandırma";
+txt_bmenu_profile="mevcut $txt_profile ile yükle";
+txt_bmenus_profile="$txt_profile $txt_save et";
+   txt_bmenu_log="göster lastbuild.log"; 
+  txt_bmenu_back="$txt_tc seçimine geri dön";
+   txt_compress1="önce dosya boyutu   ";
+   txt_compress2="sonra dosya boyutu  ";
+   txt_compress3="dosya boyutu azaldı ";
+
+# _toolchain_main_menu ###################################### 
+txt_menu_builder1="close simplebuild"; 
+txt_menu_builder2="yeni $txt_tc ekle"; 
+txt_menu_builder3="yüklü $txt_tc kaldır";
+txt_menu_builder4="mevcut yerel yapı için oluştur"; 
+txt_menu_back="$txt_tc menüsüne geri dön";
+
+# _dialog_checkout 
+txt_verify_syscheck="sistemi kontrol et          :";
+     txt_verify_svn="mevcut SVN'yi kontrol et    :";
+     txt_update_svn="$txt_update SVN           :";
+    txt_prepare_svn="SVN ödemesini hazırla    :";
+         txt_latest="en son SVN"; 
+
+# _load_profile ############################################ 
+  txt_select_profile_title="kullanılabilir profiller "; 
+        txt_select_profile="lütfen bir profil seçin"; 
+txt_confirm_profile_select="lütfen seçiminizi onaylayın:"; 
+      txt_no_profile_found="içinde profil bulunamadı\n\n$profdir";
+
+# _upload_cam ########################################### 
+txt_upload_cam1="ssh profili mevcut değil "; 
+txt_upload_cam2="ssh profili bulundu";

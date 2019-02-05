@@ -1,0 +1,266 @@
+#!/bin/bash
+
+#VERSIONCOUNTER 20190205
+SIMPLEVERSION="3.0 RC4";OIFS=$IFS;
+export NCURSES_NO_UTF8_ACS=1;
+
+#set dir_vars
+  workdir="$(pwd)";
+   svndir="$workdir/oscam-svn";
+     sdir="$workdir/support";
+    osdir="$sdir/os";
+     ldir="$sdir/logs";
+     adir="$sdir/archive";
+configdir="$sdir/configs";
+     pdir="$sdir/patches";
+  profdir="$sdir/profiles";
+     bdir="$sdir/binaries";
+    dldir="$sdir/downloads";
+     fdir="$sdir/functions";
+  menudir="$sdir/menu_save";
+     bsvn="$sdir/backup_svn";
+    tcdir="$sdir/toolchains";
+     tdir="$sdir/translation";
+ tccfgdir="$sdir/toolchains.cfg";
+   bindir="$sdir/upx";PATH="$bindir:$PATH";
+
+# create folders
+mkdir -p support/{archive,binaries,configs,downloads,functions,logs,os,patches,profiles,toolchains,toolchains.cfg,translation,backup_svn,menu_save,upx} 2>/dev/null;
+mkdir -p "$tcdir/native/bin" 2>/dev/null;
+
+# create links
+[ ! -L "$workdir/logs" ]     && ln -sf "$ldir" "$workdir/logs"     2>/dev/null;
+[ ! -L "$workdir/archive" ]  && ln -sf "$adir" "$workdir/archive"  2>/dev/null;
+[ ! -L "$workdir/patches" ]  && ln -sf "$pdir" "$workdir/patches"  2>/dev/null;
+[ ! -L "$workdir/binaries" ] && ln -sf "$bdir" "$workdir/binaries" 2>/dev/null;
+
+#set arrays
+unset INTERNAL_MODULES; unset ENABLED_MODULES; unset SHORT_MODULENAMES;  unset INST_TCLIST;
+unset DISABLED_MODULES; unset AVAI_TCLIST;     unset ALL_MODULES_LONG;   unset MISS_TCLIST;
+unset SHORT_PROTOCOLS;  unset SHORT_READERS;   unset SHORT_CARD_READERS; unset SHORT_ADDONS;
+unset SSH_CONF_CONTENT; unset USE_vars;        unset USE_vars_disable;
+
+declare -A USE_vars;
+declare -A USE_vars_disable;
+USE_vars[USE_TARGZ]=;
+USE_vars[USE_PATCH]=;
+USE_vars[USE_STAPI]=;
+USE_vars[USE_STAPI5]=;
+USE_vars[USE_CONFDIR]=;
+USE_vars[USE_COMPRESS]=;
+
+declare -A s3cfg_vars;
+s3cfg_vars[USE_TARGZ]=0;
+s3cfg_vars[DIRECTMENU]=0;
+s3cfg_vars[USE_VERBOSE]=0;
+s3cfg_vars[USE_COMPRESS]=0;
+s3cfg_vars[S3_UPDATE_CHECK]=1;
+s3cfg_vars[SAVE_LISTSMARGO]=1;
+s3cfg_vars[NO_SVN_AUTOUPDATE]=0;
+s3cfg_vars[delete_oscamdebugbinary]=1;
+
+declare -a ENABLED_MODULES;  declare -a DISABLED_MODULES;   declare -a SHORT_MODULENAMES;
+declare -a ALL_MODULES_LONG; declare -a AVAI_TCLIST;        declare -a INST_TCLIST;
+declare -a MISS_TCLIST;      declare -a SHORT_ADDONS;       declare -a SHORT_PROTOCOLS;
+declare -a SHORT_READERS;    declare -a SHORT_CARD_READERS; declare -A INTERNAL_MODULES;
+
+#filled arrays
+config_cases=( all addons protocols readers card_readers );
+s3opts=( help cedit clean tccheck tcrepair upload lang_select loadonly checkout ssh_profiles syscheck sysinfo svnup menu get_patch tedit svnpatch profiles svnrestore ); # extendable with plugins
+CUSTOM_CONFDIR="not_set";
+
+#internal vars
+OPENBOX=0;UFS916003=0;_verbose="";
+_t1e="VG9vbGNoYWluLQ==";
+_u1e="aHR0cDovL3N0cmVhbWJvYXJkLnR2L3diYjIvdHV0LXBpY3MvdG9vbGNoYWlucw==";
+cposx=0;cposy=0;off="_off";on="_on";pf="empty";file_exist="0";run="0";
+s3cfg="$configdir/simplebuild.config";loadprofile="no";menucall="no";
+# Compiler settings
+cc_warn="-W -Wall -Wshadow -Wredundant-decls -Wstrict-prototypes -Wold-style-definition";
+cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections";
+
+#default url
+trunkurl="http://www.streamboard.tv/svn/oscam/trunk";[ -f "$workdir/oscamsource.url" ] && source "$workdir/oscamsource.url";
+#trunkurl="http://www.streamboard.tv/svn/oscam-addons/modern";[ -f "$workdir/oscamsource.url" ] && source "$workdir/oscamsource.url";
+
+#load translationlist
+cd "$tdir";langsupport=(*);
+
+#load functions and plugins
+if [ -d "$fdir" ];then
+	cd "$fdir";
+	x=(*);
+	for i in "${x[@]}";do
+		source "$i";
+		plugin=$(awk '/^#simplebuild_plugin/ {printf $2}' $i);
+		[ ! -z "$plugin" ] && s3opts+=($plugin);
+	done;
+else
+	echo "fail functions";
+fi;
+
+#begin
+initializeANSI; #load colors
+
+#check system
+syscheck;[ ! "$sanity" == "1" ] && echo "sanity fail" && sleep 5 && bye;
+
+#initialize simplebuild
+_create_native_profile;	# put native datas to toolchains and configs
+auto_langset;			# echo "info $txt_load_ok";
+_get_config_con "$1";	# echo $addons;exit;
+_create_module_arrays;	# fill module arrays
+_fill_tc_array;			# get # AVAI_TCLIST # INST_TCLIST # MISS_TCLIST
+read_s3cfg;				# read simplebuild config
+_set_dialog_types;		# fill $gui vars
+_systype;				# check used uname
+
+if [ ! -n "$1" ];then
+	[ "${s3cfg_vars[DIRECTMENU]}" == "1" ] && _dialog_checkout && exit;
+	_help;
+	exit;
+else
+	for e in "${s3opts[@]}";do
+		if [ "$e" == "$1" ];then
+			case $e in
+			svnrestore|\
+			checkout|\
+			upload_cam)	if [ ! -n "$2" ];then
+							eval "$e";
+						else
+							eval "$e" "$2";
+						fi;
+						exit;;
+			menu)		if [ ! -n "$2" ];then
+							_dialog_checkout;
+						else
+							_dialog_checkout "$2";
+						fi;;
+			loadonly)	if [ ! -n "$2" ];then
+							_nl;
+							clear;
+							s3logo;
+							echo -e "$r_l\n  $txt_error: toolchain $txt_parameter $txt_missing\n""$w_l";
+							_help_toolchain;
+							sleep 2;
+							exit;
+						else
+							for t in "${AVAI_TCLIST[@]}";do
+								_tmp="$2";
+								[ "$t" == "$2" ] && _load_toolchain "$2" && break;
+							done;
+							if [ -f "$tc_dl" ];then
+								echo -e "$p_l\n\n  toolchain for $_tmp loaded\n";
+							else
+								_nl;
+								clear;
+								s3logo;
+								echo -e "$r_l  toolchain missing/error\n";
+							fi;
+							exit;
+						fi;;
+			tccheck)	if [ ! -n "$2" ];then
+							_nl;
+							clear;
+							s3logo;
+							echo -e "$r_l\n  $txt_error: toolchain $txt_parameter $txt_missing\n""$w_l";
+							_help_toolchain;echo -e "$W";
+							sleep 2;
+							exit;
+						else
+							for t in "${AVAI_TCLIST[@]}";do
+								[ "$t" == "$2" ] && _toolchain_check "$2" && break;
+							done;
+							_nl;
+							clear;
+							s3logo;
+							echo -e "$r_l\n  toolchain missing/error\n$w_l";
+							_help_toolchain;echo -e "$W";
+							sleep 2;
+							exit;
+						fi;;
+			tcrepair)	if [ ! -n "$2" ];then
+							_nl;
+							clear;
+							s3logo;
+							echo -e "$r_l\n  $txt_error: toolchain $txt_parameter $txt_missing\n""$w_l";
+							_help_toolchain;echo -e "$W";
+							sleep 2;
+							exit;
+						else
+							_nl;clear;_toolchain_repair "$2";sleep 2;exit;
+						fi;;
+			upload)		if [ ! -n "$2" ];then
+							_nl;
+							clear;
+							s3logo;
+							echo -e "$r_l\n  $txt_error: $txt_parameter $txt_missing""$w_l";
+							menucall="yes";
+							ssh_profiles;
+						else
+							upload_cam "$2";
+						fi;
+						exit;;
+			tedit)		if [ -n "$2" ];then
+							for telement in ${INST_TCLIST[@]};do
+								if [ "$telement" == "$2" ];then
+									tedit $2;
+									exit;
+								fi;
+							done;
+							clear;
+							s3logo;
+							echo -e $w_l"\n  $2 toolchain not installed\n"$W;
+						fi;
+						exit;;
+			help)		_help;
+						exit;;
+			*)			eval "$e" "$2";
+						exit;;
+			esac;
+		fi;
+	done;
+
+	for t in "${AVAI_TCLIST[@]}";do
+		if [ "$t" == "$1" ];then
+			if [ "${2:0:3}" == "-p=" ] || [ "${2:0:3}" == "-P=" ];then
+				if [ -f "$profdir/${2#*=}" ];then
+					pf=$(cat "$profdir/${2#*=}");
+					pf_name="${2#*=}";
+				fi;
+			fi;
+			[ "$pf" == "empty" ] && c_m_d="$*" || c_m_d="all_off $pf $*"; # set only active module with profiles
+			for cmd in $c_m_d;do
+				if [ "${cmd:0:3}" == "-c=" ] || [ "${cmd:0:3}" == "-C=" ];then
+					CUSTOM_CONFDIR="${cmd#*=}";
+				fi;
+				for cc in "${config_cases[@]}";
+				do
+					[ "$cmd" == "$cc$on" ]  && all_cc+=($cc$on) && break;
+					[ "$cmd" == "$cc$off" ] && all_cc+=($cc$off) && break;
+				done;
+				for sm in "${SHORT_MODULENAMES[@]}";
+				do
+					[ "$cmd" == "$sm" ]     && all_cc+=($(get_module_name "$sm")$on) && break;
+					[ "$cmd" == "$sm$off" ] && all_cc+=($(get_module_name "$sm")$off) && break;
+				done;
+				for uvar in "${!USE_vars[@]}";
+				do
+					[ "$cmd" == "$uvar" ]             && USE_vars[$uvar]="$uvar=1" && break;
+					[ "$cmd" == "$uvar$off" ] && USE_vars_disable[$uvar]="$uvar=1" && break;
+				done;
+				case $cmd in
+					OPENBOX)  OPENBOX=1;;
+					UFS916003) UFS916003=1;;
+					USE_VERBOSE) s3cfg_vars[USE_VERBOSE]=1;;
+				esac;
+			done;
+			_pre_build "$t";
+			exit;
+		fi;
+	done;
+	_help;
+
+fi;
+
+exit;

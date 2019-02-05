@@ -1,0 +1,115 @@
+#!/bin/bash
+
+#polski
+
+txt_as='niż';
+txt_of='z';
+txt_for='dla';
+txt_b2="buduję";
+txt_to="do";
+txt_now='teraz';
+txt_b1='kompiluj';
+txt_menu='menu';
+txt_no='żaden';
+txt_name='nazwa';
+txt_use='użyj';
+txt_back='powrót';
+txt_done=' gotowe';
+txt_error='błąd';
+txt_missing='brak';
+txt_sel='wybierz';
+txt_delete='usuń';
+txt_found='znaleziono';
+txt_create='utwórz';
+txt_loading='ładuj';
+txt_profiles='profil';
+txt_conf='kofiguracja';
+txt_parameter='parametr';
+txt_extracting='rozpakuj';
+txt_wait='proszę czekać ...';
+txt_existing='istniejący';
+txt_ssh_profiles='SSH Profile';
+txt_not_found='nie znaleziono';
+txt_n_installed='nie jest zainstlowane';
+txt_back_main="$txt_back do menu głównego";
+txt_too_old='(zbyt stary nie jest obsługiwany)';
+txt_selected='wybrane';
+txt_update='aktualizacja';
+txt_example_name='przykład: dm820.stube';
+txt_save='zapisz';
+txt_filename='nazwa pliku';
+txt_LOAD="UPLOAD\przesłać";
+
+# menu txt
+txt_start_menu='menu główne';
+txt_remove_menu='usuń Toolchain';
+txt_add_menu='dodaj Toolchain';
+txt_main_revision="\n aktualna SVN REVISION to : r";
+
+# help txt
+txt_help1="zaczać z"
+txt_help2="wiersz poleceń to"
+txt_help3="[ENTER] > dalej ..."
+
+# firstmenu ################################################
+txt_firstmenu_continue="dalej z lokalnym SVN";
+   txt_firstmenu_chose="załaduj inny SVN (od 7000)";
+   txt_firstmenu_cedit="$txt_conf"" - wystartuj edytor";
+    txt_firstmenu_lang="opcje językowe";
+    txt_firstmenu_exit="zakończ Simplebuild";
+
+# _toolchain_config_menu ###################################
+     txt_config_menu="menu konfiguratora";
+      txt_back_build="$txt_back do menu kompilacji";
+txt_module_configure="$txt_sel moduły Oscam";
+     txt_oscam_extra="$txt_sel kompilacyjne extra USB/PCSC ";
+     txt_build_extra="$txt_sel kompilacyjne extra Compress/Patch";
+      txt_build_load="z$txt_loading ostatnia $txt_conf";
+      txt_build_save="$txt_save $txt_conf ";
+     txt_build_reset="resetuj konfigurację ";
+       txt_use_targz='$txt_create plik.tar po kompilacji ';
+       txt_use_patch='użyj Patch przed kompilacją';
+    txt_use_compress='spakuj binarke oscam';
+
+# _toolchain_build_menu ####################################
+  txt_bmenu_title="menu kompilacji";
+   txt_bmenu_user="nazwa usera    ";
+   txt_bmenu_comp="Compiler       ";
+   txt_bmenu_debu="Debug Info     ";
+    txt_bmenu_use="variable      ";
+  txt_bmenu_build="$txt_b1 OScam";
+ txt_bmenu_config="konfiguracja OScam/Build";
+txt_bmenu_profile="załaduj $txt_existing profil";
+txt_bmenus_profile="Profil $txt_save";
+    txt_bmenu_log="pokaż lastbuild.log";
+   txt_bmenu_back="$txt_back do wyboru Toolchain";
+    txt_compress1="wielkość pliku przed          ";
+    txt_compress2="wielkość pliku po           ";
+    txt_compress3="wielkość pliku zmniejszona do";
+
+# _toolchain_main_menu ####################################
+#txt_menu_title="menu toolchaini";
+txt_menu_builder1="zakończ Simplebuild";
+txt_menu_builder2="dodaj nowy Toolchain";
+txt_menu_builder3="usuń zainstalowany Toolchain";
+txt_menu_builder4="nativ dla";
+txt_menu_back="powrót do menu toolchain";
+
+# _dialog_checkout ########################################
+txt_verify_syscheck='sprawdzanie systemu          :';
+     txt_verify_svn='sprawdzanie istniejącego svn :';
+     txt_update_svn="$txt_update svn         :";
+    txt_prepare_svn="przygotowanie svn checkout :";
+         txt_latest="ostatni aktualny";
+
+# _load_profile ###########################################
+  txt_select_profile_title="dostępne profile";
+        txt_select_profile="wybierz profil";
+txt_confirm_profile_select="potwierdzić wybór :";
+      txt_no_profile_found="nie znaleziono profilu w\n\n$profdir";
+
+# _upload_cam #############################################
+txt_upload_cam1="SSH profil nie istnieje";
+txt_upload_cam2="SSH profil znaleziony";
+
+

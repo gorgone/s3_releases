@@ -1,0 +1,154 @@
+#!/bin/bash
+
+suse_os(){
+install_log="$ldir/os-install.log";
+failed=0;
+prefix="sudo";
+packages="";
+
+echo -n >"$install_log" &2>/dev/null;
+
+echo -e "$w_l\n  INSTALLATION\n  ============\n";
+
+suse_version=$(grep VERSION= /etc/os-release 2>/dev/null | sed -n 's/^[^0-9]*\([0-9][0-9]*\).*$/\1/p');
+
+sshpass_src="ftp://rpmfind.net/linux/dag/redhat/el6/en/x86_64/dag/RPMS/sshpass-1.05-1.el6.rf.x86_64.rpm";
+sshpass86_src="ftp://rpmfind.net/linux/dag/redhat/el6/en/i386/dag/RPMS/sshpass-1.05-1.el6.rf.i686.rpm";
+
+if [[ "$suse_version" ]]; then
+	[ "$suse_version" -lt 12 ] && { echo -e "$r_l  This system is not supported anymore!\n"; return 1; }
+	[ "$suse_version" -gt 13 ] && [ "$suse_version" -lt 42 ] && echo -e "$r_l  This installer is still in the testing stage!";
+	[ "$suse_version" -gt 42 ] && echo -e "$r_l  This installer is still in the testing stage!";
+else
+	echo -e "$r_l  System not recognised -> Abort!\n"; return 1;
+fi
+
+# without sudo no user installation allowed
+hash sudo 2>/dev/null || { [ "$(whoami)" != "root" ] && { echo -e "$r_l  You need to be root for that!\n"; return 1; } }
+
+# root needs no sudo
+[ "$(whoami)" == "root" ] && prefix="";
+
+# check for sufficient repositories - SLES & SLED need an additional "SUSE Linux Enterprise Software Development Kit"
+if grep "Enterprise" /etc/os-release >/dev/null; then
+	echo -n -e "$w_l  SUSE Linux Enterprise detected$g_l check for SDK repository...";
+	if ! zypper wp subversion >/dev/null; then
+		echo -e "$r_l\n  You need to install \"SUSE Linux Enterprise Software Development Kit\" first!\n  Get it from https://download.suse.com\n"; return 1;
+	fi
+	echo -e "$y_l ok";
+fi
+
+for e in "${binvars[@]}";
+do
+	if ! hash "$e" 2>/dev/null; then
+		inst="$e";
+		case $e in
+		svn)
+			inst="subversion";
+			;;
+		xz)
+			inst="xz-utils";
+			;;
+		esac;
+		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
+		packages="$packages $inst";
+	fi;
+done;
+
+for e in "${headervars[@]}";
+do
+	e1=$(find /usr/include/* |grep -m1 "$e");
+	if [ ! ${#e1} -gt 8 ]; then
+		case $e in
+		crypto.h)
+				inst="libopenssl-devel";
+			;;
+		libusb.h)
+				inst="libusb-1_0-devel";
+			;;
+		pcsclite.h)
+				inst="pcsc-lite-devel";
+			;;
+		pthread.h)
+				inst="glibc-devel";
+			;;
+		esac;
+		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
+		packages="$packages $inst";
+	fi;
+done;
+
+for e in "${libvars[@]}";
+do
+	e1=$(find /usr/lib* |grep -m1 "$e");
+	if [ ! ${#e1} -gt 8 ]; then
+		case $e in
+		libccidtwin.so)
+				inst="pcsc-ccid";
+			;;
+		esac;
+		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
+		packages="$packages $inst";
+	fi;
+done;
+
+if [ "$(uname -m)" == "x86_64" ] && [ ! -f /usr/lib/libz.so ]; then
+	if [ ! -f /usr/lib/libz.so ]; then
+		e="zlib32";
+		inst="zlib-devel-32bit glibc-32bit libz1-32bit";
+		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
+		packages="$packages $inst";
+	fi
+fi
+
+if [ ${#packages} -gt 0 ]; then
+	echo -n -e "$w_l  update$g_l package list...";
+	echo "+++ $(date): zypper --non-interactive refresh" >> "$install_log"
+	$prefix zypper --non-interactive refresh >> "$install_log" 2>&1;
+	echo -e "$y_l done";
+	echo -n -e "$w_l  install$g_l selected packages$y_l please wait...";
+	echo "+++ $(date): zypper --non-interactive --ignore-unknown install$packages" >> "$install_log"
+	$prefix zypper --non-interactive --ignore-unknown install $packages >> "$install_log" 2>&1 || failed=1;
+	if [ $failed == 0 ]; then
+		echo -e "$y_l  done";
+	else
+		echo -e "$r_l  failed!";
+	fi
+fi
+
+# additional rpm
+if ! hash sshpass 2>/dev/null; then
+	[ "$(arch)" == "i686" ] && sshpass_src=$sshpass86_src;
+	echo -e "$w_l  install$g_l sshpass$y_l\tfrom: $sshpass_src";
+	echo "+++ $(date): rpm -i $sshpass_src" >> "$install_log";
+	$prefix rpm -i $sshpass_src >> "$install_log" 2>&1 || failed=1;
+	echo -e -n ;
+fi
+
+upxversion=(0 0);
+hash upx 2>/dev/null && upxversion=($(upx -V | awk 'NR==1 { verok=$2>=3.91; printf "%.2f %i", $2, verok }'));
+if [ ${upxversion[1]} == 0 ]; then
+	[ -f "$bindir"/upx ] && rm -f "$bindir"/upx &>/dev/null;
+	if [ "$(uname -m)" == "x86_64" ]; then
+		upxarch="upx-3.95-amd64_linux";
+	else
+		upxarch="upx-3.95-i386_linux";
+	fi
+	upxarchive=$upxarch".tar.bz2";
+	[ -f "$dldir"/$upxarchive ] && rm -f "$dldir"/$upxarchive &>/dev/null;
+	upxurl="http://upx.sourceforge.net/download/$upxarchive";
+	echo -e "$w_l  get newer$g_l upx$y_l\tfrom: $upxurl";
+	echo "+++ $(date): wget $upxurl" >> "$install_log";
+	if wget --directory-prefix="$dldir" --append-output="$install_log" $upxurl; then
+		echo "+++ $(date): tar xjvf $upxarchive" >> "$install_log";
+		tar xjvf "$dldir"/$upxarchive --directory="$bindir" $upxarch/upx --strip-components=1 >> "$install_log" 2>&1 || failed=1;
+		[ -f "$dldir"/$upxarchive ] && rm -f "$dldir"/$upxarchive &>/dev/null;
+	else
+		failed=1;
+	fi
+fi
+
+[ $failed == 1 ] && echo -e "\n$r_l  Installation with errors - see: $install_log";
+
+return $failed;
+}

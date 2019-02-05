@@ -1,0 +1,193 @@
+#!/bin/bash
+
+checkout(){
+	echo -en "$c_l";
+	fc1="$(mktemp)";
+	clear;
+	ologo;
+	i=0;
+	COUNT=0;
+	if [ -d "$svndir" ];then
+		rm -rf "$svndir";
+		echo -e "$p_l\n  $txt_delete $txt_existing oscam-svn $re_\n";
+	else
+		echo -e "$p_l\n  $txt_no oscam-svn $txt_found\n$re_";
+	fi;
+	echo -e  "$w_l  SVN TrunkURL  : $g_l$trunkurl$re_";
+	[ ! -z "$1" ] && [ $(($1)) -gt 6999 ] && opt_="-r$1" && mac_="($txt_selected)" || opt_='';
+	echo -en "$w_l  SVN FileCount : ";
+	svn info -R "$trunkurl" |grep '^URL' |uniq |wc -l >"$fc1";
+	n=$(cat "$fc1");
+	echo -e "$g_l""$txt_found $n";
+	echo -en "$w_l  SVN checkout  : ";
+	while read line filename;do
+		counter=$(( 100*(++i)/n));
+		tput cup 11 18;
+		[ "$counter" -lt "100" ] && echo -en "$g_l""$counter%$re_" || echo -en "$g_l""100%$re_";
+	done < <( svn co "$trunkurl" $opt_ "$svndir" |sed "s|$svndir/||g");
+	tput cup 11 18;
+	echo -en "$g_l""100%$re_";
+	if [ -f "$svndir/config.sh" ];then
+		tput cup 12 2;
+		echo -en "$w_l""SVN Revision  : $y_l""$("$svndir/config.sh" -r) $b_l$mac_$re_\n$w_l  SVN UserPath  : $y_l""$svndir";
+	fi;
+	[ -f "$svndir/config.h" ]&& reset_="$("$svndir/config.sh" -R)";
+	_fix_config_h;
+	rm -rf "$fc1";
+	_nl;
+	[ -f "$workdir/SVN-IS-PATCHED" ] && rm -f "$workdir/SVN-IS-PATCHED";
+	tarsvn;
+};
+svnrestore(){
+	clear;
+	echo -en "$c_l";
+	ologo;
+	if [ "$1" == "list" ];then
+		cd "$bsvn";
+		bfiles="$(find . -type f |sed 's|./||' |sed 's|.tar.gz||')";
+		bcount=$(echo "$bfiles" |wc -w);
+		if [ "$bcount" -gt "0" ];then
+			echo -e "\n$c_l    $bcount$w_l svn backups found\n    ____________________$re_\n";
+			for b in $bfiles;do
+				echo -e "$c_l    --> $w_l$b";
+			done;
+			_nl;
+		else
+			echo -e "\n$r_l    $bcount$w_l svn backups found\n    ____________________$re_\n";
+		fi;
+		exit;
+	fi;
+	if [ -d "$svndir" ];then
+		rm -rf "$svndir";
+		echo -e "$p_l\n  $txt_delete $txt_existing oscam-svn $re_\n";
+	else
+		echo -e "$p_l\n  $txt_no oscam-svn $txt_found\n$re_";
+	fi;
+	untarsvn $1;
+	[ -f "$svndir/config.h" ]&& echo -en "$w_l""  SVN Revision  : $y_l""$("$svndir/config.sh" -r) restored\n\n$re_";
+};
+quicksvnrestore(){
+	untarsvn $1;
+};
+svnup(){
+	echo -en "$c_l";
+	clear;
+	ologo;
+	i=1;
+	if [ -d "$svndir" ];then
+		echo -en "$p_l\n  $txt_update oscam-svn $re_\n";
+	else
+		checkout;
+		return;
+	fi;
+	echo -en "\n$w_l  SVN TrunkURL  : $g_l""$trunkurl""$re_";
+	svn co "$trunkurl" "$svndir" -q;
+	if [ -f "$svndir/config.sh" ];then
+		tput cup 10 2;
+		echo -e "$w_l""SVN Revision  : ""$y_l$("$svndir/config.sh" -r) $b_l$mac_$re_\n$w_l  SVN UserPath  : $y_l""$svndir\n$re_";
+	fi;
+	if [ -f "$svndir/config.h" ];then
+		reset_="$("$svndir/config.sh" -R)";
+		_fix_config_h;
+	fi;
+};
+svnpatch(){
+	if [ ! -f "$workdir/SVN-IS-PATCHED" ];then
+		clear;
+		echo -e $C;
+		ologo;
+		unset patchlist;
+		cd "$pdir";
+		patchlist=(*.patch);
+		if [ "$(ls -A "$pdir"/*.patch 2>/dev/null)" ];then
+			touch "$workdir/SVN-IS-PATCHED";
+			for p in "${patchlist[@]}";do
+				echo -e $WH"\n\n    -> $p <-\n"$W;
+				sleep 1;
+				patch -d$svndir/ -p0 < "$pdir/$p" |sed -e "s/^patching file/$G patching > $WH/g;s/^Hunk/$P Hunk     > $Y/g;s/FAILED/$R FAILED/g; ;s/-- saving/$Y -- saving/g;";
+			done;
+		else
+			echo -e $WH"    $txt_no patch $txt_found";
+		fi;
+	else
+		clear;
+		echo -e $C;
+		ologo;
+		echo -e $WH"    already patched";
+	fi;
+	echo -e $W;
+};
+_dialog_checkout(){
+	upc="$(mktemp)";
+	(echo -en " $txt_verify_syscheck ";
+	[ "$sanity" == "1" ] && echo -e "ok" && sleep 1;
+	if [ "${s3cfg_vars[NO_SVN_AUTOUPDATE]}" == "0" ];then
+		echo -en  " $txt_verify_svn ";
+		if [ -f "$svndir/config.sh" ];then
+			echo "ok";
+			sleep 1;
+			echo -en " $txt_update_svn $txt_wait\n";
+			cd "$svndir";
+			svn -q update;
+			echo 1 >"$upc";
+			sleep 1;
+		fi;
+	fi;) | "$gui" "$st_" "$bt_" "$title_" "$pb_" 5 52;
+	if [ "${s3cfg_vars[NO_SVN_AUTOUPDATE]}" == "0" ];then
+		upc1=$(cat "$upc" 2>/dev/null);
+		rm -f "$upc";
+		[ ! "$upc1" == "1" ] && _dialog_checkout1;
+		if [ -f "$svndir/config.sh" ];then
+			reset_="$("$svndir/config.sh" -R)";
+			_fix_config_h;
+		fi;
+		_get_config_menu;
+	fi;
+	if [ -n "$1" ];then
+		if [ -f "$tccfgdir/$1" ] && [ -f "$svndir/config.sh" ];then
+			source "$tccfgdir/$1";
+			if [ ! -f "$tcdir/$_toolchainname/bin/$_compiler""gcc" ];then
+				first="$1";
+				_toolchain_gui_install;
+			fi;
+			loadprofile="yes";
+			_toolchain_build_menu "$1";
+		else
+			_select_menu;
+		fi;
+	fi;
+	_select_menu;
+};
+_dialog_checkout1(){
+	rm -rf "$svndir" 2>/dev/null;
+	COUNT=0;
+	[ -z "$1" ] && rn=0 || rn="$1";
+	if [ "$rn" -ge "7000" ];then
+		_rev="-r $rn";
+		sc_text="Revision: $rn";
+	else
+		_rev='';
+		sc_text="$txt_latest";
+	fi;
+	(echo -en "$txt_prepare_svn $txt_wait";)| "$gui" "$st_" "$bt_" "$title_" "$pb_" 3 55;
+	nnn="$(svn info $_rev -R "$trunkurl" |grep "^URL: " |uniq |wc -l)";
+	"$gui" "$st_" "$bt_" "$title_" --title " -[ SVN Checkout $sc_text ]- " --gauge "  $txt_wait" 6 75 < <(while read line filename;do ((++i));PCT=$(( 100*i/(nnn+1) ));
+cat <<EOF
+XXX
+$PCT
+  $line
+XXX
+EOF
+done < <(svn co "$trunkurl" "$svndir" $_rev| sed "s@$svndir@@g"| awk '{print $2}';
+	cd "$svndir";
+	if [ -f "$svndir/config.sh" ];then
+		reset_="$("$svndir/config.sh" -R)";
+		echo "Revision: $(REVISION) done...";
+		_fix_config_h;
+		[ -f "$workdir/SVN-IS-PATCHED" ] && rm -f "$workdir/SVN-IS-PATCHED";
+		_get_config_menu;
+	fi;));
+};
+REVISION(){
+	[ -d "$svndir" ] && cd "$svndir" && svnversion -n . 2>/dev/null| sed 's/[^0-9]//g' || echo " nosvn ";
+};

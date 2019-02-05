@@ -1,0 +1,20 @@
+_toolchainname="mipsel_s3_ssl100";
+default_use="USE_UTF8 USE_LIBCRYPTO";
+_description="generic mipsel ssl 1.0.0";
+_oscamconfdir_default="/var/keys";
+_oscamconfdir_custom=""
+
+_compiler="mipsel-simplebuild3-linux-gnu-";
+_sysroot="/";
+_libsearchdir="/lib";
+_toolchainfilename="bWlwc2VsX3MzX3NzbDEwMC50YXIueHoK";
+_md5sum="b1ff681eff62b0e639d37e001b97e1e0  Toolchain-mipsel_s3_ssl100.tar.xz";
+_tc_info="\n
+    !!! generic mipsel ssl 1.0.0 !!!\n
+     this toolchain is compatible with\n
+\n
+Dreambox: dm500,dm800,500HD,800HD,800SE,7020HD,
+          7025,8000\n
+VU+     : Zero,Solo²,SoloSE,SoloSE(V2),Duo,Duo²";
+
+_tc_infolines="6";

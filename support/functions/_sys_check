@@ -1,0 +1,122 @@
+#!/bin/bash
+
+prerequisites(){
+
+failed=0;
+missing="(not found)";
+[[ $1 ]] && output=": &&" || output="echo";
+
+$output -e "$w_l\n  CHECK for binaries\n  ==================\n";
+
+# check for a forgotten and unusable 'upx' and remove this crap
+[ -x "$bindir"/upx ] && "$bindir"/upx -V &>/dev/null || rm -f "$bindir"/upx &>/dev/null;
+
+for e in "${binvars[@]}";
+do
+	if hash "$e" 2>/dev/null; then
+		$output -e "$w_l  have\t$g_l$e\t\t$y_l$(which "$e")";
+	else
+		failed=1;
+		$output -e "$r_l  need\t$w_l$e\t\t$r_l$missing";
+	fi;
+done;
+
+if hash upx 2>/dev/null; then
+	upxversion=($(upx -V | awk 'NR==1 { verok=$2>=3.91; printf "%.2f %i", $2, verok }'));
+	$output -n -e "$w_l  version$g_l upx$y_l ${upxversion[0]}";
+	if [ ${upxversion[1]} == 1 ]; then
+		$output -e "$g_l ok";
+	else
+		$output -e "$r_l nok";
+		failed=1;
+	fi
+fi
+
+$output -e " \n $w_l CHECK for headers\n  =================\n" ;
+
+for e in "${headervars[@]}";
+do
+	e1=$(find /usr/include/* | grep -m1 "$e");
+	if [ ${#e1} -gt 8 ]; then
+		$output -e "$w_l  have\t$g_l$e$w_l$y_l\t$e1"
+	else
+		failed=1;
+		$output -e "$r_l  need\t$w_l$e\t\t$r_l$missing";
+	fi;
+done;
+
+$output -e " \n $w_l CHECK for libraries\n  ===================\n" ;
+
+for e in "${libvars[@]}";
+do
+	e1=$(find /usr/lib* 2>/dev/null | grep -m1 "$e");
+	if [ ${#e1} -gt 8 ]; then
+		$output -e "$w_l  have\t$g_l$e$w_l$y_l\t$e1"
+	else
+		failed=1;
+		$output -e "$r_l  need\t$w_l$e\t\t$r_l$missing";
+	fi;
+done;
+
+if [ "$(uname -m)" == "x86_64" ]; then
+	$output -e " \n $w_l CHECK for zlib32\n  ================\n" ;
+	e="zlib32";
+	e1="/usr/lib/libz.so";
+	e2="/usr/lib32/libz.so.1";
+	if [ -f $e1 ]; then
+		$output -e "$w_l  have\t$g_l$e$w_l$y_l\t$e1"
+	elif [ -f $e2 ]; then
+		$output -e "$w_l  have\t$g_l$e$w_l$y_l\t$e2"
+	else
+		failed=1;
+		$output -e "$r_l  need\t$w_l$e\t\t$r_l$missing";
+	fi
+fi
+
+return $failed;
+}
+
+# Parameters (all optional):
+#   $1: installer name (or "auto")
+#   $2: add architecture (not implemented yet)
+#
+# Example:
+#   syscheck debian_os
+#     call installer 'debian_os' (Do not care about the actual Linux distribution.)
+syscheck(){
+[[ $1 ]] && [ "$1" != "auto" ] && override="$1";
+
+if [ -d "$osdir" ];then cd "$osdir";x=(*); for i in "${x[@]}";do source "$i"; done fi
+
+binvars=( dialog grep gawk wget tar bzip2 svn xz upx patch gcc make scp sshpass openssl dos2unix );
+headervars=( crypto.h libusb.h pcsclite.h pthread.h );
+libvars=( libccidtwin.so );
+
+sanity=1;
+
+if ! prerequisites silent; then
+	echo -e "$w_l"; clear; ologo;
+	prerequisites;
+	sanity=0;
+	installer="unknown";
+	# Debian and Ubuntu
+	[ -f /etc/debian_version ] && installer="debian_os";
+	# CentOS and Redhat
+	[ -f /etc/redhat-release ] && installer="redhat_os";
+	# Manjaro (/etc/os-release)
+	[ -f /etc/manjaro-release ] && installer="manjaro_os";
+	# SuSE (/etc/SuSE-release is depreciated -> check for YaST2)
+	[ -d /etc/YaST2 ] && installer="suse_os";
+	# Optional override via parameter
+	[[ $override ]] && installer=$override;
+	echo -e "\n$w_l  Selected installer: $installer";
+	if type -t "$installer" >/dev/null; then
+		$installer && prerequisites && sanity=1;
+	else
+		echo -e "\n$r_l  Needs manual installation.";
+	fi
+	echo -e "$re_";
+fi
+
+return $sanity;
+}

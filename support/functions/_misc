@@ -1,0 +1,547 @@
+#!/bin/bash
+
+CPUS(){ nproc;};
+clean(){ _clean;};
+_nl(){ echo -e "$rs_";};
+_set_dialog_types(){
+	gui="$(which dialog)";
+	st_="--stdout";
+	ib_="--infobox";
+	ip_="--inputbox";
+	nc_="--no-cancel";
+	cl_="--checklist";
+	rl_="--radiolist";
+	bt_="--backtitle";
+	pb_="--progressbox";
+	title_="SIMPLEBUILD_V($SIMPLEVERSION)";};
+cedit(){ s3cfg_menu;bye;};
+counter(){ COUNT="$((COUNT+1))";};
+timer_calc(){ Tcalc="$((Te-Ts))";};
+timer_stop(){ Te="$(date +%s)";};
+timer_start(){ Ts="$(date +%s)";};
+decode(){ echo -en "$1" | base64 -d;};
+get_module_name(){ echo "${INTERNAL_MODULES[$1]}";};
+_fix_config_h(){ _=0;
+#_pcsc_off;_stapi5_off;
+};
+_wait(){ echo -e "$w_l";read -n1 -r -p "  $txt_help3" key;tput cuu1;echo '                                          ';}
+_systype(){ systype="bad";case "$(uname -m)" in x86|x86_64|amd64|i686) systype="ok";;esac;};
+_pcsc_on(){  sed -i 's@^//#define CARDREADER_PCSC 1@#define CARDREADER_PCSC 1@g' "$svndir/config.h";};
+_pcsc_off(){ sed -i 's@^#define CARDREADER_PCSC 1@//#define CARDREADER_PCSC 1@g' "$svndir/config.h";};
+_stapi5_on(){  sed -i 's@^//#define CARDREADER_STAPI5 1@#define CARDREADER_STAPI5 1@g' "$svndir/config.h";};
+_stapi5_off(){ sed -i 's@^#define CARDREADER_STAPI5 1@//#define CARDREADER_STAPI5 1@g' "$svndir/config.h";};
+_generate_oscam_name(){ cd "$svndir";_dvbapi=$(
+[ "$(./config.sh --enabled HAVE_DVBAPI)" == Y ] && echo -n -dvbapi || echo ''; );_webif=$(
+[ "$(./config.sh --enabled WEBIF)"       == Y ] && echo -n -webif  || echo ''; );_ssl=$(
+[ "$(./config.sh --enabled WITH_SSL)"    == Y ] && echo -n -ssl    || echo ''; );_emu=$(
+[ "$(./config.sh --enabled WITH_EMU)"    == Y ] && echo -n -emu    || echo ''; );_ipv6=$(
+[ "$(./config.sh --enabled IPV6SUPPORT)" == Y ] && echo -n -ipv6   || echo ''; );
+[ "${USE_vars[USE_COMPRESS]}" == "USE_COMPRESS=1" ] && _upx="-upx" || _upx='';
+[ "$1" == "native" ] && _b_name="$(hostname)$_upx" || _b_name="$1";
+oscam_name="oscam-svn$(REVISION)-$_b_name$_webif$_dvbapi$_ssl$_usb$_pcsc$_stapi$_stapi5$_emu$_ipv6$_upx";};
+e_readers(){ silent=$("$svndir/config.sh" -s readers);echo ${silent//READER_/};};
+e_protocols() { silent=$("$svndir/config.sh" -s protocols);echo ${silent//MODULE_/};};
+e_card_readers(){ silent=$("$svndir/config.sh" -s card_readers);echo ${silent//CARDREADER_/};};
+e_addons(){ "$svndir/config.sh" -s addons |sed 's/WEBIF_//g;s/WITH_//g;s/MODULE_//g;s/CS_//g;s/HAVE_//g;s/_CHARSETS//g;s/CW_CYCLE_CHECK/CWCC/g;s/SUPPORT//g';};
+sysinfo(){
+	echo -e "$g_l\nSYSTEM$w_l";
+	system_info=$(which lsb_release);
+	[ ${#system_info} -ge 11 ] && lsb_release -irc;
+	echo -e "Uptime:\t\t$(uptime -p)";
+	echo -e "$g_l\nMEMORY$w_l";
+	free -mht | awk '/Mem/{print "Memory:\t\tTotal: " $2 "Mb\tUsed: " $3 "Mb\tFree: " $4 "Mb"} /Swap/{print "Swap:\t\tTotal: " $2 "Mb\tUsed: " $3 "Mb\tFree: " $4 "Mb" }';
+	[ -f /sys/dev/block ] && lsblk;
+	echo -e "$g_l\n CPU$w_l";
+	cpu_info=$(which lscpu);
+	[ ${#cpu_info} -ge 5 ] && lscpu | grep -iE 'model name|vendor id|Architecture|per socket|MHz';
+	echo -e "$g_l\nNetwork";
+	echo -e "$w_l""Hostname:\t$HOSTNAME";
+	ip -o addr | awk '/inet /{print "IP (" $2 "):\t" $4}';
+	route -n | awk '/^0.0.0.0/{ printf "Gateway:\t"$2"\n" }';
+	awk '/^nameserver/{ printf "Name Server:\t" $2 "\n"}' /etc/resolv.conf;
+	echo -e "$re_";
+	exit;
+};
+_pget(){
+	tc_dl="$dldir/$(decode "$_t1e""$_toolchainfilename")";
+	[ -f "$tc_dl" ] && rm -rf "$tc_dl";
+	#tput civis;
+	cd "$dldir";
+	zeile=$(expr 12+$zzusatz);
+	spalte=$(expr 17+$szusatz);
+	wget -N --progress=dot "$(decode "$_u1e")/$dln" 2>&1 |grep --line-buffered "%"|awk '{ printf "\033["'$zeile'";"'$spalte'"H\033[K%-4s ", $7;} {printf "'"$txt_wait >"'";} {printf " %-6s",$9;}';
+	echo -e "\033["$zeile";"$spalte"H\033[K100% done...                    "$W;
+	#tput cnorm;
+};
+_clean(){
+	[ -L "$workdir/lastbuild.log" ] && rm -rf "$workdir/lastbuild.log";
+	[ -L "$workdir/lastpatch.log" ] && rm -rf "$workdir/lastpatch.log";
+	clear;
+	echo -e "$w_l";
+	ologo;
+	for e in "$menudir" "$bdir" "$ldir" "$tcdir";do
+		echo -e "  $r_l$txt_delete$w_l\t$e"| sed "s@$workdir@@g";
+	done;
+	rm -rf "$menudir" "$bdir" "$ldir" "$tcdir" 2>/dev/null;
+	for e in "$menudir" "$bdir" "$ldir" "$tcdir";do
+		echo -e "  $g_l$txt_create$w_l\t$e"| sed "s@$workdir@@g";
+	done;
+	mkdir -p "$menudir" "$bdir" "$ldir" "$tcdir" 2>/dev/null;
+	sleep 2;
+	svnrestore;
+	_nl;
+};
+_sz(){
+	lmin=24;
+	lmax=40;
+	_lin=$(tput lines);
+	cmin=79;
+	cmax=200;
+	_col=$(tput cols);
+	if [ "$_lin" -gt "$lmin" ];then
+		if [ "$_lin" -lt "$lmax" ] || [ "$_lin" -eq "$lmax" ];then
+			_lines="$((_lin-6))";
+		fi;
+		if [ "$_lin" -gt "$lmax" ];then
+			_lines="$((lmax-6))";
+		fi;
+	fi;
+	if [ "$_col" -gt "$cmin" ];then
+		if [ "$_col" -lt "$cmax" ] || [ "$_col" -eq "$cmax" ];then
+			_cols="$((_col-6))";
+		fi;
+		if [ "$_col" -gt "$cmax" ];then
+			_cols="$((cmax-6))";
+		fi;
+	fi;
+};
+save_master(){
+	[ -f "$svndir/config.sh" ] && cat "$svndir/config.sh" >"$configdir/config.sh.master";
+	[ -f "$svndir/Makefile" ] && cat "$svndir/Makefile" >"$configdir/Makefile.master";
+};
+_pre_build(){
+	_oscamconfdir_default="";
+	_oscamconfdir_custom="";
+	source "$tccfgdir/$1";
+	clear;
+	_nl;
+	echo $WH;
+	ologo;
+	_tcfile="";
+	dln="$(decode "$_t1e")$(decode "$_toolchainfilename")";
+	tc_dl="$dldir/$dln";
+	if [ -f "$tcdir/$_toolchainname/bin/$_compiler""gcc" ];then
+		if [ "$run" == "0" ];then
+			echo -e "$w_l   toolchain :$y_l $_toolchainname";
+			echo -e "$w_l      status :$g_l compiler $txt_found ";
+			echo -e "$w_l    compiler :$p_l $_compiler""gcc";
+		else
+			echo -e "$w_l   toolchain :$y_l $_toolchainname      ";
+			echo -e "$w_l     recheck :$g_l ok $txt_now compiler $txt_found";
+			echo -e "$w_l    compiler :$p_l $_compiler""gcc      ";
+		fi;
+	else
+		[ "$run" == "1" ] && echo "$txt_error : build not possible" && exit;
+		_nl;
+		echo -e  "$w_l     toolchain :$y_l $_toolchainname   ";
+		echo -e  "$w_l        status :$r_l compiler $txt_not_found";
+		echo -en "$w_l   backupcheck : ";
+		if [ -f "$dldir/$dln" ];then
+			echo -e  "$g_l$dln $txt_found";
+			echo -en "$w_l     $txt_extracting :$y_l $txt_wait";
+			_console_extract_toolchain;
+			run=1;
+		else
+			echo -e  "$r_l$dln $txt_not_found ";
+			echo -en "$w_l      $txt_loading :$g_l";
+			zzusatz=1;szusatz=1;
+			_pget;
+			_nl;
+			echo -en "$w_l     $txt_extracting :$y_l $txt_wait";
+			_console_extract_toolchain 1;
+			run=1;
+		fi;
+		_pre_build "$1";
+	fi;
+	_cmd_build "$_toolchainname";
+};
+_init_menu(){ IFS="#";COUNT=0;MENU_OPTIONS="BACK#$txt_back#";counter;};
+_select_menu(){
+	revision_="$(REVISION)";
+	_menutext="Simplebuild V$SIMPLEVERSION by Gorgone";
+	smenu=$(
+	"$gui" "$st_" "$bt_" "$title_" "$nc_" --title "-[ $txt_start_menu ]-" --menu "\n $_menutext" 13 55 7 "Continue" "$txt_firstmenu_continue r$revision_" "CHANGE" "$txt_firstmenu_chose" "CEDIT" "$txt_firstmenu_cedit" "LANG" "$txt_firstmenu_lang" "EXIT" "$txt_firstmenu_exit");
+	[ $? = 255 ] && _select_menu;
+	case $smenu in
+		Continue)
+					if [ ! -f "$svndir/config.sh" ];then
+						"$gui" "$st_" "$bt_" "$title_" --infobox "\n  $txt_no oscam-svn $txt_found" 5 35;
+						sleep 2;
+						_select_menu;
+					else
+						_toolchain_main_menu;
+					fi;;
+		CHANGE)
+					new_rev=$("$gui" "$st_" "$nc_" --cr-wrap "$ip_" "Revision: 7000+ \nRevision: 0 = $txt_latest" 9 35);
+					[[ $new_rev =~ ^-?[0-9]+$ ]] && [ ! "$new_rev" -le "7000" ] && _rev="$new_rev" || _rev=0;
+					_dialog_checkout1 "$_rev";
+					_select_menu;;
+		CEDIT)
+					s3cfg_menu;
+					_select_menu;;
+		LANG)
+					lang_select;
+					cd "$workdir";
+					./s3 menu;;
+		EXIT)
+					bye;;
+	esac;
+	exit;
+};
+_oscam_extra_menu(){
+	uv=;
+	check_smargo;
+	unset MENU_OPTIONS;
+	for e in "${!USE_vars[@]}";do
+		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_COMPRESS" ] && [ ! "$e" == "USE_PATCH" ] && [ ! "$e" == "USE_LIBUSB" ];then
+			if [ "${#USE_vars[$e]}" -gt "4" ];then
+				MENU_OPTIONS+=( "$e" "$e" on );
+			else
+				MENU_OPTIONS+=( "$e" "$e" off );
+			fi;
+		fi;
+	done;
+	oextra=$("$gui" "$st_" "$nc_" "$bt_" "$title_" --title "-[ Oscam EXTRA ]-" "$cl_" " OPTIONS " 19 40 12 ${MENU_OPTIONS[@]});
+	[ $? = 255 ] && _toolchain_extra_menu;
+	for e in "${!USE_vars[@]}";do
+		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_COMPRESS" ] && [ ! "$e" == "USE_PATCH" ] && [ ! "$e" == "USE_LIBUSB" ];then
+			ok=0;
+			for oex in $oextra;do
+				o=$(echo "$oex" | tr -d '"');
+				[ "$e" == "$o" ] && ok=1;
+			done;
+			if [ "$ok" == "1" ];then
+				USE_vars[$e]="$e=1";
+			else
+				USE_vars[$e]=;
+			fi;
+		fi;
+	done;
+	[ "${USE_vars[USE_PCSC]}" == "USE_PCSC=1" ] && _pcsc_on;
+	[ ! "${USE_vars[USE_PCSC]}" == "USE_PCSC=1" ] && _pcsc_off;
+	save_config;
+	_toolchain_config_menu;
+};
+_build_extra_menu(){
+	us=;
+	check_smargo;
+	unset MENU_OPTIONS;
+	for e in USE_COMPRESS USE_TARGZ USE_PATCH;do
+		[ "${#USE_vars[$e]}" -gt "4" ] && MENU_OPTIONS+=( "$e" "$e=1" on ) || MENU_OPTIONS+=( "$e" "$e=1" off );
+	done;
+	bextra=$("$gui" "$st_" "$nc_" "$bt_" "$title_" --title "-[ Build EXTRA ]-" "$cl_" " OPTIONS " 10 40 3 ${MENU_OPTIONS[@]});
+	[ $? = 255 ] && _build_extra_menu;
+	USE_vars[USE_COMPRESS]=;
+	USE_vars[USE_PATCH]=;
+	USE_vars[USE_TARGZ]=;
+	for bex in $bextra;do
+		b=$(echo "$bex" | tr -d '"');
+		USE_vars[$b]="$b=1";
+	done;
+	save_config;
+	_toolchain_config_menu;
+};
+_pre_main_menu(){
+	IFS="#";
+	COUNT=0;
+	MENU_OPTIONS="EXIT#$txt_menu_builder1#";
+	counter;
+	MENU_OPTIONS=${MENU_OPTIONS}"ADD#$txt_menu_builder2#";
+	counter;
+	if [ "$tcempty" == "0" ];then
+		MENU_OPTIONS="${MENU_OPTIONS}REMOVE#$txt_menu_builder3#";
+		counter;
+	fi;
+	MENU_OPTIONS="${MENU_OPTIONS}NATIVE#$txt_menu_builder4$native#";
+	counter;
+	_a=$(uname -m);
+	if [ "$systype" == "ok" ];then
+		if [ "$tcempty" == "0" ];then
+			for i in "${INST_TCLIST[@]}";do
+				source "$tccfgdir/$i";
+				MENU_OPTIONS="${MENU_OPTIONS}$_toolchainname#$_description#";
+				counter;
+			done;
+		fi;
+	fi;
+	out=$("$gui" --help-button --help-label INFO --title "-[ Toolchain Menu V$SIMPLEVERSION ]-" --menu "$txt_t_menu1$REVISION" "${COUNT+8}" 75 0 "${MENU_OPTIONS}");
+	IFS=$OIFS;
+	first=$(echo "$out" | awk '{printf $1}');
+	tc_info=$(echo "$out" | awk '{printf $2}');
+	if [ "$first" == "HELP" ];then
+		if [ -f "$tccfgdir/$(echo "$out" | awk '{printf $2}')" ];then
+			source "$tccfgdir/$tc_info";
+			echo -e "\n\n\tinfobox $_tc_info";
+			sleep 4;
+		fi;
+	fi;
+	if [ "$first" == "EXIT" ];then
+		bye;
+	else
+		toolchain_main_menu;
+	fi;
+};
+tedit(){
+	clear;
+	if [ -f "$tccfgdir/$1" ];then
+		source "$tccfgdir/$1";
+		echo -e  $y_l;
+		slogo;
+		echo -e  " $p_l change CONF_DIR for $c_l$_toolchainname$w_l\n";
+		echo -e  $w_l"    current =$c_l $_oscamconfdir_custom";
+		echo -e  $w_l"    default =$c_l $_oscamconfdir_default";
+		echo -en $w_l"  Enter new =$w_l ";read name;
+		echo -e      "        now =$y_l CONF_DIR=$name\n$re_";
+		sed -i s@^_oscamconfdir_custom.*@_oscamconfdir_custom=\"$name\"@ "$tccfgdir/$_toolchainname";
+	fi;
+};
+_gtedit(){
+	if [ -f "$tccfgdir/$_toolchainname" ];then
+		source "$tccfgdir/$_toolchainname";
+		input=$("$gui" "$st_" "$bt_" "$title_" --title " -[ $1 Toolchain ]- " --inputbox "\n CONF_DIR=$_oscamconfdir_default 'default'\n [ESC] = default\n" 0 0 "$_oscamconfdir_custom");
+		retval=$?;
+		case $retval in
+			0)
+				confdir="$input";;
+			1)
+				confdir="$_oscamconfdir_custom";;
+			255)
+				confdir="$_oscamconfdir_default";;
+		esac;
+		sed -i s@^_oscamconfdir_custom.*@_oscamconfdir_custom=\"$confdir\"@ "$tccfgdir/$_toolchainname";
+		source "$tccfgdir/$_toolchainname";
+	fi;
+};
+check_smargo(){
+	if [ -f "$svndir/config.sh" ];then
+		if [ "$("$svndir/config.sh" -e CARDREADER_SMARGO)" == "Y" ];then
+			USE_vars[USE_LIBUSB]="USE_LIBUSB=1";
+		else
+			USE_vars[USE_LIBUSB]=;
+		fi;
+	fi;
+};
+_reset_config(){
+	if [ -f "$svndir/config.sh" ];then
+		[ -f "$menudir/$_toolchainname.save" ] && rm -rf "$menudir/$_toolchainname.save";
+		if [ ! -f "$workdir/SVN-IS-PATCHED" ];then
+			reset_="$("$svndir/config.sh" -R)";
+		fi;
+	else
+		_select_menu;
+	fi;
+};
+_get_config_menu(){
+	tmp="$(mktemp)";
+	while read -r _l;do
+		c=$(echo "$_l" | tr -cd \" | wc -c);
+		_c=$((_c + c));
+		[ ${_c} -lt 11 ] && echo "$_l" >>"$tmp";
+		[ ${_c} -eq 10 ] && break;
+	done <"$svndir/config.sh";
+	mk="$(grep '^   USE_' "$workdir/oscam-svn/Makefile" |sort -u|awk '{print $1}')";
+	for e in $mk;do
+		USE_vars[${e:0:-2}]=;
+	done;
+	check_smargo;
+	source "$tmp";
+	rm -rf "$tmp";
+};
+read_s3cfg(){
+	if [ -f "$s3cfg" ];then
+		while read l;do
+			s3cfg_vars[$(echo "$l"| awk -F'=' '{print $1}')]=$(echo "$l"| awk -F'=' '{print $2}');
+		done < "$s3cfg";
+	fi;
+};
+s3cfg_menu(){
+	unset CFG_MENU;
+	declare -a CFG_MENU;
+	old_IFS=$IFS;
+	COUNT=0;
+	found="";
+	for e in "${!s3cfg_vars[@]}";do
+		CFG_MENU+="$e#on/off#$([ "${s3cfg_vars[$e]}" -gt "0" ] && echo on || echo off)#";
+		counter;
+	done;
+	IFS="#";
+	erg=$("$gui" "$st_" "$bt_" "$title_" "$cl_" "enable/disable options" 16 45 10 ${CFG_MENU[@]});
+	IFS=$old_IFS;
+	for e1 in "${!s3cfg_vars[@]}";do
+		for e2 in $erg;do
+			found="0";
+			if [ "$e1" == "${e2//\'}" ];then
+				found="1";
+				break;
+			fi;
+		done;
+		if [ "$found" == "1" ];then
+			s3cfg_vars[$e1]=1;
+		else
+			s3cfg_vars[$e1]=0;
+		fi;
+	done;
+	write_s3cfg;
+};
+write_s3cfg(){
+	[ -f "$s3cfg" ] && rm -rf "$s3cfg";
+	for e in "${!s3cfg_vars[@]}";do
+		echo "$e=${s3cfg_vars[${e}]}" >>"$s3cfg";
+	done;
+};
+_stapi_select(){
+	if [ "$stapi_allowed" == "1" ];then
+		stapivar='';
+		addstapi=;
+		USESTRING=;
+		stapimode=$($gui $rl_ " SELECT STAPI MODE" 12 0 5 0 "STAPI_OFF" on 1 "USE_STAPI" off 2 "USE_STAPI5 UFS916" off 3 "USE_STAPI5 UFS916003" off 4 "USE_STAPI5 OPENBOX" off 3>&1 1>&2 2>&3);
+		usevars=$(echo $usevars | sed "s@USE_STAPI5@@" | xargs);
+		usevars=$(echo $usevars | sed "s@USE_STAPI@@" | xargs);
+		case $stapimode in
+			0)
+				stapivar=;;
+			1)
+				stapivar="STAPI_LIB=$sdir/stapi/liboscam_stapi.a";
+				addstapi="USE_STAPI";;
+			2)
+				stapivar="STAPI5_LIB=$sdir/stapi/liboscam_stapi5_UFS916.a";
+				addstapi="USE_STAPI5";;
+			3)
+				stapivar="STAPI5_LIB=$sdir/stapi/liboscam_stapi5_UFS916_0.03.a";
+				addstapi="USE_STAPI5";;
+			4)
+				stapivar="STAPI5_LIB=$sdir/stapi/liboscam_stapi5_OPENBOX.a";
+				addstapi="USE_STAPI5";;
+		esac;
+		save_config;
+	else
+		"$gui" "$st_" --title "STAPI INFO" --msgbox "NOT for $_toolchainname" 0 0;
+		_toolchain_config_menu;
+	fi;
+};
+
+save_config(){
+	usevars=;
+	enabled=;
+	disabled=;
+	check_smargo;
+	enabled=($("$svndir/config.sh" -s));
+	disabled=($("$svndir/config.sh" -Z));
+	[ "$_toolchainname" == "sh4" ] && unset USE_vars[USE_COMPRESS];
+	[ "$_toolchainname" == "sh_4" ] && unset USE_vars[USE_COMPRESS];
+	unset USE_vars[USE_STAPI];
+	unset USE_vars[USE_STAPI5];
+	for e in ${USE_vars[*]};do
+		usevars="${e:0:-2} $usevars";
+	done;
+	[ -f "$menudir/$_toolchainname.save" ] && rm -rf "$menudir/$_toolchainname.save";
+	echo "enabled=\"${enabled[*]}\""  >"$menudir/$_toolchainname.save";
+	echo "disabled=\"${disabled[*]}\"">>"$menudir/$_toolchainname.save";
+	if [ "$stapi_allowed" == "1" ];then
+		if [ "${#stapivar}" -gt "15" ];then
+			echo "stapivar=\"$stapivar\"">>"$menudir/$_toolchainname.save";
+			echo "usevars=\"$usevars $addstapi\"" >>"$menudir/$_toolchainname.save";
+		else
+			echo "usevars=\"$usevars\"" >>"$menudir/$_toolchainname.save";
+		fi;
+	else
+		echo "usevars=\"$usevars\"" >>"$menudir/$_toolchainname.save";
+	fi;
+};
+
+load_config(){
+	_stapi=;
+	_stapi5=;
+	enabled=;
+	disabled=;
+	stapivar="";
+	USESTRING=;
+	usevars=;
+	unset USE_vars[USE_STAPI];
+	unset USE_vars[USE_STAPI5];
+	if [ -f "$menudir/$_toolchainname.save" ];then
+		source "$menudir/$_toolchainname.save";
+		ena=$("$svndir/config.sh" -E $enabled);
+		dis=$("$svndir/config.sh" -D $disabled);
+		for e in $usevars;do
+			USE_vars[$e]="$e=1";
+			[ "$e" == "USE_LIBUSB" ] && silent=$("$svndir/config.sh" --enable CARDREADER_SMARGO);
+			[ "$e" == "USE_PCSC" ] && sed -i 's@^//#define CARDREADER_PCSC 1@#define CARDREADER_PCSC 1@g' "$svndir/config.h";
+		done;
+	else
+		_reset_config;
+		[ "${s3cfg_vars[USE_TARGZ]}" == "1" ] && USE_vars[USE_TARGZ]="USE_TARGZ=1";
+		[ "${s3cfg_vars[USE_COMPRESS]}" == "1" ] && USE_vars[USE_COMPRESS]="USE_COMPRESS=1";
+		for e in $default_use;do
+			USE_vars[$e]="$e=1";
+		done;
+	fi;
+	check_smargo;
+	[ "$_toolchainname" == "sh4" ] && unset USE_vars[USE_COMPRESS];
+	[ "$_toolchainname" == "sh_4" ] && unset USE_vars[USE_COMPRESS];
+	USESTRING="$(echo "${USE_vars[@]}"| sed 's@USE_@@g'| sed 's@=1@@g'| tr -s ' ')";
+};
+_get_config_con(){
+	if [ ! "$1" == "checkout" ] && [ ! "$1" == "clean" ];then
+		tmp="$(mktemp)";
+		if [ -f "$svndir/config.sh" ];then
+			while read -r _l;do
+				c=$(echo "$_l" | tr -cd \" | wc -c);
+				_c=$((_c + c));
+				[ ${_c} -lt 11 ] && echo "$_l" >>"$tmp";
+				[ ${_c} -eq 10 ] && break;
+			done <"$svndir/config.sh";
+		else
+			while read -r _l;do
+				c=$(echo "$_l" | tr -cd \" | wc -c);
+				_c=$((_c + c));
+				[ ${_c} -lt 11 ] && echo "$_l" >>"$tmp";
+				[ ${_c} -eq 10 ] && break;
+			done <"$configdir/config.sh.master";
+		fi;
+		if [ -f "$workdir/oscam-svn/Makefile" ];then
+			str_="$(grep '^   USE_' "$workdir/oscam-svn/Makefile"| sort -u| awk '{print $1}')";
+			for e in $str_;do
+				es="${e:0:-2}";
+				USE_vars[$es]=;
+			done;
+		else
+			str_="$(grep '^   USE_' "$configdir/Makefile.master"| sort -u| awk '{print $1}')";
+			for e in $str_;do
+				es="${e:0:-2}";
+				USE_vars[$es]=;
+			done;
+		fi;
+		check_smargo;
+		source "$tmp";
+		rm -rf "$tmp" "$tmp1";
+		rm -rf "$tmp.load" "$tmp1.load";
+	fi;
+};
+_gtedit(){
+	if [ -f "$tccfgdir/$_toolchainname" ];then
+		source "$tccfgdir/$_toolchainname";
+		input=$("$gui" "$st_" "$bt_" "$title_" --title " -[ $1 Toolchain ]- " --inputbox "\n CONF_DIR=$_oscamconfdir_default 'default'\n [ESC] = default\n" 0 0 "$_oscamconfdir_custom");
+		retval=$?;
+		case $retval in
+			0)
+				confdir="$input";;
+			1)
+				confdir="$_oscamconfdir_custom";;
+			255)
+				confdir="$_oscamconfdir_default";;
+		esac;
+		sed -i s@^_oscamconfdir_custom.*@_oscamconfdir_custom=\"$confdir\"@ "$tccfgdir/$_toolchainname";
+		source "$tccfgdir/$_toolchainname";
+	fi;
+};

@@ -1,0 +1,20 @@
+_toolchainname="openpli40"
+default_use="USE_UTF8 USE_LIBCRYPTO";
+_description="Openpli Dreambox Vu+ and other"
+_oscamconfdir_default="/usr/keys"
+_oscamconfdir_custom=""
+
+_compiler="mipsel-openpli40-linux-gnu-"
+_sysroot="mipsel-openpli40-linux-gnu/sysroot"
+_libsearchdir="/lib"
+_toolchainfilename="T3BlblBMSV80LjAudGFyLnh6";
+
+_tc_info="\n
+    !!! beware the box must have FPU !!!\n
+     this toolchain is compatible with\n
+\n
+Dreambox: 500HD,800HD,800SE,7020HD,7025,8000\n
+VU+     : Zero,Solo²,SoloSE,SoloSE(V2),Duo,Duo²";
+
+_tc_infolines="6"
+

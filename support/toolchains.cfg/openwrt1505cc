@@ -1,0 +1,20 @@
+_toolchainname="openwrt1505cc";
+default_use="USE_UTF8 USE_LIBCRYPTO";
+_description="OpenWRT 15.05.1 Chaos Calmer"
+_oscamconfdir_default="/etc/config/oscam"
+_oscamconfdir_custom="/etc/config/oscam"
+_stagingdir=1
+
+_compiler="mips-openwrt-linux-uclibc-"
+_sysroot=""
+_libsearchdir="/lib"
+_toolchainfilename="b3BlbndydDE1MDVjYy50YXIueHo=";
+_block="USE_PCSC"
+_tc_info="\n
+    !!! OpenWRT 15.05.1 Chaos Calmer !!!\n
+       this toolchain is compatible with\n
+	             fill with info\n
+\n
+";
+
+_tc_infolines="6"

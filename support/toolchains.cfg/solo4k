@@ -1,0 +1,18 @@
+_toolchainname="solo4k";
+default_use="USE_UTF8 USE_LIBCRYPTO";
+_description="VU+ Solo4k";
+_oscamconfdir_default="/var/tuxbox/config";
+_oscamconfdir_custom=""
+
+_compiler="arm-linux-gnueabihf-";
+_sysroot="arm-linux-gnueabihf";
+_libsearchdir="/lib";
+_toolchainfilename="c29sbzRrLnRhci54ego=";
+
+_tc_info="\n
+    !!! beware the box must have FPU !!!\n
+     this toolchain is compatible with\n
+\n
+VU+     : Solo4k";
+
+_tc_infolines="5"

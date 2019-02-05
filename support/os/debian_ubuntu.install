@@ -1,0 +1,137 @@
+#!/bin/bash
+
+debian_os(){
+install_log="$ldir/os-install.log";
+failed=0;
+prefix="sudo";
+packages="";
+
+echo -n >"$install_log" &2>/dev/null;
+
+echo -e "$w_l\n  INSTALLATION\n  ============\n";
+
+debian_version=$(sed -n 's/^[^0-9]*\([0-9][0-9]*\).*$/\1/p' /etc/debian_version 2>/dev/null);
+
+if [[ $debian_version ]]; then
+	[ "$debian_version" -lt 7 ] && { echo -e "$r_l  This system is not supported anymore!\n"; return 1; }
+	[ "$debian_version" -gt 8 ] && echo -e "$r_l  This installer is still in the testing stage!";
+else
+	# all known Ubuntu systems have 'lsb_release'
+	! hash lsb_release 2>/dev/null && { echo -e "$r_l  System not recognised -> Abort!\n"; return 1; }
+	ubuntu_version=$(lsb_release -rs | cut -f 1 -d '.');
+	[ "$ubuntu_version" -lt 12 ] && { echo -e "$r_l  This system is not supported anymore!\n"; return 1; }
+	[ "$ubuntu_version" -gt 16 ] && echo -e "$r_l  This installer is still in the testing stage!";
+fi
+
+# without sudo no user installation allowed
+hash sudo 2>/dev/null || { [ "$(whoami)" != "root" ] && { echo -e "$r_l  You need to be root for that!\n"; return 1; } }
+
+# root needs no sudo
+[ "$(whoami)" == "root" ] && prefix="";
+
+for e in "${binvars[@]}";
+do
+	if ! hash "$e" 2>/dev/null; then
+		inst="$e";
+		case $e in
+		svn)
+			inst="subversion";
+			;;
+		xz)
+			inst="xz-utils";
+			;;
+		esac;
+		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
+		packages="$packages $inst";
+	fi;
+done;
+
+for e in "${headervars[@]}";
+do
+	e1=$(find /usr/include/* |grep -m1 "$e");
+	if [ ! ${#e1} -gt 8 ]; then
+		case $e in
+		crypto.h)
+				inst="libssl-dev";
+			;;
+		libusb.h)
+				inst="libusb-1.0.0-dev";
+			;;
+		pcsclite.h)
+				inst="libpcsclite-dev";
+			;;
+		pthread.h)
+				inst="libc-dev-bin";
+			;;
+		esac;
+		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
+		packages="$packages $inst";
+	fi;
+done;
+
+for e in "${libvars[@]}";
+do
+	e1=$(find /usr/lib* |grep -m1 "$e");
+	if [ ! ${#e1} -gt 8 ]; then
+		case $e in
+		libccidtwin.so)
+				inst="libccid";
+			;;
+		esac;
+		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
+		packages="$packages $inst";
+	fi;
+done;
+
+if [ "$(uname -m)" == "x86_64" ] && [ ! -f /usr/lib32/libz.so.1 ]; then
+	if [ ! -f /usr/lib32/libz.so.1 ]; then
+		e="zlib32";
+		inst="lib32z1";
+		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
+		packages="$packages $inst";
+	fi
+fi
+
+if [ ${#packages} -gt 0 ]; then
+	echo -n -e "$w_l  update$g_l package list...";
+	echo "+++ $(date): apt-get -y update" >> "$install_log"
+	$prefix apt-get -y update >> "$install_log" 2>&1;
+	echo -e "$y_l done";
+	echo -n -e "$w_l  install$g_l selected packages$y_l please wait...";
+	echo "+++ $(date): apt-get -y install$packages" >> "$install_log"
+	$prefix apt-get -y install $packages >> "$install_log" 2>&1 || failed=1;
+	if [ $failed == 0 ]; then
+		echo -e "$y_l  done";
+	else
+		echo -e "$r_l  failed!";
+	fi
+fi
+
+if hash upx 2>/dev/null; then
+	upxversion=($(upx -V | awk 'NR==1 { verok=$2>=3.91; printf "%.2f %i", $2, verok }'));
+	if [ ${upxversion[1]} == 0 ]; then
+		[ -f "$bindir/upx" ] && rm -f "$bindir/upx" &>/dev/null;
+		if [ "$(uname -m)" == "x86_64" ]; then
+			upxarch="upx-3.95-amd64_linux";
+		else
+			upxarch="upx-3.95-i386_linux";
+		fi
+		upxarchive=$upxarch".tar.bz2";
+		[ -f "$dldir/$upxarchive" ] && rm -f "$dldir/$upxarchive" &>/dev/null;
+		upxurl="http://upx.sourceforge.net/download/$upxarchive";
+		echo -e "$w_l  get newer$g_l upx$y_l\tfrom: $upxurl";
+		echo "+++ $(date): wget $upxurl" >> "$install_log";
+		if wget --directory-prefix="$dldir" --append-output="$install_log" $upxurl; then
+			echo "+++ $(date): tar xjvf $upxarchive" >> "$install_log";
+			tar xjvf "$dldir"/$upxarchive --directory="$bindir" $upxarch/upx --strip-components=1 >> "$install_log" 2>&1 || failed=1;
+			[ -f "$dldir"/$upxarchive ] && rm -f "$dldir"/$upxarchive &>/dev/null;
+		else
+			failed=1;
+		fi
+	fi
+fi
+
+[ $failed == 1 ] && echo -e "\n$r_l  Installation with errors - see: $install_log";
+
+return $failed;
+}

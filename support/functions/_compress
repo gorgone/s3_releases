@@ -1,0 +1,93 @@
+#!/bin/bash
+
+compress_cam(){
+	cd "$bdir";
+	upx_c="-1";
+	[ -f "$configdir/upx_option" ] && source "$configdir/upx_option";
+	erg=$(upx "$upx_c" "$1" |grep oscam |awk '{print $1" "$3" "$4 }');
+	e1="$(echo "$erg"| awk '{printf("%4.2f k\n", $1 /1024)}')";
+	e2="$(echo "$erg"| awk '{printf("%4.2fk\n", $2 /1024)}')";
+	e3="$(echo "$erg"| awk '{print $3}')";
+	echo -e "$w_l\n\n BEFORE -----> $txt_compress1\t= $g_n$e1$w_l\n AFTER ------> $txt_compress2\t= $g_l$e2$w_l\n RESULT -----> $txt_compress3\t= $c_n$e3$rs_\n";
+};
+compress_cam_gui(){
+	cd "$bdir";
+	upx_c="-1";
+	[ -f "$configdir/upx_option" ] && source "$configdir/upx_option";
+	erg=$(upx "$upx_c" "$1" |grep oscam |awk '{print $1" "$3" "$4 }');
+	e1="$(echo "$erg"| awk '{printf("%4.2f k\n", $1 /1024)}')";
+	e2="$(echo "$erg"| awk '{printf("%4.2fk\n", $2 /1024)}')";
+	e3="$(echo "$erg"| awk '{print $3}')";
+	echo -e "\n $txt_compress1\t= $e1\n $txt_compress2\t= $e2\n $txt_compress3\t= $e3";
+};
+tar_cam_gui(){
+	cd "$bdir";
+	erg=$(tar zcf $1.tar.gz $1 $2);
+	if [ -f "$1.tar.gz" ];then
+		echo -e "\n $1.tar.gz\n created";
+		if [ -f "$adir/$1.tar.gz" ];then
+			rm -rf "$adir/$1.tar.gz";
+			mv -f "$1.tar.gz" "$adir";
+			echo -e "\n $1.tar.gz\n moved to $workdir/archive\n";
+		else
+			mv -f "$1.tar.gz" "$adir";
+			echo -e "\n $1.tar.gz\n moved to $workdir/archive\n";
+		fi;
+	else
+		echo -e "\nerror\n no $1.tar.gz\n created";
+	fi;
+};
+tar_cam(){
+	cd "$bdir";
+	if [ -n $2 ];then
+		echo -en "$y_n\n TAR -------->$w_l $1$g_l $txt_as$w_l $1.tar.gz$rs_";
+	fi;
+	erg=$(tar zcf $1.tar.gz $1 $2);
+	if [ -f "$1.tar.gz" ];then
+		echo -e "$p_n$txt_done$rs_";
+		if [ -f "$adir/$1.tar.gz" ];then
+			rm -rf "$adir/$1.tar.gz";
+			mv -f "$1.tar.gz" "$adir";
+			echo -e "$c_l"" MOVE -------> $p_l$1.tar.gz $g_l$txt_to $y_n$workdir/archive\n$rs_";
+		else
+			mv -f "$1.tar.gz" "$adir";
+			echo -e "$c_l"" MOVE -------> $p_l$1.tar.gz $g_l$txt_to $y_n$workdir/archive\n$rs_";
+		fi;
+	else
+		echo -e "$r_l\nerror\n no $1.tar.gz\n created$rs_";
+	fi;
+};
+tarsvn(){
+	cd "$workdir";
+	if [ -f "$svndir/config.sh" ];then
+		cat "$svndir/config.sh" >"$configdir/config.sh.master";
+		[ -f "$svndir/Makefile" ]&& cat "$svndir/Makefile" >"$configdir/Makefile.master";
+		echo -en "$w_l  SVN Backup    :$c_l ";
+		tar -zcf "$bsvn/$("$svndir/config.sh" -r).tar.gz" oscam-svn;
+	fi;
+	cd "$bsvn";
+	ln -sf "$bsvn/$("$svndir/config.sh" -r).tar.gz" "last.tar.gz";
+	echo -e "done\n$re_";
+};
+untarsvn(){
+	cd "$workdir";
+	[ -d oscam-svn ] && rm -rf oscam-svn;
+	if [ -z "$1" ];then
+		[ -f "$bsvn/last.tar.gz" ] && tar -xf "$bsvn/last.tar.gz";
+	else
+		if [ -f "$bsvn/$1.tar.gz" ];then
+			tar -xf "$bsvn/$1.tar.gz";
+			cd $bsvn;
+			ln -sf "$bsvn/$("$svndir/config.sh" -r).tar.gz" "last.tar.gz";
+		else
+			if [ -f "$bsvn/last.tar.gz" ];then
+				tar -xf "$bsvn/last.tar.gz";
+			else
+				echo -en "$w_l  SVN Backup    :$r_l $txt_not_found";
+				sleep 3;
+				checkout;
+			fi;
+		fi;
+	fi;
+	[ -f "$workdir/SVN-IS-PATCHED" ] && rm -f "$workdir/SVN-IS-PATCHED";
+};

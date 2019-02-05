@@ -1,0 +1,5 @@
+put only the count of cpus u want to use in the file !!!
+
+example:
+for 3 of X cpus
+echo 3 >max_cpus

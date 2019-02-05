@@ -1,0 +1,100 @@
+#!/bin/bash
+
+#english
+
+txt_as='as';
+txt_of='of';
+txt_for='for';
+txt_b2="build";
+txt_to="to";
+txt_now='now';
+txt_b1='build';
+txt_menu='menu';
+txt_done=' done';
+txt_no='no';
+txt_use='use';
+txt_back='back';
+txt_error='error';
+txt_loading='    load';
+txt_sel='select';
+txt_delete='delete';
+txt_found='found';
+txt_create='create';
+txt_conf='configuration';
+txt_extracting='extracting';
+txt_wait='please wait...';
+txt_existing='exists';
+txt_profiles='profiles';
+txt_not_found='not found';
+txt_n_installed='is not installed';
+txt_back_main="back to main menu";
+txt_too_old='(too old or not supported)';
+txt_selected='selected';
+txt_update='now updating';
+txt_tc="Toolchain";
+
+# menu txt
+txt_start_menu='Main menu';
+txt_remove_menu='Remove toolchain';
+txt_add_menu='Add toolchain';
+txt_main_revision="\n the local SVN revision is : r";
+
+# help txt
+txt_help1="begin with"
+txt_help2="commandline Parameters are"
+txt_help3="[ENTER] to continue..."
+
+# firstmenu ################################################
+txt_firstmenu_continue="continue with local SVN";
+   txt_firstmenu_chose="load a different SVN (7000+)";
+   txt_firstmenu_cedit="start configuration editor";
+    txt_firstmenu_lang="manual system language selection";
+    txt_firstmenu_exit="close simplebuild now";
+
+# _toolchain_config_menu ###################################
+     txt_config_menu="configuration menu";
+      txt_back_build="back to build menu";
+txt_module_configure="select oscam modules ";
+     txt_oscam_extra="select oscam extras USB/PCSC";
+     txt_build_extra="select build extras compress/patch";
+      txt_build_load="load last configuration";
+      txt_build_save="save configuration";
+     txt_build_reset="reset configuration";
+
+# _toolchain_build_menu#####################################
+ txt_bmenu_title="build menu";
+  txt_bmenu_user="username       ";
+  txt_bmenu_comp="compiler       ";
+  txt_bmenu_debu="debug info     ";
+   txt_bmenu_use="USE_variables ";
+ txt_bmenu_build="build oscam now";
+txt_bmenu_config="oscam/build configuration";
+   txt_bmenu_log="show lastbuild.log";
+  txt_bmenu_back="back to toolchain selection";
+   txt_compress1="filesize before     ";
+   txt_compress2="filesize after      ";
+   txt_compress3="filesize reduced to ";
+
+# _toolchain_main_menu#####################################
+txt_menu_builder1="close simplebuild";
+txt_menu_builder2="add new toolchain";
+txt_menu_builder3="remove installed toolchain";
+txt_menu_builder4="build native for";
+txt_menu_back="back to toolchain menu";
+
+# _dialog_checkout
+txt_verify_syscheck='check system                :';
+     txt_verify_svn='check existing SVN          :';
+     txt_update_svn="$txt_update SVN            :";
+    txt_prepare_svn="prepare SVN checkout     :";
+         txt_latest="latest SVN";
+
+# _load_profile ###########################################
+  txt_select_profile_title="available profiles";
+        txt_select_profile="please select a profile";
+txt_confirm_profile_select="please confirm the selection of:";
+      txt_no_profile_found="no profile found in\n\n$profdir";
+
+# _upload_cam #############################################
+txt_upload_cam1="ssh profile doesn't exist";
+txt_upload_cam2="ssh profile found";
