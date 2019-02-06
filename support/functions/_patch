@@ -14,12 +14,9 @@ _get_patch(){
 	[ -f $PATCHNAME ] && echo -e $G"   ok$W new $PATCHNAME loadet\n" || echo -e $R"   patch not found\n"$W;
 };
 _apply_menupatch(){
-	cd "$pdir";
-	pf=(*);
-	if [ ${#pf[@]} -gt 1 ];then
-		[ -f "$workdir/SVN-IS-PATCHED" ] && quicksvnrestore $_toolchainname 2>/dev/null;
-		if [ ! -f "$workdir/SVN-IS-PATCHED" ];then
-			(if [ "$(ls -A "$pdir"/*.patch 2>/dev/null)" ];then
+	[ -f "$workdir/SVN-IS-PATCHED" ] && quicksvnrestore $_toolchainname 2>/dev/null;
+		cd "$pdir";
+			(if [ "$(ls -1 "$pdir"/*.patch 2>/dev/null | wc -l)" -gt "0" ];then
 				cd "$pdir";
 				unset patchlist;patchlist=`ls *.patch | sort -st '/' -k1,1`;
 				for e in ${patchlist[@]};do
@@ -56,8 +53,6 @@ _apply_menupatch(){
 				esac;
 				rm -rf "$patchlog";
 			fi;)|"$gui" "$st_" "$bt_" "$title_" "$pb_" 12 62;sleep 2;
-		fi;
-	fi;
 };
 _apply_consolepatch(){
 	if [ ! -f "$workdir/SVN-IS-PATCHED" ];then
