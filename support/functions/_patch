@@ -19,10 +19,10 @@ _apply_menupatch(){
 			(if [ "$(ls -1 "$pdir"/*.patch 2>/dev/null | wc -l)" -gt "0" ];then
 				cd "$pdir";
 				unset patchlist;patchlist=`ls *.patch | sort -st '/' -k1,1`;
+				patchlog="$(mktemp)";
 				for e in ${patchlist[@]};do
 					_w="ok";
 					cd "$svndir";
-					patchlog="$(mktemp)";
 					echo "PATCH : apply $e";
 					patch -f -p0 < "$pdir/$e" >>"$patchlog" 2>/dev/null;
 					hunks=$(grep -c1 '^Hunk' "$patchlog");
@@ -59,9 +59,9 @@ _apply_consolepatch(){
 		cd "$pdir";
 		if [ "$(ls -1 "$pdir"/*.patch 2>/dev/null | wc -l)" -gt "0" ];then
 			unset patchlist;patchlist=`ls *.patch | sort -st '/' -k1,1`;
+			patchlog="$(mktemp)";
 			for e in ${patchlist[@]};do
 				_w=0;cd "$svndir";
-				patchlog="$(mktemp)";
 				echo -e "$y_l |     PATCH : apply $e";
 				patch -F 10 -f -p0 < "$pdir/$e" >>"$patchlog" 2>/dev/null;
 				hunks=$(grep -c1 "^Hunk" "$patchlog");
@@ -82,9 +82,9 @@ _apply_consolepatch(){
 				fi;
 				cat $patchlog >"$ldir/$e.log";
 				ln -sf "$ldir/$e.log" "$workdir/lastpatch.log";
-				rm -rf "$patchlog";
 			done;
-			if [ "$_w" -gt "0" ];then echo -e "$y_l|     PATCH : done with warnings";
+			rm -rf "$patchlog";
+			if [ "$_w" -gt "0" ];then echo -e "$y_l |     PATCH : done with warnings";
 				touch "$workdir/SVN-IS-PATCHED";
 			else
 				echo -e "$y_l |     PATCH :$g_l done all ok$rs_";
