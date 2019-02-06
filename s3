@@ -68,6 +68,7 @@ declare -a SHORT_READERS;    declare -a SHORT_CARD_READERS; declare -A INTERNAL_
 config_cases=( all addons protocols readers card_readers );
 s3opts=( help cedit clean tccheck tcrepair upload lang_select loadonly checkout ssh_profiles syscheck sysinfo svnup menu get_patch tedit svnpatch profiles svnrestore ); # extendable with plugins
 CUSTOM_CONFDIR="not_set";
+UPX="not_set";
 
 #internal vars
 OPENBOX=0;UFS916003=0;_verbose="";
@@ -229,10 +230,25 @@ else
 					pf_name="${2#*=}";
 				fi;
 			fi;
+			if [ "${3:0:3}" == "-p=" ] || [ "${3:0:3}" == "-P=" ];then
+				if [ -f "$profdir/${2#*=}" ];then
+					pf=$(cat "$profdir/${2#*=}");
+					pf_name="${2#*=}";
+				fi;
+			fi;
+			if [ "${2:0:5}" == "-upx=" ] || [ "${2:0:5}" == "-UPX=" ];then
+				UPX=${2#*=};USE_vars[USE_COMPRESS]="USE_COMPRESS=1";
+			fi;
+			if [ "${2:0:5}" == "-upx=" ] || [ "${2:0:5}" == "-UPX=" ];then
+				UPX=${2#*=};USE_vars[USE_COMPRESS]="USE_COMPRESS=1";
+			fi;
 			[ "$pf" == "empty" ] && c_m_d="$*" || c_m_d="all_off $pf $*"; # set only active module with profiles
 			for cmd in $c_m_d;do
 				if [ "${cmd:0:3}" == "-c=" ] || [ "${cmd:0:3}" == "-C=" ];then
 					CUSTOM_CONFDIR="${cmd#*=}";
+				fi;
+				if [ "${cmd:0:5}" == "-upx=" ] || [ "${cmd:0:5}" == "-UPX=" ];then
+					UPX="${cmd#*=}";USE_vars[USE_COMPRESS]="USE_COMPRESS=1";
 				fi;
 				for cc in "${config_cases[@]}";
 				do
@@ -260,7 +276,5 @@ else
 		fi;
 	done;
 	_help;
-
 fi;
-
 exit;

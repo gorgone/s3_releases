@@ -65,6 +65,9 @@ svnrestore(){
 	fi;
 	untarsvn $1;
 	[ -f "$svndir/config.h" ]&& echo -en "$w_l""  SVN Revision  : $y_l""$("$svndir/config.sh" -r) restored\n\n$re_";
+	[ -L "$workdir/lastbuild.log" ]&& rm "$workdir/lastbuild.log";
+	[ -L "$workdir/lastpatch.log" ]&& rm "$workdir/lastpatch.log";
+	[ -f "$workdir/SVN-IS-PATCHED" ] && rm -f "$workdir/SVN-IS-PATCHED";
 };
 quicksvnrestore(){
 	untarsvn $1;

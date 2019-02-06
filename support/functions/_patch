@@ -67,17 +67,17 @@ _apply_consolepatch(){
 			for e in ${patchlist[@]};do
 				_w=0;cd "$svndir";
 				patchlog="$(mktemp)";
-				echo -e "$y_l|     PATCH : apply $e";
+				echo -e "$y_l |     PATCH : apply $e";
 				patch -F 10 -f -p0 < "$pdir/$e" >>"$patchlog" 2>/dev/null;
 				hunks=$(grep -c1 "^Hunk" "$patchlog");
 				fails=$(grep -c1 "hunks FAILED" "$patchlog");
 				if [ "$hunks" -gt "0" ];then
-					echo -e "$y_l|     PATCH :$w_l $hunks x HUNK for $e";
+					echo -e "$y_l |     PATCH :$w_l $hunks x HUNK for $e";
 					_w=1;
 				fi;
 				if [ "$fails" -gt "0" ];then
-					echo -e  "$y_l|     PATCH :$r_n FAIL (breaking Build) = $fails";
-					echo -en "$w_l|   RESTORE :$c_w LAST SVN BACKUP in ";
+					echo -e  "$y_l |     PATCH :$r_n FAIL (breaking Build) = $fails";
+					echo -en "$w_l |   RESTORE :$c_w LAST SVN BACKUP in ";
 					for (( i=6; i>0; i--));do
 						sleep 1 & echo -en "$i\b";
 						wait;
@@ -92,11 +92,11 @@ _apply_consolepatch(){
 			if [ "$_w" -gt "0" ];then echo -e "$y_l|     PATCH : done with warnings";
 				touch "$workdir/SVN-IS-PATCHED";
 			else
-				echo -e "$y_l|     PATCH :$g_l done all ok$rs_";
+				echo -e "$y_l |     PATCH :$g_l done all ok$rs_";
 				touch "$workdir/SVN-IS-PATCHED";
 			fi;
 		else
-			echo -en "$y_l|     PATCH : no patch found\n";
+			echo -en "$y_l |     PATCH : no patch found\n";
 		fi;
 	fi;
 };

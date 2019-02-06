@@ -9,12 +9,18 @@ helpline0(){
 	ll=0;
 	echo -en "  ";
 	for s in "$@";do
-		ll=$((ll + (${#s} + 4)));
-		if [ "$ll" -lt "30" ];then
-			echo -en "$s(_off) ";
-		else
-			echo -en "$s(_off)\n  ";
-			ll="";
+		if [ ! "$s" == "USE_SSL" ] \
+		&& [ ! "$s" == "USE_MCA" ] \
+		&& [ ! "$s" == "USE_LIBUSB" ] \
+		&& [ ! "$s" == "USE_CONFDIR" ];
+		then
+			ll=$((ll + (${#s} + 4)));
+			if [ "$ll" -lt "30" ];then
+				echo -en "$s(_off) ";
+			else
+				echo -en "$s(_off)\n  ";
+				ll="";
+			fi;
 		fi;
 	done;
 };
@@ -32,10 +38,10 @@ helpline1(){
 	done;
 };
 _help(){ clear;s3logo;
-echo -e "  ----------------------------------";
+echo -e "  --------------------------------------";
 echo -e "  $txt_help1 $0 menu";
 echo -e "  $txt_help2";
-echo -e "  ----------------------------------";
+echo -e "  --------------------------------------";
 echo -e "$w_l\n  toolchains :\n  ------------$g_n";
 helpline1 "${AVAI_TCLIST[@]}";
 echo -e "$w_l\n  simplebuild options :\n  ---------------------$c_n";
