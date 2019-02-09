@@ -224,24 +224,29 @@ else
 
 	for t in "${AVAI_TCLIST[@]}";do
 		if [ "$t" == "$1" ];then
+
 			if [ "${2:0:3}" == "-p=" ] || [ "${2:0:3}" == "-P=" ];then
 				if [ -f "$profdir/${2#*=}" ];then
 					pf=$(cat "$profdir/${2#*=}");
 					pf_name="${2#*=}";
 				fi;
 			fi;
+
 			if [ "${3:0:3}" == "-p=" ] || [ "${3:0:3}" == "-P=" ];then
 				if [ -f "$profdir/${2#*=}" ];then
 					pf=$(cat "$profdir/${2#*=}");
 					pf_name="${2#*=}";
 				fi;
 			fi;
+
 			if [ "${2:0:5}" == "-upx=" ] || [ "${2:0:5}" == "-UPX=" ];then
 				UPX=${2#*=};USE_vars[USE_COMPRESS]="USE_COMPRESS=1";
 			fi;
+
 			if [ "${2:0:5}" == "-upx=" ] || [ "${2:0:5}" == "-UPX=" ];then
 				UPX=${2#*=};USE_vars[USE_COMPRESS]="USE_COMPRESS=1";
 			fi;
+
 			[ "$pf" == "empty" ] && c_m_d="$*" || c_m_d="all_off $pf $*"; # set only active module with profiles
 			for cmd in $c_m_d;do
 				if [ "${cmd:0:3}" == "-c=" ] || [ "${cmd:0:3}" == "-C=" ];then
@@ -271,6 +276,7 @@ else
 					USE_VERBOSE) s3cfg_vars[USE_VERBOSE]=1;;
 				esac;
 			done;
+
 			_pre_build "$t";
 			exit;
 		fi;

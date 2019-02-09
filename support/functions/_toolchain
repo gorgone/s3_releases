@@ -147,7 +147,7 @@ _console_extract_toolchain(){
 _toolchain_check(){
 	clear;
 	echo -e "$w_l";
-	ologo;
+	s3logo;
 	headervars=( crypto.h pcsclite.h libusb.h pthread.h );
 	[ -f "$tccfgdir/$1" ] && source "$tccfgdir/$1";
 	if [ -d "$tcdir/$1/bin" ];then
@@ -162,17 +162,24 @@ _toolchain_check(){
 	version=$("./$compilername" -dumpversion);
 	machine=$("./$compilername" -dumpmachine);
 	sr=$("./$compilername" -print-sysroot 2>/dev/null);
-	sysroot=${tcdir//"$1/bin"/};
+	sysroot=${sr#"$tcdir/$1/bin/../"};
 	[ -z "$sysroot" ] && sysroot="$r_l$txt_too_old";
-	echo -e "$w_l  Compiler Info\n  =============\n";
-	echo -e "$w_l  Version :$y_l $version";
-	echo -e "$w_l  Target  :$y_l $machine";
-	echo -e "$w_l  Sysroot :$y_l $sysroot";
+	echo -e "$w_l  Compiler Info -----> $C$1$w_l\n  ====================\n";
+	echo -e "$w_l  GCC Version :$y_l $version";
+	echo -e "$w_l  GCC Binary  :$y_l $machine""-gcc";
+	echo -e "$w_l  GCC Sysroot :$y_l $sysroot";
+	cd "$sr";
 	for e in "${headervars[@]}";do
-		temp=$(find "$sr"/* |grep -m1 "$e");
-		[ ${#temp} -gt 8 ] && echo -e "$w_l  Header  :$y_l $e$g_l\t$txt_found" || echo -e "$w_l  Header  :$y_l $e$r_l\t($txt_not_found)";
+		temp=$(find * |grep -m1 "$e");
+		[ ${#temp} -gt 8 ] && echo -e "$w_l  Header File :$y_l $e$g_l\t$txt_found" || echo -e "$w_l  Header File :$y_l $e$r_l\t($txt_not_found)";
 	done;
-	_nl;
+	echo -e "\n$w_l  Sysroot config ----> $C$_sysroot$w_l\n  ====================\n";
+	cd "$tcdir/$1/$_sysroot";
+	for e in "${headervars[@]}";do
+		temp=$(find * |grep -m1 "$e");
+		[ ${#temp} -gt 8 ] && echo -e "$w_l  Header File :$y_l $e$g_l\t$txt_found" || echo -e "$w_l  Header File :$y_l $e$r_l\t($txt_not_found)";
+	done;
+	echo -e $re_;
 	exit;
 };
 _toolchain_repair(){
@@ -182,6 +189,10 @@ _toolchain_repair(){
 	cd $dldir;zzusatz=0;szusatz=0;
 	[ -f "$tccfgdir/$1" ] && source "$tccfgdir/$1";
 	fn=$(echo $_md5sum |awk '{ printf $2 }');
+	if [ ${#_md5sum} -lt 1 ];then
+		echo -e $w_l"  md5sum in $Y$1$w_l config $R$txt_not_found$W\n\n";
+		exit;
+	fi;
 	if [ -f $fn ];then
 		md5file=$(mktemp);
 		echo $_md5sum > $md5file;
@@ -196,7 +207,7 @@ _toolchain_repair(){
 		else
 			echo -en $w_l"\n  Toolchain md5 check :$r_l";
 			echo -en $answer |awk '{{print " " $2;}}' |head -1;
-			echo -en $W;sleep 1;zzusatz=0;szusatz=8;
+			echo -en $W;sleep 1;zzusatz=1;szusatz=8;
 			echo -en $w_l"  Toolchain download  :$g_l";
 			dln=$fn;_pget; sleep 1;
 			echo -en $w_l"  Toolchain repair    :$g_l";

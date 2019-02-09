@@ -148,7 +148,7 @@ _pre_build(){
 		echo -en "$w_l   backupcheck : ";
 		if [ -f "$dldir/$dln" ];then
 			echo -e  "$g_l$dln $txt_found";
-			echo -en "$w_l     $txt_extracting :$y_l $txt_wait";
+			echo -en "$w_l    $txt_extracting :$y_l $txt_wait";
 			_console_extract_toolchain;
 			run=1;
 		else
