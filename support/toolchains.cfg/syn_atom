@@ -1,0 +1,19 @@
+_toolchainname="syn_atom"
+default_use="USE_UTF8 USE_LIBCRYPTO";
+_description="SYN_ATOM"
+_oscamconfdir_default="/usr/local/etc"
+_oscamconfdir_custom=""
+
+_compiler="x86_64-linux-gnu-"
+_sysroot=""
+_libsearchdir="/lib"
+_toolchainfilename="U3luX0F0b20udGFyLnh6";
+_md5sum="f9dcb6623f163af10ec2ec761e82f124  Toolchain-Syn_Atom.tar.xz";
+_tc_info="\n
+    !!! Synology ATOM !!!\n
+       this toolchain is compatible with\n
+	             fill with info\n
+\n
+";
+
+_tc_infolines="6"

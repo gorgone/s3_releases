@@ -1,0 +1,20 @@
+_toolchainname="sh_4"
+default_use="USE_UTF8 USE_LIBCRYPTO";
+_description="SH4"
+_oscamconfdir_default="/var/keys"
+_oscamconfdir_custom=""
+
+stapi_allowed="1"
+_compiler="sh4-streamboard-linux-gnu-"
+_sysroot="sh4-streamboard-linux-gnu/sysroot/usr"
+_libsearchdir="/lib"
+_toolchainfilename="TkVXU0g0LVN0cmVhbWJvYXJkX3NfdV9wLnRhci54eg";
+_md5sum="f4d44bfa8fb5bec9abacf5c2b0ca45dd  Toolchain-NEWSH4-Streamboard_s_u_p.tar.xz";
+_tc_info="\n
+    !!! SH4 New Toolchain !!!\n
+       this toolchain is compatible with\n
+	             fill with info\n
+\n
+";
+
+_tc_infolines="6"

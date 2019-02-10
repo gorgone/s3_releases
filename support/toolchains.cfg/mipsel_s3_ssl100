@@ -5,7 +5,7 @@ _oscamconfdir_default="/var/keys";
 _oscamconfdir_custom=""
 
 _compiler="mipsel-simplebuild3-linux-gnu-";
-_sysroot="mipsel-simplebuild3-linux-gnu/sysroot";
+_sysroot="/";
 _libsearchdir="/lib";
 _toolchainfilename="bWlwc2VsX3MzX3NzbDEwMC50YXIueHoK";
 _md5sum="b1ff681eff62b0e639d37e001b97e1e0  Toolchain-mipsel_s3_ssl100.tar.xz";

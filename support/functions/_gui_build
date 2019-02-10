@@ -15,6 +15,7 @@ _gui_build(){
 	ologo >"$ldir/$log_name";
 	[ -f "$configdir/max_cpus" ] && cpus="$(cat "$configdir/max_cpus")" || cpus="$(CPUS)";
 	CROSS="$tcdir/$_toolchainname/bin/$_compiler";
+	[ "$_stagingdir" == "1" ] && export STAGING_DIR="$tcdir/$_toolchainname";
 	[ -f "$configdir/compiler_option" ] && co=$(cat "$configdir/compiler_option") || co="-O2";
 
 #make clean
@@ -67,7 +68,7 @@ _gui_build(){
 	make -j"$cpus" \
 		"CONF_DIR=$_oscamconfdir_default" "OSCAM_BIN=$bdir/$oscam_name" "CC_OPTS=$co $cc_opts" "CC_WARN=$cc_warn" "CROSS=$CROSS" $stapivar $USESTRING_ 2>&1 \
 		|tee "$ldir/$log_name" \
-		|grep --line-buffered -v 'BFD' \
+		|grep --line-buffered -v 'BFD\|^/' \
 		|grep --line-buffered '^CC\|^GEN\|UseFlags\|  CONF_DIR =\|Binary\|LINK\|STRIP\|BUILD\|Addons\|Protocols\|Readers\|CardRdrs\|^/' \
 		|sed -u "s/^|/ |/g;s/^LINK/ LINK  >/g;s/^STRIP/ STRIP >/g;s/^CC\|^BUILD/ BUILD >/g;s/^GEN/ GEN   >/g;s/WEBIF_//g;s/WITH_//g;s/MODULE_//g;s/CS_//g;s/HAVE_//g;s/_CHARSETS//g;s/CW_CYCLE_CHECK/CWCC/g;s/SUPPORT//g;"
 	timer_stop;

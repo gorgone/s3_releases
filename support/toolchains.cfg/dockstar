@@ -1,0 +1,19 @@
+_toolchainname="dockstar";
+default_use="USE_UTF8 USE_LIBCRYPTO";
+_description="Dockstar";
+_oscamconfdir_default="/var/tuxbox/config";
+_oscamconfdir_custom=""
+
+_compiler="arm-none-linux-gnueabi-";
+_sysroot="arm-none-linux-gnueabi/libc/usr";
+_libsearchdir="/lib";
+_toolchainfilename="RG9ja3N0YXJfc191X3AudGFyLnh6";
+_md5sum="f259eac25e917a0b9b564d014d171c39  Toolchain-Dockstar_s_u_p.tar.xz";
+_tc_info="\n
+    !!! Dockstar !!!\n
+       this toolchain is compatible with\n
+	             fill with info\n
+\n
+";
+
+_tc_infolines="6";

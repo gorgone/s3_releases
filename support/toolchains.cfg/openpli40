@@ -8,7 +8,7 @@ _compiler="mipsel-openpli40-linux-gnu-"
 _sysroot="mipsel-openpli40-linux-gnu/sysroot"
 _libsearchdir="/lib"
 _toolchainfilename="T3BlblBMSV80LjAudGFyLnh6";
-
+_md5sum="ceae5af8c66867010845e0e4094265ff  Toolchain-OpenPLI_4.0.tar.xz";
 _tc_info="\n
     !!! beware the box must have FPU !!!\n
      this toolchain is compatible with\n

@@ -1,0 +1,20 @@
+_toolchainname="ppcold"
+default_use="USE_UTF8 USE_LIBCRYPTO";
+_description="Dbox2 / Dreambox DM500 and DM500-S"
+_oscamconfdir_default="/var/tuxbox/config"
+_oscamconfdir_custom=""
+
+_compiler="powerpc-linux-"
+_sysroot=""
+_libsearchdir="/lib"
+_toolchainfilename="UFBDLVR1eGJveC1vbGRfcy50YXIueHo=";
+_md5sum="d1db3a6b9fb743d0f6753fb72d755924  Toolchain-PPC-Tuxbox-old_s.tar.xz";
+_block="USE_PCSC USE_LIBUSB"
+_tc_info="\n
+    !!! PPC-OLD !!!\n
+       this toolchain is compatible with\n
+	             fill with info\n
+\n
+";
+
+_tc_infolines="6"

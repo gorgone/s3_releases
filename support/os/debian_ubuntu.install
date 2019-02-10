@@ -1,33 +1,11 @@
 #!/bin/bash
 
 debian_os(){
+[ -f /etc/os-release ] && source /etc/os-release || return 1;
+[ "$ID" == "ubuntu" ] && prefix="sudo" || prefix='';
 install_log="$ldir/os-install.log";
 failed=0;
-prefix="sudo";
 packages="";
-
-echo -n >"$install_log" &2>/dev/null;
-
-echo -e "$w_l\n  INSTALLATION\n  ============\n";
-
-debian_version=$(sed -n 's/^[^0-9]*\([0-9][0-9]*\).*$/\1/p' /etc/debian_version 2>/dev/null);
-
-if [[ $debian_version ]]; then
-	[ "$debian_version" -lt 7 ] && { echo -e "$r_l  This system is not supported anymore!\n"; return 1; }
-	[ "$debian_version" -gt 8 ] && echo -e "$r_l  This installer is still in the testing stage!";
-else
-	# all known Ubuntu systems have 'lsb_release'
-	! hash lsb_release 2>/dev/null && { echo -e "$r_l  System not recognised -> Abort!\n"; return 1; }
-	ubuntu_version=$(lsb_release -rs | cut -f 1 -d '.');
-	[ "$ubuntu_version" -lt 12 ] && { echo -e "$r_l  This system is not supported anymore!\n"; return 1; }
-	[ "$ubuntu_version" -gt 16 ] && echo -e "$r_l  This installer is still in the testing stage!";
-fi
-
-# without sudo no user installation allowed
-hash sudo 2>/dev/null || { [ "$(whoami)" != "root" ] && { echo -e "$r_l  You need to be root for that!\n"; return 1; } }
-
-# root needs no sudo
-[ "$(whoami)" == "root" ] && prefix="";
 
 for e in "${binvars[@]}";
 do
@@ -41,7 +19,8 @@ do
 			inst="xz-utils";
 			;;
 		esac;
-		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
+		printf -v pad %40s; e=$e$pad; e=${e:0:15};
+		echo -e "$w_l  select $g_l$e$y_l from: $inst";
 		packages="$packages $inst";
 	fi;
 done;
@@ -64,7 +43,8 @@ do
 				inst="libc-dev-bin";
 			;;
 		esac;
-		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
+		printf -v pad %40s; e=$e$pad; e=${e:0:15};
+		echo -e "$w_l  select $g_l$e$y_l from: $inst";
 		packages="$packages $inst";
 	fi;
 done;
@@ -78,7 +58,8 @@ do
 				inst="libccid";
 			;;
 		esac;
-		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
+		printf -v pad %40s; e=$e$pad; e=${e:0:15};
+		echo -e "$w_l  select $g_l$e$y_l from: $inst";
 		packages="$packages $inst";
 	fi;
 done;
@@ -87,25 +68,29 @@ if [ "$(uname -m)" == "x86_64" ] && [ ! -f /usr/lib32/libz.so.1 ]; then
 	if [ ! -f /usr/lib32/libz.so.1 ]; then
 		e="zlib32";
 		inst="lib32z1";
-		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
+		printf -v pad %40s; e=$e$pad; e=${e:0:15};
+		echo -e "$w_l  select $g_l$e$y_l from: $inst";
 		packages="$packages $inst";
 	fi
 fi
 
 if [ ${#packages} -gt 0 ]; then
-	echo -n -e "$w_l  update$g_l package list...";
-	echo "+++ $(date): apt-get -y update" >> "$install_log"
-	$prefix apt-get -y update >> "$install_log" 2>&1;
-	echo -e "$y_l done";
-	echo -n -e "$w_l  install$g_l selected packages$y_l please wait...";
-	echo "+++ $(date): apt-get -y install$packages" >> "$install_log"
-	$prefix apt-get -y install $packages >> "$install_log" 2>&1 || failed=1;
-	if [ $failed == 0 ]; then
-		echo -e "$y_l  done";
+	echo -n >"$install_log" &2>/dev/null;
+	echo -e "$w_l\n  INSTALLATION\n  ============";
+	if [ "$EUID" -ne 0 ]; then
+		echo -en "$r_l\n  enter root ";
+		$prefix su root -c "\
+		echo -e '\033[1;37m\n' ' 'update'\033[1;32m' package list...'\n';
+		apt-get -y update |grep --line-buffered -v '^T\|(\|^I\|^H' 2>&1;
+		echo -e '\n\033[1;37m  install\033[1;32m $txt_selected packages\033[1;33m $txt_wait\n';
+		apt-get -y -qq install $packages |grep --line-buffered '(' |grep --line-buffered -v 'nicht;"
 	else
-		echo -e "$r_l  failed!";
-	fi
-fi
+		echo -e '\033[1;37m' ' 'update'\033[1;32m' package list...'\n';
+		apt-get -y update |grep --line-buffered -v '^T\|(\|^I\|^H' 2>&1;
+		echo -e "\n\033[1;37m  install\033[1;32m packages \033[1;33m"$txt_wait'\n';
+		apt-get -y -qq install $packages |grep --line-buffered '(' |grep --line-buffered -v 'nicht';
+	fi;
+fi;
 
 if hash upx 2>/dev/null; then
 	upxversion=($(upx -V | awk 'NR==1 { verok=$2>=3.91; printf "%.2f %i", $2, verok }'));

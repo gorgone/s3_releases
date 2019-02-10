@@ -1,0 +1,20 @@
+_toolchainname="ineos";
+default_use="USE_UTF8";
+_description="Ineos ZX4";
+_oscamconfdir_default="/var/keys";
+_oscamconfdir_custom=""
+
+_compiler="csky-linux-";
+_sysroot="";
+_libsearchdir="/lib";
+_toolchainfilename="aW5lb3MudGFyLnh6Cg==";
+_md5sum="ce54fc7ce4cf58d76070ff86f62440e3  Toolchain-ineos.tar.xz";
+_block="USE_LIBCRYPTO USE_LIBUSB SMARGO"
+_tc_info="\n
+    !!! Ineos ZX4 !!!\n
+       this toolchain is compatible with\n
+	             fill with info\n
+\n
+";
+
+_tc_infolines="6";

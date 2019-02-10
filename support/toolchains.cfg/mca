@@ -1,0 +1,20 @@
+_toolchainname="mca";
+default_use="USE_UTF8 USE_LIBCRYPTO USE_MCA";
+_description="MATRIX CAM AIR";
+_oscamconfdir_default="/var/mca/d1";
+_oscamconfdir_custom=""
+
+_compiler="arm-none-linux-gnueabi-";
+_sysroot="51be223df048291e6bd863a7f8ec4ff8  Toolchain-Matrix_s.tar.xz";
+_libsearchdir="/lib";
+_toolchainfilename="TWF0cml4X3MudGFyLnh6";
+_md5sum="";
+_block="USE_PCSC USE_LIBUSB"
+_tc_info="\n
+    !!! MATRIX CAM AIR !!!\n
+       this toolchain is compatible with\n
+	             fill with info\n
+\n
+";
+
+_tc_infolines="6";

@@ -1,0 +1,18 @@
+_toolchainname="hd51";
+default_use="USE_UTF8 USE_LIBCRYPTO";
+_description="AX/Mutant HD51";
+_oscamconfdir_default="/etc/tuxbox/config/oscam/";
+_oscamconfdir_custom=""
+
+_compiler="arm-unknown-linux-gnueabihf-";
+_sysroot="arm-unknown-linux-gnueabihf/sys-root/";
+_libsearchdir="/lib";
+_toolchainfilename="aGQ1MS50YXIueHoK";
+_md5sum="f238272cebc476c2396ed6fa74a93d86  Toolchain-hd51.tar.xz";
+_tc_info="\n
+!!! beware the box must have FPU !!!\n
+this toolchain is compatible with\n
+\n
+AX/Mutant : HD51";
+
+_tc_infolines="5"

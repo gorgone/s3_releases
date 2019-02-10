@@ -10,12 +10,7 @@ slogo(){
 };
 bye(){
 	clear;
-	echo -en "$re_$w_l";
-	printf "\n\t\t simplebuild made for";
-	echo -e "$c_l";
-	slogo;
-	echo -e "\e[8;50H \e[8;50f" && echo -en "$g_l\t\t\t\t\t\t by gorgone $re_";
-	echo -e "\n";
+	s3logo;
 	exit;
 };
 s3logo(){

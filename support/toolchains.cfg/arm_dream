@@ -1,0 +1,19 @@
+_toolchainname="arm_dream"
+default_use="USE_UTF8 USE_LIBCRYPTO";
+_description="Dreambox ARM"
+_oscamconfdir_default="/etc/tuxbox/config"
+_oscamconfdir_custom="/var/"
+
+_compiler="arm-newnigma2-linux-gnueabihf-"
+_sysroot="arm-newnigma2-linux-gnueabihf"
+_libsearchdir="/usr/lib"
+_toolchainfilename="YXJtX2RyZWFtLnRhci54eg==";
+_md5sum="ba520f3c9ce3d4e6263751f0781e4161  Toolchain-arm_dream.tar.xz";
+_tc_info="\n
+    !!! Dreambox ARM Toolchain !!!\n
+       this toolchain is compatible with\n
+	             DM900\n
+\n
+";
+
+_tc_infolines="6"

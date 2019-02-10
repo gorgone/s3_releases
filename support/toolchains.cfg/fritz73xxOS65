@@ -1,0 +1,19 @@
+_toolchainname="fritz73xxOS65";
+default_use="USE_UTF8 USE_LIBCRYPTO";
+_description="Fritzbox73xx Fritz OS V6.5";
+_oscamconfdir_default="/var/media/ftp/uStor01/external/mod/etc/conf";
+_oscamconfdir_custom=""
+
+_compiler="mips-linux-uclibc-";
+_sysroot="";
+_libsearchdir="/usr/lib/freetz";
+_toolchainfilename="RnJpdHo3M3h4T1M2NVgudGFyLnh6";
+_md5sum="47468540657e0ed2c896695529aeb739  Toolchain-Fritz73xxOS65X.tar.xz";
+_tc_info="\n
+    !!! Fritzbox73xx OS65 !!!\n
+       this toolchain is compatible with\n
+	             fill with info\n
+\n
+";
+
+_tc_infolines="6";

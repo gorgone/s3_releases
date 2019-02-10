@@ -16,6 +16,7 @@ _cmd_build(){
 
 #set build defaults
 	CROSS="$tcdir/$_toolchainname/bin/$_compiler";
+	[ "$_stagingdir" == "1" ] && export STAGING_DIR="$tcdir/$_toolchainname";
 	[ -f "$configdir/compiler_option" ] && co=$(cat "$configdir/compiler_option") || co="-O2";
 
 #toolchain defaults
@@ -148,10 +149,10 @@ fi;
 	"CC_WARN=$cc_warn" \
 	"CROSS=$CROSS" $STAPI_LIB $USESTRING 2>&1 \
 	|tee -a "$ldir/$log_name" \
-	|grep --line-buffered -v 'BFD' \
+	|grep --line-buffered -v 'BFD\|^/' \
 	|grep --line-buffered '^CC\|^GEN\|UseFlags\|  CONF_DIR =\|Binary\|LINK\|STRIP\|BUILD\|Addons\|Protocols\|Readers\|CardRdrs\|^/' \
 	|sed -e "s/^|/"$Y" |/g;s/^LINK/"$P" LINK ------->$W/g;s/^STRIP/"$P" STRIP ------>$W/g;s/^CC\|^BUILD/"$G" BUILD ------>$W/g;s/^GEN/"$C" GEN -------->/g;
-	s/WEBIF_//g;s/WITH_//g;s/MODULE_//g;s/CS_//g;s/HAVE_//g;s/_CHARSETS//g;s/CW_CYCLE_CHECK/CWCC/g;s/SUPPORT//g;"
+	s/WEBIF_//g;s/WITH_//g;s/MODULE_//g;s/CS_//g;s/HAVE_//g;s/_CHARSETS//g;s/CW_CYCLE_CHECK/CWCC/g;s/SUPPORT//g;";
 
 #calc buildtime
 	timer_stop;

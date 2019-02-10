@@ -1,12 +1,10 @@
 #!/bin/bash
 
 prerequisites(){
-
 failed=0;
 missing="(not found)";
 [[ $1 ]] && output=": &&" || output="echo";
-
-$output -e "$w_l\n  CHECK for binaries\n  ==================\n";
+$output -e "$w_l  CHECK for binaries\n  ==================\n";
 
 # check for a forgotten and unusable 'upx' and remove this crap
 [ -x "$bindir"/upx ] && "$bindir"/upx -V &>/dev/null || rm -f "$bindir"/upx &>/dev/null;
@@ -14,16 +12,19 @@ $output -e "$w_l\n  CHECK for binaries\n  ==================\n";
 for e in "${binvars[@]}";
 do
 	if hash "$e" 2>/dev/null; then
-		$output -e "$w_l  have\t$g_l$e\t\t$y_l$(which "$e")";
+		einfo=$(which "$e");
+		printf -v pad %40s; e=$e$pad; e=${e:0:15};
+		$output -e "$w_l  have\t$g_l$e $y_l$einfo";
 	else
 		failed=1;
-		$output -e "$r_l  need\t$w_l$e\t\t$r_l$missing";
+		printf -v pad %40s; e=$e$pad; e=${e:0:15};
+		$output -e "$r_l  need\t$w_l$e $r_l$missing";
 	fi;
 done;
 
 if hash upx 2>/dev/null; then
 	upxversion=($(upx -V | awk 'NR==1 { verok=$2>=3.91; printf "%.2f %i", $2, verok }'));
-	$output -n -e "$w_l  version$g_l upx$y_l ${upxversion[0]}";
+	$output -n -e "$w_l  have$g_l  upx$y_l\t\t"$w_l"Version$P ${upxversion[0]}";
 	if [ ${upxversion[1]} == 1 ]; then
 		$output -e "$g_l ok";
 	else
@@ -38,10 +39,12 @@ for e in "${headervars[@]}";
 do
 	e1=$(find /usr/include/* | grep -m1 "$e");
 	if [ ${#e1} -gt 8 ]; then
-		$output -e "$w_l  have\t$g_l$e$w_l$y_l\t$e1"
+		printf -v pad %40s; e=$e$pad; e=${e:0:15};
+		$output -e "$w_l  have\t$g_l$e$y_l $e1"
 	else
 		failed=1;
-		$output -e "$r_l  need\t$w_l$e\t\t$r_l$missing";
+		printf -v pad %40s; e=$e$pad; e=${e:0:15};
+		$output -e "$r_l  need\t$w_l$e$r_l $missing";
 	fi;
 done;
 
@@ -51,10 +54,12 @@ for e in "${libvars[@]}";
 do
 	e1=$(find /usr/lib* 2>/dev/null | grep -m1 "$e");
 	if [ ${#e1} -gt 8 ]; then
-		$output -e "$w_l  have\t$g_l$e$w_l$y_l\t$e1"
+		printf -v pad %40s; e=$e$pad; e=${e:0:15};
+		$output -e "$w_l  have\t$g_l$e$y_l $e1"
 	else
 		failed=1;
-		$output -e "$r_l  need\t$w_l$e\t\t$r_l$missing";
+		printf -v pad %40s; e=$e$pad; e=${e:0:15};
+		$output -e "$r_l  need\t$w_l$e$r_l $missing";
 	fi;
 done;
 
@@ -64,12 +69,15 @@ if [ "$(uname -m)" == "x86_64" ]; then
 	e1="/usr/lib/libz.so";
 	e2="/usr/lib32/libz.so.1";
 	if [ -f $e1 ]; then
-		$output -e "$w_l  have\t$g_l$e$w_l$y_l\t$e1"
+		printf -v pad %40s; e=$e$pad; e=${e:0:15};
+		$output -e "$w_l  have\t$g_l$e$y_l $e1"
 	elif [ -f $e2 ]; then
-		$output -e "$w_l  have\t$g_l$e$w_l$y_l\t$e2"
+		printf -v pad %40s; e=$e$pad; e=${e:0:15};
+		$output -e "$w_l  have\t$g_l$e$y_l $e2"
 	else
 		failed=1;
-		$output -e "$r_l  need\t$w_l$e\t\t$r_l$missing";
+		printf -v pad %40s; e=$e$pad; e=${e:0:15};
+		$output -e "$r_l  need\t$w_l$e$r_l $missing";
 	fi
 fi
 
@@ -83,19 +91,17 @@ return $failed;
 # Example:
 #   syscheck debian_os
 #     call installer 'debian_os' (Do not care about the actual Linux distribution.)
+
 syscheck(){
-[[ $1 ]] && [ "$1" != "auto" ] && override="$1";
-
+[[ $1 ]] && [ "$1" != "auto" ] && override="$1";now=$2;
 if [ -d "$osdir" ];then cd "$osdir";x=(*); for i in "${x[@]}";do source "$i"; done fi
-
 binvars=( dialog grep gawk wget tar bzip2 svn xz upx patch gcc make scp sshpass openssl dos2unix );
 headervars=( crypto.h libusb.h pcsclite.h pthread.h );
 libvars=( libccidtwin.so );
-
 sanity=1;
 
-if ! prerequisites silent; then
-	echo -e "$w_l"; clear; ologo;
+if ! prerequisites silent || [ "$now" == "now" ]; then
+	clear; s3logo;
 	prerequisites;
 	sanity=0;
 	installer="unknown";
@@ -108,10 +114,10 @@ if ! prerequisites silent; then
 	# SuSE (/etc/SuSE-release is depreciated -> check for YaST2)
 	[ -d /etc/YaST2 ] && installer="suse_os";
 	# Optional override via parameter
-	[[ $override ]] && installer=$override;
-	echo -e "\n$w_l  Selected installer: $installer";
+	#[[ $override ]] && installer=$override;
+	echo -e "\n$w_l  Selected installer:    $P$installer\n";
 	if type -t "$installer" >/dev/null; then
-		$installer && prerequisites && sanity=1;
+		$installer && prerequisites silent && sanity=1;
 	else
 		echo -e "\n$r_l  Needs manual installation.";
 	fi

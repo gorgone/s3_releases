@@ -1,0 +1,19 @@
+_toolchainname="mipsoe20";
+default_use="USE_UTF8 USE_LIBCRYPTO";
+_oscamconfdir_default="/var/tuxbox/config";
+_oscamconfdir_custom=""
+
+_compiler="mipsel-unknown-linux-gnu-";
+_sysroot="mipsel-unknown-linux-gnu/sysroot";
+_libsearchdir="/lib";
+_description='Dreambox & Vu+ (OE 2.0)';
+_toolchainfilename="TUlQUy1UdXhib3gtT0UyLjBfc191X3AudGFyLnh6";
+_md5sum="fe5d838d580a400628e6d55b64b674ad  Toolchain-MIPS-Tuxbox-OE2.0_s_u_p.tar.xz";
+_tc_info="\n
+    !!! beware the box must have FPU !!!\n
+     this toolchain is compatible with\n
+\n
+Dreambox: 500HD,800HD,800SE,7020HD,7025,8000\n
+VU+     : Zero,Solo²,SoloSE,SoloSE(V2),Duo,Duo²";
+
+_tc_infolines="6"

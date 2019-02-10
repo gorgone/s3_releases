@@ -5,10 +5,10 @@ _oscamconfdir_default="/var/tuxbox/config";
 _oscamconfdir_custom=""
 
 _compiler="arm-linux-gnueabihf-";
-_sysroot="arm-linux-gnueabihf/";
+_sysroot="arm-linux-gnueabihf";
 _libsearchdir="/lib";
 _toolchainfilename="c29sbzRrLnRhci54ego=";
-_md5sum="74d4de6ac2f4812426635cf54e3d85fa Toolchain-solo4k.tar.xz";
+_md5sum="74d4de6ac2f4812426635cf54e3d85fa  Toolchain-solo4k.tar.xz";
 _tc_info="\n
     !!! beware the box must have FPU !!!\n
      this toolchain is compatible with\n

@@ -1,0 +1,19 @@
+_toolchainname="dreambox_fpu";
+default_use="USE_UTF8 USE_LIBCRYPTO";
+_description="Dreambox & VU+ (OE 2.0 FPU)";
+_oscamconfdir_default="/var/tuxbox/config";
+_oscamconfdir_custom=""
+
+_compiler="mipsel-newnigma2-linux-gnu-";
+_sysroot="mipsel-newnigma2-linux-gnu/sysroot";
+_libsearchdir="/lib";
+_toolchainfilename="RHJlYW1ib3gtSFdfc191X3AudGFyLnh6";
+_md5sum="fe042292f6c0022c3b474fcd3a9baf18  Toolchain-Dreambox-HW_s_u_p.tar.xz";
+_tc_info="\n
+    !!! beware the box must have FPU !!!\n
+     this toolchain is compatible with\n
+\n
+Dreambox: 500HD,800HD,800SE,7020HD,7025,8000\n
+VU+     : Zero,Solo²,SoloSE,SoloSE(V2),Duo,Duo²";
+
+_tc_infolines="6"
