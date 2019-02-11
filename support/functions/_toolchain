@@ -157,24 +157,31 @@ _toolchain_check(){
 		_nl;
 		exit;
 	fi;
+
+	echo -e "$w_l  Compiler Info -----> $C$1$w_l\n  ====================\n";
+	if [ -z "$sysroot" ] && [ ! "$1" == "native" ];then
 	compilername="$_compiler""gcc";
 	[ ${#_realcompiler} -gt 4 ] && compilername="$_realcompiler";
 	version=$("./$compilername" -dumpversion);
 	machine=$("./$compilername" -dumpmachine);
 	sr=$("./$compilername" -print-sysroot 2>/dev/null);
 	sysroot=${sr#"$tcdir/$1/bin/../"};
-	[ -z "$sysroot" ] && sysroot="$r_l$txt_too_old";
-	echo -e "$w_l  Compiler Info -----> $C$1$w_l\n  ====================\n";
 	echo -e "$w_l  GCC Version :$y_l $version";
 	echo -e "$w_l  GCC Binary  :$y_l $machine""-gcc";
+	sysroot="$r_l$txt_too_old";
 	echo -e "$w_l  GCC Sysroot :$y_l $sysroot";
 	cd "$sr";
 	for e in "${headervars[@]}";do
 		temp=$(find * |grep -m1 "$e");
 		[ ${#temp} -gt 8 ] && echo -e "$w_l  Header File :$y_l $e$g_l\t$txt_found" || echo -e "$w_l  Header File :$y_l $e$r_l\t($txt_not_found)";
 	done;
+	fi
+	if [ "$1" == "native" ];then
+		echo -e "$w_l  GCC Version :$y_l $(gcc --version |head -n 1 )";
+		echo -e "$w_l  GCC Binary  :$y_l $(gcc -dumpmachine )";
+	fi
 	echo -e "\n$w_l  Sysroot config ----> $C$_sysroot$w_l\n  ====================\n";
-	cd "$tcdir/$1/$_sysroot";
+	[ "$1" == "native" ] && cd "$_sysroot" || cd "$tcdir/$1/$_sysroot";
 	for e in "${headervars[@]}";do
 		temp=$(find * |grep -m1 "$e");
 		[ ${#temp} -gt 8 ] && echo -e "$w_l  Header File :$y_l $e$g_l\t$txt_found" || echo -e "$w_l  Header File :$y_l $e$r_l\t($txt_not_found)";
