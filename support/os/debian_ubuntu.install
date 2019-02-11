@@ -80,10 +80,11 @@ if [ ${#packages} -gt 0 ]; then
 	if [ "$EUID" -ne 0 ] && [ ! "$ID" == "ubuntu" ]; then
 		echo -en "$r_l\n  enter root ";
 		su root -c "
-		echo -e '\033[1;37m\n' ' 'update'\033[1;32m' package list...'\n';
+		echo -e '\033[1;37m\n  update\033[1;32m package list...\n';
 		apt-get -y update |grep --line-buffered -v '^T\|(\|^I\|^H' 2>&1;
 		echo -e '\n\033[1;37m  install\033[1;32m $txt_selected packages\033[1;33m $txt_wait\n';
-		apt-get -y -qq install $packages |grep --line-buffered '(' |grep --line-buffered -v 'nicht;"
+		apt-get -y -qq install $packages |grep --line-buffered '(' |grep --line-buffered -v 'nicht\|dpkg';
+		"
 	else
 		echo -e "\033[1;37m  update\033[1;32m package list... \n";
 		$prefix apt-get -y update |grep --line-buffered -v '^T\|(\|^I\|^H' 2>&1;
