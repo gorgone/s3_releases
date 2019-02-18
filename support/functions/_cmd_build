@@ -100,7 +100,7 @@ _cmd_build(){
 if [ ! "$_oscamconfdir_custom" == "not_set" ] && [ ${#_oscamconfdir_custom} -gt 3 ]; then
 	[ ! "$CUSTOM_CONFDIR" == "not_set" ] && _oscamconfdir_custom=$CUSTOM_CONFDIR;
 	CONFDIR="$_oscamconfdir_custom";
-	echo -e $w_l" |      set : "$r_l"custom CONF_DIR=$CONFDIR"$w_l;
+	echo -e $w_l" |       set : "$r_l"custom CONF_DIR=$CONFDIR"$w_l;
 else
 	CONFDIR="$_oscamconfdir_default";
 fi;
