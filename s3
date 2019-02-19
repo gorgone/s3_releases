@@ -1,7 +1,6 @@
 #!/bin/bash
 
-#VERSIONCOUNTER 20190210
-
+VERSIONCOUNTER=305
 SIMPLEVERSION="3.0 RC5";OIFS=$IFS;
 export NCURSES_NO_UTF8_ACS=1;
 
@@ -67,7 +66,7 @@ declare -a SHORT_READERS;    declare -a SHORT_CARD_READERS; declare -A INTERNAL_
 
 #filled arrays
 config_cases=( all addons protocols readers card_readers );
-s3opts=( help cedit clean tccheck tcrepair upload lang_select loadonly checkout ssh_profiles syscheck sysinfo svnup menu get_patch tedit svnpatch profiles svnrestore ); # extendable with plugins
+s3opts=( help cedit clean tccheck tcrepair upload lang_select loadonly checkout ssh_profiles syscheck sysinfo svnup menu get_patch tedit svnpatch profiles svnrestore update ); # extendable with plugins
 CUSTOM_CONFDIR="not_set";
 UPX="not_set";
 
