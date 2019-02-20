@@ -1,0 +1,16 @@
+#!/bin/bash
+
+update(){
+clear;s3logo;LOCALVERSIONCOUNTER=$VERSIONCOUNTER;
+source <(wget -qO- https://raw.githubusercontent.com/gorgone/s3_update/master/lastversion);
+echo -e "$w_l\n  latest online Version  ---> $SIMPLEVERSION\n  =====================";
+filename=$(echo "$_md5sum" | awk '{printf $2}';);
+echo -e "$C  filename\t\t ---> $filename\n  ========";
+echo -e     "$Y  Version Counter        ---> $VERSIONCOUNTER\n  ===============$re_";
+
+if [ $LOCALVERSIONCOUNTER -lt $VERSIONCOUNTER ];then
+	echo -e "$R\n  NEW VERSION FOUND\n\n$w_l  UPDATE$G 1=YES$w_l /$R 2=NO\n$re_";
+else
+	echo -e "$w_l\n  NO NEW VERSION FOUND$re_\n";
+fi;
+}
