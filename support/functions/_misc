@@ -516,11 +516,13 @@ _get_config_con(){
 				USE_vars[$es]=;
 			done;
 		else
-			str_="$(grep '^   USE_' "$configdir/Makefile.master"| sort -u| awk '{print $1}')";
-			for e in $str_;do
-				es="${e:0:-2}";
-				USE_vars[$es]=;
-			done;
+			if [ -f "$configdir/Makefile.master" ];then
+				str_="$(grep '^   USE_' "$configdir/Makefile.master"| sort -u| awk '{print $1}')";
+				for e in $str_;do
+					es="${e:0:-2}";
+					USE_vars[$es]=;
+				done;
+			fi;
 		fi;
 		check_smargo;
 		source "$tmp";

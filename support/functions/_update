@@ -1,15 +1,31 @@
 #!/bin/bash
 
+start_update(){
+echo -e " -> download $filename";
+echo -e " -> verify   $filename";
+echo -e " -> extract  $filename";
+echo -e " -> done!\n$re_"
+}
+
 update(){
 clear;s3logo;LOCALVERSIONCOUNTER=$VERSIONCOUNTER;
-source <(wget -qO- https://raw.githubusercontent.com/gorgone/s3_update/master/lastversion);
+source <(wget -qO- --no-cache --no-cookies https://raw.githubusercontent.com/gorgone/s3_update/master/lastversion);
 echo -e "$w_l\n  latest online Version  ---> $SIMPLEVERSION\n  =====================";
 filename=$(echo "$_md5sum" | awk '{printf $2}';);
 echo -e "$C  filename\t\t ---> $filename\n  ========";
-echo -e     "$Y  Version Counter        ---> $VERSIONCOUNTER\n  ===============$re_";
+echo -e     "$Y  Version Counter        ---> $VERSIONCOUNTER\n  ===============$re_\n";
 
 if [ $LOCALVERSIONCOUNTER -lt $VERSIONCOUNTER ];then
+	for i in "${whatsnew[*]}"
+	do
+		echo -e "  $w_l$i$re_";
+	done
 	echo -e "$R\n  NEW VERSION FOUND\n\n$w_l  UPDATE$G 1=YES$w_l /$R 2=NO\n$re_";
+	read -n1 -p " -> " key;
+	case "$key" in
+		1) echo -e "  start Update\n"; start_update;;
+		*) echo -e "  no Update\n";;
+	esac;
 else
 	echo -e "$w_l\n  NO NEW VERSION FOUND$re_\n";
 fi;
