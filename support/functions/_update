@@ -1,10 +1,16 @@
 #!/bin/bash
 
 start_update(){
-echo -e " -> download $filename";
-echo -e " -> verify   $filename";
-echo -e " -> extract  $filename";
-echo -e " -> done!\n$re_"
+clear;s3logo;
+echo -e $w_l"$txt_loading\t-->\t $Y$filename";
+url="https://github.com/gorgone/s3_releases/archive/s3_rc5.1.tar.gz";
+cd "$dldir";echo -e $P;
+wget -N --no-hsts --https-only --progress=dot "$url" 2>&1 |grep --line-buffered "%" |awk '{ printf "\033["'9'";"'41'"H\033[K > %-4s", $7;}';
+tput cup 8 40;echo -en $G"$txt_done          ";
+echo -en $w_l"\n    $txt_check\t-->\t $Y$filename";echo -en $G"\t OK";sleep 1;
+echo -en $w_l"\n  $txt_extracting\t-->\t $Y$filename";
+echo -en $G"  $txt_done\n\n$re_";
+sleep 3;
 }
 
 update(){
