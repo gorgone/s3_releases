@@ -1,38 +1,66 @@
 #!/bin/bash
 
-start_update(){
-clear;s3logo;
-echo -e $w_l"$txt_loading\t-->\t $Y$filename";
-url="https://github.com/gorgone/s3_releases/archive/s3_rc5.1.tar.gz";
-cd "$dldir";echo -e $P;
-wget -N --no-hsts --https-only --progress=dot "$url" 2>&1 |grep --line-buffered "%" |awk '{ printf "\033["'9'";"'41'"H\033[K > %-4s", $7;}';
-tput cup 8 40;echo -en $G"$txt_done          ";
-echo -en $w_l"\n    $txt_check\t-->\t $Y$filename";echo -en $G"\t OK";sleep 1;
-echo -en $w_l"\n  $txt_extracting\t-->\t $Y$filename";
-echo -en $G"  $txt_done\n\n$re_";
-sleep 3;
+update_me(){
+	clear;s3logo;
+	local_revision=0;
+	online_revision=0;
+	source "$configdir/urls";
+	s3local="$dldir/s3_github";
+	echo -en "  s3_git CHECK:\n  -------------\n";
+	if [ -d "$s3local/.svn" ]; then
+		local_revision=$(gitrevision $s3local);
+	fi
+	online_revision=$(gitrevision $s3url);
+	if [ ! $local_revision == $online_revision ]; then
+		echo -en "  update s3_git to\n  Local Revision: $online_revision\n";
+		svn -q checkout "$s3url" "$s3local";
+		cd "$s3local";
+		echo -en "  update all files ...\n\n";
+		yes | cp -rf s3 "$workdir/s3";
+		yes | cp -rf support "$workdir/support";
+	else
+		echo -en "  is up to date\n  Online Revision: $online_revision\n\n";
+	fi
 }
 
-update(){
-clear;s3logo;LOCALVERSIONCOUNTER=$VERSIONCOUNTER;
-source <(wget -qO- --no-cache --no-cookies https://raw.githubusercontent.com/gorgone/s3_update/master/lastversion);
-echo -e "$w_l\n  latest online Version  ---> $SIMPLEVERSION\n  =====================";
-filename=$(echo "$_md5sum" | awk '{printf $2}';);
-echo -e "$C  filename\t\t ---> $filename\n  ========";
-echo -e     "$Y  Version Counter        ---> $VERSIONCOUNTER\n  ===============$re_\n";
+update_emu(){
+	clear;s3logo;
+	local_revision=0;
+	online_revision=0;
+	source "$configdir/urls";
+	emulocal="$dldir/emu_github";
+	echo -en "  emu_git CHECK:\n  --------------\n";
+	if [ -d "$emulocal/.svn" ]; then
+		local_revision=$(gitrevision $emulocal);
+	fi
+	online_revision=$(gitrevision $emuurl);
+	if [ ! $local_revision == $online_revision ]; then
+		echo -en "  update emu_git to\n  Local Revision: $online_revision\n\n";
+		svn -q checkout "$emuurl" "$emulocal";
+	else
+		echo -en "  is up to date\n  Online Revision: $online_revision\n\n";
+	fi
+	sleep 1;
+	cd "$emulocal";
+	ls;
+}
 
-if [ $LOCALVERSIONCOUNTER -lt $VERSIONCOUNTER ];then
-	for i in "${whatsnew[*]}"
-	do
-		echo -e "  $w_l$i$re_";
-	done
-	echo -e "$R\n  NEW VERSION FOUND\n\n$w_l  UPDATE$G 1=YES$w_l /$R 2=NO\n$re_";
-	read -n1 -p " -> " key;
-	case "$key" in
-		1) echo -e "  start Update\n"; start_update;;
-		*) echo -e "  no Update\n";;
-	esac;
-else
-	echo -e "$w_l\n  NO NEW VERSION FOUND$re_\n";
-fi;
+fix_me(){
+	clear;s3logo;
+	source "$configdir/urls";
+	s3local="$dldir/s3_github";
+	if [ -d "$s3local/.svn" ];then
+		cd "$s3local";
+		echo -en "  overwrite all files ...\n\n";
+		yes | cp -rf s3 "$workdir/s3";
+		yes | cp -rf support "$workdir/support";
+	else
+		update_me;
+		fix_me;
+	fi
+}
+
+update_all(){
+update_me;
+update_emu;
 }

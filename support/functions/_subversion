@@ -32,7 +32,6 @@ checkout(){
 		echo -en "$w_l""SVN Revision  : $y_l""$("$svndir/config.sh" -r) $b_l$mac_$re_\n$w_l  SVN UserPath  : $y_l""$svndir";
 	fi;
 	[ -f "$svndir/config.h" ]&& reset_="$("$svndir/config.sh" -R)";
-	_fix_config_h;
 	rm -rf "$fc1";
 	_nl;
 	[ -f "$workdir/SVN-IS-PATCHED" ] && rm -f "$workdir/SVN-IS-PATCHED";
@@ -91,7 +90,6 @@ svnup(){
 	fi;
 	if [ -f "$svndir/config.h" ];then
 		reset_="$("$svndir/config.sh" -R)";
-		_fix_config_h;
 	fi;
 };
 svnpatch(){
@@ -142,7 +140,6 @@ _dialog_checkout(){
 		[ ! "$upc1" == "1" ] && _dialog_checkout1;
 		if [ -f "$svndir/config.sh" ];then
 			reset_="$("$svndir/config.sh" -R)";
-			_fix_config_h;
 		fi;
 		_get_config_menu;
 	fi;
@@ -186,7 +183,6 @@ done < <(svn co "$trunkurl" "$svndir" $_rev| sed "s@$svndir@@g"| awk '{print $2}
 	if [ -f "$svndir/config.sh" ];then
 		reset_="$("$svndir/config.sh" -R)";
 		echo "Revision: $(REVISION) done...";
-		_fix_config_h;
 		[ -f "$workdir/SVN-IS-PATCHED" ] && rm -f "$workdir/SVN-IS-PATCHED";
 		_get_config_menu;
 	fi;));

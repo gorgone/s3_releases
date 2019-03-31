@@ -10,7 +10,6 @@ _cmd_build(){
 	fi;
 	source "$tccfgdir/$_toolchainname";
 	_reset_config;
-	#_fix_config_h;
 	echo $WH;
 	ologo >"$ldir/$log_name";
 
