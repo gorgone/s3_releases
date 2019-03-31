@@ -21,6 +21,7 @@ update_me(){
 	else
 		echo -en "  is up to date\n  Online Revision: $online_revision\n\n";
 	fi
+	sleep 1;
 }
 
 update_emu(){
@@ -41,8 +42,6 @@ update_emu(){
 		echo -en "  is up to date\n  Online Revision: $online_revision\n\n";
 	fi
 	sleep 1;
-	cd "$emulocal";
-	ls;
 }
 
 fix_me(){
