@@ -16,8 +16,8 @@ update_me(){
 		svn -q checkout "$s3url" "$s3local";
 		cd "$s3local";
 		echo -en "  update all files ...\n\n";
-		yes | cp -rf s3 "$workdir/s3";
-		yes | cp -rf support "$workdir/support";
+		yes | cp -rf ./s3 "$workdir/s3";
+		yes | cp -rf ./support/functions/* "$workdir/support/functions/";
 	else
 		echo -en "  is up to date\n  Online Revision: $online_revision\n\n";
 	fi
@@ -51,8 +51,8 @@ fix_me(){
 	if [ -d "$s3local/.svn" ];then
 		cd "$s3local";
 		echo -en "  overwrite all files ...\n\n";
-		yes | cp -rf s3 "$workdir/s3";
-		yes | cp -rf support "$workdir/support";
+		yes | cp -rf ./s3 "$workdir/s3";
+		yes | cp -rf ./support/functions/* "$workdir/support/functions/";
 	else
 		update_me;
 		fix_me;
