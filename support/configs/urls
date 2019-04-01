@@ -1,2 +1,2 @@
-s3url="https://github.com/gorgone/s3_releases.git";
-emuurl="https://github.com/oscam-emu/oscam-emu.git";
+s3url="https://github.com/gorgone/s3_releases.git/trunk";
+emuurl="https://github.com/oscam-emu/oscam-emu.git/trunk";
