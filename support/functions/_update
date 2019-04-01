@@ -36,11 +36,16 @@ update_emu(){
 	fi
 	online_revision=$(gitrevision $emuurl);
 	if [ ! $local_revision == $online_revision ]; then
-		echo -en "  update emu_git to\n  Local Revision: $online_revision\n\n";
+		echo -en "  update emu_git to\n  Local Revision: $online_revision\n";
 		svn -q checkout "$emuurl" "$emulocal";
 	else
-		echo -en "  is up to date\n  Online Revision: $online_revision\n\n";
+		echo -en "  is up to date\n  Online Revision: $online_revision\n";
 	fi
+	if [ -f "$emulocal/VERSION" ];then
+                echo -en "  EmuVersion: ";
+                grep '\$Version:' "$emulocal/VERSION" |cut -d " " -f 2;
+                echo -e "\n";
+        fi
 	sleep 1;
 }
 
