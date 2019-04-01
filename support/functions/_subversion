@@ -35,6 +35,7 @@ checkout(){
 	rm -rf "$fc1";
 	_nl;
 	[ -f "$workdir/SVN-IS-PATCHED" ] && rm -f "$workdir/SVN-IS-PATCHED";
+	[ -f "$workdir/EMU_ON" ] && rm -f "$workdir/EMU_ON";
 	tarsvn;
 };
 svnrestore(){
@@ -67,6 +68,7 @@ svnrestore(){
 	[ -L "$workdir/lastbuild.log" ]&& rm "$workdir/lastbuild.log";
 	[ -L "$workdir/lastpatch.log" ]&& rm "$workdir/lastpatch.log";
 	[ -f "$workdir/SVN-IS-PATCHED" ] && rm -f "$workdir/SVN-IS-PATCHED";
+	[ -f "$workdir/EMU_ON" ] && rm -f "$workdir/EMU_ON";
 };
 quicksvnrestore(){
 	untarsvn $1;
@@ -184,6 +186,7 @@ done < <(svn co "$trunkurl" "$svndir" $_rev| sed "s@$svndir@@g"| awk '{print $2}
 		reset_="$("$svndir/config.sh" -R)";
 		echo "Revision: $(REVISION) done...";
 		[ -f "$workdir/SVN-IS-PATCHED" ] && rm -f "$workdir/SVN-IS-PATCHED";
+		[ -f "$workdir/EMU_ON" ] && rm -f "$workdir/EMU_ON";
 		_get_config_menu;
 	fi;));
 };
