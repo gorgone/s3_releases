@@ -1,0 +1,36 @@
+#!/bin/bash
+
+enable_emu(){
+clear;s3logo;
+quicksvnrestore;
+pname="oscam-emu.patch";
+source "$configdir/urls";
+emulocal="$dldir/emu_github";
+
+if [ -f "$emulocal/VERSION" ];then
+    echo -en "$w_l  Emu Revision  : $y_l";
+    grep '\$Version:' "$emulocal/VERSION" |cut -d " " -f 2;
+    if [ -f "$emulocal/$pname" ];then
+        cp -rf "$emulocal/$pname" "$svndir";
+    fi
+fi
+echo -e $re_;cd $svndir;echo $(date)>"$workdir/patch.log";
+patch -p0 < $pname      |tee -a "$workdir/patch.log" \
+                        |grep --line-buffered -v '^[0-9]\|^/' \
+                        |sed -e "s@^patching file@$Y  patching file $WH----->$C@g;" \
+                        |sed -e "s@^Hunk@$P  Hunk@g;" \
+                        |sed -e "s@FAILED@"$R"FAILED@g;" \
+                        |sed -e "s@succeeded@"$WH"succeeded@g;";
+
+fcount=0;fcount=$(grep -o 'FAILED at' -i "$workdir/patch.log" | wc -l)
+hcount=0;hcount=$(grep -o 'Hunk #' -i "$workdir/patch.log" | wc -l)
+if [ ! "$fcount" == "0" ] || [ ! "$hcount" == "0" ];then
+    echo -e "\n$WH  Patch Result\n  ------------\n  Hunk Count :" $hcount;
+    echo -e "  Fail Count :" $fcount;
+    # todo ask for restore svn yes / no / show log
+else
+    echo -e "\n$WH  Patch Staus :$G CLEAN ";
+    touch "$workdir/EMU_ON";
+fi
+echo -e $re_;
+}
