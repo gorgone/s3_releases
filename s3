@@ -66,7 +66,7 @@ declare -a SHORT_READERS;    declare -a SHORT_CARD_READERS; declare -A INTERNAL_
 
 #filled arrays
 config_cases=( all addons protocols readers card_readers );
-s3opts=( help cedit clean fix_me tccheck tcrepair upload update_me update_emu update_all lang_select loadonly checkout ssh_profiles syscheck sysinfo svnup menu get_patch tedit svnpatch profiles svnrestore update ); # extendable with plugins
+s3opts=( help cedit clean enable_emu fix_me tccheck tcrepair upload update_me update_emu update_all lang_select loadonly checkout ssh_profiles syscheck sysinfo svnup menu get_patch tedit svnpatch profiles svnrestore update ); # extendable with plugins
 CUSTOM_CONFDIR="not_set";
 UPX="not_set";
 
@@ -125,11 +125,12 @@ else
 		if [ "$e" == "$1" ];then
 			case $e in
 			fix_me|\
+			checkout|\
 			update_me|\
 			update_emu|\
 			update_all|\
 			svnrestore|\
-			checkout|\
+			enable_emu|\
 			upload_cam)	if [ ! -n "$2" ];then
 							eval "$e";
 						else
