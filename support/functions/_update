@@ -53,18 +53,18 @@ fix_me(){
 	clear;s3logo;
 	source "$configdir/urls";
 	s3local="$dldir/s3_github";
-	if [ -d "$s3local/.svn" ];then
-		cd "$s3local";
-		echo -en "  overwrite all files ...\n\n";
-		yes | cp -rf ./s3 "$workdir/s3";
-		yes | cp -rf ./support/* "$workdir/support";
+	emulocal="$dldir/emu_github";
+	if [ -d "$s3local" ];then
+		rm -rf $s3local;
+		update_me
 	else
 		update_me;
-		fix_me;
+	fi
+	if [ -d "$emulocal" ];then
+		rm -rf $emulocal;
+		update_emu;
+	else
+		update_emu;
 	fi
 }
 
-update_all(){
-update_me;
-update_emu;
-}
