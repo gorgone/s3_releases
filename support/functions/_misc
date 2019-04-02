@@ -32,7 +32,7 @@ _generate_oscam_name(){ cd "$svndir";_dvbapi=$(
 [ "$(./config.sh --enabled HAVE_DVBAPI)" == Y ] && echo -n -dvbapi || echo ''; );_webif=$(
 [ "$(./config.sh --enabled WEBIF)"       == Y ] && echo -n -webif  || echo ''; );_ssl=$(
 [ "$(./config.sh --enabled WITH_SSL)"    == Y ] && echo -n -ssl    || echo ''; );_emu=$(
-[ "$(./config.sh --enabled WITH_EMU)"    == Y ] && echo -n -emu    || echo ''; );_ipv6=$(
+[ "$(./config.sh --enabled WITH_EMU)"    == Y ] && echo -n -emu$(./config.sh --emu-version) || echo ''; );_ipv6=$(
 [ "$(./config.sh --enabled IPV6SUPPORT)" == Y ] && echo -n -ipv6   || echo ''; );
 [ "${USE_vars[USE_COMPRESS]}" == "USE_COMPRESS=1" ] && _upx="-upx" || _upx='';
 [ "$1" == "native" ] && _b_name="$(hostname)$_upx" || _b_name="$1";
