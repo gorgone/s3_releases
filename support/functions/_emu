@@ -2,7 +2,11 @@
 
 enable_emu(){
 clear;s3logo;
-[ -d "$svndir" ] && quicksvnrestore || checkout;
+if [ -d "$svndir" ];then
+    quicksvnrestore;
+else
+    checkout;
+fi;
 pname="oscam-emu.patch";
 source "$configdir/urls";
 emulocal="$dldir/emu_github";
