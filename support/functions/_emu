@@ -2,14 +2,14 @@
 
 enable_emu(){
 clear;s3logo;
-quicksvnrestore;
+[ -d "$svndir" ] && quicksvnrestore || checkout;
 pname="oscam-emu.patch";
 source "$configdir/urls";
 emulocal="$dldir/emu_github";
 
-if [ -f "$emulocal/VERSION" ];then
+if [ -f "$emulocal/oscam-emu.patch" ];then
     echo -en "$w_l  Emu Revision  : $y_l";
-    grep '\$Version:' "$emulocal/VERSION" |cut -d " " -f 2;
+    grep '\+#define EMU_VERSION' "$emulocal/+#define EMU_VERSION" |cut -d " " -f 3;
     if [ -f "$emulocal/$pname" ];then
         cp -rf "$emulocal/$pname" "$svndir";
     fi
