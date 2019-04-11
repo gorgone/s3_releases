@@ -11,7 +11,7 @@ _get_patch(){
 	[ -f $PATCHNAME ] && echo -e "$Y   old patch found\n  remove  $P$PATCHNAME" && rm -f $PATCHNAME;
 	echo -e $W"  load $PATCHNAME";
 	wget -q -O$PATCHNAME $PATCHURL;
-	[ -f $PATCHNAME ] && echo -e $G"   ok$W new $PATCHNAME loadet\n" || echo -e $R"   patch not found\n"$W;
+	[ -f $PATCHNAME ] && echo -e $G"   ok$W new $PATCHNAME loaded\n" || echo -e $R"   patch not found\n"$W;
 };
 _apply_menupatch(){
 	[ -f "$workdir/SVN-IS-PATCHED" ] && quicksvnrestore $_toolchainname 2>/dev/null;
