@@ -168,8 +168,8 @@ _toolchain_check(){
 	sysroot=${sr#"$tcdir/$1/bin/../"};
 	echo -e "$w_l  GCC Version :$y_l $version";
 	echo -e "$w_l  GCC Binary  :$y_l $machine""-gcc";
-	sysroot="$r_l$txt_too_old";
 	echo -e "$w_l  GCC Sysroot :$y_l $sysroot";
+	[ -z "$sysroot" ] && sysroot="$r_l$txt_too_old";
 	cd "$sr";
 	for e in "${headervars[@]}";do
 		temp=$(find * |grep -m1 "$e");
