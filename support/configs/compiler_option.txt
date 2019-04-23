@@ -1,3 +1,4 @@
 -O0 optimization for time
 -O2 optimization (oscam default)
+-O3 optimization (smaller size)
 -Os optimization for code size
