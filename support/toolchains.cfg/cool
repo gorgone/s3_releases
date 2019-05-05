@@ -1,0 +1,18 @@
+_toolchainname="cool";
+default_use="USE_UTF8 USE_COOLAPI";
+_description="COOLSTREAM"
+_oscamconfdir="/var/tuxbox/config";
+
+_compiler="arm-cx2450x-linux-gnueabi-";
+_sysroot="arm-cx2450x-linux-gnueabi/sys-root/usr";
+_libsearchdir="/lib";
+_toolchainfilename="Q29vbHN0cmVhbV9zX3VfcC50YXIueHoK";
+_md5sum="a4c92c6bcfeee5fd105f3590034b8d12  Toolchain-Coolstream_s_u_p.tar.xz";
+_tc_info="\n
+    !!! COOLSTREAM HD1!!!\n
+       this toolchain is compatible with\n
+               Nevis\n
+\n
+";
+
+_tc_infolines="6"
