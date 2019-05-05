@@ -36,7 +36,11 @@ _generate_oscam_name(){ cd "$svndir";_dvbapi=$(
 [ "$(./config.sh --enabled IPV6SUPPORT)" == Y ] && echo -n -ipv6   || echo ''; );
 [ "${USE_vars[USE_COMPRESS]}" == "USE_COMPRESS=1" ] && _upx="-upx" || _upx='';
 [ "$1" == "native" ] && _b_name="$(hostname)$_upx" || _b_name="$1";
-oscam_name="oscam-svn$(REVISION)-$_b_name$_webif$_dvbapi$_ssl$_usb$_pcsc$_stapi$_stapi5$_emu$_ipv6$_upx";};
+if [ "${s3cfg_vars[ADD_PROFILE_NAME]}" == "0" ];then
+	oscam_name="oscam-svn$(REVISION)-$_b_name$_webif$_dvbapi$_ssl$_usb$_pcsc$_stapi$_stapi5$_emu$_ipv6$_upx";
+else
+	oscam_name="oscam-svn$(REVISION)-${pf_name%.*}";
+fi;};
 e_readers(){ silent=$("$svndir/config.sh" -s readers);echo ${silent//READER_/};};
 e_protocols() { silent=$("$svndir/config.sh" -s protocols);echo ${silent//MODULE_/};};
 e_card_readers(){ silent=$("$svndir/config.sh" -s card_readers);echo ${silent//CARDREADER_/};};
