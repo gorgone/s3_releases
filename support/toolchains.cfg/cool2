@@ -1,0 +1,19 @@
+_toolchainname="cool2";
+default_use="USE_UTF8 USE_LIBCRYPTO USE_COOLAPI2";
+_description="COOLSTREAM HD2";
+_oscamconfdir_default="/var/tuxbox/config";
+_oscamconfdir_custom=""
+
+_compiler="arm-pnx8400-linux-uclibcgnueabi-";
+_sysroot="arm-pnx8400-linux-uclibcgnueabi/sys-root/usr";
+_libsearchdir="/lib";
+_toolchainfilename="Q29vbDJfc191X3AudGFyLnh6Cg==";
+_md5sum="7f09e91ce6e85ed65d8d7bc8bea5d8b0  Toolchain-Cool2_s_u_p.tar.xz";
+_tc_info="\n
+    !!! COOLSTREAM HD2 !!!\n
+       this toolchain is compatible with\n
+                 fill with info\n
+\n
+";
+
+_tc_infolines="6";
