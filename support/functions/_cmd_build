@@ -186,7 +186,7 @@ fi;
 		compress_cam "$oscam_name";
 	fi;
 	if [ "${s3cfg_vars[TARGZ]}" == "1" ];then
-		echo -en "$w_l"" ENABLE ----> TARGZ:$y_l $txt_wait\n";
+		echo -en "$w_l"" ENABLE -----> TARGZ:$y_l $txt_wait\n";
 		tar_cam "$oscam_name" "$tartmp";
 	fi;
 
