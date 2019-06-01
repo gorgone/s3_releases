@@ -1,0 +1,19 @@
+_toolchainname="dream_one";
+default_use="USE_UTF8 USE_LIBCRYPTO";
+_description="DreamOne aarch64";
+_oscamconfdir_default="/var/keys";
+_oscamconfdir_custom=""
+
+_compiler="aarch64-dream_one-linux-gnu-";
+_sysroot="aarch64-dream_one-linux-gnu/sysroot/";
+_libsearchdir="/lib";
+_toolchainfilename="ZHJlYW1fb25lLnRhci54eg==";
+_md5sum="5e29314209ae3e4af8e78516912f1c92  Toolchain-dream_one.tar.xz";
+
+_tc_info="\n
+    !!! beware the box must have FPU !!!\n
+     this toolchain is compatible with\n
+\n
+Dreambox     : DreamOne Arch64";
+
+_tc_infolines="5"
