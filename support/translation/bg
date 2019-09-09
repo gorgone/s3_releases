@@ -1,0 +1,100 @@
+#!/bin/bash
+
+#bulgarian
+
+txt_as='като';
+txt_of='от';
+txt_for='за';
+txt_b2="билд";
+txt_to="към";
+txt_now='сега';
+txt_b1='билд';
+txt_menu='меню';
+txt_done=' готово';
+txt_no='не';
+txt_use='използва';
+txt_back='назад';
+txt_error='грешка';
+txt_loading='зареждам'; #8 chars
+txt_sel='избор';
+txt_delete='изтрий';
+txt_found='открити';
+txt_create='създава';
+txt_conf='конфигурация';
+txt_extracting='извличане'; #10 chars
+txt_wait='изчакайте...';
+txt_existing='съществува';
+txt_profiles='профили';
+txt_not_found='не е намерено';
+txt_n_installed='не е инсталиран';
+txt_back_main="обратно към основно меню";
+txt_too_old='(твърде стар или не се поддържа)';
+txt_selected='избрано';
+txt_update='опреснявам';
+txt_tc="Toolchain      ";
+
+# menu txt
+txt_start_menu='Главно меню';
+txt_remove_menu='Премахни toolchain';
+txt_add_menu='Добави toolchain';
+txt_main_revision="\n локална SVN ревизия е : r";
+
+# help txt
+txt_help1="започва с"
+txt_help2="Параметрите на командния ред са"
+txt_help3="[ENTER] за продължение..."
+
+# firstmenu ################################################
+txt_firstmenu_continue="продължи с локалния SVN";
+   txt_firstmenu_chose="зареди различен SVN (7000+)";
+   txt_firstmenu_cedit="стартирай конфигурационния редактор";
+    txt_firstmenu_lang="ръчен избор на системен език";
+    txt_firstmenu_exit="затвори simplebuild сега";
+
+# _toolchain_config_menu ###################################
+     txt_config_menu="конфигурационно меню";
+      txt_back_build="назад към билд меню";
+txt_module_configure="избери oscam модулите ";
+     txt_oscam_extra="избери oscam екстрите USB/PCSC";
+     txt_build_extra="избери билд екстрите компресиране/пач";
+      txt_build_load="зареди последната конфигурация";
+      txt_build_save="запази конфигурацията";
+     txt_build_reset="ресет на конфигурацията";
+
+# _toolchain_build_menu#####################################
+ txt_bmenu_title="билд меню";
+  txt_bmenu_user="потребителско име ";
+  txt_bmenu_comp="компилатор       ";
+  txt_bmenu_debu="debug инфо       ";
+   txt_bmenu_use="ИЗПОЛЗВАЙ_променливи ";
+ txt_bmenu_build="компилирай oscam сега";
+txt_bmenu_config="oscam/билд конфигурация";
+   txt_bmenu_log="покажи последния билд.лог";
+  txt_bmenu_back="обратно към избор на toolchain";
+   txt_compress1="финализирай преди     ";
+   txt_compress2="финализирай след      ";
+   txt_compress3="финализирай редуциране към ";
+
+# _toolchain_main_menu#####################################
+txt_menu_builder1="затвори simplebuild";
+txt_menu_builder2="добави нов toolchain";
+txt_menu_builder3="премахни инсталиран toolchain";
+txt_menu_builder4="местен билд за";
+txt_menu_back="обратно към меню toolchain";
+
+# _dialog_checkout
+txt_verify_syscheck='проверявам системата:';
+     txt_verify_svn='проверявам настоящия SVN:';
+     txt_update_svn="$txt_update SVN:";
+    txt_prepare_svn="подготвям SVN checkout:";
+         txt_latest="последен SVN";
+
+# _load_profile ###########################################
+  txt_select_profile_title="налични профили";
+        txt_select_profile="моля изберете профил";
+txt_confirm_profile_select="моля потвърдете избора на:";
+      txt_no_profile_found="няма открит профил в\n\n$profdir";
+
+# _upload_cam #############################################
+txt_upload_cam1="ssh профила не съществува";
+txt_upload_cam2="ssh открит профил";
