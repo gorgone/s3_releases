@@ -83,7 +83,8 @@ cc_warn="-W -Wall -Wshadow -Wredundant-decls -Wstrict-prototypes -Wold-style-def
 cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections";
 
 #default url
-trunkurl="http://www.streamboard.tv/svn/oscam/trunk";[ -f "$workdir/oscamsource.url" ] && source "$workdir/oscamsource.url";
+trunkurl="https://github.com/oe-alliance/oscam-smod.git";[ -f "$workdir/oscamsource.url" ] && source "$workdir/oscamsource.url";
+#trunkurl="http://www.streamboard.tv/svn/oscam/trunk";[ -f "$workdir/oscamsource.url" ] && source "$workdir/oscamsource.url";
 #trunkurl="http://www.streamboard.tv/svn/oscam-addons/modern";[ -f "$workdir/oscamsource.url" ] && source "$workdir/oscamsource.url";
 
 #load translationlist
