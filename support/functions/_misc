@@ -41,7 +41,7 @@ VARIANT="trunk"
 $(echo $trunkurl | grep -q "modern") && VARIANT="modern"
 $(echo $trunkurl | grep -q "smod") && VARIANT="smod"
 CAM="oscam-"
-$(echo $trunkurl | grep -q "ncam") && CAM="ncam-";VARIANT=""
+$(echo $trunkurl | grep -q "ncam") && CAM="ncam-" && VARIANT=""
 if [ "${s3cfg_vars[ADD_PROFILE_NAME]}" == "0" ] || [ $pf_name == "not_set" ];then
 	oscam_name="${CAM}${VARIANT}-${PREFIX}$(REVISION)-$_b_name$_webif$_dvbapi$_ssl$_usb$_pcsc$_stapi$_stapi5$_emu$_ipv6$_upx";
 else
