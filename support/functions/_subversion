@@ -132,7 +132,8 @@ _dialog_checkout(){
 			sleep 1;
 			echo -en " $txt_update_svn $txt_wait\n";
 			cd "$svndir";
-			svn -q update;
+			$(USEGIT) && git pull -q;
+			$(USEGIT) || svn -q update;
 			echo 1 >"$upc";
 			sleep 1;
 		fi;
