@@ -162,13 +162,13 @@ fi;
 	lsmn="$(ls list_smargo* 2> /dev/null)";
 	if [ "${s3cfg_vars[SAVE_LISTSMARGO]}" == "1" ] && [ -f "$svndir/Distribution/$lsmn" ];then
 		if [ "$_toolchainname" == "native" ];then
-			echo -e "$g_n"" SAVE -------> $w_l$lsmn$g_l $txt_as$y_l oscam-svn$(REVISION)-$(hostname)-list_smargo";
-			mv -f "$lsmn" "$bdir/oscam-svn$(REVISION)-$(hostname)-list_smargo";
-			tartmp="oscam-svn$(REVISION)-$(hostname)-list_smargo";
+			echo -e "$g_n"" SAVE -------> $w_l$lsmn$g_l $txt_as$y_l ${CAM}${VARIANT}-${PREFIX}$(REVISION)-$(hostname)-list_smargo";
+			mv -f "$lsmn" "$bdir/${CAM}${VARIANT}-${PREFIX}$(REVISION)-$(hostname)-list_smargo";
+			tartmp="${CAM}${VARIANT}-${PREFIX}$(REVISION)-$(hostname)-list_smargo";
 		else
-			echo -e "$g_n"" SAVE -------> $w_l$lsmn$g_l $txt_as$y_l oscam-svn$(REVISION)-$_toolchainname-list_smargo";
-			mv -f "$lsmn" "$bdir/oscam-svn$(REVISION)-$_toolchainname-list_smargo";
-			tartmp="oscam-svn$(REVISION)-$_toolchainname-list_smargo";
+			echo -e "$g_n"" SAVE -------> $w_l$lsmn$g_l $txt_as$y_l ${CAM}${VARIANT}_${PREFIX}$(REVISION)-$_toolchainname-list_smargo";
+			mv -f "$lsmn" "$bdir/${CAM}${VARIANT}-${PREFIX}$(REVISION)-$_toolchainname-list_smargo";
+			tartmp="${CAM}${VARIANT}_${PREFIX}$(REVISION)-$_toolchainname-list_smargo";
 		fi;
 	fi;
 
