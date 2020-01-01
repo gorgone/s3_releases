@@ -79,13 +79,13 @@ _gui_build(){
 	lsmn="$(ls list_smargo* 2> /dev/null)";
 	if [ "${s3cfg_vars[SAVE_LISTSMARGO]}" == "1" ] && [ -f "$svndir/Distribution/$lsmn" ];then
 		if [ "$_toolchainname" == "native" ];then
-			echo -e "SAVE\t$lsmn $txt_as oscam-svn$(REVISION)-$(hostname)-list_smargo"| tee -a "$ldir/$log_name";
-			mv -f "$lsmn" "$bdir/oscam-svn$(REVISION)-$(hostname)-list_smargo";
-			echo "oscam-svn$(REVISION)-$(hostname)-list_smargo" >"$targztmp";
+			echo -e "SAVE\t$lsmn $txt_as ${CAM}${VARIANT}-${PREFIX}$(REVISION)-$(hostname)-list_smargo"| tee -a "$ldir/$log_name";
+			mv -f "$lsmn" "$bdir/${CAM}${VARIANT}-${PREFIX}$(REVISION)-$(hostname)-list_smargo";
+			echo "${CAM}${VARIANT}-${PREFIX}$(REVISION)-$(hostname)-list_smargo" >"$targztmp";
 		else
-			echo -e "SAVE\t$lsmn $txt_as oscam-svn$(REVISION)-$_toolchainname-list_smargo"|tee -a "$ldir/$log_name";
-			mv -f "$lsmn" "$bdir/oscam-svn$(REVISION)-$_toolchainname-list_smargo";
-			echo "oscam-svn$(REVISION)-$_toolchainname-list_smargo" >"$targztmp";
+			echo -e "SAVE\t$lsmn $txt_as ${CAM}${VARIANT}-${PREFIX}$(REVISION)-$_toolchainname-list_smargo"|tee -a "$ldir/$log_name";
+			mv -f "$lsmn" "$bdir/${CAM}${VARIANT}-${PREFIX}$(REVISION)-$_toolchainname-list_smargo";
+			echo "${CAM}${VARIANT}-${PREFIX}$(REVISION)-$_toolchainname-list_smargo" >"$targztmp";
 		fi;
 	fi;
 
