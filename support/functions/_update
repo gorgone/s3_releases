@@ -7,7 +7,7 @@ update_me(){
 	source "$configdir/urls";
 	s3local="$dldir/s3_github";
 	echo -en "  s3_git CHECK:\n  -------------\n";
-	if [ ! -d "$workdir/.svn" -a -d "$workdir/.git" ]; then
+	if [ -d "$workdir/.git" -a ! -d "$workdir/.svn" ]; then
 		local_revision=$(git rev-list --count HEAD 2>/dev/null);
 	elif [ -d "$s3local/.svn" ]; then
 		local_revision=$(gitrevision $s3local);
@@ -15,7 +15,7 @@ update_me(){
 	online_revision=$(gitrevision $s3url);
 	if [ ! $local_revision == $online_revision ]; then
 		echo -en "  update s3_git to\n  Local Revision: $online_revision\n";
-		if [ ! -d "$workdir/.svn" -a -d "$workdir/.git" ]; then
+		if [ -d "$workdir/.git" -a ! -d "$workdir/.svn" ]; then
 			pushd $workdir >/dev/null
 			git pull -q
 			popd >/dev/null
