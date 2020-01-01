@@ -95,7 +95,7 @@ return $failed;
 syscheck(){
 [[ $1 ]] && [ "$1" != "auto" ] && override="$1";now=$2;
 if [ -d "$osdir" ];then cd "$osdir";x=(*); for i in "${x[@]}";do source "$i"; done fi
-binvars=( dialog grep gawk wget tar bzip2 svn xz upx patch gcc make scp sshpass openssl dos2unix );
+binvars=( dialog git grep gawk wget tar bzip2 svn xz upx patch gcc make scp sshpass openssl dos2unix );
 headervars=( crypto.h libusb.h pcsclite.h pthread.h );
 libvars=( libccidtwin.so );
 sanity=1;
