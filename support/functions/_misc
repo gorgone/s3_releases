@@ -33,7 +33,7 @@ _generate_oscam_name(){ cd "$svndir";_dvbapi=$(
 [ "$(./config.sh --enabled WEBIF)"       == Y ] && echo -n -webif  || echo ''; );_ssl=$(
 [ "$(./config.sh --enabled WITH_SSL)"    == Y ] && echo -n -ssl    || echo ''; );_emu=$(
 [ "$(./config.sh --enabled WITH_EMU)"    == Y ] && echo -n -emu$(./config.sh --emu-version) || echo ''; );_ipv6=$(
-[ "$(./config.sh --enabled IPV6SUPPORT)" == Y ] && echo -n -ipv6   || echo ''; );
+[ "$(./config.sh --enabled IPV6SUPPORT)" == N ] && echo -n -ipv4only   || echo ''; );
 [ "${USE_vars[USE_COMPRESS]}" == "USE_COMPRESS=1" ] && _upx="-upx" || _upx='';
 [ "$1" == "native" ] && _b_name="$(hostname)" || _b_name="$1";
 if [ "${s3cfg_vars[ADD_PROFILE_NAME]}" == "0" ] || [ $pf_name == "not_set" ];then
