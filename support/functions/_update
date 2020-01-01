@@ -8,7 +8,9 @@ update_me(){
 	s3local="$dldir/s3_github";
 	echo -en "  s3_git CHECK:\n  -------------\n";
 	if [ -d "$workdir/.git" -a ! -d "$workdir/.svn" ]; then
+		pushd $workdir >/dev/null
 		local_revision=$(git rev-list --count HEAD 2>/dev/null);
+		popd >/dev/null
 	elif [ -d "$s3local/.svn" ]; then
 		local_revision=$(gitrevision $s3local);
 	fi
@@ -39,13 +41,17 @@ update_emu(){
 	source "$configdir/urls";
 	emulocal="$dldir/emu_github";
 	echo -en "  emu_git CHECK:\n  --------------\n";
-	if [ -d "$emulocal/.svn" ]; then
-		local_revision=$(gitrevision $emulocal);
+	if [ -d "$emulocal/.git" -a ! -d "$emulocal/.svn" ]; then
+		pushd $emulocal >/dev/null
+		local_revision=$(git rev-list --count HEAD 2>/dev/null);
+		popd >/dev/null
+	elif [ -d "$emulocal" ]; then
+		rm -rf "$emulocal"
 	fi
 	online_revision=$(gitrevision $emuurl);
 	if [ ! $local_revision == $online_revision ]; then
 		echo -en "  update emu_git to\n  Local Revision: $online_revision\n";
-		svn -q checkout "$emuurl" "$emulocal";
+		git clone -q "$emuurl" "$emulocal";
 	else
 		echo -en "  is up to date\n  Online Revision: $online_revision\n";
 	fi
