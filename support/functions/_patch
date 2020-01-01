@@ -24,7 +24,7 @@ _apply_menupatch(){
 					_w="ok";
 					cd "$svndir";
 					echo "PATCH : apply $e";
-					patch -f -p0 < "$pdir/$e" >>"$patchlog" 2>/dev/null;
+					patch -f -p1 < "$pdir/$e" >>"$patchlog" 2>/dev/null;
 					hunks=$(grep -c1 '^Hunk' "$patchlog");
 					fails=$(grep -c1 'hunks FAILED' "$patchlog");
 					if [ "$hunks" -gt "0" ];then
@@ -63,7 +63,7 @@ _apply_consolepatch(){
 			for e in ${patchlist[@]};do
 				_w=0;cd "$svndir";
 				echo -e "$y_l |     PATCH : apply $e";
-				patch -F 10 -f -p0 < "$pdir/$e" >>"$patchlog" 2>/dev/null;
+				patch -F 10 -f -p1 < "$pdir/$e" >>"$patchlog" 2>/dev/null;
 				hunks=$(grep -c1 "^Hunk" "$patchlog");
 				fails=$(grep -c1 "hunks FAILED" "$patchlog");
 				if [ "$hunks" -gt "0" ];then
