@@ -186,7 +186,6 @@ _toolchain_check(){
 		temp=$(find * |grep -m1 "$e");
 		[ ${#temp} -gt 8 ] && echo -e "$w_l  Header File :$y_l $e$g_l\t$txt_found" || echo -e "$w_l  Header File :$y_l $e$r_l\t($txt_not_found)";
 	done;
-	libconfigvars=( libcrypto.pc libpcsclite.pc libusb-1.0.pc zlib.pc );
 	pkg=$(find * |grep -m1 "pkgconfig");
 	[ "$1" == "native" ] && cd "$_sysroot/$pkg" || cd "$tcdir/$1/$_sysroot/$pkg";
 	echo -e "\n$w_l  Library config ----> $C$_sysroot/$pkg$w_l\n  ====================\n";
