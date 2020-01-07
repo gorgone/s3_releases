@@ -187,13 +187,17 @@ _toolchain_check(){
 		[ ${#temp} -gt 8 ] && echo -e "$w_l  Header File :$y_l $e$g_l\t$txt_found" || echo -e "$w_l  Header File :$y_l $e$r_l\t($txt_not_found)";
 	done;
 	pkg=$(find * |grep -m1 "pkgconfig");
-	[ "$1" == "native" ] && cd "$_sysroot/$pkg" || cd "$tcdir/$1/$_sysroot/$pkg";
-	echo -e "\n$w_l  Library config ----> $C$_sysroot/$pkg$w_l\n  ====================\n";
-	for f in *.pc;do
-		content=$(cat "$f") && na=$(echo "$content" | grep 'Name:' | sed -e "s/Name: //g") && ver=$(echo "$content" | grep 'Version:' | sed -e "s/Version: //g");
-		sp1=$(printf '%*s' $((20-${#f})) | tr ' ' ' ') && sp2=$(printf '%*s' $((20-${#na})) | tr ' ' ' ');
-		[ ${#content} -gt 0 ] && echo -e "$w_l  Library Config :$y_l "$f"$sp1$g_l$txt_found\t$p_l$na$sp2$ver" || echo -e "$w_l  Library Config :$y_l "$f"$sp1$r_l($txt_not_found)";
-	done;
+	if [ ${#pkg} -gt 0 ];then
+		[ "$1" == "native" ] && cd "$_sysroot/$pkg" || cd "$tcdir/$1/$_sysroot/$pkg";
+		echo -e "\n$w_l  Library config ----> $C$_sysroot/$pkg$w_l\n  ====================\n";
+		for f in *.pc;do
+			content=$(cat "$f") && na=$(echo "$content" | grep 'Name:' | sed -e "s/Name: //g") && ver=$(echo "$content" | grep 'Version:' | sed -e "s/Version: //g");
+			sp1=$(printf '%*s' $((20-${#f})) | tr ' ' ' ') && sp2=$(printf '%*s' $((20-${#na})) | tr ' ' ' ');
+			[ ${#content} -gt 0 ] && echo -e "$w_l  Library Config :$y_l "$f"$sp1$g_l$txt_found\t$p_l$na$sp2$ver" || echo -e "$w_l  Library Config :$y_l "$f"$sp1$r_l($txt_not_found)";
+		done;
+	else
+		echo -e "\n$w_l  Library config ----> $C no libraries found in pkgconfig$w_l\n  ====================\n";
+	fi
 	echo -e $re_;
 	exit;
 };
