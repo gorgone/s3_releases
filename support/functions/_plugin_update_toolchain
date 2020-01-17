@@ -1,0 +1,386 @@
+#!/bin/bash
+
+#simplebuild_plugin tcupdate 0.3.0
+
+tcupdate(){
+	clear;
+	
+	if [ "$1" == "" ];then
+		_fill_tc_array;
+		IFS="#";
+		unset MENU_OPTIONS;COUNT=0
+		if [ "$systype" == "ok" ];then
+			if [ "$tcempty" == "0" ];then
+				for i in "${INST_TCLIST[@]}";do
+					if [ ! "$i" == "native" ];then
+						source "$tccfgdir/$i";
+						MENU_OPTIONS+="$_toolchainname#$_description#";
+						counter;
+					fi;
+				done;
+			fi;
+		fi;
+		out=$(
+		"$gui" "$st_" "$bt_" "$title_" "--default-item" "$3" "--cancel-label" "EXIT" "--help-button" "--help-label" "BACKUP" "--title" "-[ Toolchain $txt_menu ]-" --menu "\nChoose on of the installed toolchains you want to update:\n " "${COUNT+10}" 0 0 ${MENU_OPTIONS});
+
+		IFS=$OIFS;
+		[ "$out" == "" ] && bye;
+		first=$(echo "$out" | awk '{printf $1}');
+		tc_info=$(echo "$out" | awk '{printf $2}';);
+		case $first in
+			HELP)
+						_toolchain_repair "$(_backup "$tc_info")";
+						tcupdate "" "0" "$tc_info";;
+			*)
+						tc="$first";
+						tc_menu="1";;
+		esac;
+	else
+		tc="$1"
+		[ "$2" == "" ] && tc_menu="0" || tc_menu="$2";
+	fi;
+	
+	#toolchain native not supported
+	if [ "$tc" == "native" ];then
+		echo -e "$r_l  $txt_error:$y_l $tc$w_l Toolchain library update not supported!""$rs_";
+		_nl;
+		exit;
+	fi;
+	
+	#toolchain exists check
+	[ -f "$tccfgdir/$tc" ] && source "$tccfgdir/$tc";
+	if [ -d "$tcdir/$tc/bin" ];then
+		cd "$tcdir/$tc/bin";
+	else
+		echo -e "$r_l  $txt_error:$y_l $tc$w_l Toolchain $txt_n_installed""$rs_";
+		[ "$1" == "" ] && sleep 2 && tcupdate "" "0" "$tc";
+		_nl;
+		exit;
+	fi;
+
+	#create/load config
+	configname="$configdir/plugin_update_toolchain.config";
+	if [ ! -f "$configname" ];then
+		echo -e "$r_l$txt_error: config file $configdir/libs not found!\n" \
+				"$g_l""Creating new config file...\n" \
+				"$y_l""You can extend them to fit your needs.""$re_";
+		_create_config;
+		sleep 2;
+	fi;
+	source "$configname";
+	
+	#autodetect toolchain's sysroot, prefix and pkgconfig folder
+	compilername="$_compiler""gcc";compilername=$(realpath $compilername);
+	ranlibname="$_compiler""ranlib";ranlibname=$(realpath $ranlibname);
+	hostname=${_compiler%?};
+	sr=$("$compilername" -print-sysroot 2>/dev/null);
+	sr=$(realpath -sm "$sr");
+	if [ ${#sr} -gt ${#tcdir} ];then
+		[ -d "$sr/include" ] && cd "$sr"
+		[ -d "$sr/usr/include" ] && cd "$sr/usr"
+	else
+		cd "$tcdir/$tc/$_sysroot"
+	fi;
+	prefixdir="$PWD"
+	pkg=$(find * | grep -m1 "/pkgconfig") && pkgdir="$prefixdir/$pkg";
+	
+	#build menu items from config file
+	unset MENU_OPTIONS;COUNT=0;unset libs;
+	for i in "${LIBS[@]}"
+	do
+		[ "${!i}" == "0" ] && continue;
+		libkey=$i;
+		libname="$i"_name;libname=${!libname};
+		libdesc="$i"_desc;libdesc=${!libdesc};
+		libversion="$i"_version;libversion=${!libversion};
+		libcheck="$i"_check;libcheck=${!libcheck};
+		liburl="$i"_url;liburl=${!liburl};
+		libversioncheck=$(echo $libversion | sed -e 's/[a-zA-Z]//g');
+		libversioncurrent=$(_get_version "$pkgdir/$libcheck" "$libversioncheck");
+		libversioncompare=$(_compare_version $libversion $(echo $libversioncurrent | sed -e 's/^$/0.0.0/g') | sed -e 's/>//g');
+		libtasks="$i"_tasks[@];libtasks=("${!libtasks}");
+		libexports="$i"_exports[@];libexports=("${!libexports}");
+		libconfigure="$i"_configure[@];libconfigure=("${!libconfigure}");
+		libmake="$i"_make[@];libmake=("${!libmake}");
+		
+		MENU_OPTIONS+=("$i"		"$libname $libversion 	$libversioncompare	$(echo $libversioncurrent | sed -e 's/^$/ ---/g')"		"$([ $libversioncurrent ] && echo "on" || echo "off")"	"$([ $libname ] && echo "$libname $libversion: $liburl")");counter;
+		
+		#     0 key     1 desc     2 version     3 checkversion     4 checkfile 5 current version    6 url      7 tasks array
+		lib=("$libkey" "$libname" "$libversion" "$libversioncheck" "$libcheck" "$libversioncurrent" "$liburl" "(${libtasks[*]@Q})");
+		libs+=("(${lib[*]@Q})");
+	done;
+
+	opts=$("$gui" "--item-help" "--help-tags" "$st_" "$bt_" "$title_" "--default-item" "$3" "--help-button" "--help-label" "INFO" "--cancel-label" "$([ "$tc_menu" == "1" ] && echo "BACK" || echo "EXIT")" --title "-[ Library Update for Toolchain $tc ]-" "$cl_"\
+		"\nSelect all libraries to update in toolchain's SYSROOT folder:\n$prefixdir\n\n       library version    NEW                    CURRENT" \
+		"${COUNT+12}" 70 0 "${MENU_OPTIONS[@]}");
+	
+	#SSL select check
+	[ $(echo $opts | tr ' ' '\n' | grep -c "SSL_") -gt 1 ] && echo -e $r_l"\n\nPlease select only one SSL version!"$re_ && sleep 3 && tcupdate $tc;
+	
+	#HELP section
+	first=$(echo "$opts" | awk '{printf $1}');
+	libkey=$(echo "$opts" | awk '{printf $2}';);
+
+	if [ "$first" == "HELP" ];then
+		sp=$(printf '%*s' 90 | tr ' ' '=');
+		txt=$(cat "$configname" | grep ""$libkey"=\|"$libkey"_");
+		bcd=$(cat "$configname" | grep ""$libkey"_tasks");
+		txt=$(echo -e "Toolchain: $tcdir/$tc\nCompiler:  $compilername\nSysroot:   $sr\nPrefix:    $prefixdir\n$sp\n\nLibrary configuration:\n$txt\n\nBuild command:\n$(_replace_tokens "$(_tidy_tasks "$bcd" "$libkey")")");
+		tempfile=$(mktemp) && echo -e "$txt" > "$tempfile";
+		"$gui" "$st_" "$nc_" "$bt_" "$title_" "--textbox" "$tempfile" 30 80;
+		rm "$tempfile" 2>/dev/null;
+		tcupdate $tc $tc_menu $libkey;
+	fi;	
+
+	#BUILD section
+	icount=$(echo $opts | wc -w);i=0;
+	for o in $opts;do
+		unset buildtasks;
+		for l in "${libs[@]}";do
+			declare -a lib="${l[*]}";				#populate libs array element
+			[ ! "$o" == "${lib[0]}" ] && continue || ((i++));
+			logfile="$ldir/$(date +%F)_$(date +%T)_update_toolchain_"$_toolchainname"_"${lib[1]}"_"${lib[2]}".log"
+			
+			#generate build command list
+			declare -a libtasks="${lib[7]}";		#populate tasks array element
+			for task in "${libtasks[@]}";do
+				task=$(_replace_tokens "$task");		#replace tokens
+				buildtasks+=("$task");
+			done
+			
+			_build "($i/$icount) ${lib[1]}" $(_extract $(_dl "${lib[6]}")) "$logfile" "${buildtasks[@]}";
+		done;
+	done;
+	
+	#Reopen update menu
+	if [ ${#opts} -gt 0 ];then
+		tcupdate $tc $tc_menu $libkey;
+	else
+		[ "$tc_menu" == "1" ] && tcupdate "" "0" "$tc";
+	fi;
+	
+	bye;
+};
+_backup(){
+
+	_sz;					# Prepare DIALOG settings
+	nr=$(( $RANDOM % 100 ));
+	newtc="$1-$nr";
+	newtccfgfile="$tccfgdir/$newtc";
+	xzfile="$dldir/Toolchain-$newtc.tar.xz";
+	
+	(
+	#generate xz-file
+	XZ_OPT=-e9 tar -cvJf "$xzfile" -C "$tcdir/$1" .
+	
+	#create new toolchains.cfg file
+	cp "$tccfgdir/$1" "$newtccfgfile";
+	
+	if [ -f "$newtccfgfile" ];then
+		#autodetect toolchain's sysroot folder
+		source "$newtccfgfile";
+		cd "$tcdir/$1/bin";
+		compilername="$_compiler""gcc";compilername=$(realpath $compilername);
+		sr=$("$compilername" -print-sysroot 2>/dev/null);
+		sr=$(realpath -sm "$sr");
+		sysroot=${sr#"$tcdir/$1/"};
+		
+		#update toolchains.cfg file 
+		#_toolchainname
+		sed -i "s#.*_toolchainname=.*#_toolchainname=\"$newtc\";#g" "$newtccfgfile";
+		#_description
+		sed -i "s#.*_description=.*#_description=\"$_description\";#g" "$newtccfgfile";
+		#_sysroot
+		sed -i "s#.*_sysroot=.*#_sysroot=\"$sysroot\";#g" "$newtccfgfile";
+		#_toolchainfilename
+		encfile=$(echo -en "$(basename "${xzfile%..*}")" | base64);
+		sed -i "s#.*_toolchainfilename=.*#_toolchainfilename=\"$encfile\";#g" "$newtccfgfile";
+		#_md5sum
+		cd "$dldir" && md5hash="$(md5sum $(basename "${xzfile%..*}"))";
+		sed -i "s#.*_md5sum=.*#_md5sum=\"$md5hash\";#g" "$newtccfgfile";
+		
+		"$gui" "$st_" "$nc_" "$bt_" "$title_" "--textbox" "$newtccfgfile" 30 80;
+	fi;
+	) | "$gui" "$st_" --colors --title " -[ Backup $1 to $newtc ... ]- " "$pb_" "$_lines" "$_cols";
+	[ -f "$newtccfgfile" ] && echo "$newtc";
+};
+_build(){
+	
+	_sz;					# Prepare DIALOG settings
+	local desc="$1";		# Save 1. argument in a variable
+	local libsrcdir="$2";	# Save 2. argument in a variable
+	local lf="$3";			# Save 3. argument in a variable
+	shift && shift && shift;# Shift all 3. arguments to the left (original $1,$2,$3 gets lost)
+	local tasks=("$@"); 	# Rebuild the array with rest of arguments
+
+	(	
+	bcl=$(printf '%s\n' "${tasks[@]}");
+	
+	sp=$(printf '%*s' 100 | tr ' ' '=')
+	echo -e "$sp\nbuild command list for $desc:\n$sp\ncd "$libsrcdir"\n$bcl\n$sp" | tee -a "$lf";
+	sleep 2;
+	cd "$libsrcdir";
+	( eval "${tasks[@]}" ) 2>&1 | tee -a "$lf"
+	) | "$gui" "$st_" --colors --title " -[ Build $desc ... ]- " "$pb_" "$_lines" "$_cols";sleep 2;
+	
+	#build error message
+	error_on_build=$(grep -cw1 Error "$lf");
+	if [ "$error_on_build" -gt "0" ]; then
+		echo -e ""$r_l"ERRORS on build found, details:\n$b_l  $lf\n$y_l" >$(tty);
+		read -n 1 -s -r -p "Press any key to continue";
+		echo -e "$re_$w_l";
+	fi;
+	
+};
+_dl(){
+	fname=$(basename "${1%..*}")
+	if [ ! -f "$dldir/$fname" ];then
+		cd "$dldir";
+		wget "$1" 2>&1 | stdbuf -o0 awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | "$gui" "$st_" "$bt_" "$title_" --title " -[ download ]- " --gauge "  $txt_loading $fname $txt_wait" 6 74;
+	fi;
+	[ -f "$dldir/$fname" ] && echo "$dldir/$fname";
+	exit;
+};
+_extract(){
+    local c e i;
+
+    (($#)) || return;
+
+	edir=/tmp/lib_source;
+	[ -d "$edir" ] && rm -r "$edir";
+	mkdir "$edir";
+	
+    for i; do
+        c='';
+        e=1;
+		
+        if [[ ! -r $i ]]; then
+            echo "$0: file is unreadable: \`$i'" >&2;
+            continue;
+        fi
+		
+        case $i in
+			*.tgz|*.tlz|*.txz|*.tb2|*.tbz|*.tbz2|*.taz|*.tar|*.tar.Z|*.tar.bz|*.tar.bz2|*.tar.gz|*.tar.lzma|*.tar.xz)
+				   c=(tar -xvf);;
+            *.7z)  c=(7z -x);;
+            *.Z)   c=(uncompress);;
+            *.bz2) c=(bunzip2);;
+            *.exe) c=(cabextract);;
+            *.gz)  c=(gunzip);;
+            *.rar) c=(unrar -x);;
+            *.xz)  c=(unxz);;
+            *.zip) c=(unzip -o);;
+            *)     echo "$0: unrecognized file extension: \`$i'" >&2;
+                   continue;;
+        esac
+		cd "$edir";
+		BEFORE=(.*/ */);
+		
+		command "${c[@]}" "$i" |"$gui" "$st_" --title " -[ $txt_extracting ]- " "$pb_" 20 74;
+        ((e = e || $?));
+		
+		AFTER=(.*/ */);
+		for (( j = 0; j < "${#BEFORE[@]}"; j++ )); do
+			[ "${BEFORE[j]}" == "${AFTER[j]}" ] || break;
+		done
+		printf "$edir/${AFTER[j]}";
+    done
+	exit;
+};
+_replace_tokens(){
+	echo -e "$1" | sed -e "s#@TOOLCHAIN@#$tcdir/$tc#g; \
+						s#@CC@#$compilername#g; \
+						s#@RANLIB@#$ranlibname#g; \
+						s#@PREFIX@#$prefixdir#g; \
+						s#@HOST@#$hostname#g";
+};
+_tidy_tasks(){
+	echo -e "$1" | sed -e "s#$2"_tasks=\(\""##g; \
+						s#$2"_tasks=\(\'"##g; \
+						s#$2"_tasks+=\(\""##g; \
+						s#$2"_tasks+=\(\'"##g; \
+						s#"\"\)\;"##g; \
+						s#"\'\)\;"##g;";
+};
+_get_version(){
+	r="";
+	if [ -f "$1" ];then
+		content=$(cat "$1");
+		ver=$(echo "$content" | grep 'Version:' | sed -e "s/Version: //g");
+		(echo "$ver" | grep -qc "$2") && r="$ver";
+	fi;
+	echo $r;
+	[ ${#r} -gt 0 ] && exit 0 || exit 1;
+};
+_compare_version(){
+	min=$(printf "$1\n$2\n" | sort -V | head -n1);
+	max=$(printf "$1\n$2\n" | sort -V | tail -n1);
+	
+	[ $min == $max ] && printf '=' && exit;
+	[ $1 == $max ] && printf '>' && exit;
+	[ $1 == $min ] && printf '<' && exit;
+};
+_create_config(){
+	sample_comments=( "#Enable/Disable (1|0)" \
+					  "#Displayname" \
+					  "#Versionnumber" \
+					  "#Filename to check in pkgconfig folder for an existing library to get version information" \
+					  "#Valid URL for downloading sources of library\n#List of build commands below. Pay attention to the SEMICOLON at the end of EACH\n#command and the correct quoting (\' or \") for or to avoid expansion of variables.\n#Tokens @TOOLCHAIN@, @CC@, @RANLIB@, @PREFIX@ are replaced automatically." \
+					  "#build command"
+					);
+	sample_settings=( "" name version check url tasks );
+	sample_keys=( SAMPLE_LIB SSL_111 SSL_110 SSL_102 SSL_100 SSL_098 LIB_USB LIB_PCSC LIB_ZLIB );
+	sample_names=( "SampleLib" "OpenSSL" "OpenSSL" "OpenSSL" "OpenSSL" "OpenSSL" "libusb" "PCSC-Lite" "zlib" );
+	sample_versions=( "0.2.9sl" "1.1.1d" "1.1.0l" "1.0.2u" "1.0.0t" "0.9.8zf" "1.0.23" "1.8.26" "1.2.11" );
+	sample_checks=( "samplelib.pc" "openssl.pc" "openssl.pc" "openssl.pc" "openssl.pc" "openssl.pc" "libusb-1.0.pc" "libpcsclite.pc" "zlib.pc" );
+	sample_urls=( "https://sampleurl.com/archive.tar.bz" \
+				  "https://www.openssl.org/source/openssl-1.1.1d.tar.gz" \
+				  "https://www.openssl.org/source/openssl-1.1.0l.tar.gz" \
+				  "https://www.openssl.org/source/openssl-1.0.2u.tar.gz" \
+				  "https://www.openssl.org/source/openssl-1.0.0t.tar.gz" \
+				  "https://www.openssl.org/source/openssl-0.9.8zf.tar.gz" \
+				  "https://github.com/libusb/libusb/archive/v1.0.23.zip" \
+				  "https://pcsclite.apdu.fr/files/pcsc-lite-1.8.26.tar.bz2" \
+				  "https://www.zlib.net/zlib1211.zip" \
+				);
+	sample_tasks=( '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )' \
+				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )' \
+				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )' \
+				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install SHLIB_VERSION_NUMBER=1.0.2 SHLIB_MINOR=0.2;\")" )' \
+				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )' \
+				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )' \
+				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./bootstrap.sh;\")" "(\"./configure --prefix=@PREFIX@/ --host=@HOST@ --disable-udev;\")" "(\"make;\")" "(\"make install;\")" )' \
+				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./configure --prefix=@PREFIX@/ --host=@HOST@ --disable-libudev --disable-libsystemd LIBUSB_LIBS=\\\"-L@PREFIX@/lib -lusb-1.0 -lrt\\\" LIBUSB_CFLAGS=\\\"-I@PREFIX@/include/libusb-1.0\\\";\")" "(\"make;\")" "(\"make install;\")" )' \
+				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./configure --prefix=@PREFIX@/;\")" "(\"make;\")" "(\"make install;\")" )' \
+				 );
+
+	echo '#list of ordered library list'	 						 							 >"$configname";
+	echo '#only libraries in this list are available'											>>"$configname";
+	echo "LIBS=(${sample_keys[@]});"															>>"$configname";
+
+	i=0;
+	for key in "${sample_keys[@]}";
+	do
+		for setting in "${sample_settings[@]}";
+		do
+			case "$setting" in
+				"")   		if [ -z $setting ];then
+								echo -e "\n#"${sample_names[$i]}" "${sample_versions[$i]}""		>>"$configname";
+							fi;
+							echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"$([ "$key" == "SAMPLE_LIB" ] && echo '0' || echo '1')\";$([ "$i" -eq "0" ] && echo " ${sample_comments[0]}")"	>>"$configname";;
+				"name")   	echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"${sample_names[$i]}\";$([ "$i" -eq "0" ] && echo " ${sample_comments[1]}")"		>>"$configname";;
+				"version")	echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"${sample_versions[$i]}\";$([ "$i" -eq "0" ] && echo " ${sample_comments[2]}")"	>>"$configname";;
+				"check")	echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"${sample_checks[$i]}\";$([ "$i" -eq "0" ] && echo " ${sample_comments[3]}")"	>>"$configname";;
+				"url")		echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"${sample_urls[$i]}\";$([ "$i" -eq "0" ] && echo " ${sample_comments[4]}")"		>>"$configname";;
+				"tasks")	unset tasks;j=0;
+							declare -a tasks="${sample_tasks[$i]}"
+							for t in "${tasks[@]}";
+							do
+								echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting"$([ "$j" -gt "0" ] && echo "+")"=$t; $([ "$i" -eq "0" ] && echo "${sample_comments[5]}$(($j+1))")"	>>"$configname";
+								((j++));
+							done;;
+			esac;
+		done;
+		((i++))
+	done;
+};
