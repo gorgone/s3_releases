@@ -1,9 +1,35 @@
 #!/bin/bash
 
-#simplebuild_plugin tcupdate 0.3.0
+#simplebuild_plugin tcupdate 0.4.0
 
 tcupdate(){
-	clear;
+	clear && _check_bin;
+	
+	configname="$configdir/plugin_update_toolchain.config";
+	echo -e "config file='$configname'\n";
+	#remove config
+	if [ "$1" == "-r" ] || [ "$1" == "--reset" ];then
+		if [ -f "$configname" ];then
+			if ! _check_github_api_limits 12; then
+				echo -e "$y_l""RESET -> Moving existing config file...""$re_";
+				bcn="$configname".$(date +"%Y%m%d%H%M%S");
+				mv "$configname" "$bcn"
+				echo -e "config file backup='$bcn'\n";
+			else
+				_paktc_timer 30;
+			fi;
+		fi;
+		set -- #remove all parameters
+	fi;
+	#create config
+	if [ ! -f "$configname" ];then
+		echo -e "$g_l""CLEANUP -> Creating new config file. Please wait...""$y_l""$re_";
+		_create_config;
+		echo -e "config file='$configname'\nYou can extend them to fit your needs.\n";
+		_paktc_timer 5;
+	fi;
+	#load config	
+	source "$configname";
 	
 	if [ "$1" == "" ];then
 		_fill_tc_array;
@@ -26,7 +52,7 @@ tcupdate(){
 		IFS=$OIFS;
 		[ "$out" == "" ] && bye;
 		first=$(echo "$out" | awk '{printf $1}');
-		tc_info=$(echo "$out" | awk '{printf $2}';);
+		tc_info=$(echo "$out" | awk '{printf $2}');
 		case $first in
 			HELP)
 						_toolchain_repair "$(_backup "$tc_info")";
@@ -58,17 +84,6 @@ tcupdate(){
 		exit;
 	fi;
 
-	#create/load config
-	configname="$configdir/plugin_update_toolchain.config";
-	if [ ! -f "$configname" ];then
-		echo -e "$r_l$txt_error: config file $configdir/libs not found!\n" \
-				"$g_l""Creating new config file...\n" \
-				"$y_l""You can extend them to fit your needs.""$re_";
-		_create_config;
-		sleep 2;
-	fi;
-	source "$configname";
-	
 	#autodetect toolchain's sysroot, prefix and pkgconfig folder
 	compilername="$_compiler""gcc";compilername=$(realpath $compilername);
 	ranlibname="$_compiler""ranlib";ranlibname=$(realpath $ranlibname);
@@ -103,7 +118,7 @@ tcupdate(){
 		libconfigure="$i"_configure[@];libconfigure=("${!libconfigure}");
 		libmake="$i"_make[@];libmake=("${!libmake}");
 		
-		MENU_OPTIONS+=("$i"		"$libname $libversion 	$libversioncompare	$(echo $libversioncurrent | sed -e 's/^$/ ---/g')"		"$([ $libversioncurrent ] && echo "on" || echo "off")"	"$([ $libname ] && echo "$libname $libversion: $liburl")");counter;
+		MENU_OPTIONS+=("$i"		"$libname $libversion  	$libversioncompare	$(echo $libversioncurrent | sed -e 's/^$/ ---/g')"		"$([ $libversioncurrent ] && echo "on" || echo "off")"	"$([ $libname ] && echo "$libname $libversion: $liburl")");counter;
 		
 		#     0 key     1 desc     2 version     3 checkversion     4 checkfile 5 current version    6 url      7 tasks array
 		lib=("$libkey" "$libname" "$libversion" "$libversioncheck" "$libcheck" "$libversioncurrent" "$liburl" "(${libtasks[*]@Q})");
@@ -233,10 +248,17 @@ _build(){
 	
 };
 _dl(){
-	fname=$(basename "${1%..*}")
-	if [ ! -f "$dldir/$fname" ];then
+	[ -d "$dldir/#tmp" ] && rm --recursive --force "$dldir/#tmp"
+	mkdir --parents "$dldir/#tmp";
+	cd "$dldir/#tmp";
+	wget --content-disposition "$1" 2>&1 | stdbuf -o0 awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | "$gui" "$st_" "$bt_" "$title_" --title " -[ download ]- " --gauge "  $txt_loading $fname $txt_wait" 6 74;
+	if [ $? -eq 0 ];then
+		fname="$(ls -t | head -n1)"; md5file="$fname.md5";
+		md5sum "$fname" > "$md5file";
 		cd "$dldir";
-		wget "$1" 2>&1 | stdbuf -o0 awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | "$gui" "$st_" "$bt_" "$title_" --title " -[ download ]- " --gauge "  $txt_loading $fname $txt_wait" 6 74;
+		answer=$(md5sum -c "$md5file" 2>/dev/null | awk -F: '{printf $2}');
+		[ ! "$answer" == "OK" ] && mv --force "$dldir/#tmp/$fname" "$dldir/$fname";
+		rm --recursive --force "$dldir/#tmp";
 	fi;
 	[ -f "$dldir/$fname" ] && echo "$dldir/$fname";
 	exit;
@@ -320,6 +342,52 @@ _compare_version(){
 	[ $1 == $max ] && printf '>' && exit;
 	[ $1 == $min ] && printf '<' && exit;
 };
+_paktc_timer(){
+if [ "$1" == "0" ] || [ "${#1}" -eq 0 ];then
+	read -n 1 -s -r -p "Press any key to continue";
+else
+	for (( i=$1; i>0; i--)); do
+		sp=$(printf '%*s' $[$1-$i+1] | tr ' ' '.');
+		printf "\rPress any key to continue$sp"
+		read -s -n 1 -t 1 key
+		if [ $? -eq 0 ]
+		then
+			break
+		fi;
+	done
+fi;
+};
+_check_bin(){
+	bins=( curl jq );
+	failed=0;
+	for e in "${bins[@]}";
+	do
+		if ! hash "$e" 2>/dev/null; then
+			packages="$packages $e";
+			failed=1;
+		fi;
+	done;
+	[ "$failed" == 1 ] && echo -e "$r_l""\nCHECK -> You need to install the following tools to use this plugin properly:\n"$b_l"apt install$packages\n""$re_" && _paktc_timer && echo -e "\n" && exit;
+};
+_check_github_api_limits(){
+	
+	limit=$(curl --silent "https://api.github.com/rate_limit" | jq -r '.resources.core.limit');
+	remaining=$(curl --silent "https://api.github.com/rate_limit" | jq -r '.resources.core.remaining');
+	reset=$(curl --silent "https://api.github.com/rate_limit" | jq -r '.resources.core.reset');
+	reset_time=$(date -d @$reset);
+	
+	if [ "$remaining" -lt "$1" ]; then
+		echo -e "$y_l""NOTE -> Please wait until "$g_l"$reset_time"$y_l" to reset your configuration file."\
+					"The most recent versions and download links for the libraries are determined dynamically via the Github API."\
+					"Exceeding the rate limit on Github API will result in failures on generationg the configuration file."\
+					"Your Github API rate limit will be reset soon on $reset_time."\
+					"\nFor "$b_l"unauthenticated requests"$y_l", the rate limit allows for "$b_l"up to $limit requests per hour"$y_l". Unauthenticated requests are associated with the originating IP address, and not the user making requests."\
+					"\n$re_";
+		return 0;
+	else
+		return 1;
+	fi;
+};
 _create_config(){
 	sample_comments=( "#Enable/Disable (1|0)" \
 					  "#Displayname" \
@@ -331,17 +399,26 @@ _create_config(){
 	sample_settings=( "" name version check url tasks );
 	sample_keys=( SAMPLE_LIB SSL_111 SSL_110 SSL_102 SSL_100 SSL_098 LIB_USB LIB_PCSC LIB_ZLIB );
 	sample_names=( "SampleLib" "OpenSSL" "OpenSSL" "OpenSSL" "OpenSSL" "OpenSSL" "libusb" "PCSC-Lite" "zlib" );
-	sample_versions=( "0.2.9sl" "1.1.1d" "1.1.0l" "1.0.2u" "1.0.0t" "0.9.8zf" "1.0.23" "1.8.26" "1.2.11" );
+	sample_versions=( "0.2.9sl" \
+					  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_1[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g')"  \
+					  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_0[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g')"  \
+					  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g')"  \
+					  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_0[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g')"  \
+					  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_0_9_8[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g')"  \
+					  "$(curl --silent "https://api.github.com/repos/libusb/libusb/releases/latest" | jq -r '.tag_name' | cut -c 2-)"  \
+					  "$(curl --silent https://salsa.debian.org/api/v4/projects/19181/repository/tags | jq -r '.[0].name' | awk -F '[/-]' '{printf $2}')"  \
+					  "$(curl --silent https://api.github.com/repos/madler/zlib/tags | jq -r '.[0].name' | cut -c 2-)"  \
+					);
 	sample_checks=( "samplelib.pc" "openssl.pc" "openssl.pc" "openssl.pc" "openssl.pc" "openssl.pc" "libusb-1.0.pc" "libpcsclite.pc" "zlib.pc" );
 	sample_urls=( "https://sampleurl.com/archive.tar.bz" \
-				  "https://www.openssl.org/source/openssl-1.1.1d.tar.gz" \
-				  "https://www.openssl.org/source/openssl-1.1.0l.tar.gz" \
-				  "https://www.openssl.org/source/openssl-1.0.2u.tar.gz" \
-				  "https://www.openssl.org/source/openssl-1.0.0t.tar.gz" \
-				  "https://www.openssl.org/source/openssl-0.9.8zf.tar.gz" \
-				  "https://github.com/libusb/libusb/archive/v1.0.23.zip" \
-				  "https://pcsclite.apdu.fr/files/pcsc-lite-1.8.26.tar.bz2" \
-				  "https://www.zlib.net/zlib1211.zip" \
+				  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_1[a-z].*"))][0] | .tarball_url')" \
+				  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_0[a-z].*"))][0] | .tarball_url')" \
+				  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .tarball_url')" \
+				  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_0[a-z].*"))][0] | .tarball_url')" \
+				  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_0_9_8[a-z].*"))][0] | .tarball_url')" \
+				  "$(curl --silent "https://api.github.com/repos/libusb/libusb/releases/latest" | jq -r '.assets[1].browser_download_url')" \
+				  "$(echo 'https://salsa.debian.org/api/v4/projects/19181/repository/archive.tar.bz2?sha='$(curl --silent https://salsa.debian.org/api/v4/projects/19181/repository/tags | jq -r '.[0].commit.id'))" \
+				  "$(curl --silent https://api.github.com/repos/madler/zlib/tags | jq -r '.[0].tarball_url')" \
 				);
 	sample_tasks=( '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )' \
 				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )' \
@@ -376,7 +453,7 @@ _create_config(){
 							declare -a tasks="${sample_tasks[$i]}"
 							for t in "${tasks[@]}";
 							do
-								echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting"$([ "$j" -gt "0" ] && echo "+")"=$t; $([ "$i" -eq "0" ] && echo "${sample_comments[5]}$(($j+1))")"	>>"$configname";
+								echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting"$([ "$j" -gt "0" ] && echo "+")"=$t;$([ "$i" -eq "0" ] && echo " ${sample_comments[5]}$(($j+1))")"	>>"$configname";
 								((j++));
 							done;;
 			esac;
