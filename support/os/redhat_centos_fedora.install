@@ -64,6 +64,9 @@ do
 	if ! hash "$e" 2>/dev/null; then
 		inst="$e";
 		case $e in
+		git)
+			inst="git";
+			;;
 		svn)
 			inst="subversion";
 			;;
