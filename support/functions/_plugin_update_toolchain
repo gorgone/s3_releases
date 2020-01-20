@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#simplebuild_plugin tcupdate 0.4.0
+#simplebuild_plugin tcupdate 0.4.1
 
 tcupdate(){
 	clear && _check_bin;
@@ -19,7 +19,7 @@ tcupdate(){
 				_paktc_timer 30;
 			fi;
 		fi;
-		set -- #remove all parameters
+		set -- #remove all commandline parameters
 	fi;
 	#create config
 	if [ ! -f "$configname" ];then
@@ -159,7 +159,7 @@ tcupdate(){
 			#generate build command list
 			declare -a libtasks="${lib[7]}";		#populate tasks array element
 			for task in "${libtasks[@]}";do
-				task=$(_replace_tokens "$task");		#replace tokens
+				task=$(_replace_tokens "$task");	#replace tokens
 				buildtasks+=("$task");
 			done
 			
@@ -393,7 +393,7 @@ _create_config(){
 					  "#Displayname" \
 					  "#Versionnumber" \
 					  "#Filename to check in pkgconfig folder for an existing library to get version information" \
-					  "#Valid URL for downloading sources of library\n#List of build commands below. Pay attention to the SEMICOLON at the end of EACH\n#command and the correct quoting (\' or \") for or to avoid expansion of variables.\n#Tokens @TOOLCHAIN@, @CC@, @RANLIB@, @PREFIX@ are replaced automatically." \
+					  "#Valid URL for downloading sources of library\n#List of build commands below. Pay attention to the SEMICOLON at the end of EACH\n#command and the correct quoting (' or \") for or to avoid expansion of variables.\n#Tokens @TOOLCHAIN@, @CC@, @RANLIB@, @PREFIX@, @HOST@ are replaced automatically." \
 					  "#build command"
 					);
 	sample_settings=( "" name version check url tasks );
@@ -420,7 +420,7 @@ _create_config(){
 				  "$(echo 'https://salsa.debian.org/api/v4/projects/19181/repository/archive.tar.bz2?sha='$(curl --silent https://salsa.debian.org/api/v4/projects/19181/repository/tags | jq -r '.[0].commit.id'))" \
 				  "$(curl --silent https://api.github.com/repos/madler/zlib/tags | jq -r '.[0].tarball_url')" \
 				);
-	sample_tasks=( '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )' \
+	sample_tasks=( '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ --host=@HOST@ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )' \
 				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )' \
 				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )' \
 				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install SHLIB_VERSION_NUMBER=1.0.2 SHLIB_MINOR=0.2;\")" )' \
