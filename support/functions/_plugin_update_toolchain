@@ -1,12 +1,15 @@
 #!/bin/bash
 
-#simplebuild_plugin tcupdate 0.4.1
+#simplebuild_plugin tcupdate (s3.TUP) 0.7.0 
 
 tcupdate(){
 	clear && _check_bin;
 	
+	pversion="0.7.0";
+	pname="s3.TUP";
+	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
-	echo -e "config file='$configname'\n";
+	
 	#remove config
 	if [ "$1" == "-r" ] || [ "$1" == "--reset" ];then
 		if [ -f "$configname" ];then
@@ -21,6 +24,7 @@ tcupdate(){
 		fi;
 		set -- #remove all commandline parameters
 	fi;
+	
 	#create config
 	if [ ! -f "$configname" ];then
 		echo -e "$g_l""CLEANUP -> Creating new config file. Please wait...""$y_l""$re_";
@@ -28,38 +32,49 @@ tcupdate(){
 		echo -e "config file='$configname'\nYou can extend them to fit your needs.\n";
 		_paktc_timer 5;
 	fi;
+	
 	#load config	
 	source "$configname";
 	
-	if [ "$1" == "" ];then
+	#check config
+	_check_config;
+	
+	IFS="#";
+	if [ "$1" == "-c" ] || [ "$1" == "--create" ];then	
+		_create_tc;
+		bye;
+	elif [ "$1" == "" ];then
 		_fill_tc_array;
-		IFS="#";
 		unset MENU_OPTIONS;COUNT=0
 		if [ "$systype" == "ok" ];then
 			if [ "$tcempty" == "0" ];then
 				for i in "${INST_TCLIST[@]}";do
 					if [ ! "$i" == "native" ];then
 						source "$tccfgdir/$i";
-						MENU_OPTIONS+="$_toolchainname#$_description#";
+						MENU_OPTIONS+="$_toolchainname#$_description#toolchain folder:"$tcdir/$i" | config file:"$tccfgdir/$i"#";
 						counter;
 					fi;
 				done;
 			fi;
+			[ $COUNT -eq 0 ] && MENU_OPTIONS+="#no toolchains found#no toolchains found#" && counter;
 		fi;
-		out=$(
-		"$gui" "$st_" "$bt_" "$title_" "--default-item" "$3" "--cancel-label" "EXIT" "--help-button" "--help-label" "BACKUP" "--title" "-[ Toolchain $txt_menu ]-" --menu "\nChoose on of the installed toolchains you want to update:\n " "${COUNT+10}" 0 0 ${MENU_OPTIONS});
+		out=$("$gui" "$st_" "$bt_" "$title_ - $pdesc" "--item-help" "--help-tags" "--default-item" "$3" "--ok-label" "Update" "--cancel-label" "Create" "--help-button" "--help-label" "Exit" "--extra-button" "--extra-label" "Copy" "--title" "-[ Toolchain Menu ]-" --menu "\nSelect one of the installed tool chains that you want to update:\n " "${COUNT+10}" 0 0 ${MENU_OPTIONS});
+		ret="$?"
 
-		IFS=$OIFS;
-		[ "$out" == "" ] && bye;
-		first=$(echo "$out" | awk '{printf $1}');
-		tc_info=$(echo "$out" | awk '{printf $2}');
-		case $first in
-			HELP)
-						_toolchain_repair "$(_backup "$tc_info")";
-						tcupdate "" "0" "$tc_info";;
-			*)
-						tc="$first";
-						tc_menu="1";;
+		tc=$(echo "$out" | awk '{printf $1}');
+		case $ret in
+			0) #Update toolchain
+				tc_menu="1";;
+			1) #Start crosstool
+				tc_menu="2";
+				_create_tc;
+				tcupdate "" "0" "$tc";;
+			2) #Exit
+				bye;;
+			3) #Copy toolchain
+				[ ! "$tc" == "" ] && _toolchain_repair "$(_copy "$tc")" || echo -e "$r_l  $txt_error:$y_l $tc$w_l Toolchain $txt_n_installed""$rs_";
+				sleep 2;
+				tcupdate "" "0" "$tc";;
 		esac;
 	else
 		tc="$1"
@@ -100,6 +115,7 @@ tcupdate(){
 	pkg=$(find * | grep -m1 "/pkgconfig") && pkgdir="$prefixdir/$pkg";
 	
 	#build menu items from config file
+	IFS=$OIFS;
 	unset MENU_OPTIONS;COUNT=0;unset libs;
 	for i in "${LIBS[@]}"
 	do
@@ -124,8 +140,9 @@ tcupdate(){
 		lib=("$libkey" "$libname" "$libversion" "$libversioncheck" "$libcheck" "$libversioncurrent" "$liburl" "(${libtasks[*]@Q})");
 		libs+=("(${lib[*]@Q})");
 	done;
+	[ $COUNT -eq 0 ] && MENU_OPTIONS+="#no libraries found#no libraries found#" && counter;
 
-	opts=$("$gui" "--item-help" "--help-tags" "$st_" "$bt_" "$title_" "--default-item" "$3" "--help-button" "--help-label" "INFO" "--cancel-label" "$([ "$tc_menu" == "1" ] && echo "BACK" || echo "EXIT")" --title "-[ Library Update for Toolchain $tc ]-" "$cl_"\
+	opts=$("$gui" "--item-help" "--help-tags" "$st_" "$bt_" "$title_ - $pdesc" "--default-item" "$3" "--ok-label" "Start" "--help-button" "--help-label" "Info" "--cancel-label" "$([ "$tc_menu" == "1" ] && echo "Back" || echo "Exit")" --title "-[ Library Update Menu - $tc ]-" "$cl_"\
 		"\nSelect all libraries to update in toolchain's SYSROOT folder:\n$prefixdir\n\n       library version    NEW                    CURRENT" \
 		"${COUNT+12}" 70 0 "${MENU_OPTIONS[@]}");
 	
@@ -142,7 +159,7 @@ tcupdate(){
 		bcd=$(cat "$configname" | grep ""$libkey"_tasks");
 		txt=$(echo -e "Toolchain: $tcdir/$tc\nCompiler:  $compilername\nSysroot:   $sr\nPrefix:    $prefixdir\n$sp\n\nLibrary configuration:\n$txt\n\nBuild command:\n$(_replace_tokens "$(_tidy_tasks "$bcd" "$libkey")")");
 		tempfile=$(mktemp) && echo -e "$txt" > "$tempfile";
-		"$gui" "$st_" "$nc_" "$bt_" "$title_" "--textbox" "$tempfile" 30 80;
+		"$gui" "$st_" "$nc_" "$bt_" "$title_ - $pdesc" "--textbox" "$tempfile" 30 80;
 		rm "$tempfile" 2>/dev/null;
 		tcupdate $tc $tc_menu $libkey;
 	fi;	
@@ -162,7 +179,6 @@ tcupdate(){
 				task=$(_replace_tokens "$task");	#replace tokens
 				buildtasks+=("$task");
 			done
-			
 			_build "($i/$icount) ${lib[1]}" $(_extract $(_dl "${lib[6]}")) "$logfile" "${buildtasks[@]}";
 		done;
 	done;
@@ -176,7 +192,124 @@ tcupdate(){
 	
 	bye;
 };
-_backup(){
+_create_tc(){
+	_sz;					# Prepare DIALOG settings
+	ctdir="$sdir/crosstool";
+	ctsrcdir="$ctdir/source";
+	cttpldir="$ctdir/templates";
+	
+	tplempty=0;
+	[ ! -d "$cttpldir" ] && mkdir --parents "$cttpldir";
+	cd "$cttpldir";
+
+	if [ "$(ls -A "$cttpldir")" ];then
+		TPL_LIST=(*);
+	else
+		tplempty=1;
+	fi;
+
+	unset MENU_OPTIONS;COUNT=0;
+	if [ "$tplempty" == "0" ];then
+		for t in "${TPL_LIST[@]}";do
+			desc=$(sed -n -e '/#toolchain template/ s/.*\: *//p' $t);
+			[ ! "$desc" ] && desc="no description available";
+			[ -d "$tcdir/$t" ] && [ -f "$tccfgdir/$t" ] && color="\Z1" || color="";
+			MENU_OPTIONS+="$t#$color$desc\Zn#template filename:"$cttpldir/$t"#";
+			counter;
+		done;
+	fi;
+	[ $COUNT -eq 0 ] && MENU_OPTIONS+="#no templates found#no templates found#" && counter;
+	
+	opts=$("$gui" "$st_" "$bt_" "$title_ - $pdesc" "--colors" "--item-help" "--help-tags" "--default-item" "$3" "--ok-label" "Start" "--cancel-label" "Setup" "--help-button" "--help-label" "$([ $tc_menu ] && echo "Back" || echo "Exit")" "--title" "-[ Cross Toolchain Template Menu ]-" \
+		   --menu "\nSelect on of the templates to create the cross toolchain you want:\n\n\Z1NOTE: If you create a cross toolchain from a template with a red colored description, an existing one with the same name will be replaced without asking!\Zn" \
+		   "${COUNT+11}" 0 0 ${MENU_OPTIONS});
+	ret="$?"
+	
+	tpl=$(echo "$opts" | awk '{printf $1}');
+	case $ret in
+		0) #Start - Build cross toolchain
+			if [ -f "$ctsrcdir/ct-ng" ]; then
+				if [ -f "$cttpldir/$tpl" ]; then
+					#logfile="$ldir/$(date +%F)_$(date +%T)_update_toolchain_crosstoolchain_"$tpl".log"
+
+					#copy template and patching them
+					cp --no-preserve=mode,ownership -f "$cttpldir/$tpl" "$ctsrcdir/.config";
+					#CT_LOCAL_TARBALLS_DIR aka cache folder for downloads
+					sed -i "s#.*CT_LOCAL_TARBALLS_DIR=.*#CT_LOCAL_TARBALLS_DIR=\"$dldir\"#g" "$ctsrcdir/.config";
+					#CT_PREFIX_DIR aka folder that contains the final toolchain
+					sed -i "s#.*CT_PREFIX_DIR=.*#CT_PREFIX_DIR=\"$tcdir/$tpl\"#g" "$ctsrcdir/.config";
+					#CT_PARALLEL_JOBS
+					sed -i "s#.*CT_PARALLEL_JOBS=.*#CT_PARALLEL_JOBS=$CTNG_PARALLEL_JOBS#g" "$ctsrcdir/.config";
+					clear;
+
+					#run build
+					bcl=$(printf '%s\n' "${CTNG_BUILD_tasks[@]}");
+					sp=$(printf '%*s' 80 | tr ' ' '=')
+					echo -e "$sp\nbuild command list for cross toolchain $tpl (executed as user $CTNG_USER):\n$sp\ncd "$ctsrcdir"\n$(_replace_tokens "$bcl")\n$sp";
+					sleep 2;
+					cd "$ctsrcdir";
+					cmd="${CTNG_BUILD_tasks[@]}";
+					sudo -u "$CTNG_USER" -H -- sh -c "$(_replace_tokens "$cmd")" 2>&1;
+					err=$(grep '\[ERROR\]' "$ctsrcdir/build.log" | wc -l)
+
+					if [ ! $err -gt 0 ]; then
+						#get target from build.log
+						target=$(sed -n -e '/target = / s/.*\= *//p' "$ctsrcdir/build.log");
+					
+						#compress toolchain
+						_compress "$dldir/Toolchain-$tpl.tar.xz" "$tcdir/$tpl" | "$gui" "$st_" --colors --title " -[ Compress cross toolchain $tpl... ]- " "$pb_" "$_lines" "$_cols";
+						
+						#create toolchain.cfg
+						desc=$(sed -n -e '/#toolchain template/ s/.*\: *//p' "$cttpldir/$tpl");
+						_create_toolchaincfg "$tcdir/$tpl" "$tpl" "$target" "$desc" "$dldir/Toolchain-$tpl.tar.xz";
+					else
+						_paktc_timer;
+					fi;
+				else
+					[ "$tpl" == "" ] && echo -e "$r_l  $txt_error:$y_l $tc$w_l Template $txt_n_installed""$rs_";
+					sleep 2;
+				fi;
+			else
+				echo -e "$r_l""CHECK -> crosstool-NG is not setup correctly. Please run 'Setup' from menu!\n""$re_";
+				_paktc_timer 10;
+			fi;
+			_create_tc;;
+		1) #Setup - Setup crosstool-NG
+			logfile="$ldir/$(date +%F)_$(date +%T)_update_toolchain_crosstool-NG_setup.log"
+			(
+			bcl=$(printf '%s\n' "${CTNG_SETUP_tasks[@]}");
+			sp=$(printf '%*s' 80 | tr ' ' '=')
+			echo -e "$sp\nbuild command list for crosstool-NG (executed as user $CTNG_USER):\n$sp\ncd "$ctsrcdir"\n$(_replace_tokens "$bcl")\n$sp";
+			sleep 2;
+			#ct-ng must not run as root, so create and run as the low privileged user defined in config
+			id -u "$CTNG_USER" &>/dev/null;
+			if [ $? -gt 0 ]; then
+				echo "Creating low privileged user "$CTNG_USER", because crosstool-NG must not run as root..."
+				userdel -r "$CTNG_USER" 2>/dev/null
+				adduser --disabled-password --gecos "" "$CTNG_USER" 2>/dev/null;
+			fi;
+			
+			#adjust folder permissions for low privileged user
+			echo "Adjust s3 folder permissions for user "$CTNG_USER"..."
+			chmod 755 "$sdir" && chmod 755 "$ctdir"; #s3 support, crosstool folder
+			chmod -R 777 "$tcdir" && chmod -R 777 "$dldir" && chmod -R 777 "$ldir"; #s3 toolchains, downloads, logs folder
+			
+			# setup crosstool wc
+			echo "Cleanup source directory "$ctsrcdir/"..."
+			rm -r "$ctsrcdir" 2>/dev/null;
+			mkdir --parents "$ctsrcdir";
+			chown -R "$CTNG_USER":"$CTNG_USER" "$ctsrcdir"; #ct-ng source folder
+			cd "$ctsrcdir";
+			cmd="${CTNG_SETUP_tasks[@]}";
+			sudo -u "$CTNG_USER" -H -- sh -c "$(_replace_tokens "$cmd")" 2>&1;
+			) | tee "$logfile" | "$gui" "$st_" --colors --title " -[ Setup crosstool-NG... ]- " "$pb_" "$_lines" "$_cols";
+			_paktc_timer;
+			_create_tc;;
+		2) #Exit
+			return;;
+	esac;
+};
+_copy(){
 
 	_sz;					# Prepare DIALOG settings
 	nr=$(( $RANDOM % 100 ));
@@ -185,38 +318,13 @@ _backup(){
 	xzfile="$dldir/Toolchain-$newtc.tar.xz";
 	
 	(
-	#generate xz-file
-	XZ_OPT=-e9 tar -cvJf "$xzfile" -C "$tcdir/$1" .
+	#compress toolchain
+	_compress "$xzfile" "$tcdir/$1"
 	
-	#create new toolchains.cfg file
-	cp "$tccfgdir/$1" "$newtccfgfile";
-	
-	if [ -f "$newtccfgfile" ];then
-		#autodetect toolchain's sysroot folder
-		source "$newtccfgfile";
-		cd "$tcdir/$1/bin";
-		compilername="$_compiler""gcc";compilername=$(realpath $compilername);
-		sr=$("$compilername" -print-sysroot 2>/dev/null);
-		sr=$(realpath -sm "$sr");
-		sysroot=${sr#"$tcdir/$1/"};
-		
-		#update toolchains.cfg file 
-		#_toolchainname
-		sed -i "s#.*_toolchainname=.*#_toolchainname=\"$newtc\";#g" "$newtccfgfile";
-		#_description
-		sed -i "s#.*_description=.*#_description=\"$_description\";#g" "$newtccfgfile";
-		#_sysroot
-		sed -i "s#.*_sysroot=.*#_sysroot=\"$sysroot\";#g" "$newtccfgfile";
-		#_toolchainfilename
-		encfile=$(echo -en "$(basename "${xzfile%..*}")" | base64);
-		sed -i "s#.*_toolchainfilename=.*#_toolchainfilename=\"$encfile\";#g" "$newtccfgfile";
-		#_md5sum
-		cd "$dldir" && md5hash="$(md5sum $(basename "${xzfile%..*}"))";
-		sed -i "s#.*_md5sum=.*#_md5sum=\"$md5hash\";#g" "$newtccfgfile";
-		
-		"$gui" "$st_" "$nc_" "$bt_" "$title_" "--textbox" "$newtccfgfile" 30 80;
-	fi;
-	) | "$gui" "$st_" --colors --title " -[ Backup $1 to $newtc ... ]- " "$pb_" "$_lines" "$_cols";
+	#create toolchain.cfg
+	source "$tccfgdir/$1" && target="${_compiler%?}" && desc="$_description";
+	_create_toolchaincfg "$tcdir/$1" "$newtc" "$target" "$desc" "$xzfile";
+	) | "$gui" "$st_" --colors --title " -[ Copy $1 to $newtc ... ]- " "$pb_" "$_lines" "$_cols";
 	[ -f "$newtccfgfile" ] && echo "$newtc";
 };
 _build(){
@@ -231,7 +339,7 @@ _build(){
 	(	
 	bcl=$(printf '%s\n' "${tasks[@]}");
 	
-	sp=$(printf '%*s' 100 | tr ' ' '=')
+	sp=$(printf '%*s' 80 | tr ' ' '=')
 	echo -e "$sp\nbuild command list for $desc:\n$sp\ncd "$libsrcdir"\n$bcl\n$sp" | tee -a "$lf";
 	sleep 2;
 	cd "$libsrcdir";
@@ -251,7 +359,7 @@ _dl(){
 	[ -d "$dldir/#tmp" ] && rm --recursive --force "$dldir/#tmp"
 	mkdir --parents "$dldir/#tmp";
 	cd "$dldir/#tmp";
-	wget --content-disposition "$1" 2>&1 | stdbuf -o0 awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | "$gui" "$st_" "$bt_" "$title_" --title " -[ download ]- " --gauge "  $txt_loading $fname $txt_wait" 6 74;
+	wget --content-disposition "$1" 2>&1 | stdbuf -o0 awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | "$gui" "$st_" "$bt_" "$title_ - $pdesc" --title " -[ download ]- " --gauge "  $txt_loading $fname $txt_wait" 6 74;
 	if [ $? -eq 0 ];then
 		fname="$(ls -t | head -n1)"; md5file="$fname.md5";
 		md5sum "$fname" > "$md5file";
@@ -263,6 +371,10 @@ _dl(){
 	[ -f "$dldir/$fname" ] && echo "$dldir/$fname";
 	exit;
 };
+_compress(){
+	#generate xz-file
+	XZ_OPT=-e9 tar -cvJf "$1" -C "$2" .
+};
 _extract(){
     local c e i;
 
@@ -270,7 +382,7 @@ _extract(){
 
 	edir=/tmp/lib_source;
 	[ -d "$edir" ] && rm -r "$edir";
-	mkdir "$edir";
+	mkdir --parents "$edir";
 	
     for i; do
         c='';
@@ -314,7 +426,8 @@ _replace_tokens(){
 						s#@CC@#$compilername#g; \
 						s#@RANLIB@#$ranlibname#g; \
 						s#@PREFIX@#$prefixdir#g; \
-						s#@HOST@#$hostname#g";
+						s#@HOST@#$hostname#g; \
+						s#@CTNGSOURCE@#$ctsrcdir#g";
 };
 _tidy_tasks(){
 	echo -e "$1" | sed -e "s#$2"_tasks=\(\""##g; \
@@ -358,17 +471,34 @@ else
 fi;
 };
 _check_bin(){
-	bins=( curl jq );
+
+	bins=( git curl jq gcc g++ gperf bison flex texinfo help2man make libncurses5-dev \
+		   python3-dev autoconf automake libtool libtool-bin gawk wget bzip2 xz-utils unzip \
+		   patch libstdc++6 rsync );
 	failed=0;
 	for e in "${bins[@]}";
 	do
-		if ! hash "$e" 2>/dev/null; then
+		dpkg -s "$e" &>/dev/null;
+		if [ ! "$?" -eq "0" ];then
 			packages="$packages $e";
 			failed=1;
 		fi;
 	done;
-	[ "$failed" == 1 ] && echo -e "$r_l""\nCHECK -> You need to install the following tools to use this plugin properly:\n"$b_l"apt install$packages\n""$re_" && _paktc_timer && echo -e "\n" && exit;
+	[ "$failed" == 1 ] && echo -e "$r_l""\nCHECK -> You need to install the following tools to use this plugin properly:\n"$y_l"apt install$packages\n""$re_" && _paktc_timer 10 && echo -e "\n TODO";
+	return $failed;
 };
+_check_config(){
+	nok=0;
+	[ -z ${CTNG_USER+x} ] && nok=1;
+	[ -z ${LIBS+x} ] && nok=1;
+	
+	if [ $nok -eq 1 ]; then 
+		clear;
+		echo -e "$r_l""CHECK -> Your config file seems to be outdated. Please restart s3 as follows to recreate an updated config file:\n"$y_l"./s3 tcupdate -r\n""$re_";
+		_paktc_timer 10;
+		return $nok;
+	fi;
+};	
 _check_github_api_limits(){
 	
 	limit=$(curl --silent "https://api.github.com/rate_limit" | jq -r '.resources.core.limit');
@@ -389,17 +519,17 @@ _check_github_api_limits(){
 	fi;
 };
 _create_config(){
-	sample_comments=( "#Enable/Disable (1|0)" \
+	lib_comments=( "#Enable/Disable (1|0)" \
 					  "#Displayname" \
 					  "#Versionnumber" \
 					  "#Filename to check in pkgconfig folder for an existing library to get version information" \
 					  "#Valid URL for downloading sources of library\n#List of build commands below. Pay attention to the SEMICOLON at the end of EACH\n#command and the correct quoting (' or \") for or to avoid expansion of variables.\n#Tokens @TOOLCHAIN@, @CC@, @RANLIB@, @PREFIX@, @HOST@ are replaced automatically." \
 					  "#build command"
 					);
-	sample_settings=( "" name version check url tasks );
-	sample_keys=( SAMPLE_LIB SSL_111 SSL_110 SSL_102 SSL_100 SSL_098 LIB_USB LIB_PCSC LIB_ZLIB );
-	sample_names=( "SampleLib" "OpenSSL" "OpenSSL" "OpenSSL" "OpenSSL" "OpenSSL" "libusb" "PCSC-Lite" "zlib" );
-	sample_versions=( "0.2.9sl" \
+	lib_settings=( "" name version check url tasks );
+	lib_keys=( SAMPLE_LIB SSL_111 SSL_110 SSL_102 SSL_100 SSL_098 LIB_USB LIB_PCSC LIB_ZLIB );
+	lib_names=( "SampleLib" "OpenSSL" "OpenSSL" "OpenSSL" "OpenSSL" "OpenSSL" "libusb" "PCSC-Lite" "zlib" );
+	lib_versions=( "0.2.9sl" \
 					  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_1[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g')"  \
 					  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_0[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g')"  \
 					  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g')"  \
@@ -409,8 +539,8 @@ _create_config(){
 					  "$(curl --silent https://salsa.debian.org/api/v4/projects/19181/repository/tags | jq -r '.[0].name' | awk -F '[/-]' '{printf $2}')"  \
 					  "$(curl --silent https://api.github.com/repos/madler/zlib/tags | jq -r '.[0].name' | cut -c 2-)"  \
 					);
-	sample_checks=( "samplelib.pc" "openssl.pc" "openssl.pc" "openssl.pc" "openssl.pc" "openssl.pc" "libusb-1.0.pc" "libpcsclite.pc" "zlib.pc" );
-	sample_urls=( "https://sampleurl.com/archive.tar.bz" \
+	lib_checks=( "samplelib.pc" "openssl.pc" "openssl.pc" "openssl.pc" "openssl.pc" "openssl.pc" "libusb-1.0.pc" "libpcsclite.pc" "zlib.pc" );
+	lib_urls=( "https://sampleurl.com/archive.tar.bz" \
 				  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_1[a-z].*"))][0] | .tarball_url')" \
 				  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_0[a-z].*"))][0] | .tarball_url')" \
 				  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .tarball_url')" \
@@ -420,7 +550,7 @@ _create_config(){
 				  "$(echo 'https://salsa.debian.org/api/v4/projects/19181/repository/archive.tar.bz2?sha='$(curl --silent https://salsa.debian.org/api/v4/projects/19181/repository/tags | jq -r '.[0].commit.id'))" \
 				  "$(curl --silent https://api.github.com/repos/madler/zlib/tags | jq -r '.[0].tarball_url')" \
 				);
-	sample_tasks=( '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ --host=@HOST@ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )' \
+	lib_tasks=( '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ --host=@HOST@ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )' \
 				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )' \
 				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )' \
 				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install SHLIB_VERSION_NUMBER=1.0.2 SHLIB_MINOR=0.2;\")" )' \
@@ -431,33 +561,84 @@ _create_config(){
 				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./configure --prefix=@PREFIX@/;\")" "(\"make;\")" "(\"make install;\")" )' \
 				 );
 
-	echo '#list of ordered library list'	 						 							 >"$configname";
-	echo '#only libraries in this list are available'											>>"$configname";
-	echo "LIBS=(${sample_keys[@]});"															>>"$configname";
+	ctng_build_tasks=( "(\"./ct-ng build;\")" );
+	ctng_build_tasks_comment="#build command";
+	ctng_setup_tasks=( "(\"git clone --progress \"\$CTNG_REPO_URL\" \"@CTNGSOURCE@\";\")" "(\"./bootstrap;\")" "(\"./configure --enable-local;\")" "(\"make;\")" "(\"touch \"@CTNGSOURCE@\.config\";\")" );
+	ctng_setup_tasks_comment="#setup command";
+	
+	echo '#CROSS toolchain build settings'	 						 						 				 				 >"$configname";
+	echo 'CTNG_USER="ctng"; #low privileged user that run ct-ng (will be created automatically, if not exists)'				>>"$configname";
+	echo 'CTNG_REPO_URL="https://github.com/crosstool-ng/crosstool-ng"; #Repository to load ct-ng from'	 					>>"$configname";
+	echo 'CTNG_PARALLEL_JOBS="4"; #Number of parallel build jobs'	 						 								>>"$configname";
+	echo '#List of build and setup commands below. Pay attention to the SEMICOLON at the end of EACH'	 					>>"$configname";
+	echo '#command and the correct quoting ('"'"' or ") for or to avoid expansion of variables.'	 						>>"$configname";
+	echo '#Tokens @CTNGSOURCE@ are replaced automatically. The commands are executed in the context of the user CTNG_USER.'	>>"$configname";
+	i=0;
+	for bt in "${ctng_build_tasks[@]}";
+	do
+		echo -e "CTNG_BUILD_tasks"$([ "$i" -gt "0" ] && echo "+")"=$bt; $ctng_build_tasks_comment$(($i+1))"					>>"$configname";
+		((i++));
+	done;
+	i=0;
+	for st in "${ctng_setup_tasks[@]}";
+	do
+		echo -e "CTNG_SETUP_tasks"$([ "$i" -gt "0" ] && echo "+")"=$st; $ctng_setup_tasks_comment$(($i+1))"					>>"$configname";
+		((i++));
+	done;
+	
+	echo -e '\n#LIBRARY update build settings\n#List of ordered libraries. Only libraries in this list are available'		>>"$configname";
+	echo "LIBS=(${lib_keys[@]});"																							>>"$configname";
 
 	i=0;
-	for key in "${sample_keys[@]}";
+	for key in "${lib_keys[@]}";
 	do
-		for setting in "${sample_settings[@]}";
+		for setting in "${lib_settings[@]}";
 		do
 			case "$setting" in
 				"")   		if [ -z $setting ];then
-								echo -e "\n#"${sample_names[$i]}" "${sample_versions[$i]}""		>>"$configname";
+								echo -e "\n#"${lib_names[$i]}" "${lib_versions[$i]}""		>>"$configname";
 							fi;
-							echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"$([ "$key" == "SAMPLE_LIB" ] && echo '0' || echo '1')\";$([ "$i" -eq "0" ] && echo " ${sample_comments[0]}")"	>>"$configname";;
-				"name")   	echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"${sample_names[$i]}\";$([ "$i" -eq "0" ] && echo " ${sample_comments[1]}")"		>>"$configname";;
-				"version")	echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"${sample_versions[$i]}\";$([ "$i" -eq "0" ] && echo " ${sample_comments[2]}")"	>>"$configname";;
-				"check")	echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"${sample_checks[$i]}\";$([ "$i" -eq "0" ] && echo " ${sample_comments[3]}")"	>>"$configname";;
-				"url")		echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"${sample_urls[$i]}\";$([ "$i" -eq "0" ] && echo " ${sample_comments[4]}")"		>>"$configname";;
+							echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"$([ "$key" == "SAMPLE_LIB" ] && echo '0' || echo '1')\";$([ "$i" -eq "0" ] && echo " ${lib_comments[0]}")"	>>"$configname";;
+				"name")   	echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"${lib_names[$i]}\";$([ "$i" -eq "0" ] && echo " ${lib_comments[1]}")"		>>"$configname";;
+				"version")	echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"${lib_versions[$i]}\";$([ "$i" -eq "0" ] && echo " ${lib_comments[2]}")"	>>"$configname";;
+				"check")	echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"${lib_checks[$i]}\";$([ "$i" -eq "0" ] && echo " ${lib_comments[3]}")"	>>"$configname";;
+				"url")		echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"${lib_urls[$i]}\";$([ "$i" -eq "0" ] && echo " ${lib_comments[4]}")"		>>"$configname";;
 				"tasks")	unset tasks;j=0;
-							declare -a tasks="${sample_tasks[$i]}"
+							declare -a tasks="${lib_tasks[$i]}"
 							for t in "${tasks[@]}";
 							do
-								echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting"$([ "$j" -gt "0" ] && echo "+")"=$t;$([ "$i" -eq "0" ] && echo " ${sample_comments[5]}$(($j+1))")"	>>"$configname";
+								echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting"$([ "$j" -gt "0" ] && echo "+")"=$t;$([ "$i" -eq "0" ] && echo " ${lib_comments[5]}$(($j+1))")"	>>"$configname";
 								((j++));
 							done;;
 			esac;
 		done;
 		((i++))
 	done;
+};
+_create_toolchaincfg(){
+	cd "$1/bin";
+	compilername="$3""-gcc";compilername=$(realpath $compilername);
+	sr=$("$compilername" -print-sysroot 2>/dev/null);
+	sr=$(realpath -sm "$sr");
+	sysroot=${sr#"$1/"};
+	cd "$tccfgdir";
+	cat << EOF > $2
+_toolchainname="$2";
+default_use="USE_UTF8 USE_LIBCRYPTO";
+_description="$4"
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+
+_compiler="$3-";
+_sysroot="$sysroot";
+_libsearchdir="/usr/lib";
+_toolchainfilename="$(echo -en "$(basename "${5%..*}")" | base64)";
+_md5sum="$(cd "$dldir" && md5sum $(basename "${5%..*}"))";
+_tc_info="$(echo -e "\\\n
+!!! crosstool-NG Toolchain !!!\\\n
+\\\n
+$4\\\n
+\\\n")";
+_tc_infolines="5";
+EOF
 };
