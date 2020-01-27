@@ -1,11 +1,11 @@
 #!/bin/bash
 
-#simplebuild_plugin tcupdate (s3.TUP) 0.8.1 
+#simplebuild_plugin tcupdate (s3.TUP) 0.8.2 
 
 tcupdate(){
 	clear && _check_bin;
 	
-	pversion="0.8.1";
+	pversion="0.8.2";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -104,8 +104,8 @@ tcupdate(){
 	fi;
 
 	#autodetect toolchain's sysroot, prefix and pkgconfig folder
-	compilername="$_compiler""gcc";compilername=$(realpath $compilername);
-	ranlibname="$_compiler""ranlib";ranlibname=$(realpath $ranlibname);
+	compilername="$_compiler""gcc";compilername=$(realpath -s $compilername);
+	ranlibname="$_compiler""ranlib";ranlibname=$(realpath -s $ranlibname);
 	hostname=${_compiler%?};
 	sr=$("$compilername" -print-sysroot 2>/dev/null);
 	sr=$(realpath -sm "$sr");
@@ -237,22 +237,29 @@ _create_tc(){
 				icount=$(echo $opts | wc -w);i=0;
 				for tpl in $opts;do
 					if [ -f "$cttpldir/$tpl" ]; then
-						logfile="$ldir/$(date +%F)_$(date +%T)_update_toolchain_crosstoolchain_"$tpl".log" && ((i++));
+						
+						logfile="$ldir/$(date +%F)_$(date +%T)_update_toolchain_crosstoolchain_"$tpl".log" && ((i++)); 
 
+						clear;
+						sp=$(printf '%*s' 80 | tr ' ' '=')
+						echo -e "$sp\nbuild ($i/$icount): command list for cross toolchain $tpl (executed as user $CTNG_USER):\n$sp" | tee -a "$logfile";
+						
 						#copy template and patching them
+						echo "cp --no-preserve=mode,ownership -f "$cttpldir/$tpl" "$ctsrcdir/.config";" | tee -a "$logfile";
 						cp --no-preserve=mode,ownership -f "$cttpldir/$tpl" "$ctsrcdir/.config";
 						#CT_LOCAL_TARBALLS_DIR aka cache folder for downloads
+						echo "sed -i \"s#.*CT_LOCAL_TARBALLS_DIR=.*#CT_LOCAL_TARBALLS_DIR=\"$dldir\"#g\" "$ctsrcdir/.config";" | tee -a "$logfile";
 						sed -i "s#.*CT_LOCAL_TARBALLS_DIR=.*#CT_LOCAL_TARBALLS_DIR=\"$dldir\"#g" "$ctsrcdir/.config";
 						#CT_PREFIX_DIR aka folder that contains the final toolchain
+						echo "sed -i \"s#.*CT_PREFIX_DIR=.*#CT_PREFIX_DIR=\"$tcdir/$tpl\"#g\" "$ctsrcdir/.config";" | tee -a "$logfile";
 						sed -i "s#.*CT_PREFIX_DIR=.*#CT_PREFIX_DIR=\"$tcdir/$tpl\"#g" "$ctsrcdir/.config";
 						#CT_PARALLEL_JOBS aka parallel build job count
+						echo "sed -i \"s#.*CT_PARALLEL_JOBS=.*#CT_PARALLEL_JOBS=$CTNG_PARALLEL_JOBS#g\" "$ctsrcdir/.config";" | tee -a "$logfile";
 						sed -i "s#.*CT_PARALLEL_JOBS=.*#CT_PARALLEL_JOBS=$CTNG_PARALLEL_JOBS#g" "$ctsrcdir/.config";
-						clear;
 
 						#run build as $CTNG_USER
 						bcl=$(printf '%s\n' "${CTNG_BUILD_tasks[@]}");
-						sp=$(printf '%*s' 80 | tr ' ' '=')
-						echo -e "$sp\nbuild ($i/$icount): command list for cross toolchain $tpl (executed as user $CTNG_USER):\n$sp\ncd "$ctsrcdir"\n$(_replace_tokens "$bcl")\n$sp";
+						echo -e "cd "$ctsrcdir"\n$(_replace_tokens "$bcl")\n$sp" | tee -a "$logfile";
 						sleep 2;
 						cd "$ctsrcdir";
 						cmd="${CTNG_BUILD_tasks[@]}";
@@ -260,7 +267,7 @@ _create_tc(){
 						err=$(grep '\[ERROR\]' "$ctsrcdir/build.log" | wc -l)
 
 						#save build.log in logs
-						cp -f "$ctsrcdir/build.log" "$logfile"; 
+						cat "$ctsrcdir/build.log" >>"$logfile"; 
 						
 						if [ ! $err -gt 0 ]; then
 							#get target from build.log
@@ -574,7 +581,7 @@ _create_config(){
 				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install SHLIB_VERSION_NUMBER=1.0.2 SHLIB_MINOR=0.2;\")" )' \
 				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )' \
 				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )' \
-				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./bootstrap.sh;\")" "(\"./configure --prefix=@PREFIX@/ --host=@HOST@ --disable-udev;\")" "(\"make;\")" "(\"make install;\")" )' \
+				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./configure --prefix=@PREFIX@/ --host=@HOST@ --disable-udev;\")" "(\"make;\")" "(\"make install;\")" )' \
 				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./configure --prefix=@PREFIX@/ --host=@HOST@ --disable-libudev --disable-libsystemd LIBUSB_LIBS=\\\"-L@PREFIX@/lib -lusb-1.0 -lrt\\\" LIBUSB_CFLAGS=\\\"-I@PREFIX@/include/libusb-1.0\\\";\")" "(\"make;\")" "(\"make install;\")" )' \
 				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./configure --prefix=@PREFIX@/;\")" "(\"make;\")" "(\"make install;\")" )' \
 				 );
@@ -637,7 +644,7 @@ _create_config(){
 };
 _create_toolchaincfg(){
 	cd "$1/bin";
-	compilername="$3""-gcc";compilername=$(realpath $compilername);
+	compilername="$3""-gcc";compilername=$(realpath -s $compilername);
 	sr=$("$compilername" -print-sysroot 2>/dev/null);
 	sr=$(realpath -sm "$sr");
 	sysroot=${sr#"$1/"};
