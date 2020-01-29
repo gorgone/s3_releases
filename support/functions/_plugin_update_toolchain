@@ -1,11 +1,11 @@
 #!/bin/bash
 
-#simplebuild_plugin tcupdate (s3.TUP) 0.8.2 
+#simplebuild_plugin tcupdate (s3.TUP) 0.8.3
 
 tcupdate(){
 	clear && _check_bin;
 	
-	pversion="0.8.2";
+	pversion="0.8.3";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -108,7 +108,7 @@ tcupdate(){
 	ranlibname="$_compiler""ranlib";ranlibname=$(realpath -s $ranlibname);
 	hostname=${_compiler%?};
 	sr=$("$compilername" -print-sysroot 2>/dev/null);
-	sr=$(realpath -sm "$sr");
+	sr=$(realpath -sm "$sr" 2>/dev/null);
 	if [ ${#sr} -gt ${#tcdir} ];then
 		[ -d "$sr/include" ] && cd "$sr"
 		[ -d "$sr/usr/include" ] && cd "$sr/usr"
@@ -128,16 +128,17 @@ tcupdate(){
 		libdesc="$i"_desc;libdesc=${!libdesc};
 		libversion="$i"_version;libversion=${!libversion};
 		libcheck="$i"_check;libcheck=${!libcheck};
+		libversioncheck=$(echo "$libcheck" | awk '{printf $2}')
+		libcheck=$(echo "$libcheck" | awk '{printf $1}')
 		liburl="$i"_url;liburl=${!liburl};
-		libversioncheck=$(echo $libversion | sed -e 's/[a-zA-Z]//g');
 		libversioncurrent=$(_get_version "$pkgdir/$libcheck" "$libversioncheck");
-		libversioncompare=$(_compare_version $libversion $(echo $libversioncurrent | sed -e 's/^$/0.0.0/g') | sed -e 's/>//g');
+		libversioncompare=$(_compare_version $libversion $(echo $libversioncurrent | sed -e 's/^$/0.0.0/g'));
 		libtasks="$i"_tasks[@];libtasks=("${!libtasks}");
 		libexports="$i"_exports[@];libexports=("${!libexports}");
 		libconfigure="$i"_configure[@];libconfigure=("${!libconfigure}");
 		libmake="$i"_make[@];libmake=("${!libmake}");
 
-		MENU_OPTIONS+=("$i"		"$libname $libversion  	$libversioncompare	$(echo $libversioncurrent | sed -e 's/^$/ ---/g')"		"$([ $libversioncurrent ] && echo "on" || echo "off")"	"$([ $libname ] && echo "$libname $libversion: $liburl")");counter;
+		MENU_OPTIONS+=("$i"		"$libname $libversion  	$([ $libversioncurrent ] && echo $libversioncompare)	$(echo $libversioncurrent | sed -e 's/^$/ ---/g')"		"$([ $libversioncurrent ] && echo "on" || echo "off")"	"$([ $libname ] && echo "$libname $libversion: $liburl")");counter;
 		
 		#     0 key     1 desc     2 version     3 checkversion     4 checkfile 5 current version    6 url      7 tasks array
 		lib=("$libkey" "$libname" "$libversion" "$libversioncheck" "$libcheck" "$libversioncurrent" "$liburl" "(${libtasks[*]@Q})");
@@ -238,7 +239,7 @@ _create_tc(){
 				for tpl in $opts;do
 					if [ -f "$cttpldir/$tpl" ]; then
 						
-						logfile="$ldir/$(date +%F)_$(date +%T)_update_toolchain_crosstoolchain_"$tpl".log" && ((i++)); 
+						logfile="$ldir/$(date +%F)_$(date +%T)_update_toolchain_crosstoolchain_"$tpl".log"; ((i++)); 
 
 						clear;
 						sp=$(printf '%*s' 80 | tr ' ' '=')
@@ -253,9 +254,6 @@ _create_tc(){
 						#CT_PREFIX_DIR aka folder that contains the final toolchain
 						echo "sed -i \"s#.*CT_PREFIX_DIR=.*#CT_PREFIX_DIR=\"$tcdir/$tpl\"#g\" "$ctsrcdir/.config";" | tee -a "$logfile";
 						sed -i "s#.*CT_PREFIX_DIR=.*#CT_PREFIX_DIR=\"$tcdir/$tpl\"#g" "$ctsrcdir/.config";
-						#CT_PARALLEL_JOBS aka parallel build job count
-						echo "sed -i \"s#.*CT_PARALLEL_JOBS=.*#CT_PARALLEL_JOBS=$CTNG_PARALLEL_JOBS#g\" "$ctsrcdir/.config";" | tee -a "$logfile";
-						sed -i "s#.*CT_PARALLEL_JOBS=.*#CT_PARALLEL_JOBS=$CTNG_PARALLEL_JOBS#g" "$ctsrcdir/.config";
 
 						#run build as $CTNG_USER
 						bcl=$(printf '%s\n' "${CTNG_BUILD_tasks[@]}");
@@ -278,7 +276,7 @@ _create_tc(){
 							
 							#create toolchain.cfg
 							desc=$(sed -n -e '/#toolchain template/ s/.*\: *//p' "$cttpldir/$tpl");
-							_create_toolchaincfg "$tcdir/$tpl" "$tpl" "$target" "$desc" "$dldir/Toolchain-$tpl.tar.xz";
+							_create_toolchaincfg "$tcdir/$tpl" "$tpl" "$target" "" "" "$desc" "" "$dldir/Toolchain-$tpl.tar.xz";
 						else
 							_paktc_timer 10;
 						fi;
@@ -340,8 +338,8 @@ _copy(){
 	_compress "$xzfile" "$tcdir/$1"
 	
 	#create toolchain.cfg
-	source "$tccfgdir/$1" && target="${_compiler%?}" && desc="$_description";
-	_create_toolchaincfg "$tcdir/$1" "$newtc" "$target" "$desc" "$xzfile";
+	source "$tccfgdir/$1" && target="${_compiler%?}" && sysroot="$_sysroot" && lsd="$_libsearchdir" && desc="$_description" && info="$_tc_info";
+	_create_toolchaincfg "$tcdir/$1" "$newtc" "$target" "$sysroot" "$lsd" "$desc" "$info" "$xzfile";
 	) | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Copy $1 to $newtc ... ]- " "$pb_" "$_lines" "$_cols";
 	[ -f "$newtccfgfile" ] && echo "$newtc";
 };
@@ -358,7 +356,7 @@ _build(){
 	bcl=$(printf '%s\n' "${tasks[@]}");
 	
 	sp=$(printf '%*s' 80 | tr ' ' '=')
-	echo -e "$sp\nbuild command list for $desc:\n$sp\ncd "$libsrcdir"\n$bcl\n$sp" | tee -a "$lf";
+	echo -e "$sp\nbuild command list for $desc:\n$sp\ncd "$libsrcdir\;"\n$bcl\n$sp" | tee -a "$lf";
 	sleep 2;
 	cd "$libsrcdir";
 	( eval "${tasks[@]}" ) 2>&1 | tee -a "$lf"
@@ -460,18 +458,23 @@ _get_version(){
 	if [ -f "$1" ];then
 		content=$(cat "$1");
 		ver=$(echo "$content" | grep 'Version:' | sed -e "s/Version: //g");
-		(echo "$ver" | grep -qc "$2") && r="$ver";
+		if [ "$2" == "" ]; then
+			r="$ver";
+		else
+			(echo "$ver" | grep -qc "$2") && r="$ver";
+		fi;
 	fi;
 	echo $r;
 	[ ${#r} -gt 0 ] && exit 0 || exit 1;
 };
 _compare_version(){
+
 	min=$(printf "$1\n$2\n" | sort -V | head -n1);
 	max=$(printf "$1\n$2\n" | sort -V | tail -n1);
 	
-	[ $min == $max ] && printf '=' && exit;
-	[ $1 == $max ] && printf '>' && exit;
-	[ $1 == $min ] && printf '<' && exit;
+	[ $min == $max ] && printf '=' && return;
+	[ $1 == $max ] && printf '>' && return;
+	[ $1 == $min ] && printf '<' && return;
 };
 _paktc_timer(){
 if [ "$1" == "0" ] || [ "${#1}" -eq 0 ];then
@@ -544,47 +547,43 @@ _create_config(){
 		return 1;
 	fi;
 	
-	lib_comments=( "#Enable/Disable (1|0)" \
-					  "#Displayname" \
-					  "#Versionnumber" \
-					  "#Filename to check in pkgconfig folder for an existing library to get version information" \
-					  "#Valid URL for downloading sources of library\n#List of build commands below. Pay attention to the SEMICOLON at the end of EACH\n#command and the correct quoting (' or \") for or to avoid expansion of variables.\n#Tokens @TOOLCHAIN@, @CC@, @RANLIB@, @PREFIX@, @HOST@ are replaced automatically." \
-					  "#build command"
-					);
+	lib_comments=(	"#Enable/Disable (1|0)"
+					"#Displayname"
+					"#Versionnumber"
+					"#Filename and optional version number to check in pkgconfig folder for an existing library to get version information"
+					"#Valid URL for downloading sources of library\n#List of build commands below. Pay attention to the SEMICOLON at the end of EACH\n#command and the correct quoting (' or \") for or to avoid expansion of variables.\n#Tokens @TOOLCHAIN@, @CC@, @RANLIB@, @PREFIX@, @HOST@ are replaced automatically."
+					"#build command" );
 	lib_settings=( "" name version check url tasks );
 	lib_keys=( SAMPLE_LIB SSL_111 SSL_110 SSL_102 SSL_100 SSL_098 LIB_USB LIB_PCSC LIB_ZLIB );
 	lib_names=( "SampleLib" "OpenSSL" "OpenSSL" "OpenSSL" "OpenSSL" "OpenSSL" "libusb" "PCSC-Lite" "zlib" );
-	lib_versions=( "0.2.9sl" \
-					  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_1[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g')"  \
-					  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_0[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g')"  \
-					  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g')"  \
-					  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_0[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g')"  \
-					  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_0_9_8[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g')"  \
-					  "$(curl --silent "https://api.github.com/repos/libusb/libusb/releases/latest" | jq -r '.tag_name' | cut -c 2-)"  \
-					  "$(curl --silent https://salsa.debian.org/api/v4/projects/19181/repository/tags | jq -r '.[0].name' | awk -F '[/-]' '{printf $2}')"  \
-					  "$(curl --silent https://api.github.com/repos/madler/zlib/tags | jq -r '.[0].name' | cut -c 2-)"  \
-					);
+	lib_versions=(	"0.2.9sl"
+					"$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_1[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')"
+					"$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_0[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')"
+					"$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')"
+					"$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_0[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')"
+					"$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_0_9_8[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')"
+					"$(curl --silent "https://api.github.com/repos/libusb/libusb/releases/latest" | jq -r '.tag_name' | cut -c 2-)"
+					"$(curl --silent https://salsa.debian.org/api/v4/projects/19181/repository/tags | jq -r '.[0].name' | awk -F '[/-]' '{printf $2}')"
+					"$(curl --silent https://api.github.com/repos/madler/zlib/tags | jq -r '.[0].name' | cut -c 2-)" );
 	lib_checks=( "samplelib.pc" "openssl.pc" "openssl.pc" "openssl.pc" "openssl.pc" "openssl.pc" "libusb-1.0.pc" "libpcsclite.pc" "zlib.pc" );
-	lib_urls=( "https://sampleurl.com/archive.tar.bz" \
-				  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_1[a-z].*"))][0] | .tarball_url')" \
-				  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_0[a-z].*"))][0] | .tarball_url')" \
-				  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .tarball_url')" \
-				  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_0[a-z].*"))][0] | .tarball_url')" \
-				  "$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_0_9_8[a-z].*"))][0] | .tarball_url')" \
-				  "$(curl --silent "https://api.github.com/repos/libusb/libusb/releases/latest" | jq -r '.assets[1].browser_download_url')" \
-				  "$(echo 'https://salsa.debian.org/api/v4/projects/19181/repository/archive.tar.bz2?sha='$(curl --silent https://salsa.debian.org/api/v4/projects/19181/repository/tags | jq -r '.[0].commit.id'))" \
-				  "$(curl --silent https://api.github.com/repos/madler/zlib/tags | jq -r '.[0].tarball_url')" \
-				);
-	lib_tasks=( '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ --host=@HOST@ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )' \
-				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )' \
-				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )' \
-				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install SHLIB_VERSION_NUMBER=1.0.2 SHLIB_MINOR=0.2;\")" )' \
-				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )' \
-				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )' \
-				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./configure --prefix=@PREFIX@/ --host=@HOST@ --disable-udev;\")" "(\"make;\")" "(\"make install;\")" )' \
-				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./configure --prefix=@PREFIX@/ --host=@HOST@ --disable-libudev --disable-libsystemd LIBUSB_LIBS=\\\"-L@PREFIX@/lib -lusb-1.0 -lrt\\\" LIBUSB_CFLAGS=\\\"-I@PREFIX@/include/libusb-1.0\\\";\")" "(\"make;\")" "(\"make install;\")" )' \
-				   '( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./configure --prefix=@PREFIX@/;\")" "(\"make;\")" "(\"make install;\")" )' \
-				 );
+	lib_urls=(	"https://sampleurl.com/archive.tar.bz"
+				"$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_1[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')"
+				"$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_0[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')"
+				"$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')"
+				"$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_0[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')"
+				"$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_0_9_8[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')"
+				"$(curl --silent "https://api.github.com/repos/libusb/libusb/releases/latest" | jq -r '.assets[1].browser_download_url')"
+				"$(echo 'https://salsa.debian.org/api/v4/projects/19181/repository/archive.tar.bz2?sha='$(curl --silent https://salsa.debian.org/api/v4/projects/19181/repository/tags | jq -r '.[0].commit.id'))"
+				"$(curl --silent https://api.github.com/repos/madler/zlib/tags | jq -r '.[0].tarball_url')" );
+	lib_tasks=(	'( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ --host=@HOST@ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )'
+				'( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )'
+				'( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )'
+				'( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install SHLIB_VERSION_NUMBER=1.0.2 SHLIB_MINOR=0.2;\")" )'
+				'( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )'
+				'( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )'
+				'( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./configure --prefix=@PREFIX@/ --host=@HOST@ --disable-udev;\")" "(\"make;\")" "(\"make install;\")" )'
+				'( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./configure --prefix=@PREFIX@/ --host=@HOST@ --disable-libudev --disable-libsystemd LIBUSB_LIBS=\\\"-L@PREFIX@/lib -lusb-1.0 -lrt\\\" LIBUSB_CFLAGS=\\\"-I@PREFIX@/include/libusb-1.0\\\";\")" "(\"make;\")" "(\"make install;\")" )'
+				'( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./configure --prefix=@PREFIX@/;\")" "(\"make;\")" "(\"make install;\")" )' );
 
 	ctng_build_tasks=( "(\"./ct-ng build;\")" );
 	ctng_build_tasks_comment="#build command";
@@ -594,7 +593,6 @@ _create_config(){
 	echo '#CROSS toolchain build settings'	 						 						 				 				 >"$configname";
 	echo 'CTNG_USER="ctng"; #low privileged user that run ct-ng (will be created automatically, if not exists)'				>>"$configname";
 	echo 'CTNG_REPO_URL="https://github.com/crosstool-ng/crosstool-ng"; #Repository to load ct-ng from'	 					>>"$configname";
-	echo 'CTNG_PARALLEL_JOBS="4"; #Number of parallel build jobs'	 						 								>>"$configname";
 	echo '#List of build and setup commands below. Pay attention to the SEMICOLON at the end of EACH'	 					>>"$configname";
 	echo '#command and the correct quoting ('"'"' or ") for or to avoid expansion of variables.'	 						>>"$configname";
 	echo '#Tokens @CTNGSOURCE@ are replaced automatically. The commands are executed in the context of the user CTNG_USER.'	>>"$configname";
@@ -626,7 +624,8 @@ _create_config(){
 							echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"$([ "$key" == "SAMPLE_LIB" ] && echo '0' || echo '1')\";$([ "$i" -eq "0" ] && echo " ${lib_comments[0]}")"	>>"$configname";;
 				"name")   	echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"${lib_names[$i]}\";$([ "$i" -eq "0" ] && echo " ${lib_comments[1]}")"		>>"$configname";;
 				"version")	echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"${lib_versions[$i]}\";$([ "$i" -eq "0" ] && echo " ${lib_comments[2]}")"	>>"$configname";;
-				"check")	echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"${lib_checks[$i]}\";$([ "$i" -eq "0" ] && echo " ${lib_comments[3]}")"	>>"$configname";;
+				"check")	[ $(echo -e "$key" | grep -c "SSL_\|SAMPLE_") -gt 0 ] && chk="$(echo -e "${lib_checks[$i]} $(echo ${lib_versions[$i]} | sed -e 's/[a-zA-Z]//g')")" || chk="${lib_checks[$i]}";
+							echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"$chk\";$([ "$i" -eq "0" ] && echo " ${lib_comments[3]}")"	>>"$configname";;
 				"url")		echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"${lib_urls[$i]}\";$([ "$i" -eq "0" ] && echo " ${lib_comments[4]}")"		>>"$configname";;
 				"tasks")	unset tasks;j=0;
 							declare -a tasks="${lib_tasks[$i]}"
@@ -639,33 +638,40 @@ _create_config(){
 		done;
 		((i++))
 	done;
-	
+
 	return 0;
 };
 _create_toolchaincfg(){
 	cd "$1/bin";
 	compilername="$3""-gcc";compilername=$(realpath -s $compilername);
 	sr=$("$compilername" -print-sysroot 2>/dev/null);
-	sr=$(realpath -sm "$sr");
-	sysroot=${sr#"$1/"};
+	sr=$(realpath -sm "$sr" 2>/dev/null);
+	if [ ${#sr} -eq 0 ];then
+		sysroot="$4";
+	else
+		sysroot="${sr#"$1/"}";
+	fi;
+	[ ${#5} -gt 0 ] && lsd="$5" || lsd="/usr/lib";
+	[ ${#7} -gt 0 ] && info="$7" || info="$(echo -e "\\\n
+!!! crosstool-NG Toolchain !!!\\\n
+\\\n
+$6\\\n
+\\\n")";
+	
 	cd "$tccfgdir";
 	cat << EOF > $2
 _toolchainname="$2";
 default_use="USE_UTF8 USE_LIBCRYPTO";
-_description="$4"
+_description="$6"
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
 
 _compiler="$3-";
 _sysroot="$sysroot";
-_libsearchdir="/usr/lib";
-_toolchainfilename="$(echo -en "$(basename "${5%..*}")" | base64)";
-_md5sum="$(cd "$dldir" && md5sum $(basename "${5%..*}"))";
-_tc_info="$(echo -e "\\\n
-!!! crosstool-NG Toolchain !!!\\\n
-\\\n
-$4\\\n
-\\\n")";
+_libsearchdir="$lsd";
+_toolchainfilename="$(echo -en "$(basename "${8%..*}")" | base64)";
+_md5sum="$(cd "$dldir" && md5sum $(basename "${8%..*}"))";
+_tc_info="$info";
 _tc_infolines="5";
 EOF
 };
