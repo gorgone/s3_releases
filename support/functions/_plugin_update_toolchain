@@ -1,11 +1,11 @@
 #!/bin/bash
 
-#simplebuild_plugin tcupdate (s3.TUP) 0.8.3
+#simplebuild_plugin tcupdate (s3.TUP)
 
 tcupdate(){
 	clear && _check_bin;
 	
-	pversion="0.8.3";
+	pversion="0.8.4";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -103,20 +103,22 @@ tcupdate(){
 		exit;
 	fi;
 
-	#autodetect toolchain's sysroot, prefix and pkgconfig folder
+	#autodetect toolchain's sysroot, prefix, include, pkgconfig folder
 	compilername="$_compiler""gcc";compilername=$(realpath -s $compilername);
 	ranlibname="$_compiler""ranlib";ranlibname=$(realpath -s $ranlibname);
 	hostname=${_compiler%?};
+	incdir=$(realpath -s $(echo | "$compilername" -Wp,-v -xc - -fsyntax-only 2>&1 | grep include$ | tail -n 1 | xargs))
 	sr=$("$compilername" -print-sysroot 2>/dev/null);
 	sr=$(realpath -sm "$sr" 2>/dev/null);
 	if [ ${#sr} -gt ${#tcdir} ];then
 		[ -d "$sr/include" ] && cd "$sr"
-		[ -d "$sr/usr/include" ] && cd "$sr/usr"
+		[ -d "$sr/usr/include" ] && [ ! "$(realpath $(readlink -- "$PWD"))" == "$(realpath "$sr/usr")" ] && cd "$sr/usr" #Ignore symlinks to the same directory
 	else
 		cd "$tcdir/$tc/$_sysroot"
 	fi;
 	prefixdir="$PWD"
 	pkg=$(find * | grep -m1 "/pkgconfig") && pkgdir="$prefixdir/$pkg" || pkgdir="$prefixdir";
+	
 	
 	#build menu items from config file
 	unset MENU_OPTIONS;COUNT=0;unset libs;
@@ -161,7 +163,7 @@ tcupdate(){
 		sp=$(printf '%*s' 90 | tr ' ' '=');
 		txt=$(cat "$configname" | grep ""$libkey"=\|"$libkey"_");
 		bcd=$(cat "$configname" | grep ""$libkey"_tasks");
-		txt=$(echo -e "Toolchain: $tcdir/$tc\nCompiler:  $compilername\nSysroot:   $sr\nPrefix:    $prefixdir\n$sp\n\nLibrary configuration:\n$txt\n\nBuild command:\n$(_replace_tokens "$(_tidy_tasks "$bcd" "$libkey")")");
+		txt=$(echo -e "Toolchain: $tcdir/$tc\nCompiler:  $compilername\nSysroot:   $sr\nPrefix:    $prefixdir\nInclude:   $incdir\n$sp\n\nLibrary configuration:\n$txt\n\nBuild command:\n$(_replace_tokens "$(_tidy_tasks "$bcd" "$libkey")")");
 		tempfile=$(mktemp) && echo -e "$txt" > "$tempfile";
 		"$gui" "$st_" "$nc_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--textbox" "$tempfile" 30 80;
 		rm "$tempfile" 2>/dev/null;
@@ -257,9 +259,9 @@ _create_tc(){
 
 						#run build as $CTNG_USER
 						bcl=$(printf '%s\n' "${CTNG_BUILD_tasks[@]}");
-						echo -e "cd "$ctsrcdir"\n$(_replace_tokens "$bcl")\n$sp" | tee -a "$logfile";
+						echo -e "cd "$ctsrcdir" && chown -R "$CTNG_USER":"$CTNG_USER" "$tcdir/$tpl";\n$(_replace_tokens "$bcl")\n$sp" | tee -a "$logfile";
 						sleep 2;
-						cd "$ctsrcdir";
+						cd "$ctsrcdir" && chown -R "$CTNG_USER":"$CTNG_USER" "$tcdir/$tpl";
 						cmd="${CTNG_BUILD_tasks[@]}";
 						sudo -u "$CTNG_USER" -H -- sh -c "$(_replace_tokens "$cmd")" 2>&1;
 						err=$(grep '\[ERROR\]' "$ctsrcdir/build.log" | wc -l)
@@ -443,7 +445,8 @@ _replace_tokens(){
 						s#@RANLIB@#$ranlibname#g; \
 						s#@PREFIX@#$prefixdir#g; \
 						s#@HOST@#$hostname#g; \
-						s#@CTNGSOURCE@#$ctsrcdir#g";
+						s#@CTNGSOURCE@#$ctsrcdir#g; \
+						s#@VALIDATE@#_check_lib#g";
 };
 _tidy_tasks(){
 	echo -e "$1" | sed -e "s#$2"_tasks=\(\""##g; \
@@ -491,6 +494,20 @@ else
 	done
 fi;
 echo -e "\033[2K\r"; #remove characters from console
+};
+_check_lib(){
+	case "$1" in
+		"PCSC")	#Create symlink to the PCSC header files, if the last include path of the compiler don't point to it
+				echo -e "\nCheck for PCSC header files and try to symlink to the correct PCSC header files if the last compiler include path points to the wrong location...";
+				if [ ${#incdir} -gt 0 ] && [ ! -d "$incdir/PCSC" ]; then
+					headerdir="$(dirname $(find "$prefixdir" -type f -name "pcsclite.h" | head -n 1))";
+					[ ${#headerdir} -gt 0 ] && ln -s "$(realpath --relative-to="$incdir" "$headerdir")" "$incdir/PCSC";
+					[ ${#headerdir} -gt 0 ] && echo "Symlink $incdir/PCSC -> $headerdir created, to point to the PCSC header files." || "No PCSC header files found in $prefixdir and it's sub directories!";
+				else
+					[ ${#incdir} -gt 0 ] && echo "PCSC header files are in the correct location: $incdir/PCSC" || echo "Compiler returns no include directories!";
+				fi;;
+		*) echo "not implemented yet!";
+	esac;
 };
 _check_bin(){
 
@@ -551,7 +568,7 @@ _create_config(){
 					"#Displayname"
 					"#Versionnumber"
 					"#Filename and optional version number to check in pkgconfig folder for an existing library to get version information"
-					"#Valid URL for downloading sources of library\n#List of build commands below. Pay attention to the SEMICOLON at the end of EACH\n#command and the correct quoting (' or \") for or to avoid expansion of variables.\n#Tokens @TOOLCHAIN@, @CC@, @RANLIB@, @PREFIX@, @HOST@ are replaced automatically."
+					"#Valid URL for downloading sources of library\n#List of build commands below. Pay attention to the SEMICOLON at the end of EACH\n#command and the correct quoting (' or \") for or to avoid expansion of variables.\n#Tokens @TOOLCHAIN@, @CC@, @RANLIB@, @PREFIX@, @HOST@, @VALIDATE@ are replaced automatically."
 					"#build command" );
 	lib_settings=( "" name version check url tasks );
 	lib_keys=( SAMPLE_LIB SSL_111 SSL_110 SSL_102 SSL_100 SSL_098 LIB_USB LIB_PCSC LIB_ZLIB );
@@ -582,7 +599,7 @@ _create_config(){
 				'( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )'
 				'( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "(\"export RANLIB=@RANLIB@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./Configure --prefix=@PREFIX@/ linux-generic32 shared;\")" "(\"make;\")" "(\"make install;\")" )'
 				'( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./configure --prefix=@PREFIX@/ --host=@HOST@ --disable-udev;\")" "(\"make;\")" "(\"make install;\")" )'
-				'( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./configure --prefix=@PREFIX@/ --host=@HOST@ --disable-libudev --disable-libsystemd LIBUSB_LIBS=\\\"-L@PREFIX@/lib -lusb-1.0 -lrt\\\" LIBUSB_CFLAGS=\\\"-I@PREFIX@/include/libusb-1.0\\\";\")" "(\"make;\")" "(\"make install;\")" )'
+				'( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./configure --prefix=@PREFIX@/ --host=@HOST@ --disable-libudev --disable-libsystemd LIBUSB_LIBS=\\\"-L@PREFIX@/lib -lusb-1.0 -lrt\\\" LIBUSB_CFLAGS=\\\"-I@PREFIX@/include/libusb-1.0\\\";\")" "(\"make;\")" "(\"make install;\")" "(\"@VALIDATE@ \"PCSC\";\")" )'
 				'( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./configure --prefix=@PREFIX@/;\")" "(\"make;\")" "(\"make install;\")" )' );
 
 	ctng_build_tasks=( "(\"./ct-ng build;\")" );
