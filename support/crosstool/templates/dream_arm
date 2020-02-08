@@ -1,4 +1,4 @@
-#toolchain template: Dreambox DM9x0 UHD (arm based, gcc 9.2.0, glibc 2.23)
+#toolchain template: Dreambox DM9x0 UHD (arm based, gcc 9.2.0, Glibc 2.23)
 CT_CONFIGURE_has_static_link=y
 CT_CONFIGURE_has_cxx11=y
 CT_CONFIGURE_has_wget=y
