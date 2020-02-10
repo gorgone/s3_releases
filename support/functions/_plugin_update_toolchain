@@ -5,7 +5,7 @@
 tcupdate(){
 	clear && _check_bin;
 	
-	pversion="0.8.4";
+	pversion="0.8.5";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -112,13 +112,12 @@ tcupdate(){
 	sr=$(realpath -sm "$sr" 2>/dev/null);
 	if [ ${#sr} -gt ${#tcdir} ];then
 		[ -d "$sr/include" ] && cd "$sr"
-		[ -d "$sr/usr/include" ] && [ ! "$(realpath $(readlink -- "$PWD"))" == "$(realpath "$sr/usr")" ] && cd "$sr/usr" #Ignore symlinks to the same directory
+		[ -d "$sr/usr/include" ] && [ ! "$(realpath $(readlink -- "$PWD") 2>/dev/null)" == "$(realpath "$sr/usr")" ] && cd "$sr/usr" #Ignore symlinks to the same directory
 	else
 		cd "$tcdir/$tc/$_sysroot"
 	fi;
 	prefixdir="$PWD"
 	pkg=$(find * | grep -m1 "/pkgconfig") && pkgdir="$prefixdir/$pkg" || pkgdir="$prefixdir";
-	
 	
 	#build menu items from config file
 	unset MENU_OPTIONS;COUNT=0;unset libs;
@@ -248,8 +247,8 @@ _create_tc(){
 						echo -e "$sp\nbuild ($i/$icount): command list for cross toolchain $tpl (executed as user $CTNG_USER):\n$sp" | tee -a "$logfile";
 						
 						#copy template and patching them
-						echo "cp --no-preserve=mode,ownership -f "$cttpldir/$tpl" "$ctsrcdir/.config";" | tee -a "$logfile";
-						cp --no-preserve=mode,ownership -f "$cttpldir/$tpl" "$ctsrcdir/.config";
+						echo "rm "$ctsrcdir/.config*" 2>/dev/null;cp --no-preserve=mode,ownership -f "$cttpldir/$tpl" "$ctsrcdir/.config";" | tee -a "$logfile";
+						rm "$ctsrcdir/.config*" 2>/dev/null;cp --no-preserve=mode,ownership -f "$cttpldir/$tpl" "$ctsrcdir/.config";
 						#CT_LOCAL_TARBALLS_DIR aka cache folder for downloads
 						echo "sed -i \"s#.*CT_LOCAL_TARBALLS_DIR=.*#CT_LOCAL_TARBALLS_DIR=\"$dldir\"#g\" "$ctsrcdir/.config";" | tee -a "$logfile";
 						sed -i "s#.*CT_LOCAL_TARBALLS_DIR=.*#CT_LOCAL_TARBALLS_DIR=\"$dldir\"#g" "$ctsrcdir/.config";
@@ -259,9 +258,10 @@ _create_tc(){
 
 						#run build as $CTNG_USER
 						bcl=$(printf '%s\n' "${CTNG_BUILD_tasks[@]}");
-						echo -e "cd "$ctsrcdir" && chown -R "$CTNG_USER":"$CTNG_USER" "$tcdir/$tpl";\n$(_replace_tokens "$bcl")\n$sp" | tee -a "$logfile";
+						echo -e "cd "$ctsrcdir";\n[ -d "$tcdir/$tpl" ] && chown -R "$CTNG_USER":"$CTNG_USER" "$tcdir/$tpl";\n$(_replace_tokens "$bcl")\n$sp" | tee -a "$logfile";
 						sleep 2;
-						cd "$ctsrcdir" && chown -R "$CTNG_USER":"$CTNG_USER" "$tcdir/$tpl";
+						cd "$ctsrcdir";
+						[ -d "$tcdir/$tpl" ] && chown -R "$CTNG_USER":"$CTNG_USER" "$tcdir/$tpl";
 						cmd="${CTNG_BUILD_tasks[@]}";
 						sudo -u "$CTNG_USER" -H -- sh -c "$(_replace_tokens "$cmd")" 2>&1;
 						err=$(grep '\[ERROR\]' "$ctsrcdir/build.log" | wc -l)
@@ -602,7 +602,7 @@ _create_config(){
 				'( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./configure --prefix=@PREFIX@/ --host=@HOST@ --disable-libudev --disable-libsystemd LIBUSB_LIBS=\\\"-L@PREFIX@/lib -lusb-1.0 -lrt\\\" LIBUSB_CFLAGS=\\\"-I@PREFIX@/include/libusb-1.0\\\";\")" "(\"make;\")" "(\"make install;\")" "(\"@VALIDATE@ \"PCSC\";\")" )'
 				'( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./configure --prefix=@PREFIX@/;\")" "(\"make;\")" "(\"make install;\")" )' );
 
-	ctng_build_tasks=( "(\"./ct-ng build;\")" );
+	ctng_build_tasks=( "(\"./ct-ng upgradeconfig;\")" "(\"./ct-ng show-config;\")" "(\"./ct-ng build;\")" );
 	ctng_build_tasks_comment="#build command";
 	ctng_setup_tasks=( "(\"git clone --progress \"\$CTNG_REPO_URL\" \"@CTNGSOURCE@\";\")" "(\"./bootstrap;\")" "(\"./configure --enable-local;\")" "(\"make;\")" "(\"touch \"@CTNGSOURCE@/.config\";\")" );
 	ctng_setup_tasks_comment="#setup command";
