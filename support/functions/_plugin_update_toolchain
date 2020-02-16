@@ -5,7 +5,7 @@
 tcupdate(){
 	clear && _check_bin;
 	
-	pversion="0.9.0";
+	pversion="0.9.1";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -453,7 +453,8 @@ _replace_tokens(){
 						s#@PREFIX@#$prefixdir#g; \
 						s#@HOST@#$hostname#g; \
 						s#@CTNGSOURCE@#$ctsrcdir#g; \
-						s#@VALIDATE@#_check_lib#g";
+						s#@VALIDATE@#$_check_lib#g; \
+						s#@LOGFILE@#$logfile#g";
 };
 _tidy_tasks(){
 	echo -e "$1" | sed -e "s#$2"_tasks=\(\""##g; \
@@ -578,7 +579,7 @@ _create_config(){
 					"#Displayname"
 					"#Versionnumber"
 					"#Filename and optional version number to check in pkgconfig folder for an existing library to get version information"
-					"#Valid URL for downloading sources of library\n#List of build commands below. Pay attention to the SEMICOLON at the end of EACH\n#command and the correct quoting (' or \") for or to avoid expansion of variables.\n#Tokens @TOOLCHAIN@, @CC@, @RANLIB@, @PREFIX@, @HOST@, @VALIDATE@ are replaced automatically."
+					"#Valid URL for downloading sources of library\n#List of build commands below. Pay attention to the SEMICOLON at the end of EACH\n#command and the correct quoting (' or \") for or to avoid expansion of variables.\n#Tokens @TOOLCHAIN@, @CC@, @RANLIB@, @PREFIX@, @HOST@, @VALIDATE@, @LOGFILE@ are replaced automatically."
 					"#build command" );
 	lib_settings=( "" name version check url tasks );
 	lib_keys=( SAMPLE_LIB SSL_111 SSL_110 SSL_102 SSL_100 SSL_098 LIB_USB LIB_PCSC LIB_ZLIB );
@@ -612,17 +613,17 @@ _create_config(){
 				'( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./configure --prefix=@PREFIX@/ --host=@HOST@ --disable-libudev --disable-libsystemd LIBUSB_LIBS=\\\"-L@PREFIX@/lib -lusb-1.0 -lrt\\\" LIBUSB_CFLAGS=\\\"-I@PREFIX@/include/libusb-1.0\\\";\")" "(\"make;\")" "(\"make install;\")" "(\"@VALIDATE@ \"PCSC\";\")" )'
 				'( "(\"export TOOLCHAIN=@TOOLCHAIN@;\")" "(\"export CC=@CC@;\")" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "(\"./configure --prefix=@PREFIX@/;\")" "(\"make;\")" "(\"make install;\")" )' );
 
-	ctng_build_tasks=( "(\"./ct-ng upgradeconfig;\")" "(\"./ct-ng show-config;\")" "(\"./ct-ng build;\")" );
+	ctng_build_tasks=( "(\"./ct-ng upgradeconfig | tee -a \"@LOGFILE@\";\")" "(\"./ct-ng show-config | tee -a \"@LOGFILE@\";\")" "(\"./ct-ng build;\")" );
 	ctng_build_tasks_comment="#build command";
 	ctng_setup_tasks=( "(\"git clone --progress \"\$CTNG_REPO_URL\" \"@CTNGSOURCE@\";\")" "(\"./bootstrap;\")" "(\"./configure --enable-local;\")" "(\"make;\")" );
 	ctng_setup_tasks_comment="#setup command";
 		
 	echo '#CROSS toolchain build settings'	 						 						 				 				 >"$configname";
 	echo 'CTNG_REPO_URL="https://github.com/crosstool-ng/crosstool-ng"; #Repository to load ct-ng from'	 					>>"$configname";
-	echo 'CTNG_BUILD_AS_ROOT="0"; #You normally do *not* need to be root to build a toolchain using crosstool-NG. In fact, it is *VERY* dangerous to run as root, as crosstool-NG will, as part of the build process, remove a few directories. If anything goes wrong, running as root can ruin your host distribution.' >>"$configname";
+	echo 'CTNG_BUILD_AS_ROOT="0"; #Enable/Disable (1|0); You normally do *not* need to be root to build a toolchain using crosstool-NG. In fact, it is *VERY* dangerous to run as root, as crosstool-NG will, as part of the build process, remove a few directories. If anything goes wrong, running as root can ruin your host distribution.' >>"$configname";
 	echo '#List of build and setup commands below. Pay attention to the SEMICOLON at the end of EACH'	 					>>"$configname";
 	echo '#command and the correct quoting ('"'"' or ") for or to avoid expansion of variables.'	 						>>"$configname";
-	echo '#Tokens @CTNGSOURCE@ are replaced automatically. The commands are executed in the context of the current user.'	>>"$configname";
+	echo '#Tokens @CTNGSOURCE@, @LOGFILE@ are replaced automatically. The commands are executed in the context of the current user.'	>>"$configname";
 	i=0;
 	for bt in "${ctng_build_tasks[@]}";
 	do
