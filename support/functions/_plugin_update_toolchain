@@ -5,7 +5,7 @@
 tcupdate(){
 	clear && _check_bin;
 	
-	pversion="0.8.5";
+	pversion="0.9.0";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -60,6 +60,7 @@ tcupdate(){
 			fi;
 			[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "no toolchains found" "no toolchains found") && counter;
 		fi;
+
 		out=$("$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--item-help" "--help-tags" "--default-item" "$3" "--ok-label" "Update" "--cancel-label" "Create" "--help-button" "--help-label" "Exit" "--extra-button" "--extra-label" "Copy" "--title" "-[ Toolchain Menu ]-" \
 			--menu "\nSelect one of the installed tool chains that you want to update:\n " \
 			"${COUNT+10}" 0 0 "${MENU_OPTIONS[@]}");
@@ -244,30 +245,38 @@ _create_tc(){
 
 						clear;
 						sp=$(printf '%*s' 80 | tr ' ' '=')
-						echo -e "$sp\nbuild ($i/$icount): command list for cross toolchain $tpl (executed as user $CTNG_USER):\n$sp" | tee -a "$logfile";
+						echo -e "$sp\nbuild ($i/$icount): command list for cross toolchain $tpl:\n$sp" | tee -a "$logfile";
 						
 						#copy template and patching them
-						echo "rm "$ctsrcdir/.config*" 2>/dev/null;cp --no-preserve=mode,ownership -f "$cttpldir/$tpl" "$ctsrcdir/.config";" | tee -a "$logfile";
+						echo "rm \"$ctsrcdir/.config*\" 2>/dev/null;cp --no-preserve=mode,ownership -f \"$cttpldir/$tpl\" \"$ctsrcdir/.config\";" | tee -a "$logfile";
 						rm "$ctsrcdir/.config*" 2>/dev/null;cp --no-preserve=mode,ownership -f "$cttpldir/$tpl" "$ctsrcdir/.config";
+
 						#CT_LOCAL_TARBALLS_DIR aka cache folder for downloads
-						echo "sed -i \"s#.*CT_LOCAL_TARBALLS_DIR=.*#CT_LOCAL_TARBALLS_DIR=\"$dldir\"#g\" "$ctsrcdir/.config";" | tee -a "$logfile";
+						echo "sed -i \"s#.*CT_LOCAL_TARBALLS_DIR=.*#CT_LOCAL_TARBALLS_DIR=\"$dldir\"#g\" \"$ctsrcdir/.config\";" | tee -a "$logfile";
 						sed -i "s#.*CT_LOCAL_TARBALLS_DIR=.*#CT_LOCAL_TARBALLS_DIR=\"$dldir\"#g" "$ctsrcdir/.config";
 						#CT_PREFIX_DIR aka folder that contains the final toolchain
-						echo "sed -i \"s#.*CT_PREFIX_DIR=.*#CT_PREFIX_DIR=\"$tcdir/$tpl\"#g\" "$ctsrcdir/.config";" | tee -a "$logfile";
+						echo "sed -i \"s#.*CT_PREFIX_DIR=.*#CT_PREFIX_DIR=\"$tcdir/$tpl\"#g\" \"$ctsrcdir/.config\";" | tee -a "$logfile";
 						sed -i "s#.*CT_PREFIX_DIR=.*#CT_PREFIX_DIR=\"$tcdir/$tpl\"#g" "$ctsrcdir/.config";
+						#CT_ALLOW_BUILD_AS_ROOT aka force build as root
+						_check_root && [ "$CTNG_BUILD_AS_ROOT" == "1" ] && echo "echo -e \"\nCT_EXPERIMENTAL=y\nCT_ALLOW_BUILD_AS_ROOT=y\nCT_ALLOW_BUILD_AS_ROOT_SURE=y\" >>\"$ctsrcdir/.config\";" | tee -a "$logfile";
+						_check_root && [ "$CTNG_BUILD_AS_ROOT" == "1" ] && echo -e "\nCT_EXPERIMENTAL=y\nCT_ALLOW_BUILD_AS_ROOT=y\nCT_ALLOW_BUILD_AS_ROOT_SURE=y" >>"$ctsrcdir/.config";
 
-						#run build as $CTNG_USER
+						#run build
 						bcl=$(printf '%s\n' "${CTNG_BUILD_tasks[@]}");
-						echo -e "cd "$ctsrcdir";\n[ -d "$tcdir/$tpl" ] && chown -R "$CTNG_USER":"$CTNG_USER" "$tcdir/$tpl";\n$(_replace_tokens "$bcl")\n$sp" | tee -a "$logfile";
+						echo -e "cd \"$ctsrcdir\";\n$(_replace_tokens "$bcl")\n$sp" | tee -a "$logfile";
 						sleep 2;
+						
 						cd "$ctsrcdir";
-						[ -d "$tcdir/$tpl" ] && chown -R "$CTNG_USER":"$CTNG_USER" "$tcdir/$tpl";
-						cmd="${CTNG_BUILD_tasks[@]}";
-						sudo -u "$CTNG_USER" -H -- sh -c "$(_replace_tokens "$cmd")" 2>&1;
+						#generate build command list
+						for task in "${CTNG_BUILD_tasks[@]}";do
+							task=$(_replace_tokens "$task");	#replace tokens
+							buildtasks+=("$task");
+						done
+						( eval "${buildtasks[@]}" ) 2>&1;
 						err=$(grep '\[ERROR\]' "$ctsrcdir/build.log" | wc -l)
 
 						#save build.log in logs
-						cat "$ctsrcdir/build.log" >>"$logfile"; 
+						cat "$ctsrcdir/build.log" >>"$logfile";
 						
 						if [ ! $err -gt 0 ]; then
 							#get target from build.log
@@ -297,29 +306,27 @@ _create_tc(){
 			(
 			bcl=$(printf '%s\n' "${CTNG_SETUP_tasks[@]}");
 			sp=$(printf '%*s' 80 | tr ' ' '=')
-			echo -e "$sp\nbuild command list for crosstool-NG (executed as user $CTNG_USER):\n$sp\ncd "$ctsrcdir"\n$(_replace_tokens "$bcl")\n$sp";
+			echo -e "$sp\nbuild command list for crosstool-NG:\n$sp\ncd "$ctsrcdir"\n$(_replace_tokens "$bcl")\n$sp";
 			sleep 2;
-			#ct-ng must not run as root, so create and run as the low privileged user defined in config
-			id -u "$CTNG_USER" &>/dev/null;
-			if [ $? -gt 0 ]; then
-				echo "Creating low privileged user "$CTNG_USER", because crosstool-NG must not run as root..."
-				userdel -r "$CTNG_USER" 2>/dev/null
-				adduser --disabled-password --gecos "" "$CTNG_USER" 2>/dev/null;
+			
+			#ct-ng must not be run as root unless you know what you are doing by forcing it
+			! _check_root && RUN_SETUP=1 || RUN_SETUP=0;
+			[ "$CTNG_BUILD_AS_ROOT" == "1" ] && RUN_SETUP=1;
+			if [ $RUN_SETUP -eq 1 ]; then
+				# setup crosstool wc
+				echo "Cleanup source directory "$ctsrcdir/"..."
+				rm -rf "$ctsrcdir" 2>/dev/null;
+				mkdir --parents "$ctsrcdir";
+				cd "$ctsrcdir";
+				#generate setup command list
+				for task in "${CTNG_SETUP_tasks[@]}";do
+					task=$(_replace_tokens "$task");	#replace tokens
+					setuptasks+=("$task");
+				done
+				( eval "${setuptasks[@]}" ) 2>&1;
+			else
+				echo -e "\nERROR -> The execution of crosstool-NG was aborted\n         because it must not run as root!\n";
 			fi;
-			
-			#adjust folder permissions for low privileged user
-			echo "Adjust s3 folder permissions for user "$CTNG_USER"..."
-			chmod 755 "$sdir" && chmod 755 "$ctdir"; #s3 support, crosstool folder
-			chmod -R 777 "$tcdir" && chmod -R 777 "$dldir" && chmod -R 777 "$ldir"; #s3 toolchains, downloads, logs folder
-			
-			# setup crosstool wc
-			echo "Cleanup source directory "$ctsrcdir/"..."
-			rm -r "$ctsrcdir" 2>/dev/null;
-			mkdir --parents "$ctsrcdir";
-			chown -R "$CTNG_USER":"$CTNG_USER" "$ctsrcdir"; #ct-ng source folder
-			cd "$ctsrcdir";
-			cmd="${CTNG_SETUP_tasks[@]}";
-			sudo -u "$CTNG_USER" -H -- sh -c "$(_replace_tokens "$cmd")" 2>&1;
 			) | tee "$logfile" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Setup crosstool-NG... ]- " "$pb_" "$_lines" "$_cols";
 			_paktc_timer 10;
 			_create_tc;;
@@ -495,6 +502,9 @@ else
 fi;
 echo -e "\033[2K\r"; #remove characters from console
 };
+_check_root(){
+  ! ((${EUID:-0} || "$(id -u)"));
+};
 _check_lib(){
 	case "$1" in
 		"PCSC")	#Create symlink to the PCSC header files, if the last include path of the compiler don't point to it
@@ -528,7 +538,7 @@ _check_bin(){
 };
 _check_config(){
 	nok=0;
-	[ -z ${CTNG_USER+x} ] && nok=1;
+	[ -z ${CTNG_BUILD_AS_ROOT+x} ] && nok=1;
 	[ -z ${LIBS+x} ] && nok=1;
 	
 	if [ $nok -eq 1 ]; then 
@@ -604,15 +614,15 @@ _create_config(){
 
 	ctng_build_tasks=( "(\"./ct-ng upgradeconfig;\")" "(\"./ct-ng show-config;\")" "(\"./ct-ng build;\")" );
 	ctng_build_tasks_comment="#build command";
-	ctng_setup_tasks=( "(\"git clone --progress \"\$CTNG_REPO_URL\" \"@CTNGSOURCE@\";\")" "(\"./bootstrap;\")" "(\"./configure --enable-local;\")" "(\"make;\")" "(\"touch \"@CTNGSOURCE@/.config\";\")" );
+	ctng_setup_tasks=( "(\"git clone --progress \"\$CTNG_REPO_URL\" \"@CTNGSOURCE@\";\")" "(\"./bootstrap;\")" "(\"./configure --enable-local;\")" "(\"make;\")" );
 	ctng_setup_tasks_comment="#setup command";
 		
 	echo '#CROSS toolchain build settings'	 						 						 				 				 >"$configname";
-	echo 'CTNG_USER="ctng"; #low privileged user that run ct-ng (will be created automatically, if not exists)'				>>"$configname";
 	echo 'CTNG_REPO_URL="https://github.com/crosstool-ng/crosstool-ng"; #Repository to load ct-ng from'	 					>>"$configname";
+	echo 'CTNG_BUILD_AS_ROOT="0"; #You normally do *not* need to be root to build a toolchain using crosstool-NG. In fact, it is *VERY* dangerous to run as root, as crosstool-NG will, as part of the build process, remove a few directories. If anything goes wrong, running as root can ruin your host distribution.' >>"$configname";
 	echo '#List of build and setup commands below. Pay attention to the SEMICOLON at the end of EACH'	 					>>"$configname";
 	echo '#command and the correct quoting ('"'"' or ") for or to avoid expansion of variables.'	 						>>"$configname";
-	echo '#Tokens @CTNGSOURCE@ are replaced automatically. The commands are executed in the context of the user CTNG_USER.'	>>"$configname";
+	echo '#Tokens @CTNGSOURCE@ are replaced automatically. The commands are executed in the context of the current user.'	>>"$configname";
 	i=0;
 	for bt in "${ctng_build_tasks[@]}";
 	do
