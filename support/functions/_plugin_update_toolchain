@@ -5,7 +5,7 @@
 tcupdate(){
 	clear && _check_bin;
 	
-	pversion="0.9.1";
+	pversion="0.9.2";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -53,7 +53,8 @@ tcupdate(){
 				for i in "${INST_TCLIST[@]}";do
 					if [ ! "$i" == "native" ];then
 						source "$tccfgdir/$i";
-						MENU_OPTIONS+=("$_toolchainname" "$_description" "toolchain folder:$tcdir/$i | config file:$tccfgdir/$i");
+						[ -f "$tcdir/$i/build.log.bz2" ] && tcdate=" ct-ng."$(date -r "$tcdir/$i/build.log.bz2" "+%Y-%m-%d %H:%M:%S") || tcdate="";
+						MENU_OPTIONS+=("$_toolchainname" "$_description\Z2$tcdate\Zn" "toolchain folder:$tcdir/$i | config file:$tccfgdir/$i");
 						counter;
 					fi;
 				done;
@@ -453,7 +454,7 @@ _replace_tokens(){
 						s#@PREFIX@#$prefixdir#g; \
 						s#@HOST@#$hostname#g; \
 						s#@CTNGSOURCE@#$ctsrcdir#g; \
-						s#@VALIDATE@#$_check_lib#g; \
+						s#@VALIDATE@#_check_lib#g; \
 						s#@LOGFILE@#$logfile#g";
 };
 _tidy_tasks(){

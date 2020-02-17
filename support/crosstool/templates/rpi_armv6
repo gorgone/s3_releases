@@ -345,7 +345,7 @@ CT_GLIBC_ENABLE_OBSOLETE_RPC=y
 # CT_GLIBC_DISABLE_VERSIONING is not set
 CT_GLIBC_OLDEST_ABI=""
 CT_GLIBC_FORCE_UNWIND=y
-CT_GLIBC_LOCALES=y
+# CT_GLIBC_LOCALES is not set
 # CT_GLIBC_KERNEL_VERSION_NONE is not set
 # CT_GLIBC_KERNEL_VERSION_AS_HEADERS is not set
 CT_GLIBC_KERNEL_VERSION_CHOSEN=y
@@ -441,110 +441,10 @@ CT_CC_GCC_DEC_FLOAT_AUTO=y
 CT_ALL_CC_CHOICES="GCC"
 CT_CC_LANG_CXX=y
 # CT_CC_LANG_FORTRAN is not set
-CT_DEBUG_DUMA=y
-CT_DEBUG_DUMA_PKG_KSYM="DUMA"
-CT_DUMA_DIR_NAME="duma"
-CT_DUMA_PKG_NAME="duma"
-CT_DUMA_SRC_RELEASE=y
-CT_DUMA_PATCH_ORDER="global"
-CT_DUMA_V_2_5_15=y
-# CT_DUMA_NO_VERSIONS is not set
-CT_DUMA_VERSION="2_5_15"
-CT_DUMA_MIRRORS="http://downloads.sourceforge.net/project/duma/duma/${CT_DUMA_VERSION//_/.}"
-CT_DUMA_ARCHIVE_FILENAME="@{pkg_name}_@{version}"
-CT_DUMA_ARCHIVE_DIRNAME="@{pkg_name}_@{version}"
-CT_DUMA_ARCHIVE_FORMATS=".tar.gz .zip"
-CT_DUMA_SIGNATURE_FORMAT=""
-CT_DUMA_SO=y
-CT_DUMA_CUSTOM_WRAPPER=y
-CT_DEBUG_GDB=y
-CT_DEBUG_GDB_PKG_KSYM="GDB"
-CT_GDB_DIR_NAME="gdb"
-CT_GDB_USE_GNU=y
-CT_GDB_USE="GDB"
-CT_GDB_PKG_NAME="gdb"
-CT_GDB_SRC_RELEASE=y
-CT_GDB_PATCH_ORDER="global"
-CT_GDB_V_8_3=y
-# CT_GDB_V_8_2 is not set
-# CT_GDB_V_8_1 is not set
-# CT_GDB_V_8_0 is not set
-# CT_GDB_V_7_12 is not set
-# CT_GDB_V_7_11 is not set
-# CT_GDB_NO_VERSIONS is not set
-CT_GDB_VERSION="8.3.1"
-CT_GDB_MIRRORS="$(CT_Mirrors GNU gdb) $(CT_Mirrors sourceware gdb/releases)"
-CT_GDB_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
-CT_GDB_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
-CT_GDB_ARCHIVE_FORMATS=".tar.xz .tar.gz"
-CT_GDB_SIGNATURE_FORMAT=""
-CT_GDB_later_than_8_3=y
-CT_GDB_8_3_or_later=y
-CT_GDB_later_than_8_0=y
-CT_GDB_8_0_or_later=y
-CT_GDB_later_than_7_12=y
-CT_GDB_7_12_or_later=y
-CT_GDB_later_than_7_2=y
-CT_GDB_7_2_or_later=y
-CT_GDB_later_than_7_0=y
-CT_GDB_7_0_or_later=y
-CT_GDB_CROSS=y
-# CT_GDB_CROSS_STATIC is not set
-# CT_GDB_CROSS_SIM is not set
-# CT_GDB_CROSS_PYTHON is not set
-CT_GDB_CROSS_EXTRA_CONFIG_ARRAY=""
-# CT_GDB_NATIVE is not set
-CT_GDB_GDBSERVER=y
-# CT_GDB_NATIVE_BUILD_IPA_LIB is not set
-# CT_GDB_NATIVE_STATIC_LIBSTDCXX is not set
-CT_GDB_HAS_PKGVERSION_BUGURL=y
-CT_GDB_HAS_PYTHON=y
-CT_GDB_INSTALL_GDBINIT=y
-CT_GDB_HAS_IPA_LIB=y
-CT_DEBUG_LTRACE=y
-CT_DEBUG_LTRACE_PKG_KSYM="LTRACE"
-CT_LTRACE_DIR_NAME="ltrace"
-CT_LTRACE_PKG_NAME="ltrace"
-CT_LTRACE_SRC_RELEASE=y
-CT_LTRACE_PATCH_ORDER="global"
-CT_LTRACE_V_0_7_3=y
-# CT_LTRACE_NO_VERSIONS is not set
-CT_LTRACE_VERSION="0.7.3"
-CT_LTRACE_MIRRORS="http://ftp.debian.org/debian/pool/main/l/ltrace ftp:://ftp.debian.org/debian/pool/main/l/ltrace"
-CT_LTRACE_ARCHIVE_FILENAME="@{pkg_name}_@{version}.orig"
-CT_LTRACE_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
-CT_LTRACE_ARCHIVE_FORMATS=".tar.bz2"
-CT_LTRACE_SIGNATURE_FORMAT=""
-CT_DEBUG_STRACE=y
-CT_DEBUG_STRACE_PKG_KSYM="STRACE"
-CT_STRACE_DIR_NAME="strace"
-CT_STRACE_PKG_NAME="strace"
-CT_STRACE_SRC_RELEASE=y
-CT_STRACE_PATCH_ORDER="global"
-CT_STRACE_V_5_4=y
-# CT_STRACE_V_5_3 is not set
-# CT_STRACE_V_5_2 is not set
-# CT_STRACE_V_5_1 is not set
-# CT_STRACE_V_5_0 is not set
-# CT_STRACE_V_4_26 is not set
-# CT_STRACE_V_4_25 is not set
-# CT_STRACE_V_4_24 is not set
-# CT_STRACE_V_4_23 is not set
-# CT_STRACE_V_4_22 is not set
-# CT_STRACE_V_4_21 is not set
-# CT_STRACE_V_4_20 is not set
-# CT_STRACE_V_4_19 is not set
-# CT_STRACE_V_4_18 is not set
-# CT_STRACE_V_4_17 is not set
-# CT_STRACE_V_4_16 is not set
-# CT_STRACE_V_4_15 is not set
-# CT_STRACE_NO_VERSIONS is not set
-CT_STRACE_VERSION="5.4"
-CT_STRACE_MIRRORS="https://strace.io/files/${CT_STRACE_VERSION}"
-CT_STRACE_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
-CT_STRACE_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
-CT_STRACE_ARCHIVE_FORMATS=".tar.xz"
-CT_STRACE_SIGNATURE_FORMAT=""
+# CT_DEBUG_DUMA is not set
+# CT_DEBUG_GDB is not set
+# CT_DEBUG_LTRACE is not set
+# CT_DEBUG_STRACE is not set
 CT_ALL_DEBUG_CHOICES="DUMA GDB LTRACE STRACE"
 # CT_COMPLIBS_CHECK is not set
 # CT_COMP_LIBS_CLOOG is not set
@@ -738,8 +638,6 @@ CT_GMP_NEEDED=y
 CT_MPFR_NEEDED=y
 CT_ISL_NEEDED=y
 CT_MPC_NEEDED=y
-CT_LIBELF_TARGET=y
-CT_EXPAT_NEEDED=y
 CT_NCURSES_NEEDED=y
 CT_ZLIB_NEEDED=y
 CT_LIBICONV=y
@@ -748,7 +646,6 @@ CT_GMP=y
 CT_MPFR=y
 CT_ISL=y
 CT_MPC=y
-CT_EXPAT=y
 CT_NCURSES=y
 CT_ZLIB=y
 # CT_COMP_TOOLS_FOR_HOST is not set
