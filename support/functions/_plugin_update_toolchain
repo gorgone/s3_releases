@@ -5,7 +5,7 @@
 tcupdate(){
 	clear && _check_bin;
 	
-	pversion="0.9.2";
+	pversion="0.9.3";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -239,6 +239,7 @@ _create_tc(){
 		0) #Start - Build cross toolchain
 			if [ -f "$ctsrcdir/ct-ng" ]; then
 				icount=$(echo $opts | wc -w);i=0;
+			
 				for tpl in $opts;do
 					if [ -f "$cttpldir/$tpl" ]; then
 						
@@ -269,10 +270,11 @@ _create_tc(){
 						
 						cd "$ctsrcdir";
 						#generate build command list
+						unset buildtasks;
 						for task in "${CTNG_BUILD_tasks[@]}";do
 							task=$(_replace_tokens "$task");	#replace tokens
 							buildtasks+=("$task");
-						done
+						done;
 						( eval "${buildtasks[@]}" ) 2>&1;
 						err=$(grep '\[ERROR\]' "$ctsrcdir/build.log" | wc -l)
 
