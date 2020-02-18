@@ -15,6 +15,7 @@ configdir="$sdir/configs";
      pdir="$sdir/patches";
   profdir="$sdir/profiles";
      bdir="$sdir/binaries";
+	 pfdir="$sdir/profiles";
     dldir="$sdir/downloads";
      fdir="$sdir/functions";
   menudir="$sdir/menu_save";
@@ -33,6 +34,7 @@ mkdir -p "$tcdir/native/bin" 2>/dev/null;
 [ ! -L "$workdir/archive" ]  && ln -sf "$adir" "$workdir/archive"  2>/dev/null;
 [ ! -L "$workdir/patches" ]  && ln -sf "$pdir" "$workdir/patches"  2>/dev/null;
 [ ! -L "$workdir/binaries" ] && ln -sf "$bdir" "$workdir/binaries" 2>/dev/null;
+[ ! -L "$workdir/profiles" ] && ln -sf "$pfdir" "$workdir/profiles" 2>/dev/null;
 
 #set arrays
 unset INTERNAL_MODULES; unset ENABLED_MODULES; unset SHORT_MODULENAMES;  unset INST_TCLIST;
@@ -225,7 +227,7 @@ else
 						exit;;
 			help)		_help;
 						exit;;
-			*)			eval "$e" "$2";
+			*)			shift && eval "$e" "$@"; #Remove the first command line argument and pass the remaining ones to the plugin
 						exit;;
 			esac;
 		fi;
