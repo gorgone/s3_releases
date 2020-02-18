@@ -1,0 +1,99 @@
+#!/bin/bash
+
+#spanish
+txt_as='como';
+txt_of='de';
+txt_for='para';
+txt_b2="compilar";
+txt_to="a";
+txt_now='ahora';
+txt_b1='compilar';
+txt_menu='menu';
+txt_done=' hecho';
+txt_no='no';
+txt_use='usa';
+txt_back='atras';
+txt_error='error';
+txt_loading='cargando'; #8 chars
+txt_sel='seleccion';
+txt_delete='borrar';
+txt_found='encontrado';
+txt_create='crear';
+txt_conf='configuracion';
+txt_extracting='extrayendo'; #10 chars
+txt_wait='esperar...';
+txt_existing='existe';
+txt_profiles='perfiles';
+txt_not_found='no encontrado';
+txt_n_installed='no esta instalado';
+txt_back_main="Volver al menu";
+txt_too_old='(demasiado antiguo o no soportado)';
+txt_selected='seleccionado';
+txt_update='refrescando';
+txt_tc="Toolchain";
+
+# menu txt
+txt_start_menu='menu principal';
+txt_remove_menu='Eliminar toolchain';
+txt_add_menu='nuevo toolchain';
+txt_main_revision="\n la revision SVN es : r";
+
+# help txt
+txt_help1="empieza por"
+txt_help2="Los parametros del commandline son"
+txt_help3="[ENTER] para continuar..."
+
+# firstmenu ################################################
+txt_firstmenu_continue="Continuar con el SVN local";
+   txt_firstmenu_chose="Cargar un SVN diferente (7000+)";
+   txt_firstmenu_cedit="Iniciar editor de configuracion";
+    txt_firstmenu_lang="Seleccion de idioma";
+    txt_firstmenu_exit="Cerrar SimpleBuild ahora";
+
+# _toolchain_config_menu ###################################
+     txt_config_menu="menu configuracion";
+      txt_back_build="volver al menu de compilacion";
+txt_module_configure="seleccionar modulos oscam ";
+     txt_oscam_extra="seleccionar extras oscam USB/PCSC";
+     txt_build_extra="seleccionar extras de compilacion comprimir/parcheo";
+      txt_build_load="cargar la última configuracion";
+      txt_build_save="guardar configuracion";
+     txt_build_reset="reiniciar configuracion";
+
+# _toolchain_build_menu#####################################
+ txt_bmenu_title="menu compilacion";
+  txt_bmenu_user="usuario        ";
+  txt_bmenu_comp="compilador     ";
+  txt_bmenu_debu="debug info     ";
+   txt_bmenu_use="USE_variables ";
+ txt_bmenu_build="compilar oscam ahora";
+txt_bmenu_config="oscam/build configuracion";
+   txt_bmenu_log="mostrar lastbuild.log";
+  txt_bmenu_back="volver a la seleccion del toolchain";
+   txt_compress1="filesize antes     ";
+   txt_compress2="filesize después      ";
+   txt_compress3="filesize reducido a ";
+
+# _toolchain_main_menu#####################################
+txt_menu_builder1="cerrar simplebuild";
+txt_menu_builder2="Cambiar toolchain";
+txt_menu_builder3="Eliminar el toolchain instalado";
+txt_menu_builder4="Compilar sistema nativo =>";
+txt_menu_back="volver al menu del toolchain";
+
+# _dialog_checkout
+txt_verify_syscheck='comprobacion del sistema             :';
+     txt_verify_svn='comprobacion del SVN existente       :';
+     txt_update_svn="$txt_update SVN                      :";
+    txt_prepare_svn="preparacion SVN checkout             :";
+         txt_latest="ultimo SVN";
+
+# _load_profile ###########################################
+  txt_select_profile_title="perfiles disponibles";
+        txt_select_profile="selecciona un perfil";
+txt_confirm_profile_select="confirma la seleccion para:";
+      txt_no_profile_found="perfil no encontrado en\n\n$profdir";
+
+# _upload_cam #############################################
+txt_upload_cam1="perfil ssh no existente";
+txt_upload_cam2="perfil ssh encontrado";
