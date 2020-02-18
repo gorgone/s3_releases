@@ -37,7 +37,7 @@ upload_cam(){
 	if [ "$replace_target" == "y" ];then
 		echo -en "$p_l  REPLACE > $y_l$targetcam$re_";
 		sshpass -p "$password" ssh -p "$port" -o StrictHostKeyChecking=no "$loginname@$ip" \
-		"cd /tmp;if [ -f \"$buildcamname\" ];then if [ -f \"$targetcam\" ];then mv -f \"$buildcamname\" \"$targetcam\";fi;fi;exit;";
+		"cd /tmp;if [ -f \"$buildcamname\" ];then if [ -f \"$targetcam\" ];then if [ \"$backup_target\" == \"y\" ]; then cp -pf \"$targetcam\" \"$targetcam.backup\"; fi;mv -f \"$buildcamname\" \"$targetcam\";fi;fi;exit;";
 		echo -e "$g_l$txt_done!$re_";
 	fi;
 
