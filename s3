@@ -115,10 +115,10 @@ syscheck;[ ! "$sanity" == "1" ] && echo "sanity fail" && sleep 5 && bye;
 _create_native_profile;	# put native datas to toolchains and configs
 _get_config_con "$1";	# echo $addons;exit;
 _create_module_arrays;	# fill module arrays
-_fill_tc_array;			# get # AVAI_TCLIST # INST_TCLIST # MISS_TCLIST
-read_s3cfg;				# read simplebuild config
-_set_dialog_types;		# fill $gui vars
-_systype;				# check used uname
+_fill_tc_array;		# get # AVAI_TCLIST # INST_TCLIST # MISS_TCLIST
+read_s3cfg;		# read simplebuild config
+_set_dialog_types;	# fill $gui vars
+_systype;		# check used uname
 
 if [ ! -n "$1" ];then
 	[ "${s3cfg_vars[DIRECTMENU]}" == "1" ] && _dialog_checkout && exit;
