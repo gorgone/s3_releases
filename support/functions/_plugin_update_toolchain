@@ -1,17 +1,20 @@
 #!/bin/bash
 
-#simplebuild_plugin tcupdate (s3.TUP)
-
 tcupdate(){
-	clear && _check_bin;
-	
-	pversion="0.9.3";
+	pversion="0.10.0";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
 	
-	#remove config
-	if [ "$1" == "-r" ] || [ "$1" == "--reset" ];then
+	CMDTC="$1";
+	OPTION1="$2";
+	OPTION2="$3";
+	FLAG="$4";
+	
+	clear && _check_bin;
+	
+	#backup config
+	if [ "$CMDTC" == "-r" ] || [ "$CMDTC" == "--reset" ];then
 		if [ -f "$configname" ];then
 			if ! _check_github_api_limits 12; then
 				echo -e "$y_l""RESET -> Moving existing config file...""$re_";
@@ -42,68 +45,54 @@ tcupdate(){
 	#check config
 	_check_config;
 	
-	if [ "$1" == "-c" ] || [ "$1" == "--create" ];then	
-		_create_tc;
+	if [ "$CMDTC" == "-c" ] || [ "$CMDTC" == "--create" ];then	#start toolchain builder menu
+		_create_tc "$FLAG";
 		bye;
-	elif [ "$1" == "" ];then
-		_fill_tc_array;
-		unset MENU_OPTIONS;COUNT=0
-		if [ "$systype" == "ok" ];then
-			if [ "$tcempty" == "0" ];then
-				for i in "${INST_TCLIST[@]}";do
-					if [ ! "$i" == "native" ];then
-						source "$tccfgdir/$i";
-						[ -f "$tcdir/$i/build.log.bz2" ] && tcdate=" ct-ng."$(date -r "$tcdir/$i/build.log.bz2" "+%Y-%m-%d %H:%M:%S") || tcdate="";
-						MENU_OPTIONS+=("$_toolchainname" "$_description\Z2$tcdate\Zn" "toolchain folder:$tcdir/$i | config file:$tccfgdir/$i");
-						counter;
-					fi;
-				done;
-			fi;
-			[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "no toolchains found" "no toolchains found") && counter;
+	elif [ "$CMDTC" == "-b" ] || [ "$CMDTC" == "--backup" ];then #backup toolchain
+		if _check_toolchain "$OPTION1";then
+			_backup "$OPTION1" "$OPTION1" >/dev/null;
+			bye;
+		else
+			_nl && exit;
 		fi;
-
-		out=$("$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--item-help" "--help-tags" "--default-item" "$3" "--ok-label" "Update" "--cancel-label" "Create" "--help-button" "--help-label" "Exit" "--extra-button" "--extra-label" "Copy" "--title" "-[ Toolchain Menu ]-" \
-			--menu "\nSelect one of the installed tool chains that you want to update:\n " \
-			"${COUNT+10}" 0 0 "${MENU_OPTIONS[@]}");
-		ret="$?"
-
-		tc=$(echo "$out" | awk '{printf $1}');
-		case $ret in
-			0) #Update toolchain
-				tc_menu="1";;
-			1) #Start crosstool
-				tc_menu="2";
-				_create_tc;
-				tcupdate "" "0" "$tc";;
-			2) #Exit
-				bye;;
-			3) #Copy toolchain
-				[ ! "$tc" == "" ] && _toolchain_repair "$(_copy "$tc")" || echo -e "$r_l  $txt_error:$y_l $tc$w_l Toolchain $txt_n_installed""$rs_";
-				sleep 2;
-				tcupdate "" "0" "$tc";;
-		esac;
+	elif [ "$CMDTC" == "-d" ] || [ "$CMDTC" == "--duplicate" ];then #duplicate toolchain
+		if _check_toolchain "$OPTION1";then
+			! _check_toolchain "$OPTION2" && _toolchain_repair "$(_backup "$OPTION1" "$OPTION2")" || echo -e "\n\n$r_l  $txt_error:$y_l $OPTION2$w_l Toolchain already exists!""$rs_" && _nl && exit;
+			bye;
+		else
+			_nl && exit;
+		fi;
+	elif [ "$CMDTC" == "" ];then
+		unset menu_close;
+		while [ ! $menu_close ]
+		do
+			tc=$(_select_tc "$tc" "$FLAG");
+			ret="$?"
+		
+			case $ret in
+				0) #Update toolchain
+					menu_close="1";;
+				1) #Start crosstool-NG
+					_create_tc;;
+				2) #Exit
+					[ "$FLAG" == "1" ] && bye || return;;
+				3) #Duplicate toolchain
+					_check_toolchain $tc && _backup "$tc" "$tc" >/dev/null || [ "$CMDTC"  == "" ] && sleep 2 && tcupdate "$CMDTC" "$OPTION1" "$OPTION2" "$FLAG" || _nl && exit;
+					sleep 2;;
+			esac;
+		done;
 	else
-		tc="$1"
-		[ "$2" == "" ] && tc_menu="0" || tc_menu="$2";
+		tc="$CMDTC";
 	fi;
 	
-	#toolchain native not supported
-	if [ "$tc" == "native" ];then
-		echo -e "$r_l  $txt_error:$y_l $tc$w_l Toolchain library update not supported!""$rs_";
-		_nl;
-		exit;
+	#toolchain native not supported and exists check 
+	if ! _check_toolchain $tc;then
+		[ "$CMDTC"  == "" ] && sleep 2 && tcupdate "$CMDTC" "$OPTION1" "$OPTION2" "$FLAG" || _nl && exit;
 	fi;
 	
-	#toolchain exists check
+	#load toolchain config
 	[ -f "$tccfgdir/$tc" ] && source "$tccfgdir/$tc";
-	if [ -d "$tcdir/$tc/bin" ];then
-		cd "$tcdir/$tc/bin";
-	else
-		echo -e "$r_l  $txt_error:$y_l $tc$w_l Toolchain $txt_n_installed""$rs_";
-		[ "$1" == "" ] && sleep 2 && tcupdate "" "0" "$tc";
-		_nl;
-		exit;
-	fi;
+	cd "$tcdir/$tc/bin";
 
 	#autodetect toolchain's sysroot, prefix, include, pkgconfig folder
 	compilername="$_compiler""gcc";compilername=$(realpath -s $compilername);
@@ -149,7 +138,7 @@ tcupdate(){
 	done;
 	[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "no libraries found" "no libraries found") && counter;
 
-	opts=$("$gui" "--item-help" "--help-tags" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--default-item" "$3" "--ok-label" "Start" "--help-button" "--help-label" "Info" "--cancel-label" "$([ "$tc_menu" == "1" ] && echo "Back" || echo "Exit")" "--title" "-[ Library Update Menu - \Z2$tc\Zn ]-" "$cl_"\
+	opts=$("$gui" "--item-help" "--help-tags" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--default-item" "$3" "--ok-label" "Start" "--help-button" "--help-label" "Info" "--cancel-label" "$([ "$menu_close" == "1" ] && echo "Back" || echo "Exit")" "--title" "-[ Library Update Menu - \Z2$tc\Zn ]-" "$cl_"\
 		"\nSelect all libraries to update in toolchain's SYSROOT folder:\n$prefixdir\n\n       library version    NEW                    CURRENT" \
 		"${COUNT+12}" 70 0 "${MENU_OPTIONS[@]}");
 	
@@ -171,7 +160,7 @@ tcupdate(){
 		tcupdate $tc $tc_menu $libkey;
 	fi;	
 
-	#BUILD section
+	#BUILD library section
 	ts=$(date +%F)_$(date +%T);
 	tmpdir="/tmp/lib_source/$ts";
 	icount=$(echo $opts | wc -w);i=0;
@@ -195,12 +184,35 @@ tcupdate(){
 	
 	#Reopen update menu
 	if [ ${#opts} -gt 0 ];then
-		tcupdate $tc $tc_menu $libkey;
+		tcupdate "$tc" "$OPTION1" "$OPTION2" "$menu_close";
 	else
-		[ "$tc_menu" == "1" ] && tcupdate "" "0" "$tc";
+		[ "$menu_close" == "1" ] && tcupdate "" "$OPTION1" "$OPTION2" "$FLAG" || bye;
+	fi;
+};
+_select_tc(){
+	_fill_tc_array;
+	unset MENU_OPTIONS;COUNT=0
+	if [ "$systype" == "ok" ];then
+		if [ "$tcempty" == "0" ];then
+			for i in "${INST_TCLIST[@]}";do
+				if [ ! "$i" == "native" ];then
+					source "$tccfgdir/$i";
+					[ -f "$tcdir/$i/build.log.bz2" ] && tcdate=" ct-ng."$(date -r "$tcdir/$i/build.log.bz2" "+%Y-%m-%d %H:%M:%S") || tcdate="";
+					MENU_OPTIONS+=("$_toolchainname" "$_description\Z2$tcdate\Zn" "toolchain folder:$tcdir/$i | config file:$tccfgdir/$i");
+					counter;
+				fi;
+			done;
+		fi;
+		[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "no toolchains found" "no toolchains found") && counter;
 	fi;
 	
-	bye;
+	out=$("$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--item-help" "--help-tags" "--default-item" "$1" "--ok-label" "Update" "--cancel-label" "Create" "--help-button" "--help-label" "$([ "$2" == "1" ] && echo "Exit" || echo "Back")" "--extra-button" "--extra-label" "Backup" "--title" "-[ Toolchain Menu ]-" \
+		--menu "\nSelect one of the installed tool chains that you want to update:\n " \
+		"${COUNT+10}" 0 0 "${MENU_OPTIONS[@]}");
+	ret="$?"
+	tc=$(echo "$out" | awk '{printf $1}');
+	echo "$tc";
+	return $ret;
 };
 _create_tc(){
 	_sz;					# Prepare DIALOG settings
@@ -230,7 +242,7 @@ _create_tc(){
 	fi;
 	[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "no templates found" "no templates found") && counter;
 	
-	opts=$("$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--item-help" "--help-tags" "--default-item" "$3" "--ok-label" "Start" "--cancel-label" "Setup" "--help-button" "--help-label" "$([ $tc_menu ] && echo "Back" || echo "Exit")" "--title" "-[ Cross Toolchain Template Menu ]-" "$cl_"\
+	opts=$("$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--item-help" "--help-tags" "--default-item" "$3" "--ok-label" "Start" "--cancel-label" "Setup" "--help-button" "--help-label" "$([ $1 == "1" ] && echo "Exit" || echo "Back")" "--title" "-[ Cross Toolchain Template Menu ]-" "$cl_"\
 		 "\nSelect on of the templates to create the cross toolchain you want:\n\n\Z1NOTE: If you create a cross toolchain from a template with a red colored description, an existing one with the same name will be replaced without asking!\Zn" \
 		 "${COUNT+11}" 0 0 "${MENU_OPTIONS[@]}");
 	ret="$?"
@@ -337,23 +349,23 @@ _create_tc(){
 			return;;
 	esac;
 };
-_copy(){
+_backup(){
 
 	_sz;					# Prepare DIALOG settings
-	nr=$(( $RANDOM % 100 ));
-	newtc="$1-$nr";
-	newtccfgfile="$tccfgdir/$newtc";
-	xzfile="$dldir/Toolchain-$newtc.tar.xz";
+	src=$1;
+	dest=$2;
+	newtccfgfile="$tccfgdir/$dest";
+	xzfile="$dldir/Toolchain-$dest.tar.xz";
 	
 	(
 	#compress toolchain
-	_compress "$xzfile" "$tcdir/$1"
+	_compress "$xzfile" "$tcdir/$src"
 	
 	#create toolchain.cfg
-	source "$tccfgdir/$1" && target="${_compiler%?}" && sysroot="$_sysroot" && lsd="$_libsearchdir" && desc="$_description" && info="$_tc_info";
-	_create_toolchaincfg "$tcdir/$1" "$newtc" "$target" "$sysroot" "$lsd" "$desc" "$info" "$xzfile";
-	) | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Copy $1 to $newtc ... ]- " "$pb_" "$_lines" "$_cols";
-	[ -f "$newtccfgfile" ] && echo "$newtc";
+	source "$tccfgdir/$src" && target="${_compiler%?}" && sysroot="$_sysroot" && lsd="$_libsearchdir" && desc="$_description" && info="$_tc_info";
+	_create_toolchaincfg "$tcdir/$src" "$dest" "$target" "$sysroot" "$lsd" "$desc" "$info" "$xzfile";
+	) | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Backup $src to $(basename "$xzfile")... ]- " "$pb_" "$_lines" "$_cols";
+	[ -f "$newtccfgfile" ] && echo "$dest";
 };
 _build(){
 	
@@ -506,8 +518,23 @@ else
 fi;
 echo -e "\033[2K\r"; #remove characters from console
 };
+_check_toolchain(){
+	#toolchain native not supported
+	if [ "$1" == "" ];then
+		echo -e "\n\n$r_l  $txt_error:$y_l Parameter$w_l Toolchain not set!""$rs_";
+		return 1;
+	elif [ "$1" == "native" ];then
+		echo -e "\n\n$r_l  $txt_error:$y_l $1$w_l Toolchain library update not supported!""$rs_";
+		return 1;
+	elif [ ! -d "$tcdir/$1/bin" ];then
+		echo -e "\n\n$r_l  $txt_error:$y_l $1$w_l Toolchain $txt_n_installed""$rs_";
+		return 1;
+	else
+		return 0;
+	fi;
+};
 _check_root(){
-  ! ((${EUID:-0} || "$(id -u)"));
+	! ((${EUID:-0} || "$(id -u)"));
 };
 _check_lib(){
 	case "$1" in

@@ -48,6 +48,7 @@ txt_help3="[ENTER] to continue..."
 txt_firstmenu_continue="continue with local SVN";
    txt_firstmenu_chose="load a different SVN (7000+)";
    txt_firstmenu_cedit="start configuration editor";
+   txt_firstmenu_tcupdate="start toolchain updater";
     txt_firstmenu_lang="manual system language selection";
     txt_firstmenu_exit="close simplebuild now";
 

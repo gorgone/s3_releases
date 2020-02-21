@@ -57,6 +57,7 @@ txt_help3="Taste [ENTER] zum fortsetzen..."
 txt_firstmenu_continue="weiter mit lokalem SVN";
    txt_firstmenu_chose="anderen SVN Stand (7000+) laden";
    txt_firstmenu_cedit="$txt_conf""s Editor starten";
+   txt_firstmenu_tcupdate="Toolchain Updater starten";
     txt_firstmenu_lang="Systemsprache manuell $txt_sel";
     txt_firstmenu_exit="simplebuild sofort beenden";
 
