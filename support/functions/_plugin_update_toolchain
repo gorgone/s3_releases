@@ -69,8 +69,28 @@ tcupdate(){
 		unset menu_close;
 		while [ ! $menu_close ]
 		do
-			tc=$(_select_tc "$tc" "$FLAG");
-			ret="$?"
+			#TOOLCHAIN MENU
+			_fill_tc_array;
+			unset MENU_OPTIONS;COUNT=0
+			if [ "$systype" == "ok" ];then
+				if [ "$tcempty" == "0" ];then
+					for i in "${INST_TCLIST[@]}";do
+						if [ ! "$i" == "native" ];then
+							source "$tccfgdir/$i";
+							[ -f "$tcdir/$i/build.log.bz2" ] && tcdate=" ct-ng."$(date -r "$tcdir/$i/build.log.bz2" "+%Y-%m-%d %H:%M:%S") || tcdate="";
+							MENU_OPTIONS+=("$_toolchainname" "$_description\Z2$tcdate\Zn" "toolchain folder:$tcdir/$i | config file:$tccfgdir/$i");
+							counter;
+						fi;
+					done;
+				fi;
+				[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "no toolchains found" "no toolchains found") && counter;
+			fi;
+			clear;clear;
+			out=$("$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--item-help" "--help-tags" "--default-item" "$tc" "--ok-label" "Update" "--cancel-label" "Create" "--help-button" "--help-label" "$([ "$FLAG" == "1" ] && echo "Exit" || echo "Back")" "--extra-button" "--extra-label" "Backup" "--title" "-[ Toolchain Menu ]-" \
+				--menu "\nSelect one of the installed tool chains that you want to update:\n " \
+				"${COUNT+10}" 0 0 "${MENU_OPTIONS[@]}");
+			ret="$?";
+			tc=$(echo "$out" | awk '{printf $1}');
 		
 			case $ret in
 				0) #Update toolchain
@@ -87,7 +107,7 @@ tcupdate(){
 	else
 		tc="$CMDTC";
 	fi;
-	
+
 	#toolchain native not supported and exists check 
 	if ! _check_toolchain $tc;then
 		[ "$CMDTC"  == "" ] && sleep 2 && tcupdate "$CMDTC" "$OPTION1" "$OPTION2" "$FLAG" || _nl && exit;
@@ -118,7 +138,7 @@ tcupdate(){
 	while [ ! $menu_close ]
 	do
 		cd "$prefixdir"
-		#build menu items from config file
+		#LIBRARY UPDATE MENU
 		unset MENU_OPTIONS;COUNT=0;unset libs;
 		for i in "${LIBS[@]}"
 		do
@@ -230,8 +250,34 @@ _create_tc(){
 			opts="$1";
 			ret="0";
 		else #Show Template Menu
-			opts=$(_select_tpl "$tpl" "$3");
-			ret="$?"
+			tplempty=0;
+			[ ! -d "$cttpldir" ] && mkdir --parents "$cttpldir";
+			cd "$cttpldir";
+
+			if [ "$(ls -A "$cttpldir")" ];then
+				TPL_LIST=(*);
+			else
+				tplempty=1;
+			fi;
+			
+			#CROSS TOOLCHAIN TEMPLATE MENU
+			unset MENU_OPTIONS;COUNT=0;
+			if [ "$tplempty" == "0" ];then
+				for t in "${TPL_LIST[@]}";do
+					desc=$(sed -n -e '/#toolchain template/ s/.*\: *//p' $t);
+					[ ! "$desc" ] && desc="no description available";
+					[ -d "$tcdir/$t" ] && [ -f "$tccfgdir/$t" ] && color="\Z1" || color="";
+					MENU_OPTIONS+=("$t" "$color$desc\Zn" "off" "template filename:$cttpldir/$t");counter;
+					counter;
+				done;
+			fi;
+			
+			[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "no templates found" "no templates found") && counter;
+			clear;clear;
+			opts=$("$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--item-help" "--help-tags" "--default-item" "$tpl" "--ok-label" "Start" "--cancel-label" "Setup" "--help-button" "--help-label" "$([ "$3" == "1" ] && echo "Exit" || echo "Back")" "--title" "-[ Cross Toolchain Template Menu ]-" "$cl_"\
+				 "\nSelect on of the templates to create the cross toolchain you want:\n\n\Z1NOTE: If you create a cross toolchain from a template with a red colored description, an existing one with the same name will be replaced without asking!\Zn" \
+				 "${COUNT+11}" 0 0 "${MENU_OPTIONS[@]}");
+			ret="$?";
 		fi;
 	
 		case $ret in
@@ -341,62 +387,6 @@ _create_tc(){
 		[ ${#2} -gt 0 ] || [ ${#1} -gt 0 ] && menu_close=1;
 		
 	done;
-};
-_select_tc(){
-	_fill_tc_array;
-	unset MENU_OPTIONS;COUNT=0
-	if [ "$systype" == "ok" ];then
-		if [ "$tcempty" == "0" ];then
-			for i in "${INST_TCLIST[@]}";do
-				if [ ! "$i" == "native" ];then
-					source "$tccfgdir/$i";
-					[ -f "$tcdir/$i/build.log.bz2" ] && tcdate=" ct-ng."$(date -r "$tcdir/$i/build.log.bz2" "+%Y-%m-%d %H:%M:%S") || tcdate="";
-					MENU_OPTIONS+=("$_toolchainname" "$_description\Z2$tcdate\Zn" "toolchain folder:$tcdir/$i | config file:$tccfgdir/$i");
-					counter;
-				fi;
-			done;
-		fi;
-		[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "no toolchains found" "no toolchains found") && counter;
-	fi;
-	clear;clear;
-	out=$("$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--item-help" "--help-tags" "--default-item" "$1" "--ok-label" "Update" "--cancel-label" "Create" "--help-button" "--help-label" "$([ "$2" == "1" ] && echo "Exit" || echo "Back")" "--extra-button" "--extra-label" "Backup" "--title" "-[ Toolchain Menu ]-" \
-		--menu "\nSelect one of the installed tool chains that you want to update:\n " \
-		"${COUNT+10}" 0 0 "${MENU_OPTIONS[@]}");
-	ret="$?"
-	tc=$(echo "$out" | awk '{printf $1}');
-	echo "$tc";
-	return $ret;
-};
-_select_tpl(){
-	tplempty=0;
-	[ ! -d "$cttpldir" ] && mkdir --parents "$cttpldir";
-	cd "$cttpldir";
-
-	if [ "$(ls -A "$cttpldir")" ];then
-		TPL_LIST=(*);
-	else
-		tplempty=1;
-	fi;
-
-	unset MENU_OPTIONS;COUNT=0;
-	if [ "$tplempty" == "0" ];then
-		for t in "${TPL_LIST[@]}";do
-			desc=$(sed -n -e '/#toolchain template/ s/.*\: *//p' $t);
-			[ ! "$desc" ] && desc="no description available";
-			[ -d "$tcdir/$t" ] && [ -f "$tccfgdir/$t" ] && color="\Z1" || color="";
-			MENU_OPTIONS+=("$t" "$color$desc\Zn" "off" "template filename:$cttpldir/$t");counter;
-			counter;
-		done;
-	fi;
-	
-	[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "no templates found" "no templates found") && counter;
-	clear;clear;
-	opts=$("$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--item-help" "--help-tags" "--default-item" "$1" "--ok-label" "Start" "--cancel-label" "Setup" "--help-button" "--help-label" "$([ "$2" == "1" ] && echo "Exit" || echo "Back")" "--title" "-[ Cross Toolchain Template Menu ]-" "$cl_"\
-		 "\nSelect on of the templates to create the cross toolchain you want:\n\n\Z1NOTE: If you create a cross toolchain from a template with a red colored description, an existing one with the same name will be replaced without asking!\Zn" \
-		 "${COUNT+11}" 0 0 "${MENU_OPTIONS[@]}");
-	ret="$?"
-	echo "$opts";
-	return $ret;
 };
 _backup(){
 
