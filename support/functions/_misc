@@ -172,7 +172,7 @@ _select_menu(){
 	revision_="$(REVISION)";
 	_menutext="Simplebuild V$SIMPLEVERSION by Gorgone";
 	smenu=$(
-	"$gui" "$st_" "$bt_" "$title_" "$nc_" --title "-[ $txt_start_menu ]-" --menu "\n $_menutext" 13 55 7 "Continue" "$txt_firstmenu_continue r$revision_" "CHANGE" "$txt_firstmenu_chose" "CEDIT" "$txt_firstmenu_cedit" "LANG" "$txt_firstmenu_lang" "EXIT" "$txt_firstmenu_exit");
+	"$gui" "$st_" "$bt_" "$title_" "$nc_" --title "-[ $txt_start_menu ]-" --menu "\n $_menutext" 13 55 7 "Continue" "$txt_firstmenu_continue r$revision_" "CHANGE" "$txt_firstmenu_chose" "CEDIT" "$txt_firstmenu_cedit" "TCUPDATE" "$txt_firstmenu_tcupdate" "LANG" "$txt_firstmenu_lang" "EXIT" "$txt_firstmenu_exit");
 	[ $? = 255 ] && _select_menu;
 	case $smenu in
 		Continue)
@@ -190,6 +190,9 @@ _select_menu(){
 					_select_menu;;
 		CEDIT)
 					s3cfg_menu;
+					_select_menu;;
+		TCUPDATE)
+					tcupdate;
 					_select_menu;;
 		LANG)
 					lang_select;

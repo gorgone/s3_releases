@@ -1,17 +1,20 @@
 #!/bin/bash
 
-#simplebuild_plugin tcupdate (s3.TUP)
-
 tcupdate(){
-	clear && _check_bin;
-	
-	pversion="0.9.3";
+	pversion="0.10.2";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
 	
-	#remove config
-	if [ "$1" == "-r" ] || [ "$1" == "--reset" ];then
+	CMDTC="$1";
+	OPTION1="$2";
+	OPTION2="$3";
+	FLAG="$4";
+	
+	clear && _check_bin;
+	
+	#backup config
+	if [ "$CMDTC" == "-r" ] || [ "$CMDTC" == "--reset" ];then
 		if [ -f "$configname" ];then
 			if ! _check_github_api_limits 12; then
 				echo -e "$y_l""RESET -> Moving existing config file...""$re_";
@@ -42,68 +45,77 @@ tcupdate(){
 	#check config
 	_check_config;
 	
-	if [ "$1" == "-c" ] || [ "$1" == "--create" ];then	
-		_create_tc;
+	if [ "$CMDTC" == "-c" ] || [ "$CMDTC" == "--create" ];then	#start toolchain builder menu
+		_create_tc "$OPTION1" "" "$FLAG";
 		bye;
-	elif [ "$1" == "" ];then
-		_fill_tc_array;
-		unset MENU_OPTIONS;COUNT=0
-		if [ "$systype" == "ok" ];then
-			if [ "$tcempty" == "0" ];then
-				for i in "${INST_TCLIST[@]}";do
-					if [ ! "$i" == "native" ];then
-						source "$tccfgdir/$i";
-						[ -f "$tcdir/$i/build.log.bz2" ] && tcdate=" ct-ng."$(date -r "$tcdir/$i/build.log.bz2" "+%Y-%m-%d %H:%M:%S") || tcdate="";
-						MENU_OPTIONS+=("$_toolchainname" "$_description\Z2$tcdate\Zn" "toolchain folder:$tcdir/$i | config file:$tccfgdir/$i");
-						counter;
-					fi;
-				done;
-			fi;
-			[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "no toolchains found" "no toolchains found") && counter;
+	elif [ "$CMDTC" == "-s" ] || [ "$CMDTC" == "--setup" ];then	#setup crosstool-NG
+		_create_tc "" "$CMDTC" "$FLAG";
+		bye;
+	elif [ "$CMDTC" == "-b" ] || [ "$CMDTC" == "--backup" ];then #backup toolchain
+		if _check_toolchain "$OPTION1";then
+			_backup "$OPTION1" "$OPTION1" >/dev/null;
+			bye;
+		else
+			_nl && exit;
 		fi;
-
-		out=$("$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--item-help" "--help-tags" "--default-item" "$3" "--ok-label" "Update" "--cancel-label" "Create" "--help-button" "--help-label" "Exit" "--extra-button" "--extra-label" "Copy" "--title" "-[ Toolchain Menu ]-" \
-			--menu "\nSelect one of the installed tool chains that you want to update:\n " \
-			"${COUNT+10}" 0 0 "${MENU_OPTIONS[@]}");
-		ret="$?"
-
-		tc=$(echo "$out" | awk '{printf $1}');
-		case $ret in
-			0) #Update toolchain
-				tc_menu="1";;
-			1) #Start crosstool
-				tc_menu="2";
-				_create_tc;
-				tcupdate "" "0" "$tc";;
-			2) #Exit
-				bye;;
-			3) #Copy toolchain
-				[ ! "$tc" == "" ] && _toolchain_repair "$(_copy "$tc")" || echo -e "$r_l  $txt_error:$y_l $tc$w_l Toolchain $txt_n_installed""$rs_";
-				sleep 2;
-				tcupdate "" "0" "$tc";;
-		esac;
+	elif [ "$CMDTC" == "-d" ] || [ "$CMDTC" == "--duplicate" ];then #duplicate toolchain
+		if _check_toolchain "$OPTION1";then
+			! _check_toolchain "$OPTION2" && _toolchain_repair "$(_backup "$OPTION1" "$OPTION2")" || echo -e "\n\n$r_l  $txt_error:$y_l $OPTION2$w_l Toolchain already exists!""$rs_" && _nl && exit;
+			bye;
+		else
+			_nl && exit;
+		fi;
+	elif [ "$CMDTC" == "" ];then
+		unset menu_close;
+		while [ ! $menu_close ]
+		do
+			#TOOLCHAIN MENU
+			_fill_tc_array;
+			unset MENU_OPTIONS;COUNT=0
+			if [ "$systype" == "ok" ];then
+				if [ "$tcempty" == "0" ];then
+					for i in "${INST_TCLIST[@]}";do
+						if [ ! "$i" == "native" ];then
+							source "$tccfgdir/$i";
+							[ -f "$tcdir/$i/build.log.bz2" ] && tcdate=" ct-ng."$(date -r "$tcdir/$i/build.log.bz2" "+%Y-%m-%d %H:%M:%S") || tcdate="";
+							MENU_OPTIONS+=("$_toolchainname" "$_description\Z2$tcdate\Zn" "toolchain folder:$tcdir/$i | config file:$tccfgdir/$i");
+							counter;
+						fi;
+					done;
+				fi;
+				[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "no toolchains found" "no toolchains found") && counter;
+			fi;
+			clear;clear;
+			out=$("$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--item-help" "--help-tags" "--default-item" "$tc" "--ok-label" "Update" "--cancel-label" "Create" "--help-button" "--help-label" "$([ "$FLAG" == "1" ] && echo "Exit" || echo "Back")" "--extra-button" "--extra-label" "Backup" "--title" "-[ Toolchain Menu ]-" \
+				--menu "\nSelect one of the installed tool chains that you want to update:\n " \
+				"${COUNT+10}" 0 0 "${MENU_OPTIONS[@]}");
+			ret="$?";
+			tc=$(echo "$out" | awk '{printf $1}');
+		
+			case $ret in
+				0) #Update toolchain
+					menu_close="1";;
+				1) #Start crosstool-NG
+					_create_tc;;
+				2) #Exit
+					[ "$FLAG" == "1" ] && bye || return;;
+				3) #Duplicate toolchain
+					_check_toolchain $tc && _backup "$tc" "$tc" >/dev/null || [ "$CMDTC"  == "" ] && sleep 2 && tcupdate "$CMDTC" "$OPTION1" "$OPTION2" "$FLAG" || _nl && exit;
+					sleep 2;;
+			esac;
+		done;
 	else
-		tc="$1"
-		[ "$2" == "" ] && tc_menu="0" || tc_menu="$2";
+		tc="$CMDTC";
+	fi;
+
+	#toolchain native not supported and exists check 
+	if ! _check_toolchain $tc;then
+		[ "$CMDTC"  == "" ] && sleep 2 && tcupdate "$CMDTC" "$OPTION1" "$OPTION2" "$FLAG" || _nl && exit;
 	fi;
 	
-	#toolchain native not supported
-	if [ "$tc" == "native" ];then
-		echo -e "$r_l  $txt_error:$y_l $tc$w_l Toolchain library update not supported!""$rs_";
-		_nl;
-		exit;
-	fi;
-	
-	#toolchain exists check
+	#load toolchain config
 	[ -f "$tccfgdir/$tc" ] && source "$tccfgdir/$tc";
-	if [ -d "$tcdir/$tc/bin" ];then
-		cd "$tcdir/$tc/bin";
-	else
-		echo -e "$r_l  $txt_error:$y_l $tc$w_l Toolchain $txt_n_installed""$rs_";
-		[ "$1" == "" ] && sleep 2 && tcupdate "" "0" "$tc";
-		_nl;
-		exit;
-	fi;
+	cd "$tcdir/$tc/bin";
 
 	#autodetect toolchain's sysroot, prefix, include, pkgconfig folder
 	compilername="$_compiler""gcc";compilername=$(realpath -s $compilername);
@@ -121,86 +133,104 @@ tcupdate(){
 	prefixdir="$PWD"
 	pkg=$(find * | grep -m1 "/pkgconfig") && pkgdir="$prefixdir/$pkg" || pkgdir="$prefixdir";
 	
-	#build menu items from config file
-	unset MENU_OPTIONS;COUNT=0;unset libs;
-	for i in "${LIBS[@]}"
+	backxit=$menu_close;
+	unset menu_close;
+	while [ ! $menu_close ]
 	do
-		[ "${!i}" == "0" ] && continue;
-		libkey=$i;
-		libname="$i"_name;libname=${!libname};
-		libdesc="$i"_desc;libdesc=${!libdesc};
-		libversion="$i"_version;libversion=${!libversion};
-		libcheck="$i"_check;libcheck=${!libcheck};
-		libversioncheck=$(echo "$libcheck" | awk '{printf $2}')
-		libcheck=$(echo "$libcheck" | awk '{printf $1}')
-		liburl="$i"_url;liburl=${!liburl};
-		libversioncurrent=$(_get_version "$pkgdir/$libcheck" "$libversioncheck");
-		libversioncompare=$(_compare_version $libversion $(echo $libversioncurrent | sed -e 's/^$/0.0.0/g'));
-		libtasks="$i"_tasks[@];libtasks=("${!libtasks}");
-		libexports="$i"_exports[@];libexports=("${!libexports}");
-		libconfigure="$i"_configure[@];libconfigure=("${!libconfigure}");
-		libmake="$i"_make[@];libmake=("${!libmake}");
+		cd "$prefixdir"
+		#LIBRARY UPDATE MENU
+		unset MENU_OPTIONS;COUNT=0;unset libs;
+		for i in "${LIBS[@]}"
+		do
+			[ "${!i}" == "0" ] && continue;
+			libkey=$i;
+			libname="$i"_name;libname=${!libname};
+			libdesc="$i"_desc;libdesc=${!libdesc};
+			libversion="$i"_version;libversion=${!libversion};
+			libcheck="$i"_check;libcheck=${!libcheck};
+			libversioncheck=$(echo "$libcheck" | awk '{printf $2}')
+			libcheck=$(echo "$libcheck" | awk '{printf $1}')
+			liburl="$i"_url;liburl=${!liburl};
+			libversioncurrent=$(_get_version "$pkgdir/$libcheck" "$libversioncheck");
+			libversioncompare=$(_compare_version $libversion $(echo $libversioncurrent | sed -e 's/^$/0.0.0/g'));
+			libtasks="$i"_tasks[@];libtasks=("${!libtasks}");
+			libexports="$i"_exports[@];libexports=("${!libexports}");
+			libconfigure="$i"_configure[@];libconfigure=("${!libconfigure}");
+			libmake="$i"_make[@];libmake=("${!libmake}");
 
-		MENU_OPTIONS+=("$i"		"$libname $libversion  	$([ $libversioncurrent ] && echo $libversioncompare)	$(echo $libversioncurrent | sed -e 's/^$/ ---/g')"		"$([ $libversioncurrent ] && echo "on" || echo "off")"	"$([ $libname ] && echo "$libname $libversion: $liburl")");counter;
-		
-		#     0 key     1 desc     2 version     3 checkversion     4 checkfile 5 current version    6 url      7 tasks array
-		lib=("$libkey" "$libname" "$libversion" "$libversioncheck" "$libcheck" "$libversioncurrent" "$liburl" "(${libtasks[*]@Q})");
-		libs+=("(${lib[*]@Q})");
-	done;
-	[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "no libraries found" "no libraries found") && counter;
-
-	opts=$("$gui" "--item-help" "--help-tags" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--default-item" "$3" "--ok-label" "Start" "--help-button" "--help-label" "Info" "--cancel-label" "$([ "$tc_menu" == "1" ] && echo "Back" || echo "Exit")" "--title" "-[ Library Update Menu - \Z2$tc\Zn ]-" "$cl_"\
-		"\nSelect all libraries to update in toolchain's SYSROOT folder:\n$prefixdir\n\n       library version    NEW                    CURRENT" \
-		"${COUNT+12}" 70 0 "${MENU_OPTIONS[@]}");
-	
-	#SSL select check
-	[ $(echo $opts | tr ' ' '\n' | grep -c "SSL_") -gt 1 ] && echo -e $r_l"\n\nPlease select only one SSL version!"$re_ && sleep 3 && tcupdate $tc;
-	
-	#HELP section
-	first=$(echo "$opts" | awk '{printf $1}');
-	libkey=$(echo "$opts" | awk '{printf $2}';);
-
-	if [ "$first" == "HELP" ];then
-		sp=$(printf '%*s' 90 | tr ' ' '=');
-		txt=$(cat "$configname" | grep ""$libkey"=\|"$libkey"_");
-		bcd=$(cat "$configname" | grep ""$libkey"_tasks");
-		txt=$(echo -e "Toolchain: $tcdir/$tc\nCompiler:  $compilername\nSysroot:   $sr\nPrefix:    $prefixdir\nInclude:   $incdir\n$sp\n\nLibrary configuration:\n$txt\n\nBuild command:\n$(_replace_tokens "$(_tidy_tasks "$bcd" "$libkey")")");
-		tempfile=$(mktemp) && echo -e "$txt" > "$tempfile";
-		"$gui" "$st_" "$nc_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--textbox" "$tempfile" 30 80;
-		rm "$tempfile" 2>/dev/null;
-		tcupdate $tc $tc_menu $libkey;
-	fi;	
-
-	#BUILD section
-	ts=$(date +%F)_$(date +%T);
-	tmpdir="/tmp/lib_source/$ts";
-	icount=$(echo $opts | wc -w);i=0;
-	for o in $opts;do
-		unset buildtasks;
-		for l in "${libs[@]}";do
-			declare -a lib="${l[*]}";				#populate libs array element
-			[ ! "$o" == "${lib[0]}" ] && continue || ((i++));
-			logfile="$ldir/"$ts"_update_toolchain_"$_toolchainname"_"${lib[1]}"_"${lib[2]}".log"
-
-			#generate build command list
-			declare -a libtasks="${lib[7]}";		#populate tasks array element
-			for task in "${libtasks[@]}";do
-				task=$(_replace_tokens "$task");	#replace tokens
-				buildtasks+=("$task");
-			done
-			_build "($i/$icount) $tc: library ${lib[1]} ${lib[2]}" $(_extract $(_dl "${lib[6]}" "${lib[1]} ${lib[2]}") "$tmpdir") "$logfile" "${buildtasks[@]}";
+			MENU_OPTIONS+=("$i"		"$libname $libversion  	$([ $libversioncurrent ] && echo $libversioncompare)	$(echo $libversioncurrent | sed -e 's/^$/ ---/g')"		"$([ $libversioncurrent ] && echo "on" || echo "off")"	"$([ $libname ] && echo "$libname $libversion: $liburl")");counter;
+			
+			#     0 key     1 desc     2 version     3 checkversion     4 checkfile 5 current version    6 url      7 tasks array
+			lib=("$libkey" "$libname" "$libversion" "$libversioncheck" "$libcheck" "$libversioncurrent" "$liburl" "(${libtasks[*]@Q})");
+			libs+=("(${lib[*]@Q})");
 		done;
+		[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "no libraries found" "no libraries found") && counter;
+
+		if [ ${#OPTION1} -gt 0 ];then #Force build library call
+			opts=$(echo "$OPTION1" | tr ',' "\n");
+			ret="0";
+		else
+			clear;clear;
+			opts=$("$gui" "--item-help" "--help-tags" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--default-item" "$lkey" "--ok-label" "Start" "--help-button" "--help-label" "Info" "--cancel-label" "$([ "$backxit" == "1" ] && echo "Back" || echo "Exit")" "--title" "-[ Library Update Menu - \Z2$tc\Zn ]-" "$cl_"\
+				"\nSelect all libraries to update in toolchain's SYSROOT folder:\n$prefixdir\n\n       library version    NEW                    CURRENT" \
+				"${COUNT+12}" 70 0 "${MENU_OPTIONS[@]}");
+			ret="$?"
+		fi;
+
+		#SSL select check
+		[ $(echo $opts | tr ' ' '\n' | grep -c "SSL_") -gt 1 ] && echo -e $r_l"\n\nPlease select only one SSL version!"$re_ && sleep 3 && [ ${#OPTION1} -gt 0 ] && menu_close=1 && continue;
+
+		case $ret in
+			0) #Start - Build library
+				ts=$(date +%F)_$(date +%T);
+				tmpdir="/tmp/lib_source/$ts";
+				icount=$(echo $opts | wc -w);i=0;
+				for o in $opts;do
+					unset buildtasks;
+					for l in "${libs[@]}";do
+						declare -a lib="${l[*]}";				#populate libs array element
+						[ ! "$o" == "${lib[0]}" ] && continue || ((i++));
+						logfile="$ldir/"$ts"_update_toolchain_"$_toolchainname"_"${lib[1]}"_"${lib[2]}".log"
+
+						#generate build command list
+						declare -a libtasks="${lib[7]}";		#populate tasks array element
+						for task in "${libtasks[@]}";do
+							task=$(_replace_tokens "$task");	#replace tokens
+							buildtasks+=("$task");
+						done
+						_build "($i/$icount) $tc: library ${lib[1]} ${lib[2]}" $(_extract $(_dl "${lib[6]}" "${lib[1]} ${lib[2]}") "$tmpdir" 2>/dev/null) "$logfile" "${buildtasks[@]}";
+					done;
+					[ "${#buildtasks[@]}" == "0" ] && echo -e "$r_l  $txt_error:$y_l $o$w_l Library not found in config file""$rs_";
+				done;
+				[ -d "$tmpdir" ] && rm -r "$tmpdir";;
+			1) #Exit/Back
+				menu_close="1";;
+			2) #Info
+				first=$(echo "$opts" | awk '{printf $1}');
+				lkey=$(echo "$opts" | awk '{printf $2}';);
+
+				if [ "$first" == "HELP" ];then
+					sp=$(printf '%*s' 90 | tr ' ' '=');
+					txt=$(cat "$configname" | grep ""$lkey"=\|"$lkey"_");
+					bcd=$(cat "$configname" | grep ""$lkey"_tasks");
+					txt=$(echo -e "Toolchain: $tcdir/$tc\nCompiler:  $compilername\nSysroot:   $sr\nPrefix:    $prefixdir\nInclude:   $incdir\n$sp\n\nLibrary configuration:\n$txt\n\nBuild command:\n$(_replace_tokens "$(_tidy_tasks "$bcd" "$lkey")")");
+					tempfile=$(mktemp) && echo -e "$txt" > "$tempfile";
+					"$gui" "$st_" "$nc_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--ok-label" "Back" "--textbox" "$tempfile" 30 80;
+					rm "$tempfile" 2>/dev/null;
+				fi;;
+		esac;
+		
+		#Exit loop if build library is forced
+		[ ${#OPTION1} -gt 0 ] && menu_close=1;
 	done;
-	[ -d "$tmpdir" ] && rm -r "$tmpdir";
 	
-	#Reopen update menu
+	#Reopen previous menu
+	[ ${#OPTION1} -gt 0 ] && exit;
 	if [ ${#opts} -gt 0 ];then
-		tcupdate $tc $tc_menu $libkey;
+		tcupdate "$tc" "$OPTION1" "$OPTION2" "$backxit";
 	else
-		[ "$tc_menu" == "1" ] && tcupdate "" "0" "$tc";
+		[ "$backxit" == "1" ] && tcupdate "" "$OPTION1" "$OPTION2" "$FLAG" || bye;
 	fi;
-	
-	bye;
 };
 _create_tc(){
 	_sz;					# Prepare DIALOG settings
@@ -208,155 +238,175 @@ _create_tc(){
 	ctsrcdir="$ctdir/source";
 	cttpldir="$ctdir/templates";
 	
-	tplempty=0;
-	[ ! -d "$cttpldir" ] && mkdir --parents "$cttpldir";
-	cd "$cttpldir";
-
-	if [ "$(ls -A "$cttpldir")" ];then
-		TPL_LIST=(*);
-	else
-		tplempty=1;
-	fi;
-
-	unset MENU_OPTIONS;COUNT=0;
-	if [ "$tplempty" == "0" ];then
-		for t in "${TPL_LIST[@]}";do
-			desc=$(sed -n -e '/#toolchain template/ s/.*\: *//p' $t);
-			[ ! "$desc" ] && desc="no description available";
-			[ -d "$tcdir/$t" ] && [ -f "$tccfgdir/$t" ] && color="\Z1" || color="";
-			MENU_OPTIONS+=("$t" "$color$desc\Zn" "off" "template filename:$cttpldir/$t");counter;
-			counter;
-		done;
-	fi;
-	[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "no templates found" "no templates found") && counter;
+	#ct-ng must not be run as root unless you forcing it by config
+	! _check_root && START_BUILD=1 || [ "$CTNG_BUILD_AS_ROOT" == "1" ] && START_BUILD=1 || START_BUILD=0;
 	
-	opts=$("$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--item-help" "--help-tags" "--default-item" "$3" "--ok-label" "Start" "--cancel-label" "Setup" "--help-button" "--help-label" "$([ $tc_menu ] && echo "Back" || echo "Exit")" "--title" "-[ Cross Toolchain Template Menu ]-" "$cl_"\
-		 "\nSelect on of the templates to create the cross toolchain you want:\n\n\Z1NOTE: If you create a cross toolchain from a template with a red colored description, an existing one with the same name will be replaced without asking!\Zn" \
-		 "${COUNT+11}" 0 0 "${MENU_OPTIONS[@]}");
-	ret="$?"
+	local menu_close;
+	while [ ! $menu_close ]
+	do
+		if [ ${#2} -gt 0 ];then #Force setup call
+			ret="1";
+		elif [ ${#1} -gt 0 ];then #Force build toolchain call
+			opts="$1";
+			ret="0";
+		else #Show Template Menu
+			tplempty=0;
+			[ ! -d "$cttpldir" ] && mkdir --parents "$cttpldir";
+			cd "$cttpldir";
 
-	case $ret in
-		0) #Start - Build cross toolchain
-			if [ -f "$ctsrcdir/ct-ng" ]; then
-				icount=$(echo $opts | wc -w);i=0;
+			if [ "$(ls -A "$cttpldir")" ];then
+				TPL_LIST=(*);
+			else
+				tplempty=1;
+			fi;
 			
-				for tpl in $opts;do
-					if [ -f "$cttpldir/$tpl" ]; then
-						
-						logfile="$ldir/$(date +%F)_$(date +%T)_update_toolchain_crosstoolchain_"$tpl".log"; ((i++)); 
-
-						clear;
-						sp=$(printf '%*s' 80 | tr ' ' '=')
-						echo -e "$sp\nbuild ($i/$icount): command list for cross toolchain $tpl:\n$sp" | tee -a "$logfile";
-						
-						#copy template and patching them
-						echo "rm \"$ctsrcdir/.config*\" 2>/dev/null;cp --no-preserve=mode,ownership -f \"$cttpldir/$tpl\" \"$ctsrcdir/.config\";" | tee -a "$logfile";
-						rm "$ctsrcdir/.config*" 2>/dev/null;cp --no-preserve=mode,ownership -f "$cttpldir/$tpl" "$ctsrcdir/.config";
-
-						#CT_LOCAL_TARBALLS_DIR aka cache folder for downloads
-						echo "sed -i \"s#.*CT_LOCAL_TARBALLS_DIR=.*#CT_LOCAL_TARBALLS_DIR=\"$dldir\"#g\" \"$ctsrcdir/.config\";" | tee -a "$logfile";
-						sed -i "s#.*CT_LOCAL_TARBALLS_DIR=.*#CT_LOCAL_TARBALLS_DIR=\"$dldir\"#g" "$ctsrcdir/.config";
-						#CT_PREFIX_DIR aka folder that contains the final toolchain
-						echo "sed -i \"s#.*CT_PREFIX_DIR=.*#CT_PREFIX_DIR=\"$tcdir/$tpl\"#g\" \"$ctsrcdir/.config\";" | tee -a "$logfile";
-						sed -i "s#.*CT_PREFIX_DIR=.*#CT_PREFIX_DIR=\"$tcdir/$tpl\"#g" "$ctsrcdir/.config";
-						#CT_ALLOW_BUILD_AS_ROOT aka force build as root
-						_check_root && [ "$CTNG_BUILD_AS_ROOT" == "1" ] && echo "echo -e \"\nCT_EXPERIMENTAL=y\nCT_ALLOW_BUILD_AS_ROOT=y\nCT_ALLOW_BUILD_AS_ROOT_SURE=y\" >>\"$ctsrcdir/.config\";" | tee -a "$logfile";
-						_check_root && [ "$CTNG_BUILD_AS_ROOT" == "1" ] && echo -e "\nCT_EXPERIMENTAL=y\nCT_ALLOW_BUILD_AS_ROOT=y\nCT_ALLOW_BUILD_AS_ROOT_SURE=y" >>"$ctsrcdir/.config";
-
-						#run build
-						bcl=$(printf '%s\n' "${CTNG_BUILD_tasks[@]}");
-						echo -e "cd \"$ctsrcdir\";\n$(_replace_tokens "$bcl")\n$sp" | tee -a "$logfile";
-						sleep 2;
-						
-						cd "$ctsrcdir";
-						#generate build command list
-						unset buildtasks;
-						for task in "${CTNG_BUILD_tasks[@]}";do
-							task=$(_replace_tokens "$task");	#replace tokens
-							buildtasks+=("$task");
-						done;
-						( eval "${buildtasks[@]}" ) 2>&1;
-						err=$(grep '\[ERROR\]' "$ctsrcdir/build.log" | wc -l)
-
-						#save build.log in logs
-						cat "$ctsrcdir/build.log" >>"$logfile";
-						
-						if [ ! $err -gt 0 ]; then
-							#get target from build.log
-							target=$(sed -n -e '/target = / s/.*\= *//p' "$ctsrcdir/build.log");
-						
-							#compress toolchain
-							_compress "$dldir/Toolchain-$tpl.tar.xz" "$tcdir/$tpl" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Compress cross toolchain $tpl... ]- " "$pb_" "$_lines" "$_cols";
-							
-							#create toolchain.cfg
-							desc=$(sed -n -e '/#toolchain template/ s/.*\: *//p' "$cttpldir/$tpl");
-							_create_toolchaincfg "$tcdir/$tpl" "$tpl" "$target" "" "" "$desc" "" "$dldir/Toolchain-$tpl.tar.xz";
-						else
-							_paktc_timer 10;
-						fi;
-					else
-						[ "$tpl" == "" ] && echo -e "$r_l  $txt_error:$y_l $tc$w_l Template $txt_n_installed""$rs_";
-						sleep 2;
-					fi;
+			#CROSS TOOLCHAIN TEMPLATE MENU
+			unset MENU_OPTIONS;COUNT=0;
+			if [ "$tplempty" == "0" ];then
+				for t in "${TPL_LIST[@]}";do
+					desc=$(sed -n -e '/#toolchain template/ s/.*\: *//p' $t);
+					[ ! "$desc" ] && desc="no description available";
+					[ -d "$tcdir/$t" ] && [ -f "$tccfgdir/$t" ] && color="\Z1" || color="";
+					MENU_OPTIONS+=("$t" "$color$desc\Zn" "off" "template filename:$cttpldir/$t");counter;
+					counter;
 				done;
-			else
-				echo -e "$r_l""\nCHECK -> crosstool-NG is not setup correctly. Please run 'Setup' from menu!\n""$re_";
-				_paktc_timer 10;
 			fi;
-			_create_tc;;
-		1) #Setup - Setup crosstool-NG
-			logfile="$ldir/$(date +%F)_$(date +%T)_update_toolchain_crosstool-NG_setup.log"
-			(
-			bcl=$(printf '%s\n' "${CTNG_SETUP_tasks[@]}");
-			sp=$(printf '%*s' 80 | tr ' ' '=')
-			echo -e "$sp\nbuild command list for crosstool-NG:\n$sp\ncd "$ctsrcdir"\n$(_replace_tokens "$bcl")\n$sp";
-			sleep 2;
 			
-			#ct-ng must not be run as root unless you know what you are doing by forcing it
-			! _check_root && RUN_SETUP=1 || RUN_SETUP=0;
-			[ "$CTNG_BUILD_AS_ROOT" == "1" ] && RUN_SETUP=1;
-			if [ $RUN_SETUP -eq 1 ]; then
-				# setup crosstool wc
-				echo "Cleanup source directory "$ctsrcdir/"..."
-				rm -rf "$ctsrcdir" 2>/dev/null;
-				mkdir --parents "$ctsrcdir";
-				cd "$ctsrcdir";
-				#generate setup command list
-				for task in "${CTNG_SETUP_tasks[@]}";do
-					task=$(_replace_tokens "$task");	#replace tokens
-					setuptasks+=("$task");
-				done
-				( eval "${setuptasks[@]}" ) 2>&1;
-			else
-				echo -e "\nERROR -> The execution of crosstool-NG was aborted\n         because it must not run as root!\n";
-			fi;
-			) | tee "$logfile" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Setup crosstool-NG... ]- " "$pb_" "$_lines" "$_cols";
-			_paktc_timer 10;
-			_create_tc;;
-		2) #Exit
-			return;;
-	esac;
+			[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "no templates found" "no templates found") && counter;
+			clear;clear;
+			opts=$("$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--item-help" "--help-tags" "--default-item" "$tpl" "--ok-label" "Start" "--cancel-label" "Setup" "--help-button" "--help-label" "$([ "$3" == "1" ] && echo "Exit" || echo "Back")" "--title" "-[ Cross Toolchain Template Menu ]-" "$cl_"\
+				 "\nSelect on of the templates to create the cross toolchain you want:\n\n\Z1NOTE: If you create a cross toolchain from a template with a red colored description, an existing one with the same name will be replaced without asking!\Zn" \
+				 "${COUNT+11}" 0 0 "${MENU_OPTIONS[@]}");
+			ret="$?";
+		fi;
+	
+		case $ret in
+			0) #Start - Build cross toolchain
+				if [ -f "$ctsrcdir/ct-ng" ]; then
+					icount=$(echo $opts | wc -w);i=0;
+				
+					for tpl in $opts;do
+						if [ -f "$cttpldir/$tpl" ]; then
+							
+							logfile="$ldir/$(date +%F)_$(date +%T)_update_toolchain_crosstoolchain_"$tpl".log"; ((i++)); 
+
+							clear;
+							sp=$(printf '%*s' 80 | tr ' ' '=')
+							echo -e "$sp\nbuild ($i/$icount): command list for cross toolchain $tpl:\n$sp" | tee -a "$logfile";
+							
+							#copy template and patching them
+							echo "rm \"$ctsrcdir/.config*\" 2>/dev/null;cp --no-preserve=mode,ownership -f \"$cttpldir/$tpl\" \"$ctsrcdir/.config\";" | tee -a "$logfile";
+							rm "$ctsrcdir/.config*" 2>/dev/null;cp --no-preserve=mode,ownership -f "$cttpldir/$tpl" "$ctsrcdir/.config";
+
+							#CT_LOCAL_TARBALLS_DIR aka cache folder for downloads
+							echo "sed -i \"s#.*CT_LOCAL_TARBALLS_DIR=.*#CT_LOCAL_TARBALLS_DIR=\"$dldir\"#g\" \"$ctsrcdir/.config\";" | tee -a "$logfile";
+							sed -i "s#.*CT_LOCAL_TARBALLS_DIR=.*#CT_LOCAL_TARBALLS_DIR=\"$dldir\"#g" "$ctsrcdir/.config";
+							#CT_PREFIX_DIR aka folder that contains the final toolchain
+							echo "sed -i \"s#.*CT_PREFIX_DIR=.*#CT_PREFIX_DIR=\"$tcdir/$tpl\"#g\" \"$ctsrcdir/.config\";" | tee -a "$logfile";
+							sed -i "s#.*CT_PREFIX_DIR=.*#CT_PREFIX_DIR=\"$tcdir/$tpl\"#g" "$ctsrcdir/.config";
+							#CT_ALLOW_BUILD_AS_ROOT aka force build as root
+							_check_root && [ "$CTNG_BUILD_AS_ROOT" == "1" ] && echo "echo -e \"\nCT_EXPERIMENTAL=y\nCT_ALLOW_BUILD_AS_ROOT=y\nCT_ALLOW_BUILD_AS_ROOT_SURE=y\" >>\"$ctsrcdir/.config\";" | tee -a "$logfile";
+							_check_root && [ "$CTNG_BUILD_AS_ROOT" == "1" ] && echo -e "\nCT_EXPERIMENTAL=y\nCT_ALLOW_BUILD_AS_ROOT=y\nCT_ALLOW_BUILD_AS_ROOT_SURE=y" >>"$ctsrcdir/.config";
+
+							#run build
+							bcl=$(printf '%s\n' "${CTNG_BUILD_tasks[@]}");
+							echo -e "cd \"$ctsrcdir\";\n$(_replace_tokens "$bcl")\n$sp" | tee -a "$logfile";
+							sleep 2;
+							
+							if [ $START_BUILD -eq 1 ]; then
+								cd "$ctsrcdir";
+								#generate build command list
+								unset buildtasks;
+								for task in "${CTNG_BUILD_tasks[@]}";do
+									task=$(_replace_tokens "$task");	#replace tokens
+									buildtasks+=("$task");
+								done;
+								( eval "${buildtasks[@]}" ) 2>&1;
+								err=$(grep '\[ERROR\]' "$ctsrcdir/build.log" | wc -l)
+
+								#save build.log in logs
+								cat "$ctsrcdir/build.log" >>"$logfile";
+								
+								if [ ! $err -gt 0 ]; then
+									#get target from build.log
+									target=$(sed -n -e '/target = / s/.*\= *//p' "$ctsrcdir/build.log");
+								
+									#compress toolchain
+									_compress "$dldir/Toolchain-$tpl.tar.xz" "$tcdir/$tpl" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Compress cross toolchain $tpl... ]- " "$pb_" "$_lines" "$_cols";
+									
+									#create toolchain.cfg
+									desc=$(sed -n -e '/#toolchain template/ s/.*\: *//p' "$cttpldir/$tpl");
+									_create_toolchaincfg "$tcdir/$tpl" "$tpl" "$target" "" "" "$desc" "" "$dldir/Toolchain-$tpl.tar.xz";
+								else
+									_paktc_timer 10;
+								fi;
+							else
+								echo -e "$r_l""\nERROR -> The execution of crosstool-NG was aborted\n         because it must not run as root!\n""$re_" | tee -a "$logfile";
+								_paktc_timer 10;
+							fi;
+						else
+							echo -e "$r_l  $txt_error:$y_l $tpl$w_l Template $txt_n_installed""$rs_";
+							sleep 2;
+						fi;
+					done;
+				else
+					echo -e "$r_l""\nCHECK -> crosstool-NG is not setup correctly. Please run 'Setup' from menu!\n""$re_";
+					_paktc_timer 10;
+				fi;;
+			1) #Setup - Setup crosstool-NG
+				logfile="$ldir/$(date +%F)_$(date +%T)_update_toolchain_crosstool-NG_setup.log"
+				(
+				bcl=$(printf '%s\n' "${CTNG_SETUP_tasks[@]}");
+				sp=$(printf '%*s' 80 | tr ' ' '=')
+				echo -e "$sp\nbuild command list for crosstool-NG:\n$sp\ncd "$ctsrcdir"\n$(_replace_tokens "$bcl")\n$sp";
+				sleep 2;
+				
+				if [ $START_BUILD -eq 1 ]; then
+					# setup crosstool wc
+					echo "Cleanup source directory "$ctsrcdir/"..."
+					rm -rf "$ctsrcdir" 2>/dev/null;
+					mkdir --parents "$ctsrcdir";
+					cd "$ctsrcdir";
+					#generate setup command list
+					for task in "${CTNG_SETUP_tasks[@]}";do
+						task=$(_replace_tokens "$task");	#replace tokens
+						setuptasks+=("$task");
+					done
+					( eval "${setuptasks[@]}" ) 2>&1;
+				else
+					echo -e "\nERROR -> The execution of crosstool-NG was aborted\n         because it must not run as root!\n";
+				fi;
+				) | tee "$logfile" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Setup crosstool-NG... ]- " "$pb_" "$_lines" "$_cols";
+				_paktc_timer 10;;
+			2) #Exit
+				menu_close="1";
+				return;;
+		esac;
+		
+		#Exit loop if setup or build toolchain are forced
+		[ ${#2} -gt 0 ] || [ ${#1} -gt 0 ] && menu_close=1;
+		
+	done;
 };
-_copy(){
+_backup(){
 
 	_sz;					# Prepare DIALOG settings
-	nr=$(( $RANDOM % 100 ));
-	newtc="$1-$nr";
-	newtccfgfile="$tccfgdir/$newtc";
-	xzfile="$dldir/Toolchain-$newtc.tar.xz";
+	src=$1;
+	dest=$2;
+	newtccfgfile="$tccfgdir/$dest";
+	xzfile="$dldir/Toolchain-$dest.tar.xz";
 	
 	(
 	#compress toolchain
-	_compress "$xzfile" "$tcdir/$1"
+	_compress "$xzfile" "$tcdir/$src"
 	
 	#create toolchain.cfg
-	source "$tccfgdir/$1" && target="${_compiler%?}" && sysroot="$_sysroot" && lsd="$_libsearchdir" && desc="$_description" && info="$_tc_info";
-	_create_toolchaincfg "$tcdir/$1" "$newtc" "$target" "$sysroot" "$lsd" "$desc" "$info" "$xzfile";
-	) | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Copy $1 to $newtc ... ]- " "$pb_" "$_lines" "$_cols";
-	[ -f "$newtccfgfile" ] && echo "$newtc";
+	source "$tccfgdir/$src" && target="${_compiler%?}" && sysroot="$_sysroot" && lsd="$_libsearchdir" && desc="$_description" && info="$_tc_info";
+	_create_toolchaincfg "$tcdir/$src" "$dest" "$target" "$sysroot" "$lsd" "$desc" "$info" "$xzfile";
+	) | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Backup $src to $(basename "$xzfile")... ]- " "$pb_" "$_lines" "$_cols";
+	[ -f "$newtccfgfile" ] && echo "$dest";
 };
 _build(){
-	
 	_sz;					# Prepare DIALOG settings
 	local desc="$1";		# Save 1. argument in a variable
 	local libsrcdir="$2";	# Save 2. argument in a variable
@@ -506,8 +556,23 @@ else
 fi;
 echo -e "\033[2K\r"; #remove characters from console
 };
+_check_toolchain(){
+	
+	if [ "$1" == "" ];then	#toolchain parameter empty
+		echo -e "\n\n$r_l  $txt_error:$y_l Parameter$w_l Toolchain not set!""$rs_";
+		return 1;
+	elif [ "$1" == "native" ];then	#toolchain native not supported
+		echo -e "\n\n$r_l  $txt_error:$y_l $1$w_l Toolchain library update not supported!""$rs_";
+		return 1;
+	elif [ ! -d "$tcdir/$1/bin" ];then	#toolchain not installed
+		echo -e "\n\n$r_l  $txt_error:$y_l $1$w_l Toolchain $txt_n_installed""$rs_";
+		return 1;
+	else
+		return 0;
+	fi;
+};
 _check_root(){
-  ! ((${EUID:-0} || "$(id -u)"));
+	! ((${EUID:-0} || "$(id -u)"));
 };
 _check_lib(){
 	case "$1" in

@@ -68,7 +68,7 @@ declare -a SHORT_READERS;    declare -a SHORT_CARD_READERS; declare -A INTERNAL_
 
 #filled arrays
 config_cases=( all addons protocols readers card_readers );
-s3opts=( help cedit clean enable_emu fix_me tccheck tcrepair upload update_me update_emu lang_select loadonly checkout ssh_profiles syscheck sysinfo svnup menu get_patch tedit svnpatch profiles svnrestore update ); # extendable with plugins
+s3opts=( help cedit clean enable_emu fix_me tccheck tcrepair tcupdate upload update_me update_emu lang_select loadonly checkout ssh_profiles syscheck sysinfo svnup menu get_patch tedit svnpatch profiles svnrestore update ); # extendable with plugins
 CUSTOM_CONFDIR="not_set";
 pf_name="not_set";
 UPX="not_set";
@@ -114,10 +114,10 @@ syscheck;[ ! "$sanity" == "1" ] && echo "sanity fail" && sleep 5 && bye;
 _create_native_profile;	# put native datas to toolchains and configs
 _get_config_con "$1";	# echo $addons;exit;
 _create_module_arrays;	# fill module arrays
-_fill_tc_array;		# get # AVAI_TCLIST # INST_TCLIST # MISS_TCLIST
-read_s3cfg;		# read simplebuild config
-_set_dialog_types;	# fill $gui vars
-_systype;		# check used uname
+_fill_tc_array;			# get # AVAI_TCLIST # INST_TCLIST # MISS_TCLIST
+read_s3cfg;				# read simplebuild config
+_set_dialog_types;		# fill $gui vars
+_systype;				# check used uname
 
 if [ ! -n "$1" ];then
 	[ "${s3cfg_vars[DIRECTMENU]}" == "1" ] && _dialog_checkout && exit;
@@ -198,6 +198,7 @@ else
 						else
 							_nl;clear;_toolchain_repair "$2";sleep 2;exit;
 						fi;;
+			tcupdate)	_nl;clear;tcupdate "$2" "$3" "$4" "1";sleep 2;exit;;
 			upload)		if [ ! -n "$2" ];then
 							_nl;
 							clear;
