@@ -1,4 +1,4 @@
-#toolchain template: OE 2.0 STBs (mipsel based, gcc 9.2.0, Glibc 2.19)
+#toolchain template: OpenEmbedded 2.0 STBs (mipsel based, gcc 9.2.0, Glibc 2.19)
 CT_CONFIGURE_has_static_link=y
 CT_CONFIGURE_has_cxx11=y
 CT_CONFIGURE_has_wget=y
