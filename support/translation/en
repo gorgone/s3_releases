@@ -70,6 +70,8 @@ txt_module_configure="select oscam modules ";
    txt_bmenu_use="USE_variables ";
  txt_bmenu_build="build oscam now";
 txt_bmenu_config="oscam/build configuration";
+txt_bmenu_update="install/update libraries";
+txt_bmenu_backup="backup toolchain";
    txt_bmenu_log="show lastbuild.log";
   txt_bmenu_back="back to toolchain selection";
    txt_compress1="filesize before     ";
@@ -81,6 +83,7 @@ txt_menu_builder1="close simplebuild";
 txt_menu_builder2="add new toolchain";
 txt_menu_builder3="remove installed toolchain";
 txt_menu_builder4="build native for";
+txt_menu_builder5="create new toolchain";
 txt_menu_back="back to toolchain menu";
 
 # _dialog_checkout

@@ -3,13 +3,19 @@
 _toolchain_build_menu(){
 	[ "$loadprofile" == "yes" ] && load_config;
 	selected=$(
-	"$gui" "$st_" "$bt_" "$title_" --no-cancel --title " -[ $txt_bmenu_title ]- " --menu "_________________________________________________________ \n $txt_bmenu_user = $(whoami)\n Toolchain       = $_toolchainname\n $txt_bmenu_comp = $_compiler""gcc\n $txt_bmenu_debu = CPU-Threads($(CPUS)) SVN($(REVISION)) SCRIPT($SIMPLEVERSION)\n $txt_bmenu_use  = $(echo $USESTRING| sed -e 's/^[ \t]*//')\n _________________________________________________________ \n" 22 65 10 BUILD "$txt_bmenu_build" CONFIGURE "$txt_bmenu_config" LOAD_PROFILE "$txt_bmenu_profile" SAVE_PROFILE "$txt_bmenus_profile" SHOW_BUILDLOG "$txt_bmenu_log" EDIT_CONF_DIR "Oscam config PATH" BACK "$txt_bmenu_back" EXIT "$txt_firstmenu_exit");
+	"$gui" "$st_" "$bt_" "$title_" --no-cancel --title " -[ $txt_bmenu_title ]- " --menu "_________________________________________________________ \n $txt_bmenu_user = $(whoami)\n Toolchain       = $_toolchainname\n $txt_bmenu_comp = $_compiler""gcc\n $txt_bmenu_debu = CPU-Threads($(CPUS)) SVN($(REVISION)) SCRIPT($SIMPLEVERSION)\n $txt_bmenu_use  = $(echo $USESTRING| sed -e 's/^[ \t]*//')\n _________________________________________________________ \n" 22 65 10 BUILD "$txt_bmenu_build" CONFIGURE "$txt_bmenu_config" UPDATE "$txt_bmenu_update" BACKUP "$txt_bmenu_backup" LOAD_PROFILE "$txt_bmenu_profile" SAVE_PROFILE "$txt_bmenus_profile" SHOW_BUILDLOG "$txt_bmenu_log" EDIT_CONF_DIR "Oscam config PATH" BACK "$txt_bmenu_back" EXIT "$txt_firstmenu_exit");
 	[ $? = 255 ] && _toolchain_build_menu;
 	case $selected in
 		BUILD)
 						_gui_build;;
 		CONFIGURE)
 						_toolchain_config_menu;;
+		UPDATE)
+						tcupdate "$_toolchainname" "" "" "2";
+						_toolchain_build_menu;;
+		BACKUP)
+						tcupdate "-b" "$_toolchainname" "" "2";
+						_toolchain_build_menu;;
 		EDIT_CONF_DIR)
 						_gtedit;
 						_toolchain_build_menu;;
@@ -65,6 +71,8 @@ _toolchain_main_menu(){
 	if [ "$systype" == "ok" ];then
 		MENU_OPTIONS+="ADD#$txt_menu_builder2#";
 		counter;
+		MENU_OPTIONS+="CREATE#$txt_menu_builder5#";
+		counter;
 		[ "$tcempty" == "0" ] && MENU_OPTIONS+="REMOVE#$txt_menu_builder3#" && counter;
 	fi;
 	MENU_OPTIONS+="native#$txt_menu_builder4 $(hostname)-$(uname -m)#";
@@ -94,6 +102,9 @@ _toolchain_main_menu(){
 					_select_menu;;
 		ADD)
 					_toolchain_add_menu;;
+		CREATE)
+					tcupdate "-c" "" "" "2";
+					_toolchain_main_menu;;
 		REMOVE)
 					_toolchain_remove_menu;;
 		HELP)

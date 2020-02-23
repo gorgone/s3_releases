@@ -1,7 +1,7 @@
 #!/bin/bash
 
 tcupdate(){
-	pversion="0.10.2";
+	pversion="0.10.4";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -47,16 +47,16 @@ tcupdate(){
 	
 	if [ "$CMDTC" == "-c" ] || [ "$CMDTC" == "--create" ];then	#start toolchain builder menu
 		_create_tc "$OPTION1" "" "$FLAG";
-		bye;
+		[ "$FLAG" == "2" ] && return || bye;
 	elif [ "$CMDTC" == "-s" ] || [ "$CMDTC" == "--setup" ];then	#setup crosstool-NG
 		_create_tc "" "$CMDTC" "$FLAG";
 		bye;
 	elif [ "$CMDTC" == "-b" ] || [ "$CMDTC" == "--backup" ];then #backup toolchain
 		if _check_toolchain "$OPTION1";then
 			_backup "$OPTION1" "$OPTION1" >/dev/null;
-			bye;
+			[ "$FLAG" == "2" ] && return || bye;
 		else
-			_nl && exit;
+			_nl && [ "$FLAG" == "2" ] && sleep 2 && return || exit;
 		fi;
 	elif [ "$CMDTC" == "-d" ] || [ "$CMDTC" == "--duplicate" ];then #duplicate toolchain
 		if _check_toolchain "$OPTION1";then
@@ -110,7 +110,7 @@ tcupdate(){
 
 	#toolchain native not supported and exists check 
 	if ! _check_toolchain $tc;then
-		[ "$CMDTC"  == "" ] && sleep 2 && tcupdate "$CMDTC" "$OPTION1" "$OPTION2" "$FLAG" || _nl && exit;
+		[ "$CMDTC"  == "" ] && sleep 2 && tcupdate "$CMDTC" "$OPTION1" "$OPTION2" "$FLAG" || _nl && [ "$FLAG" == "2" ] && sleep 2 && return || exit;
 	fi;
 	
 	#load toolchain config
@@ -133,7 +133,7 @@ tcupdate(){
 	prefixdir="$PWD"
 	pkg=$(find * | grep -m1 "/pkgconfig") && pkgdir="$prefixdir/$pkg" || pkgdir="$prefixdir";
 	
-	backxit=$menu_close;
+	[ "$FLAG" == "2" ] && backxit=1 || backxit=$menu_close;
 	unset menu_close;
 	while [ ! $menu_close ]
 	do
@@ -226,6 +226,7 @@ tcupdate(){
 	
 	#Reopen previous menu
 	[ ${#OPTION1} -gt 0 ] && exit;
+	[ "$FLAG" == "2" ] && return;
 	if [ ${#opts} -gt 0 ];then
 		tcupdate "$tc" "$OPTION1" "$OPTION2" "$backxit";
 	else

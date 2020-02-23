@@ -81,6 +81,8 @@ txt_module_configure="oscam Module $txt_sel";
     txt_bmenu_use="USE_Variablen ";
   txt_bmenu_build="oscam jetzt $txt_b1";
  txt_bmenu_config="oscam/Build $txt_conf";
+ txt_bmenu_update="install/update libraries";
+ txt_bmenu_backup="backup toolchain";
 txt_bmenu_profile="vorhandenes $txt_profile laden";
 txt_bmenus_profile="$txt_profile $txt_save";
     txt_bmenu_log="zeige lastbuild.log";
@@ -94,6 +96,7 @@ txt_menu_builder1="Beende simplebuild";
 txt_menu_builder2="einen neuen $txt_tc hinzufügen";
 txt_menu_builder3="entferne einen installierten $txt_tc";
 txt_menu_builder4="Nativ $txt_for";
+txt_menu_builder5="einen neuen $txt_tc erstellen";
 txt_menu_back="Zurück zum $txt_tc $txt_menu";
 
 # _dialog_checkout ########################################
