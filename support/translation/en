@@ -37,7 +37,7 @@ txt_tc="Toolchain";
 txt_start_menu='Main menu';
 txt_remove_menu='Remove toolchain';
 txt_add_menu='Add toolchain';
-txt_main_revision="\n the local SVN revision is : r";
+txt_main_revision="\n the local $(REPO) revision is : r";
 
 # help txt
 txt_help1="begin with"
@@ -45,8 +45,8 @@ txt_help2="commandline Parameters are"
 txt_help3="[ENTER] to continue..."
 
 # firstmenu ################################################
-txt_firstmenu_continue="continue with local SVN";
-   txt_firstmenu_chose="load a different SVN (7000+)";
+txt_firstmenu_continue="continue with local $(REPO)";
+   txt_firstmenu_chose="load a different $(REPO) (7000+)";
    txt_firstmenu_cedit="start configuration editor";
    txt_firstmenu_tcupdate="start toolchain updater";
     txt_firstmenu_lang="manual system language selection";
@@ -85,10 +85,10 @@ txt_menu_back="back to toolchain menu";
 
 # _dialog_checkout
 txt_verify_syscheck='check system                :';
-     txt_verify_svn='check existing SVN          :';
-     txt_update_svn="$txt_update SVN            :";
-    txt_prepare_svn="prepare SVN checkout     :";
-         txt_latest="latest SVN";
+     txt_verify_svn='check existing '$(REPO)'          :';
+     txt_update_svn="$txt_update $(REPO)            :";
+    txt_prepare_svn="prepare $(REPO) checkout     :";
+         txt_latest="latest $(REPO)";
 
 # _load_profile ###########################################
   txt_select_profile_title="available profiles";
