@@ -68,7 +68,7 @@ declare -a SHORT_READERS;    declare -a SHORT_CARD_READERS; declare -A INTERNAL_
 
 #filled arrays
 config_cases=( all addons protocols readers card_readers );
-s3opts=( help cedit clean enable_emu fix_me tccheck tcrepair tcupdate upload update_me update_emu lang_select loadonly checkout ssh_profiles syscheck sysinfo svnup menu get_patch tedit svnpatch profiles svnrestore update ); # extendable with plugins
+s3opts=( help cedit clean enable_emu fix_me tccheck tcrepair upload update_me update_emu lang_select loadonly checkout ssh_profiles syscheck sysinfo svnup menu get_patch tedit svnpatch profiles svnrestore update ); # extendable with plugins
 CUSTOM_CONFDIR="not_set";
 pf_name="not_set";
 UPX="not_set";
@@ -198,7 +198,6 @@ else
 						else
 							_nl;clear;_toolchain_repair "$2";sleep 2;exit;
 						fi;;
-			tcupdate)	_nl;clear;tcupdate "$2" "$3" "$4" "1";sleep 2;exit;;
 			upload)		if [ ! -n "$2" ];then
 							_nl;
 							clear;

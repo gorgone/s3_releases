@@ -192,7 +192,7 @@ _select_menu(){
 					s3cfg_menu;
 					_select_menu;;
 		TCUPDATE)
-					tcupdate;
+					tcupdate "" "" "" "1";
 					_select_menu;;
 		LANG)
 					lang_select;

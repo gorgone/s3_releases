@@ -11,10 +11,10 @@ _toolchain_build_menu(){
 		CONFIGURE)
 						_toolchain_config_menu;;
 		UPDATE)
-						tcupdate "$_toolchainname" "" "" "2";
+						tcupdate "$_toolchainname" "" "" "1";
 						_toolchain_build_menu;;
 		BACKUP)
-						tcupdate "-b" "$_toolchainname" "" "2";
+						tcupdate "-b" "$_toolchainname" "" "" "1";
 						_toolchain_build_menu;;
 		EDIT_CONF_DIR)
 						_gtedit;
@@ -103,7 +103,7 @@ _toolchain_main_menu(){
 		ADD)
 					_toolchain_add_menu;;
 		CREATE)
-					tcupdate "-c" "" "" "2";
+					tcupdate "-c" "" "" "1";
 					_toolchain_main_menu;;
 		REMOVE)
 					_toolchain_remove_menu;;
