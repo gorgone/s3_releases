@@ -98,7 +98,7 @@ tcupdate(){
 				0) #Update toolchain
 					menu_close="1";;
 				1) #Start crosstool-NG
-					_create_tc;;
+					_create_tc "" "" "$FLAG";;
 				2) #Exit
 					[ "$FLAG" == "1" ] && return || bye;;
 				3) #Duplicate toolchain
