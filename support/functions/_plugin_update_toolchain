@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.10.8";
+	pversion="0.10.9";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -340,7 +340,7 @@ _create_tc(){
 									
 									#create toolchain.cfg
 									desc=$(sed -n -e '/#toolchain template/ s/.*\: *//p' "$cttpldir/$tpl");
-									_create_toolchaincfg "$tcdir/$tpl" "$tpl" "$target" "" "" "$desc" "" "$dldir/Toolchain-$tpl.tar.xz";
+									_create_toolchaincfg "$tcdir/$tpl" "$tpl" "$target" "" "" "$desc" "" "$dldir/Toolchain-$tpl.tar.xz" "yes";
 								else
 									_paktc_timer 10;
 								fi;
@@ -405,8 +405,8 @@ _backup(){
 	_compress "$xzfile" "$tcdir/$src"
 	
 	#create toolchain.cfg
-	source "$tccfgdir/$src" && target="${_compiler%?}" && sysroot="$_sysroot" && lsd="$_libsearchdir" && desc="$_description" && info="$_tc_info";
-	_create_toolchaincfg "$tcdir/$src" "$dest" "$target" "$sysroot" "$lsd" "$desc" "$info" "$xzfile";
+	source "$tccfgdir/$src" && target="${_compiler%?}" && sysroot="$_sysroot" && lsd="$_libsearchdir" && desc="$_description" && info="$_tc_info" && sb="$_self_build";
+	_create_toolchaincfg "$tcdir/$src" "$dest" "$target" "$sysroot" "$lsd" "$desc" "$info" "$xzfile" "$sb";
 	) | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Backup $src to $(basename "$xzfile") ]- " "$pb_" "$_lines" "$_cols";
 	[ -f "$newtccfgfile" ] && echo "$dest";
 };
@@ -765,7 +765,7 @@ default_use="USE_UTF8 USE_LIBCRYPTO";
 _description="$6";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-_self_build="true";
+_self_build="$([ ! "$9" == "yes" ] && echo "no" || echo "$9")";
 _compiler="$3-";
 _sysroot="$sysroot";
 _libsearchdir="$lsd";
@@ -774,4 +774,5 @@ _md5sum="$(cd "$dldir" && md5sum $(basename "${8%..*}"))";
 _tc_info="$info";
 _tc_infolines="5";
 EOF
+
 };
