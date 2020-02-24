@@ -26,11 +26,7 @@ CT_CONFIG_VERSION="3"
 CT_MODULES=y
 # CT_OBSOLETE is not set
 # CT_EXPERIMENTAL is not set
-CT_DEBUG_CT=y
-# CT_DEBUG_PAUSE_STEPS is not set
-CT_DEBUG_CT_SAVE_STEPS=y
-CT_DEBUG_CT_SAVE_STEPS_GZIP=y
-# CT_DEBUG_INTERACTIVE is not set
+# CT_DEBUG_CT is not set
 CT_LOCAL_TARBALLS_DIR="${HOME}/src"
 CT_SAVE_TARBALLS=y
 # CT_TARBALLS_BUILDROOT_LAYOUT is not set
@@ -445,39 +441,9 @@ CT_ALL_CC_CHOICES="GCC"
 CT_CC_LANG_CXX=y
 # CT_CC_LANG_FORTRAN is not set
 # CT_DEBUG_DUMA is not set
-# CT_DUMA_SRC_RELEASE is not set
-# CT_DUMA_V_2_5_15 is not set
 # CT_DEBUG_GDB is not set
-# CT_GDB_USE_GNU is not set
-# CT_GDB_SRC_RELEASE is not set
-# CT_GDB_V_8_3 is not set
-# CT_GDB_V_8_2 is not set
-# CT_GDB_V_8_1 is not set
-# CT_GDB_V_8_0 is not set
-# CT_GDB_V_7_12 is not set
-# CT_GDB_V_7_11 is not set
 # CT_DEBUG_LTRACE is not set
-# CT_LTRACE_SRC_RELEASE is not set
-# CT_LTRACE_V_0_7_3 is not set
 # CT_DEBUG_STRACE is not set
-# CT_STRACE_SRC_RELEASE is not set
-# CT_STRACE_V_5_4 is not set
-# CT_STRACE_V_5_3 is not set
-# CT_STRACE_V_5_2 is not set
-# CT_STRACE_V_5_1 is not set
-# CT_STRACE_V_5_0 is not set
-# CT_STRACE_V_4_26 is not set
-# CT_STRACE_V_4_25 is not set
-# CT_STRACE_V_4_24 is not set
-# CT_STRACE_V_4_23 is not set
-# CT_STRACE_V_4_22 is not set
-# CT_STRACE_V_4_21 is not set
-# CT_STRACE_V_4_20 is not set
-# CT_STRACE_V_4_19 is not set
-# CT_STRACE_V_4_18 is not set
-# CT_STRACE_V_4_17 is not set
-# CT_STRACE_V_4_16 is not set
-# CT_STRACE_V_4_15 is not set
 CT_ALL_DEBUG_CHOICES="DUMA GDB LTRACE STRACE"
 # CT_COMPLIBS_CHECK is not set
 # CT_COMP_LIBS_CLOOG is not set
