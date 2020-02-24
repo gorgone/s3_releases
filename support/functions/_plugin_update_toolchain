@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.10.7";
+	pversion="0.10.8";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -336,7 +336,7 @@ _create_tc(){
 									target=$(sed -n -e '/target = / s/.*\= *//p' "$ctsrcdir/build.log");
 								
 									#compress toolchain
-									_compress "$dldir/Toolchain-$tpl.tar.xz" "$tcdir/$tpl" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Compress cross toolchain $tpl to Toolchain-$tpl.tar.xz... ]- " "$pb_" "$_lines" "$_cols";
+									_compress "$dldir/Toolchain-$tpl.tar.xz" "$tcdir/$tpl" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Compress cross toolchain $tpl to Toolchain-$tpl.tar.xz ]- " "$pb_" "$_lines" "$_cols";
 									
 									#create toolchain.cfg
 									desc=$(sed -n -e '/#toolchain template/ s/.*\: *//p' "$cttpldir/$tpl");
@@ -380,7 +380,7 @@ _create_tc(){
 				else
 					echo -e "\nERROR -> The execution of crosstool-NG was aborted\n         because it must not run as root!\n";
 				fi;
-				) | tee "$logfile" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Setup crosstool-NG... ]- " "$pb_" "$_lines" "$_cols";
+				) | tee "$logfile" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Setup crosstool-NG ]- " "$pb_" "$_lines" "$_cols";
 				_paktc_timer 10;;
 			2) #Exit
 				menu_close="1";
@@ -407,7 +407,7 @@ _backup(){
 	#create toolchain.cfg
 	source "$tccfgdir/$src" && target="${_compiler%?}" && sysroot="$_sysroot" && lsd="$_libsearchdir" && desc="$_description" && info="$_tc_info";
 	_create_toolchaincfg "$tcdir/$src" "$dest" "$target" "$sysroot" "$lsd" "$desc" "$info" "$xzfile";
-	) | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Backup $src to $(basename "$xzfile")... ]- " "$pb_" "$_lines" "$_cols";
+	) | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Backup $src to $(basename "$xzfile") ]- " "$pb_" "$_lines" "$_cols";
 	[ -f "$newtccfgfile" ] && echo "$dest";
 };
 _build(){
@@ -426,7 +426,7 @@ _build(){
 	sleep 2;
 	cd "$libsrcdir";
 	( eval "${tasks[@]}" ) 2>&1 | tee -a "$lf"
-	) | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Build $desc... ]- " "$pb_" "$_lines" "$_cols";sleep 2;
+	) | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Build $desc ]- " "$pb_" "$_lines" "$_cols";sleep 2;
 	
 	#build error message
 	error_on_build=$(grep -cw1 Error "$lf");
@@ -765,7 +765,7 @@ default_use="USE_UTF8 USE_LIBCRYPTO";
 _description="$6";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-
+_self_build="true";
 _compiler="$3-";
 _sysroot="$sysroot";
 _libsearchdir="$lsd";
