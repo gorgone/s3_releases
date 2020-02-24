@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.10.6";
+	pversion="0.10.7";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -336,7 +336,7 @@ _create_tc(){
 									target=$(sed -n -e '/target = / s/.*\= *//p' "$ctsrcdir/build.log");
 								
 									#compress toolchain
-									_compress "$dldir/Toolchain-$tpl.tar.xz" "$tcdir/$tpl" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Compress cross toolchain $tpl... ]- " "$pb_" "$_lines" "$_cols";
+									_compress "$dldir/Toolchain-$tpl.tar.xz" "$tcdir/$tpl" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Compress cross toolchain $tpl to Toolchain-$tpl.tar.xz... ]- " "$pb_" "$_lines" "$_cols";
 									
 									#create toolchain.cfg
 									desc=$(sed -n -e '/#toolchain template/ s/.*\: *//p' "$cttpldir/$tpl");
@@ -762,7 +762,7 @@ $6\\\n
 	cat << EOF > $2
 _toolchainname="$2";
 default_use="USE_UTF8 USE_LIBCRYPTO";
-_description="$6"
+_description="$6";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
 
