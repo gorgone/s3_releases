@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.10.5";
+	pversion="0.10.6";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -119,7 +119,7 @@ tcupdate(){
 	[ -f "$tccfgdir/$tc" ] && source "$tccfgdir/$tc";
 	cd "$tcdir/$tc/bin";
 
-	#autodetect toolchain's sysroot, prefix, include, pkgconfig folder
+	#autodetect toolchain's sysroot, prefix, include
 	compilername="$_compiler""gcc";compilername=$(realpath -s $compilername);
 	ranlibname="$_compiler""ranlib";ranlibname=$(realpath -s $ranlibname);
 	hostname=${_compiler%?};
@@ -133,12 +133,13 @@ tcupdate(){
 		cd "$tcdir/$tc/$_sysroot"
 	fi;
 	prefixdir="$PWD"
-	pkg=$(find * | grep -m1 "/pkgconfig") && pkgdir="$prefixdir/$pkg" || pkgdir="$prefixdir";
 	
 	[ "$FLAG" == "1" ] && backxit=1 || backxit=$menu_close;
 	unset menu_close;
 	while [ ! $menu_close ]
 	do
+		#autodetect toolchain's pkgconfig folder
+		pkg=$(find * | grep -m1 "/pkgconfig") && pkgdir="$prefixdir/$pkg" || pkgdir="$prefixdir";
 		cd "$prefixdir"
 		#LIBRARY UPDATE MENU
 		unset MENU_OPTIONS;COUNT=0;unset libs;
