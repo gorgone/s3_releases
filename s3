@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSIONCOUNTER=305
+VERSIONCOUNTER=308
 SIMPLEVERSION="3.0 RC6";OIFS=$IFS;
 export NCURSES_NO_UTF8_ACS=1;
 
@@ -22,35 +22,34 @@ configdir="$sdir/configs";
     tcdir="$sdir/toolchains";
      tdir="$sdir/translation";
  tccfgdir="$sdir/toolchains.cfg";
-   bindir="$sdir/upx";PATH="$bindir:$PATH";
+   bindir="$sdir/upx";
+     PATH="$bindir:$PATH";
 
 # create folders
 mkdir -p support/{archive,binaries,configs,downloads,functions,logs,os,patches,profiles,toolchains,toolchains.cfg,translation,backup_svn,menu_save,upx} 2>/dev/null;
 mkdir -p "$tcdir/native/bin" 2>/dev/null;
 
 # create links
-[ ! -L "$workdir/logs" ]     && ln -sf "$ldir" "$workdir/logs"     2>/dev/null;
-[ ! -L "$workdir/archive" ]  && ln -sf "$adir" "$workdir/archive"  2>/dev/null;
-[ ! -L "$workdir/patches" ]  && ln -sf "$pdir" "$workdir/patches"  2>/dev/null;
-[ ! -L "$workdir/binaries" ] && ln -sf "$bdir" "$workdir/binaries" 2>/dev/null;
-[ ! -L "$workdir/profiles" ] && ln -sf "$profdir" "$workdir/profiles" 2>/dev/null;
+[ -L "$workdir/logs" ]     || ln -sf "$ldir" "$workdir/logs"     2>/dev/null;
+[ -L "$workdir/archive" ]  || ln -sf "$adir" "$workdir/archive"  2>/dev/null;
+[ -L "$workdir/patches" ]  || ln -sf "$pdir" "$workdir/patches"  2>/dev/null;
+[ -L "$workdir/binaries" ] || ln -sf "$bdir" "$workdir/binaries" 2>/dev/null;
+[ -L "$workdir/profiles" ] || ln -sf "$profdir" "$workdir/profiles" 2>/dev/null;
 
 #set arrays
-unset INTERNAL_MODULES; unset ENABLED_MODULES; unset SHORT_MODULENAMES;  unset INST_TCLIST;
-unset DISABLED_MODULES; unset AVAI_TCLIST;     unset ALL_MODULES_LONG;   unset MISS_TCLIST;
-unset SHORT_PROTOCOLS;  unset SHORT_READERS;   unset SHORT_CARD_READERS; unset SHORT_ADDONS;
-unset SSH_CONF_CONTENT; unset USE_vars;        unset USE_vars_disable;
+array_names=( SHORT_PROTOCOLS SHORT_READERS SHORT_CARD_READERS AVAI_TCLIST MISS_TCLIST
+SHORT_ADDONS DISABLED_MODULES SHORT_MODULENAMES ALL_MODULES_LONG INTERNAL_MODULES
+ENABLED_MODULES INST_TCLIST SSH_CONF_CONTENT USE_vars USE_vars_disable s3cfg_vars )
 
-declare -A USE_vars;
-declare -A USE_vars_disable;
-USE_vars[USE_TARGZ]=;
-USE_vars[USE_PATCH]=;
-USE_vars[USE_STAPI]=;
-USE_vars[USE_STAPI5]=;
-USE_vars[USE_CONFDIR]=;
-USE_vars[USE_COMPRESS]=;
+for a_n in "${array_names[@]}";do unset $a_n; declare -a $a_n; done
 
-declare -A s3cfg_vars;
+USE_vars[USE_TARGZ]=
+USE_vars[USE_PATCH]=
+USE_vars[USE_STAPI]=
+USE_vars[USE_STAPI5]=
+USE_vars[USE_CONFDIR]=
+USE_vars[USE_COMPRESS]=
+
 s3cfg_vars[USE_TARGZ]=0;
 s3cfg_vars[DIRECTMENU]=0;
 s3cfg_vars[USE_VERBOSE]=0;
@@ -61,14 +60,13 @@ s3cfg_vars[ADD_PROFILE_NAME]=0;
 s3cfg_vars[NO_SVN_AUTOUPDATE]=0;
 s3cfg_vars[delete_oscamdebugbinary]=1;
 
-declare -a ENABLED_MODULES;  declare -a DISABLED_MODULES;   declare -a SHORT_MODULENAMES;
-declare -a ALL_MODULES_LONG; declare -a AVAI_TCLIST;        declare -a INST_TCLIST;
-declare -a MISS_TCLIST;      declare -a SHORT_ADDONS;       declare -a SHORT_PROTOCOLS;
-declare -a SHORT_READERS;    declare -a SHORT_CARD_READERS; declare -A INTERNAL_MODULES;
-
 #filled arrays
 config_cases=( all addons protocols readers card_readers );
-s3opts=( help cedit clean enable_emu fix_me tccheck tcrepair upload update_me update_emu lang_select loadonly checkout ssh_profiles syscheck sysinfo svnup menu get_patch tedit svnpatch profiles svnrestore update ); # extendable with plugins
+s3opts=( cedit checkout clean enable_emu fix_me get_patch help
+lang_select loadonly menu profiles ssh_profiles svnpatch
+svnrestore svnup syscheck sysinfo tccheck tcrepair tedit
+update update_emu update_me upload ) # extendable with plugins
+
 CUSTOM_CONFDIR="not_set";
 pf_name="not_set";
 UPX="not_set";
