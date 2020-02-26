@@ -75,15 +75,17 @@ UPX="not_set";
 OPENBOX=0;UFS916003=0;_verbose="";
 _t1e="VG9vbGNoYWluLQ==";
 _u1e="aHR0cDovL3N0cmVhbWJvYXJkLnR2L3diYjIvdHV0LXBpY3MvdG9vbGNoYWlucw==";
-cposx=0;cposy=0;off="_off";on="_on";pf="empty";file_exist="0";run="0";
+cposx=0; cposy=0; off="_off"; on="_on"; pf="empty"; file_exist="0"; run="0";
 s3cfg="$configdir/simplebuild.config";loadprofile="no";menucall="no";
+
 # Compiler settings
 cc_warn="-W -Wall -Wshadow -Wredundant-decls -Wstrict-prototypes -Wold-style-definition";
 cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections";
 
 #default url
-trunkurl="http://www.streamboard.tv/svn/oscam/trunk";[ -f "$workdir/oscamsource.url" ] && source "$workdir/oscamsource.url";
-#trunkurl="http://www.streamboard.tv/svn/oscam-addons/modern";[ -f "$workdir/oscamsource.url" ] && source "$workdir/oscamsource.url";
+trunkurl="http://www.streamboard.tv/svn/oscam/trunk";
+#trunkurl="http://www.streamboard.tv/svn/oscam-addons/modern";
+[ -f "$workdir/oscamsource.url" ] && source "$workdir/oscamsource.url";
 
 #load translationlist
 cd "$tdir";langsupport=(*);
@@ -102,8 +104,8 @@ else
 fi;
 
 #initialize simplebuild
-initializeANSI;			# load colors
-auto_langset;			# echo "info $txt_load_ok";
+initializeANSI;		# load colors
+auto_langset;		# echo "info $txt_load_ok";
 
 # check system #########################################################
 syscheck;[ ! "$sanity" == "1" ] && echo "sanity fail" && sleep 5 && bye;
@@ -112,10 +114,10 @@ syscheck;[ ! "$sanity" == "1" ] && echo "sanity fail" && sleep 5 && bye;
 _create_native_profile;	# put native datas to toolchains and configs
 _get_config_con "$1";	# echo $addons;exit;
 _create_module_arrays;	# fill module arrays
-_fill_tc_array;			# get # AVAI_TCLIST # INST_TCLIST # MISS_TCLIST
-read_s3cfg;				# read simplebuild config
-_set_dialog_types;		# fill $gui vars
-_systype;				# check used uname
+_fill_tc_array;		# get # AVAI_TCLIST # INST_TCLIST # MISS_TCLIST
+read_s3cfg;		# read simplebuild config
+_set_dialog_types;	# fill $gui vars
+_systype;		# check used uname
 
 if [ ! -n "$1" ];then
 	[ "${s3cfg_vars[DIRECTMENU]}" == "1" ] && _dialog_checkout && exit;
@@ -125,107 +127,80 @@ else
 	for e in "${s3opts[@]}";do
 		if [ "$e" == "$1" ];then
 			case $e in
-			fix_me|\
-			checkout|\
-			update_me|\
-			update_emu|\
-			svnrestore|\
-			enable_emu|\
-			upload_cam)	if [ ! -n "$2" ];then
-							eval "$e";
-						else
-							eval "$e" "$2";
-						fi;
-						exit;;
-			menu)		if [ ! -n "$2" ];then
-							_dialog_checkout;
-						else
-							_dialog_checkout "$2";
-						fi;;
-			loadonly)	if [ ! -n "$2" ];then
-							_nl;
-							clear;
-							s3logo;
-							echo -e "$r_l\n  $txt_error: toolchain $txt_parameter $txt_missing\n""$w_l";
-							_help_toolchain;
-							sleep 2;
-							exit;
-						else
-							for t in "${AVAI_TCLIST[@]}";do
-								_tmp="$2";
-								[ "$t" == "$2" ] && _load_toolchain "$2" && break;
-							done;
-							if [ -f "$tc_dl" ];then
-								echo -e "$p_l\n\n  toolchain for $_tmp loaded\n";
-							else
-								_nl;
-								clear;
-								s3logo;
-								echo -e "$r_l  toolchain missing/error\n";
-							fi;
-							exit;
-						fi;;
-			tccheck)	if [ ! -n "$2" ];then
-							_nl;
-							clear;
-							s3logo;
-							echo -e "$r_l\n  $txt_error: toolchain $txt_parameter $txt_missing\n""$w_l";
-							_help_toolchain;echo -e "$W";
-							sleep 2;
-							exit;
-						else
-							for t in "${AVAI_TCLIST[@]}";do
-								[ "$t" == "$2" ] && _toolchain_check "$2" && break;
-							done;
-							_nl;
-							clear;
-							s3logo;
-							echo -e "$r_l\n  toolchain missing/error\n$w_l";
-							_help_toolchain;echo -e "$W";
-							sleep 2;
-							exit;
-						fi;;
-			tcrepair)	if [ ! -n "$2" ];then
-							_nl;
-							clear;
-							s3logo;
-							echo -e "$r_l\n  $txt_error: toolchain $txt_parameter $txt_missing\n""$w_l";
-							_help_toolchain;echo -e "$W";
-							sleep 2;
-							exit;
-						else
-							_nl;clear;_toolchain_repair "$2";sleep 2;exit;
-						fi;;
-			upload)		if [ ! -n "$2" ];then
-							_nl;
-							clear;
-							s3logo;
-							echo -e "$r_l\n  $txt_error: $txt_parameter $txt_missing""$w_l";
-							menucall="yes";
-							ssh_profiles;
-						else
-							upload_cam "$2";
-						fi;
-						exit;;
+			fix_me|checkout|update_me|update_emu|svnrestore|enable_emu|upload_cam)
+				if [ ! -n "$2" ];then
+					eval "$e";
+				else
+					eval "$e" "$2";
+				fi;exit;;
+			menu)
+				if [ ! -n "$2" ];then
+					_dialog_checkout;
+				else
+					_dialog_checkout "$2";
+				fi;;
+			loadonly)
+				if [ ! -n "$2" ];then
+					_nl; clear; s3logo;
+					echo -e "$r_l\n  $txt_error: toolchain $txt_parameter $txt_missing\n""$w_l";
+					_help_toolchain; sleep 2; exit;
+				else
+					for t in "${AVAI_TCLIST[@]}";do
+						_tmp="$2";
+						[ "$t" == "$2" ] && _load_toolchain "$2" && break;
+					done;
+					if [ -f "$tc_dl" ];then
+						echo -e "$p_l\n\n  toolchain for $_tmp loaded\n";
+					else
+						_nl; clear; s3logo;
+						echo -e "$r_l  toolchain missing/error\n";
+					fi; exit;
+				fi;;
+			tccheck)
+				if [ ! -n "$2" ];then
+					_nl; clear; s3logo;
+					echo -e "$r_l\n  $txt_error: toolchain $txt_parameter $txt_missing\n""$w_l";
+					_help_toolchain;echo -e "$W"; sleep 2; exit;
+				else
+					for t in "${AVAI_TCLIST[@]}";do
+						[ "$t" == "$2" ] && _toolchain_check "$2" && break;
+					done;
+					_nl; clear; s3logo;
+					echo -e "$r_l\n  toolchain missing/error\n$w_l";
+					_help_toolchain;echo -e "$W"; sleep 2; exit;
+				fi;;
+			tcrepair)
+				if [ ! -n "$2" ];then
+					_nl; clear; s3logo;
+					echo -e "$r_l\n  $txt_error: toolchain $txt_parameter $txt_missing\n""$w_l";
+					_help_toolchain;echo -e "$W"; sleep 2; exit;
+				else
+					_nl;clear;_toolchain_repair "$2";sleep 2;exit;
+				fi;;
+			upload)
+				if [ ! -n "$2" ];then
+					_nl; clear; s3logo;
+					echo -e "$r_l\n  $txt_error: $txt_parameter $txt_missing""$w_l";
+					menucall="yes"; ssh_profiles;
+				else
+					upload_cam "$2";
+				fi; exit;;
 			syscheck)
-						syscheck silent $2;
-						exit;;
-			tedit)		if [ -n "$2" ];then
-							for telement in ${INST_TCLIST[@]};do
-								if [ "$telement" == "$2" ];then
-									tedit $2;
-									exit;
-								fi;
-							done;
-							clear;
-							s3logo;
-							echo -e $w_l"\n  $2 toolchain not installed\n"$W;
+				syscheck silent $2; exit;;
+			tedit)
+				if [ -n "$2" ];then
+					for telement in ${INST_TCLIST[@]};do
+						if [ "$telement" == "$2" ];then
+							tedit $2; exit;
 						fi;
-						exit;;
-			help)		_help;
-						exit;;
-			*)			shift && eval "$e" "$@"; #Remove the first command line argument and pass the remaining ones to the plugin
-						exit;;
+					done;
+					clear; s3logo; echo -e $w_l"\n  $2 toolchain not installed\n"$W;
+				fi; exit;;
+			help)
+				_help; exit;;
+			*)
+				shift && eval "$e" "$@"; #Remove the first command line argument and pass the remaining ones to the plugin
+				exit;;
 			esac;
 		fi;
 	done;
