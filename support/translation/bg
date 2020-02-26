@@ -19,17 +19,17 @@ txt_loading='зареждам'; #8 chars
 txt_sel='избор';
 txt_delete='изтрий';
 txt_found='открити';
-txt_create='създава';
+txt_create='създай';
 txt_conf='конфигурация';
-txt_extracting='извличане'; #10 chars
+txt_extracting='извличане '; #10 chars
 txt_wait='изчакайте...';
 txt_existing='съществува';
 txt_profiles='профили';
 txt_not_found='не е намерено';
-txt_n_installed='не е инсталиран';
+txt_n_installed='не е инсталирано';
 txt_back_main="обратно към основно меню";
 txt_too_old='(твърде стар или не се поддържа)';
-txt_selected='избрано';
+txt_selected='избран';
 txt_update='опреснявам';
 txt_tc="Toolchain      ";
 
@@ -37,17 +37,18 @@ txt_tc="Toolchain      ";
 txt_start_menu='Главно меню';
 txt_remove_menu='Премахни toolchain';
 txt_add_menu='Добави toolchain';
-txt_main_revision="\n локална SVN ревизия е : r";
+txt_main_revision="\n локалната SVN ревизия е : r";
 
 # help txt
-txt_help1="започва с"
+txt_help1="започнете с"
 txt_help2="Параметрите на командния ред са"
-txt_help3="[ENTER] за продължение..."
+txt_help3="[ENTER] за продължаване..."
 
 # firstmenu ################################################
 txt_firstmenu_continue="продължи с локалния SVN";
    txt_firstmenu_chose="зареди различен SVN (7000+)";
    txt_firstmenu_cedit="стартирай конфигурационния редактор";
+   txt_firstmenu_tcupdate="стартирай опресняване на toolchain"; 
     txt_firstmenu_lang="ръчен избор на системен език";
     txt_firstmenu_exit="затвори simplebuild сега";
 
@@ -63,28 +64,31 @@ txt_module_configure="избери oscam модулите ";
 
 # _toolchain_build_menu#####################################
  txt_bmenu_title="билд меню";
-  txt_bmenu_user="потребителско име ";
+  txt_bmenu_user="потребител ";
   txt_bmenu_comp="компилатор       ";
   txt_bmenu_debu="debug инфо       ";
-   txt_bmenu_use="ИЗПОЛЗВАЙ_променливи ";
+   txt_bmenu_use="USE_променливи ";
  txt_bmenu_build="компилирай oscam сега";
 txt_bmenu_config="oscam/билд конфигурация";
-   txt_bmenu_log="покажи последния билд.лог";
+txt_bmenu_update="инсталирай/опресни библиотеките";
+txt_bmenu_backup="бекъп на toolchain";
+  txt_bmenu_log="покажи последния билд.лог";
   txt_bmenu_back="обратно към избор на toolchain";
-   txt_compress1="финализирай преди     ";
-   txt_compress2="финализирай след      ";
-   txt_compress3="финализирай редуциране към ";
+   txt_compress1="размер на файла преди     ";
+   txt_compress2="размер на файла след      ";
+   txt_compress3="файловия размер е редуциран до ";
 
-# _toolchain_main_menu#####################################
+#  _toolchain_main_menu#####################################
 txt_menu_builder1="затвори simplebuild";
 txt_menu_builder2="добави нов toolchain";
 txt_menu_builder3="премахни инсталиран toolchain";
-txt_menu_builder4="местен билд за";
+txt_menu_builder4="локален билд за";
+txt_menu_builder5="създай нов toolchain";
 txt_menu_back="обратно към меню toolchain";
 
 # _dialog_checkout
 txt_verify_syscheck='проверявам системата:';
-     txt_verify_svn='проверявам настоящия SVN:';
+     txt_verify_svn='проверявам съществуващия SVN:';
      txt_update_svn="$txt_update SVN:";
     txt_prepare_svn="подготвям SVN checkout:";
          txt_latest="последен SVN";
@@ -97,4 +101,4 @@ txt_confirm_profile_select="моля потвърдете избора на:";
 
 # _upload_cam #############################################
 txt_upload_cam1="ssh профила не съществува";
-txt_upload_cam2="ssh открит профил";
+txt_upload_cam2="ssh профил е открит";
