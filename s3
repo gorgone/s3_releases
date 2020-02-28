@@ -39,7 +39,16 @@ mkdir -p "$tcdir/native/bin" 2>/dev/null;
 #set arrays
 array_names=( SHORT_PROTOCOLS SHORT_READERS SHORT_CARD_READERS AVAI_TCLIST MISS_TCLIST SHORT_ADDONS DISABLED_MODULES SHORT_MODULENAMES ALL_MODULES_LONG INTERNAL_MODULES ENABLED_MODULES INST_TCLIST SSH_CONF_CONTENT USE_vars USE_vars_disable s3cfg_vars )
 
-for a_n in "${array_names[@]}";do unset $a_n; declare -a $a_n; done
+for a_n in "${array_names[@]}"; do
+    unset $a_n;
+    if [ "$a_n" == "INTERNAL_MODULES" ] || [ "$a_n" == "USE_vars" ] ||
+       [ "$a_n" == "USE_vars_disable" ] || [ "$a_n" == "s3cfg_vars" ];
+    then
+        declare -A $a_n;
+    else
+        declare -a $a_n;
+    fi;
+done
 
 USE_vars[USE_TARGZ]=;
 USE_vars[USE_PATCH]=;
