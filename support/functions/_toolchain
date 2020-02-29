@@ -183,8 +183,7 @@ _console_extract_toolchain(){
 	mkdir "$tcdir/$_toolchainname"
 	cd "$tcdir/$_toolchainname"
 	xz -d "$tc_dl" -c | tar -x
-	tput cup 10 23
-	printf "$txt_done!               $w_l\n"
+	printf "\r$w_l    $txt_extracting :$g_l$txt_done!                             \n\n"
 }
 
 _toolchain_check(){
