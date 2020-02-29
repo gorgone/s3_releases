@@ -30,12 +30,12 @@ compress_cam_gui(){
 	e1="$(echo "$erg"| awk '{printf("%4.2f k\n", $1 /1024)}')"
 	e2="$(echo "$erg"| awk '{printf("%4.2fk\n", $2 /1024)}')"
 	e3="$(echo "$erg"| awk '{print $3}')"
-	
-	echo -e "\n
-	$txt_compress1\t= $e1\n
-	$txt_compress2\t= $e2\n
+
+	echo -en "
+	$txt_compress1\t= $e1
+	$txt_compress2\t= $e2
 	$txt_compress3\t= $e3"
-};
+}
 
 tar_cam_gui(){
 	cd "$bdir"
@@ -48,10 +48,10 @@ tar_cam_gui(){
 		then
 			rm -rf "$adir/$1.tar.gz"
 			mv -f "$1.tar.gz" "$adir"
-			printf "\n $1.tar.gz\n moved to $workdir/archive\n"
+			printf "\n $1.tar.gz\n $txt_to\n $workdir/archive\n"
 		else
 			mv -f "$1.tar.gz" "$adir"
-			printf "\n $1.tar.gz\n moved to $workdir/archive\n"
+			printf "\n $1.tar.gz\n $txt_to\n $workdir/archive\n"
 		fi
 	else
 		printf "\nerror\n no $1.tar.gz\n created\n"

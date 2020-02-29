@@ -3,116 +3,149 @@
 _gui_build(){
 
 #init
-	oc_size=${#_oscamconfdir_custom};
-	[ "$oc_size" -gt "4" ] && _oscamconfdir_default="$_oscamconfdir_custom";
+	oc_size=${#_oscamconfdir_custom}
+	[ "$oc_size" -gt "4" ] && _oscamconfdir_default="$_oscamconfdir_custom"
 
-	if [ "$_toolchainname" == "native" ];then
-		log_name="$(date +%F).$(date +%X).$(hostname).log";
+	if [ "$_toolchainname" == "native" ]
+	then
+		log_name="$(date +%F).$(date +%X).$(hostname).log"
 	else
-		log_name="$(date +%F).$(date +%X).$_toolchainname.log";
-	fi;
+		log_name="$(date +%F).$(date +%X).$_toolchainname.log"
+	fi
 
-	ologo >"$ldir/$log_name";
-	[ -f "$configdir/max_cpus" ] && cpus="$(cat "$configdir/max_cpus")" || cpus="$(CPUS)";
-	CROSS="$tcdir/$_toolchainname/bin/$_compiler";
-	[ "$_stagingdir" == "1" ] && export STAGING_DIR="$tcdir/$_toolchainname";
-	[ -f "$configdir/compiler_option" ] && co=$(cat "$configdir/compiler_option") || co="-O2";
+	ologo >"$ldir/$log_name"
+	[ -f "$configdir/max_cpus" ] && cpus="$(cat "$configdir/max_cpus")" || cpus="$(CPUS)"
+
+	CROSS="$tcdir/$_toolchainname/bin/$_compiler"
+
+	[ "$_stagingdir" == "1" ] && export STAGING_DIR="$tcdir/$_toolchainname"
+	[ -f "$configdir/compiler_option" ] && co=$(cat "$configdir/compiler_option") || co="-O2"
 
 #make clean
-	cd "$svndir";
-	make distclean > /dev/null 2>&1;
-	USESTRING_='';
+	cd "$svndir"
+	make distclean > /dev/null 2>&1
+	USESTRING_=''
 
 #do use_vars
-	for e2 in $USESTRING;do
-		[ "USE_$e2" == "USE_PATCH" ] && _apply_menupatch;is_blocked=0;
-		for e1 in $_block;do
-			if [ "$e1" == "USE_$e2" ];then
-				is_blocked=1;
-				[ "USE_$e2" == "USE_LIBUSB" ] && silent=$(./config.sh -D CARDREADER_SMARGO);
-			fi;
-		done;
-		[ "$is_blocked" == "0" ] && _us="USE_$e2 $_us";
-	done;
+	for e2 in $USESTRING
+	do
+		[ "USE_$e2" == "USE_PATCH" ] && _apply_menupatch
+		is_blocked=0
 
-	for e in $_us;do
-		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_COMPRESS" ] && [ ! "$e" == "USE_PATCH" ];then
-			USESTRING_="$e=1 $USESTRING_";
-		fi;
-	done;
+		for e1 in $_block
+		do
 
-	if [ "${USE_vars[USE_PCSC]}"   == "USE_PCSC=1"   ];then
-		_pcsc="-pcsc"  ;
+			if [ "$e1" == "USE_$e2" ]
+			then
+				is_blocked=1
+				[ "USE_$e2" == "USE_LIBUSB" ] && silent=$(./config.sh -D CARDREADER_SMARGO)
+			fi
+
+		done
+		[ "$is_blocked" == "0" ] && _us="USE_$e2 $_us"
+	done
+
+	for e in $_us
+	do
+
+		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_COMPRESS" ] && [ ! "$e" == "USE_PATCH" ]
+		then
+			USESTRING_="$e=1 $USESTRING_"
+		fi
+
+	done
+
+	if [ "${USE_vars[USE_PCSC]}" == "USE_PCSC=1" ]
+	then
+		_pcsc="-pcsc"
 	else
-		_pcsc=;
-	fi;
-	if [ "${USE_vars[USE_LIBUSB]}" == "USE_LIBUSB=1" ];then
-		_usb="-libusb";
+		_pcsc=
+	fi
+
+	if [ "${USE_vars[USE_LIBUSB]}" == "USE_LIBUSB=1" ]
+	then
+		_usb="-libusb"
 	else
-		_usb=;
-	fi;
-	USESTRING_=${USE_vars[@]};
+		_usb=
+	fi
+
+	USESTRING_=${USE_vars[@]}
 
 #todo add switch for verbose
-	_generate_oscam_name "$_toolchainname";
-	targztmp="$(mktemp)";
-	if [ ! "${USE_vars[USE_TARGZ]}" == "USE_TARGZ=1" ];then
-		s3cfg_vars[USE_TARGZ]=0;
-	fi;
-	check_smargo;
+	_generate_oscam_name "$_toolchainname"
+	targztmp="$(mktemp)"
+
+	if [ ! "${USE_vars[USE_TARGZ]}" == "USE_TARGZ=1" ]
+	then
+		s3cfg_vars[USE_TARGZ]=0
+	fi
+	check_smargo
 
 #build
-	_sz;
-	(ologo; _nl;
-	timer_start;
+	_sz
+	(ologo; _nl
+	timer_start
 	make -j"$cpus" \
 		"CONF_DIR=$_oscamconfdir_default" "OSCAM_BIN=$bdir/$oscam_name" "CC_OPTS=$co $cc_opts" "CC_WARN=$cc_warn" "CROSS=$CROSS" $stapivar $USESTRING_ 2>&1 \
 		|tee "$ldir/$log_name" \
 		|grep --line-buffered -v 'BFD\|^/' \
 		|grep --line-buffered '^CC\|^GEN\|UseFlags\|  CONF_DIR =\|Binary\|LINK\|STRIP\|BUILD\|Addons\|Protocols\|Readers\|CardRdrs\|^/' \
-		|sed -u "s/^|/ |/g;s/^LINK/ LINK  >/g;s/^STRIP/ STRIP >/g;s/^CC\|^BUILD/ BUILD >/g;s/^GEN/ GEN   >/g;s/WEBIF_//g;s/WITH_//g;s/MODULE_//g;s/CS_//g;s/HAVE_//g;s/_CHARSETS//g;s/CW_CYCLE_CHECK/CWCC/g;s/SUPPORT//g;"
-	timer_stop;
-	timer_calc;
+		|sed -u "s/^|/ |/g;s/^LINK/ |  LINK  >/g;s/^STRIP/ |  STRIP >/g;s/^CC\|^BUILD/ |  BUILD >/g;s/^GEN/ |  GEN   >/g;s/WEBIF_//g;s/WITH_//g;s/MODULE_//g;s/CS_//g;s/HAVE_//g;s/_CHARSETS//g;s/CW_CYCLE_CHECK/CWCC/g;s/SUPPORT//g;"
+	timer_stop
+	timer_calc
 
 #save list_smargo
-	cd "$svndir/Distribution";
-	lsmn="$(ls list_smargo* 2> /dev/null)";
-	if [ "${s3cfg_vars[SAVE_LISTSMARGO]}" == "1" ] && [ -f "$svndir/Distribution/$lsmn" ];then
-		if [ "$_toolchainname" == "native" ];then
-			echo -e "SAVE\t$lsmn $txt_as oscam-svn$(REVISION)-$(hostname)-list_smargo"| tee -a "$ldir/$log_name";
-			mv -f "$lsmn" "$bdir/oscam-svn$(REVISION)-$(hostname)-list_smargo";
-			echo "oscam-svn$(REVISION)-$(hostname)-list_smargo" >"$targztmp";
+	cd "$svndir/Distribution"
+	lsmn="$(ls list_smargo* 2> /dev/null)"
+
+	if [ "${s3cfg_vars[SAVE_LISTSMARGO]}" == "1" ] && [ -f "$svndir/Distribution/$lsmn" ]
+	then
+
+		if [ "$_toolchainname" == "native" ]
+		then
+			printf "SAVE\t$lsmn $txt_as oscam-svn$(REVISION)-$(hostname)-list_smargo"| tee -a "$ldir/$log_name"
+			mv -f "$lsmn" "$bdir/oscam-svn$(REVISION)-$(hostname)-list_smargo"
+			printf "oscam-svn$(REVISION)-$(hostname)-list_smargo" >"$targztmp"
 		else
-			echo -e "SAVE\t$lsmn $txt_as oscam-svn$(REVISION)-$_toolchainname-list_smargo"|tee -a "$ldir/$log_name";
-			mv -f "$lsmn" "$bdir/oscam-svn$(REVISION)-$_toolchainname-list_smargo";
-			echo "oscam-svn$(REVISION)-$_toolchainname-list_smargo" >"$targztmp";
-		fi;
-	fi;
+			printf -e "SAVE\t$lsmn $txt_as oscam-svn$(REVISION)-$_toolchainname-list_smargo"|tee -a "$ldir/$log_name"
+			mv -f "$lsmn" "$bdir/oscam-svn$(REVISION)-$_toolchainname-list_smargo"
+			printf "oscam-svn$(REVISION)-$_toolchainname-list_smargo" >"$targztmp\n"
+		fi
+
+	fi
 
 #show buildtime
-	echo -e "\n TIME\t[ $txt_buildtime $((Tcalc / 60)) min(s) $((Tcalc % 60)) secs ]"| tee -a "$ldir/$log_name";sleep 1;
+	printf "\n |  TIME  >\t[ $txt_buildtime $((Tcalc / 60)) min(s) $((Tcalc % 60)) secs ]"| tee -a "$ldir/$log_name"
+	sleep 1
 
 #remove debug binary
-	if [ "${s3cfg_vars[delete_oscamdebugbinary]}" == "1" ] && [ -f "$bdir/$oscam_name.debug" ];then
-		rm "$bdir/$oscam_name.debug";
-		echo -e "\n $txt_delete $oscam_name.debug\n"|tee -a "$ldir/$log_name";
-	fi;) | "$gui" "$st_" --colors --title " -[ Build ]- " "$pb_" "$_lines" "$_cols";sleep 2;
+	if [ "${s3cfg_vars[delete_oscamdebugbinary]}" == "1" ] && [ -f "$bdir/$oscam_name.debug" ]
+	then
+		rm "$bdir/$oscam_name.debug"
+		printf "\n $txt_delete $oscam_name.debug\n"|tee -a "$ldir/$log_name"
+	fi;) | "$gui" "$st_" --colors --title " -[ Build ]- " "$pb_" "$_lines" "$_cols"
+	sleep 2
 
 #COMPRESS
-	if [ ! "$stapi_allowed" == "1" ];then
-		if [ "${s3cfg_vars[COMPRESS]}" == "1" ] || [ "${USE_vars[USE_COMPRESS]}" == "USE_COMPRESS=1" ];then
-			(compress_cam_gui "$oscam_name") |tee -a "$ldir/$log_name"| "$gui" "$st_" --title " -[ COMPRESS ]- " "$pb_" 7 50;
-			sleep 2;
-		fi;
-	fi;
+	if [ ! "$stapi_allowed" == "1" ]
+	then
+
+		if [ "${s3cfg_vars[COMPRESS]}" == "1" ] || [ "${USE_vars[USE_COMPRESS]}" == "USE_COMPRESS=1" ]
+		then
+			(compress_cam_gui "$oscam_name") |tee -a "$ldir/$log_name"| "$gui" "$st_" --title " -[ COMPRESS ]- " "$pb_" 7 50
+			sleep 2
+		fi
+
+	fi
 
 #tar
-	if [ "${USE_vars[USE_TARGZ]}" == "USE_TARGZ=1" ];then
-		(tar_cam_gui "$oscam_name" "$(cat "$targztmp")") |tee -a "$ldir/$log_name"| "$gui" "$st_" --title " -[ TAR Binary ]- " "$pb_" 10 70;
-		sleep 2;
-	fi;
+	if [ "${USE_vars[USE_TARGZ]}" == "USE_TARGZ=1" ]
+	then
+		(tar_cam_gui "$oscam_name" "$(cat "$targztmp")") |tee -a "$ldir/$log_name"| "$gui" "$st_" --title " -[ TAR Binary ]- " "$pb_" 10 70
+		sleep 2
+	fi
 
 #link log
-	ln -sf "$ldir/$log_name" "$workdir/lastbuild.log";
-	[ -f "$targztmp" ] && rm -rf "$targztmp";
-};
+	ln -sf "$ldir/$log_name" "$workdir/lastbuild.log"
+	[ -f "$targztmp" ] && rm -rf "$targztmp"
+}
