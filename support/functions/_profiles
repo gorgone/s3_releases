@@ -6,89 +6,114 @@ profiles(){
 }
 
 _list_profiles(){
-	cd "$profdir";
-	profiles=(*.profile);
-	if [ ${#profiles[@]} -gt 0 ];then
-		echo -e "$c_l";
-		clear;
-		slogo;
-		echo -e "$y_l\n  $txt_profiles $txt_found $txt_for ( ./$(basename "$0") \"tcname\" -p=name.profile )";
-		echo -e "$w_l  ======================================================\n";i=0;
-		for e in "${profiles[@]}";do
-			((i++));
-			echo -e "$w_l  ($i) > $e";
-		done;
-	fi;
-	echo -e "\n$rs_";
-};
+	cd "$profdir"
+	profiles=(*.profile)
+	if [ ${#profiles[@]} -gt 0 ]
+	then
+		printf "$c_l"
+		clear
+		slogo
+		printf "$y_l\n  $txt_profiles $txt_found $txt_for ( ./$(basename "$0") \"tcname\" -p=name.profile )\n"
+		echo -e "$w_l  ======================================================\n"
+		i=0
+		for e in "${profiles[@]}"
+		do
+			((i++))
+			printf "$w_l  ($i) > $e\n"
+		done
+	fi
+	printf "\n$rs_"
+}
+
 _save_profile(){
-	if [ -f "$menudir/$_toolchainname.save" ];then
-		source "$menudir/$_toolchainname.save";
-		input=$("$gui" "$st_" "$bt_" "$title_" --title " -[ $1 Toolchain ]- " $ip_ "\n SAVE PROFILE\n" 0 0 "$_toolchainname");
-		echo $enabled $usevars | sed -e 's/CARDREADER_//g;s/READER_//g;s/MODULE_//g;s/HAVE_//g;s/WEBIF_//g;s/WITH_//g;s/CS_//g;s/_CHARSETS//g;s/CW_CYCLE_CHECK/CWCC/g;s/SUPPORT//g;' >"$profdir/$input.profile";
-	fi;
-};
+	if [ -f "$menudir/$_toolchainname.save" ]
+	then
+		source "$menudir/$_toolchainname.save"
+		input=$("$gui" "$st_" "$bt_" "$title_" --title " -[ $1 Toolchain ]- " $ip_ "\n SAVE PROFILE\n" 0 0 "$_toolchainname")
+		printf $enabled $usevars | sed -e 's/CARDREADER_//g;s/READER_//g;s/MODULE_//g;s/HAVE_//g;s/WEBIF_//g;s/WITH_//g;s/CS_//g;s/_CHARSETS//g;s/CW_CYCLE_CHECK/CWCC/g;s/SUPPORT//g;' >"$profdir/$input.profile"
+	fi
+}
+
 _load_profile(){
-	if [ "$(ls -A "$profdir")" ];then
-		ok=0;
-		loadprofile="no";
+	if [ "$(ls -A "$profdir")" ]
+	then
+		ok=0
+		loadprofile="no"
 		USESTRING=;
-		_create_module_arrays;
-		unset selection;
-		declare -a SELECTION;
-		cd "$profdir";
-		p_files=(*.profile);
-		i=0;
-		for e in "${p_files[@]}";do
-			((i++));SELECTION+=($e '<');
-		done;
-		pselect=$("$gui" "$st_" "$bt_" "$title_" --no-cancel --title " -[ $txt_select_profile_title ]- " --menu "\n $txt_select_profile\n\n" 0 0 "$i" "${SELECTION[@]}");
-		[ $? = 255 ] && loadprofile="yes" && _toolchain_build_menu;
-		"$gui" "$st_" "$bt_" "$title_" --yesno "\n$txt_confirm_profile_select\n\n$pselect\n\n" 0 0;
-		response=$?;
+		_create_module_arrays
+		unset selection
+		declare -a SELECTION
+		cd "$profdir"
+		p_files=(*.profile)
+		i=0
+
+		for e in "${p_files[@]}"
+		do
+			((i++))
+			SELECTION+=($e '<')
+		done
+
+		pselect=$("$gui" "$st_" "$bt_" "$title_" --no-cancel --title " -[ $txt_select_profile_title ]- " --menu "\n $txt_select_profile\n\n" 0 0 "$i" "${SELECTION[@]}")
+		[ $? = 255 ] && loadprofile="yes" && _toolchain_build_menu
+		"$gui" "$st_" "$bt_" "$title_" --yesno "\n$txt_confirm_profile_select\n\n$pselect\n\n" 0 0
+		response=$?
+
 		case "$response" in
 			1)
-					loadprofile="yes";
-					_toolchain_build_menu;;
+				loadprofile="yes"
+				_toolchain_build_menu;;
 			255)
-					loadprofile="yes";
-					_toolchain_build_menu;;
-		esac;
-		if [ -f "$profdir/$pselect" ];then
-			profile_vars=$(cat "$profdir/$pselect";);
-			reset_="$("$svndir/config.sh" -D all)";
-			for e in "${!USE_vars[@]}";do
+				loadprofile="yes"
+				_toolchain_build_menu;;
+		esac
+
+		if [ -f "$profdir/$pselect" ]
+		then
+			profile_vars=$(cat "$profdir/$pselect";)
+			reset_="$("$svndir/config.sh" -D all)"
+
+			for e in "${!USE_vars[@]}"
+			do
 				USE_vars[$e]=;
-			done;
-			for e1 in $profile_vars;do
-				for e2 in "${!USE_vars[@]}";do
-					[ "$e1" == "$e2" ] && USE_vars[$e1]="$e1=1";
-				done;
-				for sm in "${SHORT_MODULENAMES[@]}";do
-					if [ "$e1" == "$sm" ];then
-						_em_="$_em_ $(get_module_name "$sm")";
-					fi;
-				done;
-			done;
-			_set_=$("$svndir/config.sh" -E $_em_);
-			USESTRING="$(echo "${USE_vars[@]}"| sed 's@USE_@@g' | sed 's@=1@@g'| tr -s ' ')";
-			loadprofile="yes";
-		fi;
+			done
+
+			for e1 in $profile_vars
+			do
+				for e2 in "${!USE_vars[@]}"
+				do
+					[ "$e1" == "$e2" ] && USE_vars[$e1]="$e1=1"
+				done
+				for sm in "${SHORT_MODULENAMES[@]}"
+				do
+					if [ "$e1" == "$sm" ]
+					then
+						_em_="$_em_ $(get_module_name "$sm")"
+					fi
+				done
+			done
+
+			_set_=$("$svndir/config.sh" -E $_em_)
+			USESTRING="$(echo "${USE_vars[@]}"| sed 's@USE_@@g' | sed 's@=1@@g'| tr -s ' ')"
+			loadprofile="yes"
+		fi
 	else
-		$gui --msgbox "\n$txt_no_profile_found \n " 0 0;
-	fi;
-	loadprofile="no";
-};
+		$gui --msgbox "\n$txt_no_profile_found \n " 0 0
+	fi
+	loadprofile="no"
+}
+
 _create_native_profile(){
-	[ ! -d "$tcdir/native/bin" ] && mkdir -p "$tcdir/native/bin";
-	cd "$tcdir/native/bin";
-	g="$(which gcc)";
-	stripvar="$(which strip)";
-	compiler_link="$($g -dumpmachine)-gcc";
-	strip_link="$($g -dumpmachine)-strip";
-	[ ! -L "$compiler_link" ] && ln -sf "$g"     "$compiler_link";
-	[ ! -L "$strip_link" ]    && ln -sf "$stripvar" "$strip_link";
-	cd "$tccfgdir";
+
+	[ ! -d "$tcdir/native/bin" ] && mkdir -p "$tcdir/native/bin"
+	cd "$tcdir/native/bin"
+	g="$(which gcc)"
+	stripvar="$(which strip)"
+	strip_link="$($g -dumpmachine)-strip"
+	compiler_link="$($g -dumpmachine)-gcc"
+	[ -L "$compiler_link" ] || ln -sf "$g"     "$compiler_link"
+	[ -L "$strip_link" ]    || ln -sf "$stripvar" "$strip_link"
+	cd "$tccfgdir"
+
 	cat << EOF > native
 _toolchainname="native";
 default_use="USE_UTF8 USE_LIBCRYPTO";
@@ -101,5 +126,6 @@ _libsearchdir="/lib";
 _menuname="native";
 _sysroot="/usr/include";
 EOF
-cd "$workdir";
-};
+cd "$workdir"
+
+}
