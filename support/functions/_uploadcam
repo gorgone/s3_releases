@@ -7,10 +7,10 @@ upload_cam(){
 
 	if [ ! -f "$profdir/$FILENAME" ]
 	then
-		printf "$r_l\n  $txt_error $FILENAME $txt_upload_cam1 $re_"
+		printf "$r_l\n  $txt_error $FILENAME $txt_upload_cam1 $re_\n"
 		exit
 	else
-		printf "$w_l\n  CONFIG  : $g_l$FILENAME $txt_upload_cam2 $re_"
+		printf "$w_l\n  CONFIG  : $g_l$FILENAME $txt_upload_cam2 $re_\n"
 	fi
 
 #load data from config
