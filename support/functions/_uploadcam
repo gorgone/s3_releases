@@ -24,26 +24,26 @@ upload_cam(){
 #output date from cam
 	if [ -f "$bdir/$buildcamname" ]
 	then
-		printf "$w_l  CAMNAME : $y_l$buildcamname"
+		printf "$w_l  CAMNAME : $y_l$buildcamname\n"
 		printf "$w_l  FILEDATE: "$(
 			stat -c %y "$bdir/$buildcamname" |awk '{print $1" "; printf substr($2,1,8)}'
 		)
 		printf "$w_l"
 	else
-		printf "\n  matching \$CAM not found in $bdir$re_"
+		printf "\n  matching \$CAM not found in $bdir$re_\n"
 		exit
 	fi
 
-	printf "$p_l\n  $txt_LOAD  > $w_l$txt_to IP:$b_l$ip$w_l port:$b_l$port"
+	printf "$p_l\n  UPLOAD  > $w_l$txt_to IP:$b_l$ip$w_l port:$b_l$port\n"
 	sshpass -p "$password" scp -P "$port" "$bdir/$buildcamname" "$loginname@$ip":/tmp
 
 #replace target cam
 	if [ "$replace_target" == "y" ]
 	then
-		printf "$p_l  REPLACE > $y_l$targetcam$re_"
+		printf "$p_l  REPLACE > $y_l$targetcam$re_\n"
 		sshpass -p "$password" ssh -p "$port" -o StrictHostKeyChecking=no "$loginname@$ip" \
 		"cd /tmp;if [ -f \"$buildcamname\" ];then if [ -f \"$targetcam\" ];then if [ \"$backup_target\" == \"y\" ]; then cp -pf \"$targetcam\" \"$targetcam.backup\"; fi;mv -f \"$buildcamname\" \"$targetcam\";fi;fi;exit;"
-		printf "$g_l$txt_done!$re_"
+		printf " $g_l$txt_done!$re_\n"
 	fi
 
 #stop target cam
@@ -55,8 +55,9 @@ upload_cam(){
 #remote command (example restart cam)
 	if [ ! "$remote_command" == "none" ]
 	then
-		printf "$w_l  SSH COMMANDS $remote_command $y_l$txt_wait"
+		printf "$w_l  SSH COMMANDS $remote_command $y_l$txt_wait\n\n"
 		# do remote commands
 		sshpass -p "$password" ssh -p "$port" -o StrictHostKeyChecking=no "$loginname@$ip" "$remote_command;"
+		_nl
 	fi
 }
