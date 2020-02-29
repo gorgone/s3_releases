@@ -97,7 +97,7 @@ tarsvn(){
 
 	cd "$bsvn"
 	ln -sf "$bsvn/$("$svndir/config.sh" -r).tar.gz" "last.tar.gz"
-	printf "done$re_\n"
+	printf "done$re_\n\n"
 }
 
 untarsvn(){

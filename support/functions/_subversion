@@ -11,7 +11,7 @@ checkout(){
 	if [ -d "$svndir" ]
 	then
 		rm -rf "$svndir"
-		printf "$p_l\n  $txt_delete $txt_existing oscam-svn $re_\n"
+		printf "$p_l\n  $txt_delete oscam-svn $re_\n"
 	else
 		printf "$p_l\n  $txt_no oscam-svn $txt_found\n$re_"
 	fi
@@ -19,26 +19,26 @@ checkout(){
 	printf "$w_l  SVN TrunkURL  : $g_l$trunkurl$re_"
 	[ ! -z "$1" ] && [ $(($1)) -gt 6999 ] && opt_="-r$1" && mac_="($txt_selected)" || opt_=''
 
-	printf "$w_l  SVN FileCount : "
+	printf "\n$w_l  SVN FileCount : "
 	svn info -R "$trunkurl" |grep '^URL' |uniq |wc -l >"$fc1"
 	n=$(cat "$fc1")
 	printf "$g_l""$txt_found $n"
-	printf "$w_l  SVN checkout  : "
+	printf "\n$w_l  SVN checkout  : "
 
 	while read line filename
 	do
 		counter=$(( 100*(++i)/n))
-		tput cup 11 18
-		[ "$counter" -lt "100" ] && printf "$g_l""$counter%$re_" || printf "$g_l""100%$re_"
+		tput cup 10 18
+		[ "$counter" -lt "100" ] && echo -en "$g_l""$counter%$re_" || echo -e "$g_l""100%$re_"
 	done < <( svn co "$trunkurl" $opt_ "$svndir" |sed "s|$svndir/||g")
 
-	tput cup 11 18;
-	printf "$g_l""100%$re_"
+	tput cup 10 18;
+	echo -e "$g_l""100%$re_"
 
 	if [ -f "$svndir/config.sh" ]
 	then
-		tput cup 12 2;
-		printf "$w_l""SVN Revision  : $y_l""$("$svndir/config.sh" -r) $b_l$mac_$re_\n$w_l  SVN UserPath  : $y_l""$svndir"
+		tput cup 11 0;
+		printf "$w_l  SVN Revision  :$y_l $("$svndir/config.sh" -r) $b_l$mac_$re_\n$w_l  SVN UserPath  :$y_l $svndir"
 	fi
 
 	[ -f "$svndir/config.h" ]&& reset_="$("$svndir/config.sh" -R)"
@@ -115,7 +115,7 @@ svnup(){
 	if [ -f "$svndir/config.sh" ]
 	then
 		tput cup 10 2
-		printf "$w_l""SVN Revision  : ""$y_l$("$svndir/config.sh" -r) $b_l$mac_$re_\n$w_l  SVN UserPath  : $y_l""$svndir\n$re_"
+		printf "\n$w_l  SVN Revision  : ""$y_l$("$svndir/config.sh" -r) $b_l$mac_$re_\n$w_l  SVN UserPath  : $y_l""$svndir\n$re_"
 	fi
 
 	if [ -f "$svndir/config.h" ]
