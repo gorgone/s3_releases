@@ -183,7 +183,7 @@ fi
 	|grep --line-buffered -v 'BFD\|^/' \
 	|grep --line-buffered '^CC\|^GEN\|UseFlags\|  CONF_DIR =\|Binary\|LINK\|STRIP\|BUILD\|Addons\|Protocols\|Readers\|CardRdrs\|^/' \
 	|sed -e "s/^|/"$Y" |/g;s/^LINK/"$P" LINK ------->$W/g;s/^STRIP/"$P" STRIP ------>$W/g;s/^CC\|^BUILD/"$G" BUILD ------>$W/g;s/^GEN/"$C" GEN -------->/g;
-	s/WEBIF_//g;s/WITH_//g;s/MODULE_//g;s/CS_//g;s/HAVE_//g;s/_CHARSETS//g;s/CW_CYCLE_CHECK/CWCC/g;s/SUPPORT//g;s/=/:/g;"
+	s/WEBIF_//g;s/WITH_//g;s/MODULE_//g;s/CS_//g;s/HAVE_//g;s/_CHARSETS//g;s/CW_CYCLE_CHECK/CWCC/g;s/SUPPORT//g;s/= /: /g;"
 
 #calc buildtime
 	timer_stop
