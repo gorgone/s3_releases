@@ -1,87 +1,112 @@
 #!/bin/bash
 
 prerequisites(){
-failed=0;
-missing="(not found)";
-[[ $1 ]] && output=": &&" || output="echo";
-$output -e "$w_l  CHECK for binaries\n  ==================\n";
+	failed=0
+	missing="(not found)"
+	[[ $1 ]] && output=": &&" || output="printf";
+	$output "$w_l  CHECK for binaries\n  ==================\n";
 
 # check for a forgotten and unusable 'upx' and remove this crap
-[ -x "$bindir"/upx ] && "$bindir"/upx -V &>/dev/null || rm -f "$bindir"/upx &>/dev/null;
+	[ -x "$bindir"/upx ] && "$bindir"/upx -V &>/dev/null || rm -f "$bindir"/upx &>/dev/null;
 
-for e in "${binvars[@]}";
+	for e in "${binvars[@]}"
+	do
+		if hash "$e" 2>/dev/null
+		then
+			einfo=$(which "$e")
+			printf -v pad %40s
+			e=$e$pad
+			e=${e:0:15}
+			$output "$w_l  have\t$g_l$e $y_l$einfo\n"
+		else
+			failed=1
+			printf -v pad %40s
+			e=$e$pad
+			e=${e:0:15}
+			$output "$r_l  need\t$w_l$e $r_l$missing\n"
+		fi
+	done
+
+	if hash upx 2>/dev/null; then
+		upxversion=($(upx -V | awk 'NR==1 { verok=$2>=3.91; printf "%.2f %i", $2, verok }'));
+		$output "$w_l  have$g_l  upx$y_l\t\t"$w_l"Version$P ${upxversion[0]}";
+		if [ ${upxversion[1]} == 1 ]
+		then
+			$output "$g_l ok\n"
+		else
+			$output "$r_l nok\n"
+			failed=1
+		fi
+	fi
+
+	$output " \n $w_l CHECK for headers\n  =================\n"
+
+	for e in "${headervars[@]}"
+	do
+		e1=$(find /usr/include/* | grep -m1 "$e")
+		if [ ${#e1} -gt 8 ]
+		  then
+			printf -v pad %40s
+			e=$e$pad
+			e=${e:0:15}
+			$output "$w_l  have\t$g_l$e$y_l $e1\n"
+		else
+			failed=1
+			printf -v pad %40s
+			e=$e$pad
+			e=${e:0:15}
+			$output "$r_l  need\t$w_l$e$r_l $missing\n"
+		fi
+	done
+
+$output " \n $w_l CHECK for libraries\n  ===================\n"
+
+for e in "${libvars[@]}"
 do
-	if hash "$e" 2>/dev/null; then
-		einfo=$(which "$e");
-		printf -v pad %40s; e=$e$pad; e=${e:0:15};
-		$output -e "$w_l  have\t$g_l$e $y_l$einfo";
+	e1=$(find /usr/lib* 2>/dev/null | grep -m1 "$e")
+	if [ ${#e1} -gt 8 ]
+	then
+		printf -v pad %40s
+		e=$e$pad
+		e=${e:0:15}
+		$output "$w_l  have\t$g_l$e$y_l $e1\n"
 	else
-		failed=1;
-		printf -v pad %40s; e=$e$pad; e=${e:0:15};
-		$output -e "$r_l  need\t$w_l$e $r_l$missing";
-	fi;
-done;
+		failed=1
+		printf -v pad %40s
+		e=$e$pad
+		e=${e:0:15}
+		$output "$r_l  need\t$w_l$e$r_l $missing\n";
+	fi
+done
 
-if hash upx 2>/dev/null; then
-	upxversion=($(upx -V | awk 'NR==1 { verok=$2>=3.91; printf "%.2f %i", $2, verok }'));
-	$output -n -e "$w_l  have$g_l  upx$y_l\t\t"$w_l"Version$P ${upxversion[0]}";
-	if [ ${upxversion[1]} == 1 ]; then
-		$output -e "$g_l ok";
+if [ "$(uname -m)" == "x86_64" ]
+	then
+	$output " \n $w_l CHECK for zlib32\n  ================\n"
+	e="zlib32"
+	e1="/usr/lib/libz.so"
+	e2="/usr/lib32/libz.so.1"
+	if [ -f $e1 ]
+	then
+		printf -v pad %40s
+		e=$e$pad
+		e=${e:0:15}
+		$output "$w_l  have\t$g_l$e$y_l $e1\n"
+	elif [ -f $e2 ]
+		then
+		printf -v pad %40s
+		e=$e$pad
+		e=${e:0:15}
+		$output "$w_l  have\t$g_l$e$y_l $e2\n"
 	else
-		$output -e "$r_l nok";
-		failed=1;
+		failed=1
+		printf -v pad %40s
+		e=$e$pad
+		e=${e:0:15}
+		$output "$r_l  need\t$w_l$e$r_l $missing\n"
 	fi
 fi
 
-$output -e " \n $w_l CHECK for headers\n  =================\n" ;
-
-for e in "${headervars[@]}";
-do
-	e1=$(find /usr/include/* | grep -m1 "$e");
-	if [ ${#e1} -gt 8 ]; then
-		printf -v pad %40s; e=$e$pad; e=${e:0:15};
-		$output -e "$w_l  have\t$g_l$e$y_l $e1"
-	else
-		failed=1;
-		printf -v pad %40s; e=$e$pad; e=${e:0:15};
-		$output -e "$r_l  need\t$w_l$e$r_l $missing";
-	fi;
-done;
-
-$output -e " \n $w_l CHECK for libraries\n  ===================\n" ;
-
-for e in "${libvars[@]}";
-do
-	e1=$(find /usr/lib* 2>/dev/null | grep -m1 "$e");
-	if [ ${#e1} -gt 8 ]; then
-		printf -v pad %40s; e=$e$pad; e=${e:0:15};
-		$output -e "$w_l  have\t$g_l$e$y_l $e1"
-	else
-		failed=1;
-		printf -v pad %40s; e=$e$pad; e=${e:0:15};
-		$output -e "$r_l  need\t$w_l$e$r_l $missing";
-	fi;
-done;
-
-if [ "$(uname -m)" == "x86_64" ]; then
-	$output -e " \n $w_l CHECK for zlib32\n  ================\n" ;
-	e="zlib32";
-	e1="/usr/lib/libz.so";
-	e2="/usr/lib32/libz.so.1";
-	if [ -f $e1 ]; then
-		printf -v pad %40s; e=$e$pad; e=${e:0:15};
-		$output -e "$w_l  have\t$g_l$e$y_l $e1"
-	elif [ -f $e2 ]; then
-		printf -v pad %40s; e=$e$pad; e=${e:0:15};
-		$output -e "$w_l  have\t$g_l$e$y_l $e2"
-	else
-		failed=1;
-		printf -v pad %40s; e=$e$pad; e=${e:0:15};
-		$output -e "$r_l  need\t$w_l$e$r_l $missing";
-	fi
-fi
-
-return $failed;
+return $failed
 }
 
 # Parameters (all optional):
@@ -93,36 +118,56 @@ return $failed;
 #     call installer 'debian_os' (Do not care about the actual Linux distribution.)
 
 syscheck(){
-[[ $1 ]] && [ "$1" != "auto" ] && override="$1";now=$2;
-if [ -d "$osdir" ];then cd "$osdir";x=(*); for i in "${x[@]}";do source "$i"; done fi
-binvars=( dialog grep gawk wget tar bzip2 svn xz upx patch gcc make scp sshpass openssl dos2unix );
-headervars=( crypto.h libusb.h pcsclite.h pthread.h );
-libvars=( libccidtwin.so );
-sanity=1;
-
-if ! prerequisites silent || [ "$now" == "now" ]; then
-	clear; s3logo;
-	prerequisites;
-	sanity=0;
-	installer="unknown";
-	# Debian and Ubuntu
-	[ -f /etc/debian_version ] && installer="debian_os";
-	# CentOS and Redhat
-	[ -f /etc/redhat-release ] && installer="redhat_os";
-	# Manjaro (/etc/os-release)
-	[ -f /etc/manjaro-release ] && installer="manjaro_os";
-	# SuSE (/etc/SuSE-release is depreciated -> check for YaST2)
-	[ -d /etc/YaST2 ] && installer="suse_os";
-	# Optional override via parameter
-	#[[ $override ]] && installer=$override;
-	echo -e "\n$w_l  Selected installer:    $P$installer\n";
-	if type -t "$installer" >/dev/null; then
-		$installer && prerequisites silent && sanity=1;
-	else
-		echo -e "\n$r_l  Needs manual installation.";
-	fi
-	echo -e "$re_";
+[[ $1 ]] && [ "$1" != "auto" ] && override="$1"
+now=$2
+if [ -d "$osdir" ]
+then
+	cd "$osdir"
+	x=(*)
+	for i in "${x[@]}"
+	do
+		source "$i"
+	done
 fi
 
-return $sanity;
+binvars=( dialog grep gawk wget tar bzip2 svn xz upx patch gcc make scp sshpass openssl dos2unix );
+headervars=( crypto.h libusb.h pcsclite.h pthread.h )
+libvars=( libccidtwin.so )
+sanity=1
+
+if ! prerequisites silent || [ "$now" == "now" ]
+then
+	clear
+	s3logo
+	prerequisites
+	sanity=0
+	installer="unknown"
+
+	# Debian and Ubuntu
+	[ -f /etc/debian_version ] && installer="debian_os"
+
+	# CentOS and Redhat
+	[ -f /etc/redhat-release ] && installer="redhat_os"
+
+	# Manjaro (/etc/os-release)
+	[ -f /etc/manjaro-release ] && installer="manjaro_os"
+
+	# SuSE (/etc/SuSE-release is depreciated -> check for YaST2)
+	[ -d /etc/YaST2 ] && installer="suse_os"
+
+	# Optional override via parameter
+	#[[ $override ]] && installer=$override;
+	printf "\n$w_l  Selected installer:    $P$installer\n"
+
+	if type -t "$installer" >/dev/null
+	then
+		$installer && prerequisites silent && sanity=1
+	else
+		printf "\n$r_l  Needs manual installation.\n"
+	fi
+
+	printf "$re_\n"
+fi
+
+return $sanity
 }
