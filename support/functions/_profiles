@@ -1,9 +1,10 @@
 #!/bin/bash
 
 profiles(){
-	_list_profiles;
-	exit;
-};
+	_list_profiles
+	exit
+}
+
 _list_profiles(){
 	cd "$profdir";
 	profiles=(*.profile);
