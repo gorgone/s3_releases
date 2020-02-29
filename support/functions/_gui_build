@@ -90,7 +90,7 @@ _gui_build(){
 		|tee "$ldir/$log_name" \
 		|grep --line-buffered -v 'BFD\|^/' \
 		|grep --line-buffered '^CC\|^GEN\|UseFlags\|  CONF_DIR =\|Binary\|LINK\|STRIP\|BUILD\|Addons\|Protocols\|Readers\|CardRdrs\|^/' \
-		|sed -u "s/^|/ |/g;s/^LINK/ |  LINK  >/g;s/^STRIP/ |  STRIP >/g;s/^CC\|^BUILD/ |  BUILD >/g;s/^GEN/ |  GEN   >/g;s/WEBIF_//g;s/WITH_//g;s/MODULE_//g;s/CS_//g;s/HAVE_//g;s/_CHARSETS//g;s/CW_CYCLE_CHECK/CWCC/g;s/SUPPORT//g;"
+		|sed -u "s/^|/ |/g;s/^LINK/ |  LINK  >/g;s/^STRIP/ |  STRIP >/g;s/^CC\|^BUILD/ |  BUILD >/g;s/^GEN/ |  GEN   >/g;s/WEBIF_//g;s/WITH_//g;s/MODULE_//g;s/CS_//g;s/HAVE_//g;s/_CHARSETS//g;s/CW_CYCLE_CHECK/CWCC/g;s/SUPPORT//g;s/=/:/g;"
 	timer_stop
 	timer_calc
 

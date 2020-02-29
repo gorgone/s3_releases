@@ -1,42 +1,43 @@
 #!/bin/bash
 
 VERSIONCOUNTER=310
-SIMPLEVERSION="3.0 RC7";OIFS=$IFS;
-export NCURSES_NO_UTF8_ACS=1;
+SIMPLEVERSION="3.0 RC7"
+OIFS=$IFS
+export NCURSES_NO_UTF8_ACS=1
 
 #set dir_vars
-workdir="$(pwd)";
- bindir="$sdir/upx";
-   PATH="$bindir:$PATH";
-   sdir="$workdir/support";
+workdir="$(pwd)"
+ bindir="$sdir/upx"
+   PATH="$bindir:$PATH"
+   sdir="$workdir/support"
 
-    osdir="$sdir/os";
-     ldir="$sdir/logs";
-     adir="$sdir/archive";
-configdir="$sdir/configs";
-     pdir="$sdir/patches";
-  profdir="$sdir/profiles";
-     bdir="$sdir/binaries";
-    dldir="$sdir/downloads";
-     fdir="$sdir/functions";
-  menudir="$sdir/menu_save";
-     bsvn="$sdir/backup_svn";
-    tcdir="$sdir/toolchains";
-     tdir="$sdir/translation";
-   svndir="$workdir/oscam-svn";
- tccfgdir="$sdir/toolchains.cfg";
+    osdir="$sdir/os"
+     ldir="$sdir/logs"
+     adir="$sdir/archive"
+configdir="$sdir/configs"
+     pdir="$sdir/patches"
+  profdir="$sdir/profiles"
+     bdir="$sdir/binaries"
+    dldir="$sdir/downloads"
+     fdir="$sdir/functions"
+  menudir="$sdir/menu_save"
+     bsvn="$sdir/backup_svn"
+    tcdir="$sdir/toolchains"
+     tdir="$sdir/translation"
+   svndir="$workdir/oscam-svn"
+ tccfgdir="$sdir/toolchains.cfg"
 
 # create folders
-mkdir -p "$tcdir/native/bin" 2>/dev/null;
-mkdir -p support/{archive,binaries,downloads,logs,patches,backup_svn,menu_save,upx} 2>/dev/null;
+mkdir -p "$tcdir/native/bin" 2>/dev/null
+mkdir -p support/{archive,binaries,downloads,logs,patches,backup_svn,menu_save,upx} 2>/dev/null
 
 # create links
-[ ! -d "$ldir" ] && clear && echo -e "\n folder creation error\n\n" && exit;
-[ -L "$workdir/logs" ]     || ln -sf "$ldir" "$workdir/logs"     2>/dev/null;
-[ -L "$workdir/archive" ]  || ln -sf "$adir" "$workdir/archive"  2>/dev/null;
-[ -L "$workdir/patches" ]  || ln -sf "$pdir" "$workdir/patches"  2>/dev/null;
-[ -L "$workdir/binaries" ] || ln -sf "$bdir" "$workdir/binaries" 2>/dev/null;
-[ -L "$workdir/profiles" ] || ln -sf "$profdir" "$workdir/profiles" 2>/dev/null;
+[ ! -d "$ldir" ] && clear && echo -e "\n folder creation error\n\n" && exit
+[ -L "$workdir/logs" ]     || ln -sf "$ldir" "$workdir/logs"     2>/dev/null
+[ -L "$workdir/archive" ]  || ln -sf "$adir" "$workdir/archive"  2>/dev/null
+[ -L "$workdir/patches" ]  || ln -sf "$pdir" "$workdir/patches"  2>/dev/null
+[ -L "$workdir/binaries" ] || ln -sf "$bdir" "$workdir/binaries" 2>/dev/null
+[ -L "$workdir/profiles" ] || ln -sf "$profdir" "$workdir/profiles" 2>/dev/null
 
 #set arrays
 array_names_a=( SHORT_PROTOCOLS SHORT_READERS SHORT_CARD_READERS AVAI_TCLIST
@@ -44,14 +45,16 @@ array_names_a=( SHORT_PROTOCOLS SHORT_READERS SHORT_CARD_READERS AVAI_TCLIST
 				ALL_MODULES_LONG  ENABLED_MODULES INST_TCLIST SSH_CONF_CONTENT )
 array_names_A=( INTERNAL_MODULES USE_vars USE_vars_disable s3cfg_vars )
 
-for a_n in "${array_names_a[@]}"; do
-	unset $a_n;
-	declare -a $a_n;
+for a_n in "${array_names_a[@]}"
+do
+	unset $a_n
+	declare -a $a_n
 done
 
-for a_n in "${array_names_A[@]}"; do
-	unset $a_n;
-	declare -A $a_n;
+for a_n in "${array_names_A[@]}"
+do
+	unset $a_n
+	declare -A $a_n
 done
 
 USE_vars[USE_TARGZ]=;
@@ -61,15 +64,15 @@ USE_vars[USE_STAPI5]=;
 USE_vars[USE_CONFDIR]=;
 USE_vars[USE_COMPRESS]=;
 
-s3cfg_vars[USE_TARGZ]=0;
-s3cfg_vars[DIRECTMENU]=0;
-s3cfg_vars[USE_VERBOSE]=0;
-s3cfg_vars[USE_COMPRESS]=0;
-s3cfg_vars[S3_UPDATE_CHECK]=1;
-s3cfg_vars[SAVE_LISTSMARGO]=1;
-s3cfg_vars[ADD_PROFILE_NAME]=0;
-s3cfg_vars[NO_SVN_AUTOUPDATE]=0;
-s3cfg_vars[delete_oscamdebugbinary]=1;
+s3cfg_vars[USE_TARGZ]=0
+s3cfg_vars[DIRECTMENU]=0
+s3cfg_vars[USE_VERBOSE]=0
+s3cfg_vars[USE_COMPRESS]=0
+s3cfg_vars[S3_UPDATE_CHECK]=1
+s3cfg_vars[SAVE_LISTSMARGO]=1
+s3cfg_vars[ADD_PROFILE_NAME]=0
+s3cfg_vars[NO_SVN_AUTOUPDATE]=0
+s3cfg_vars[delete_oscamdebugbinary]=1
 
 #filled arrays
 config_cases=( all addons protocols readers card_readers );
@@ -77,16 +80,27 @@ s3opts=( cedit checkout clean enable_emu fix_me get_patch help lang_select loado
 		 menu profiles ssh_profiles svnpatch svnrestore svnup syscheck sysinfo tccheck\
 		 tcrepair tedit update update_emu update_me upload ) # extendable with plugins
 
-CUSTOM_CONFDIR="not_set";
-pf_name="not_set";
-UPX="not_set";
+CUSTOM_CONFDIR="not_set"
+pf_name="not_set"
+UPX="not_set"
 
 #internal vars
-OPENBOX=0;UFS916003=0;_verbose="";
-_t1e="VG9vbGNoYWluLQ==";
-_u1e="aHR0cDovL3N0cmVhbWJvYXJkLnR2L3diYjIvdHV0LXBpY3MvdG9vbGNoYWlucw==";
-cposx=0; cposy=0; off="_off"; on="_on"; pf="empty"; file_exist="0"; run="0";
-s3cfg="$configdir/simplebuild.config";loadprofile="no";menucall="no";
+OPENBOX=0
+UFS916003=0
+_t1e="VG9vbGNoYWluLQ=="
+_u1e="aHR0cDovL3N0cmVhbWJvYXJkLnR2L3diYjIvdHV0LXBpY3MvdG9vbGNoYWlucw=="
+
+run="0"
+cposx=0
+cposy=0
+on="_on"
+off="_off"
+pf="empty"
+_verbose=""
+menucall="no"
+file_exist="0"
+loadprofile="no"
+s3cfg="$configdir/simplebuild.config"
 
 # Compiler settings
 cc_warn="-W -Wall -Wshadow -Wredundant-decls -Wstrict-prototypes -Wold-style-definition";
@@ -99,175 +113,272 @@ trunkurl="http://www.streamboard.tv/svn/oscam/trunk";
 [ -f "$workdir/oscamsource.url" ] && source "$workdir/oscamsource.url";
 
 #load translationlist
-cd "$tdir";langsupport=(*);
+cd "$tdir"
+langsupport=(*)
 
 #load functions and plugins
-if [ -d "$fdir" ];then
-	cd "$fdir";
-	x=(*);
-	for i in "${x[@]}";do
-		source "$i";
-		plugin=$(awk '/^#simplebuild_plugin/ {printf $2}' $i);
-		[ -z "$plugin" ] || s3opts+=($plugin);
-	done;
+if [ -d "$fdir" ]
+then
+	cd "$fdir"
+	x=(*)
+	for i in "${x[@]}"
+	do
+		source "$i"
+		plugin=$(awk '/^#simplebuild_plugin/ {printf $2}' $i)
+		[ -z "$plugin" ] || s3opts+=($plugin)
+	done
 else
-	echo "fail functions";
-fi;
+	echo "fail functions"
+fi
 
 #initialize simplebuild
-initializeANSI;	# load colors
-auto_langset;	# echo "info $txt_load_ok";
+initializeANSI	# load colors
+auto_langset	# echo "info $txt_load_ok";
 
 # check system #########################################################
-syscheck;[ ! "$sanity" == "1" ] && echo "sanity fail" && sleep 5 && bye;
+syscheck
+[ ! "$sanity" == "1" ] && echo "sanity fail" && sleep 5 && bye
 ########################################################################
 
-_create_native_profile;	# put native datas to toolchains and configs
-_get_config_con "$1";	# echo $addons;exit;
-_create_module_arrays;	# fill module arrays
-_fill_tc_array;			# get # AVAI_TCLIST # INST_TCLIST # MISS_TCLIST
-read_s3cfg;				# read simplebuild config
-_set_dialog_types;		# fill $gui vars
-_systype;				# check used uname
+_create_native_profile	# put native datas to toolchains and configs
+_get_config_con "$1"	# echo $addons;exit;
+_create_module_arrays	# fill module arrays
+_fill_tc_array			# get # AVAI_TCLIST # INST_TCLIST # MISS_TCLIST
+read_s3cfg				# read simplebuild config
+_set_dialog_types		# fill $gui vars
+_systype				# check used uname
 
-if [ ! -n "$1" ];then
-	[ "${s3cfg_vars[DIRECTMENU]}" == "1" ] && _dialog_checkout && exit;
-	_help; exit;
+if [ -z "$1" ]
+then
+	[ "${s3cfg_vars[DIRECTMENU]}" == "1" ] && _dialog_checkout && exit
+	_help
+	exit
+
 else
-	for e in "${s3opts[@]}";do
-		if [ "$e" == "$1" ];then
+	for e in "${s3opts[@]}"
+	do
+
+		if [ "$e" == "$1" ]
+		then
+
 			case $e in
+
 			fix_me|checkout|update_me|update_emu|svnrestore|enable_emu|upload_cam)
-				if [ ! -n "$2" ];then
-					eval "$e";
+				if [ ! -n "$2" ]
+				then
+					eval "$e"
 				else
-					eval "$e" "$2";
-				fi; exit;;
+					eval "$e" "$2"
+				fi
+				exit;;
+
 			menu)
-				if [ ! -n "$2" ];then
-					_dialog_checkout;
+				if [ ! -n "$2" ]
+				then
+					_dialog_checkout
 				else
-					_dialog_checkout "$2";
+					_dialog_checkout "$2"
 				fi;;
+
 			loadonly)
-				if [ ! -n "$2" ];then
-					_nl; clear; s3logo;
-					echo -e "$r_l\n  $txt_error: toolchain $txt_parameter $txt_missing\n""$w_l";
-					_help_toolchain; sleep 2; exit;
+				if [ ! -n "$2" ]
+				then
+					_nl
+					clear
+					s3logo
+					echo -e "$r_l\n  $txt_error: toolchain $txt_parameter $txt_missing\n""$w_l"
+					_help_toolchain
+					sleep 2
+					exit
 				else
-					for t in "${AVAI_TCLIST[@]}";do
-						_tmp="$2";
-						[ "$t" == "$2" ] && _load_toolchain "$2" && break;
-					done;
-					if [ -f "$tc_dl" ];then
-						echo -e "$p_l\n\n  toolchain for $_tmp loaded\n";
+					for t in "${AVAI_TCLIST[@]}"
+					do
+						_tmp="$2"
+						[ "$t" == "$2" ] && _load_toolchain "$2" && break
+					done
+					if [ -f "$tc_dl" ]
+					then
+						echo -e "$p_l\n\n  toolchain for $_tmp loaded\n"
 					else
-						_nl; clear; s3logo;
-						echo -e "$r_l  toolchain missing/error\n";
-					fi; exit;
+						_nl
+						clear
+						s3logo
+						printf "$r_l  toolchain missing/error\n"
+					fi
+					exit
 				fi;;
+
 			tccheck)
-				if [ ! -n "$2" ];then
-					_nl; clear; s3logo;
-					echo -e "$r_l\n  $txt_error: toolchain $txt_parameter $txt_missing\n""$w_l";
-					_help_toolchain;echo -e "$W"; sleep 2; exit;
+				if [ ! -n "$2" ]
+				then
+					_nl
+					clear
+					s3logo
+					printf "$r_l\n  $txt_error: toolchain $txt_parameter $txt_missing\n""$w_l"
+					_help_toolchain
+					printf "$W"
+					sleep 2
+					exit
 				else
-					for t in "${AVAI_TCLIST[@]}";do
-						[ "$t" == "$2" ] && _toolchain_check "$2" && break;
-					done;
-					_nl; clear; s3logo;
-					echo -e "$r_l\n  toolchain missing/error\n$w_l";
-					_help_toolchain;echo -e "$W"; sleep 2; exit;
+					for t in "${AVAI_TCLIST[@]}"
+					do
+						[ "$t" == "$2" ] && _toolchain_check "$2" && break
+					done
+					_nl
+					clear
+					s3logo
+					printf "$r_l\n  toolchain missing/error\n$w_l"
+					_help_toolchain
+					echo -e "$W"
+					sleep 2
+					exit
 				fi;;
+
 			tcrepair)
 				if [ ! -n "$2" ];then
-					_nl; clear; s3logo;
-					echo -e "$r_l\n  $txt_error: toolchain $txt_parameter $txt_missing\n""$w_l";
-					_help_toolchain;echo -e "$W"; sleep 2; exit;
+					_nl
+					clear
+					s3logo
+					printf "$r_l\n  $txt_error: toolchain $txt_parameter $txt_missing\n""$w_l"
+					_help_toolchain
+					printf "$W"
+					sleep 2
+					exit
 				else
-					_nl;clear;_toolchain_repair "$2";sleep 2;exit;
+					_nl
+					clear
+					_toolchain_repair "$2"
+					sleep 2
+					exit
 				fi;;
+
 			upload)
-				if [ ! -n "$2" ];then
-					_nl; clear; s3logo;
-					echo -e "$r_l\n  $txt_error: $txt_parameter $txt_missing""$w_l";
-					menucall="yes"; ssh_profiles;
+				if [ ! -n "$2" ]
+				then
+					_nl
+					clear
+					s3logo
+					echo -e "$r_l\n  $txt_error: $txt_parameter $txt_missing""$w_l"
+					menucall="yes"
+					ssh_profiles
 				else
-					upload_cam "$2";
-				fi; exit;;
+					upload_cam "$2"
+				fi
+				exit;;
+
 			syscheck)
-				syscheck silent $2; exit;;
+				syscheck silent $2
+				exit;;
+
 			tedit)
-				if [ -n "$2" ];then
-					for telement in ${INST_TCLIST[@]};do
-						if [ "$telement" == "$2" ];then
-							tedit $2; exit;
-						fi;
-					done;
-					clear; s3logo; echo -e $w_l"\n  $2 toolchain not installed\n"$W;
-				fi; exit;;
+				if [ -n "$2" ]
+				then
+					for telement in ${INST_TCLIST[@]}
+					do
+						if [ "$telement" == "$2" ]
+						then
+							tedit $2
+							exit
+						fi
+					done
+					clear
+					s3logo
+					printf "$w_l\n  $2 toolchain not installed\n"$W
+				fi
+				exit;;
+
 			help)
-				_help; exit;;
+				_help
+				exit;;
+
 			*)
 				shift && eval "$e" "$@"; #Remove the first command line argument and pass the remaining ones to the plugin
 				exit;;
-			esac;
-		fi;
-	done;
+			esac
 
-	for t in "${AVAI_TCLIST[@]}";do
-		if [ "$t" == "$1" ];then
-			if [ "${2:0:3}" == "-p=" ] || [ "${2:0:3}" == "-P=" ];then
-				if [ -f "$profdir/${2#*=}" ];then
-					pf=$(cat "$profdir/${2#*=}");
-					pf_name="${2#*=}";
-				fi;
-			fi;
-			if [ "${3:0:3}" == "-p=" ] || [ "${3:0:3}" == "-P=" ];then
-				if [ -f "$profdir/${2#*=}" ];then
-					pf=$(cat "$profdir/${2#*=}");
-					pf_name="${2#*=}";
-				fi;
-			fi;
-			if [ "${2:0:5}" == "-upx=" ] || [ "${2:0:5}" == "-UPX=" ];then
-				UPX=${2#*=};USE_vars[USE_COMPRESS]="USE_COMPRESS=1";
-			fi;
-			if [ "${3:0:5}" == "-upx=" ] || [ "${3:0:5}" == "-UPX=" ];then
-				UPX=${2#*=};USE_vars[USE_COMPRESS]="USE_COMPRESS=1";
-			fi;
+		fi
+	done
+
+	for t in "${AVAI_TCLIST[@]}"
+	do
+
+		if [ "$t" == "$1" ]
+		then
+
+			if [ "${2:0:3}" == "-p=" ] || [ "${2:0:3}" == "-P=" ]
+			then
+				if [ -f "$profdir/${2#*=}" ]
+				then
+					pf=$(cat "$profdir/${2#*=}")
+					pf_name="${2#*=}"
+				fi
+			fi
+
+			if [ "${3:0:3}" == "-p=" ] || [ "${3:0:3}" == "-P=" ]
+			then
+				if [ -f "$profdir/${2#*=}" ]
+				then
+					pf=$(cat "$profdir/${2#*=}")
+					pf_name="${2#*=}"
+				fi
+			fi
+
+			if [ "${2:0:5}" == "-upx=" ] || [ "${2:0:5}" == "-UPX=" ]
+			then
+				UPX=${2#*=};USE_vars[USE_COMPRESS]="USE_COMPRESS=1"
+			fi
+
+			if [ "${3:0:5}" == "-upx=" ] || [ "${3:0:5}" == "-UPX=" ]
+			then
+				UPX=${2#*=}
+				USE_vars[USE_COMPRESS]="USE_COMPRESS=1"
+			fi
+
 			[ "$pf" == "empty" ] && c_m_d="$*" || c_m_d="all_off $pf $*"; # set only active module with profiles
-			for cmd in $c_m_d;do
-				if [ "${cmd:0:3}" == "-c=" ] || [ "${cmd:0:3}" == "-C=" ];then
-					CUSTOM_CONFDIR="${cmd#*=}";
-				fi;
-				if [ "${cmd:0:5}" == "-upx=" ] || [ "${cmd:0:5}" == "-UPX=" ];then
-					UPX="${cmd#*=}";USE_vars[USE_COMPRESS]="USE_COMPRESS=1";
-				fi;
-				for cc in "${config_cases[@]}";
+			for cmd in $c_m_d
+			do
+
+				if [ "${cmd:0:3}" == "-c=" ] || [ "${cmd:0:3}" == "-C=" ]
+				then
+					CUSTOM_CONFDIR="${cmd#*=}"
+				fi
+
+				if [ "${cmd:0:5}" == "-upx=" ] || [ "${cmd:0:5}" == "-UPX=" ]
+				then
+					UPX="${cmd#*=}"
+					USE_vars[USE_COMPRESS]="USE_COMPRESS=1"
+				fi
+
+				for cc in "${config_cases[@]}"
 				do
-					[ "$cmd" == "$cc$on" ]  && all_cc+=($cc$on) && break;
-					[ "$cmd" == "$cc$off" ] && all_cc+=($cc$off) && break;
-				done;
-				for sm in "${SHORT_MODULENAMES[@]}";
+					[ "$cmd" == "$cc$on" ]  && all_cc+=($cc$on) && break
+					[ "$cmd" == "$cc$off" ] && all_cc+=($cc$off) && break
+				done
+
+				for sm in "${SHORT_MODULENAMES[@]}"
 				do
-					[ "$cmd" == "$sm" ]     && all_cc+=($(get_module_name "$sm")$on) && break;
-					[ "$cmd" == "$sm$off" ] && all_cc+=($(get_module_name "$sm")$off) && break;
-				done;
-				for uvar in "${!USE_vars[@]}";
+					[ "$cmd" == "$sm" ]     && all_cc+=($(get_module_name "$sm")$on) && break
+					[ "$cmd" == "$sm$off" ] && all_cc+=($(get_module_name "$sm")$off) && break
+				done
+
+				for uvar in "${!USE_vars[@]}"
 				do
-					[ "$cmd" == "$uvar" ]             && USE_vars[$uvar]="$uvar=1" && break;
-					[ "$cmd" == "$uvar$off" ] && USE_vars_disable[$uvar]="$uvar=1" && break;
-				done;
+					[ "$cmd" == "$uvar" ]             && USE_vars[$uvar]="$uvar=1" && break
+					[ "$cmd" == "$uvar$off" ] && USE_vars_disable[$uvar]="$uvar=1" && break
+				done
+
 				case $cmd in
 					OPENBOX)  OPENBOX=1;;
 					UFS916003) UFS916003=1;;
 					USE_VERBOSE) s3cfg_vars[USE_VERBOSE]=1;;
-				esac;
-			done;
-			_pre_build "$t";
-			exit;
-		fi;
-	done;
-	_help;
-fi;
-exit;
+				esac
+
+			done
+			_pre_build "$t"
+			exit
+		fi
+
+	done
+	_help
+fi
+exit
