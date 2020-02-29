@@ -11,7 +11,7 @@ _toolchain_build_menu(){
 		CONFIGURE)
 						_toolchain_config_menu;;
 		UPDATE)
-						tcupdate "$_toolchainname" "" "" "1";
+						tcupdate "$_toolchainname" "" "" "2";
 						_toolchain_build_menu;;
 		BACKUP)
 						tcupdate "-b" "$_toolchainname" "" "" "1";
