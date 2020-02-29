@@ -1,51 +1,75 @@
 #!/bin/bash
 
 auto_langset(){
-	langset="fail";
-	cd "$tdir";
-	langsupport=(*);
-	if [ -f "$configdir/force_lang" ];then
-		lng1=$(head -n 1 "$configdir/force_lang");
-		for lng in "${langsupport[@]}";do
-			if [ "$lng" == "$lng1" ];then
-				source "$tdir/$lng";
-				langset="ok";
-				return;
-			fi;
-		done;
-	fi;
-	for lng in "${langsupport[@]}";do
-		if [ "${LANG:0:2}" == "$lng" ];then
-			source "$tdir/$lng";
-			langset="ok";
-			return;
-		fi;
-	done;
-	if [ ! "$langset" == "ok" ];then
-		[ -f "$tdir/en" ] && source "$tdir/en";
-	fi;
-};
+	langset="fail"
+	cd "$tdir"
+	langsupport=(*)
+
+	if [ -f "$configdir/force_lang" ]
+	then
+		lng1=$(head -n 1 "$configdir/force_lang")
+		for lng in "${langsupport[@]}"
+		do
+
+			if [ "$lng" == "$lng1" ]
+			then
+				source "$tdir/$lng"
+				langset="ok"
+				return
+			fi
+
+		done
+	fi
+
+	for lng in "${langsupport[@]}"
+	do
+		if [ "${LANG:0:2}" == "$lng" ]
+		then
+			source "$tdir/$lng"
+			langset="ok"
+			return
+		fi
+	done
+
+	if [ ! "$langset" == "ok" ]
+	then
+		[ -f "$tdir/en" ] && source "$tdir/en"
+	fi
+}
+
 lang_select(){
-	lng="none";
-	[ -f "$configdir/force_lang" ] && lng=$(head -n 1 "$configdir/force_lang");
-	unset MENU_OPTIONS;COUNT=0;
-	for e in "${langsupport[@]}";do
-		if [ "$lng" == "none" ];then
-			[ "${LANG:0:2}" == "$e" ] && _stat="on" || _stat="off";
+	lng="none"
+	[ -f "$configdir/force_lang" ] && lng=$(head -n 1 "$configdir/force_lang")
+	
+	unset MENU_OPTIONS
+	COUNT=0
+
+	for e in "${langsupport[@]}"
+	do
+
+		if [ "$lng" == "none" ]
+		then
+			[ "${LANG:0:2}" == "$e" ] && _stat="on" || _stat="off"
 		else
-			[ "$lng" == "$e" ] && _stat="on" || _stat="off";
-		fi;
-		txt=$(head -3 "$tdir/$e" |tail -1);
-		MENU_OPTIONS+=($e $txt $_stat);counter;
-	done;
-	lng=$("$gui" "$st_" "$bt_" "$title_" --title "-[ lang set ...to edit... ]-" "$rl_" "...langset...to...edit..." "${COUNT+7}" 40 0 "${MENU_OPTIONS[@]}");
-	if [ ! "${LANG:0:2}" == "$lng" ];then
-		for lng1 in "${langsupport[@]}";do
-			if [ "$lng" == "$lng1" ];then
-				echo "$lng" >"$configdir/force_lang";
-			fi;
-		done;
+			[ "$lng" == "$e" ] && _stat="on" || _stat="off"
+		fi
+
+		txt=$(head -3 "$tdir/$e" |tail -1)
+		MENU_OPTIONS+=($e $txt $_stat)
+		counter
+	done
+
+	lng=$("$gui" "$st_" "$bt_" "$title_" --title "-[ lang set ...to edit... ]-" "$rl_" "...langset...to...edit..." "${COUNT+7}" 40 0 "${MENU_OPTIONS[@]}")
+	if [ ! "${LANG:0:2}" == "$lng" ]
+	then
+		for lng1 in "${langsupport[@]}"
+		do
+			if [ "$lng" == "$lng1" ]
+			then
+				echo "$lng" >"$configdir/force_lang"
+			fi
+		done
 	else
-		[ -f "$configdir/force_lang" ] && rm -rf "$configdir/force_lang";
-	fi;
-};
+		[ -f "$configdir/force_lang" ] && rm -rf "$configdir/force_lang"
+	fi
+}

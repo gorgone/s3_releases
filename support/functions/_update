@@ -1,70 +1,84 @@
 #!/bin/bash
 
 update_me(){
-	clear;s3logo;
-	local_revision=0;
-	online_revision=0;
-	source "$configdir/urls";
-	s3local="$dldir/s3_github";
-	echo -en "  s3_git CHECK:\n  -------------\n";
-	if [ -d "$s3local/.svn" ]; then
-		local_revision=$(gitrevision $s3local);
+	clear;s3logo
+	local_revision=0
+	online_revision=0
+	source "$configdir/urls"
+	s3local="$dldir/s3_github"
+	printf "  s3_git CHECK:\n  -------------\n"
+
+	if [ -d "$s3local/.svn" ]
+	then
+		local_revision=$(gitrevision $s3local)
 	fi
-	online_revision=$(gitrevision $s3url);
-	if [ ! $local_revision == $online_revision ]; then
-		echo -en "  update s3_git to\n  Local Revision: $online_revision\n";
-		svn -q checkout "$s3url" "$s3local";
-		cd "$s3local";
-		echo -en "  update all files ...\n\n";
-		yes | cp -rf ./s3 "$workdir/s3";
-		yes | cp -rf ./support/* "$workdir/support";
+
+	online_revision=$(gitrevision $s3url)
+	if [ ! $local_revision == $online_revision ]
+	then
+		printf "  update s3_git to\n  Local Revision: $online_revision\n"
+		svn -q checkout "$s3url" "$s3local"
+		cd "$s3local"
+		printf "  update all files ...\n\n"
+		yes | cp -rf ./s3 "$workdir/s3"
+		yes | cp -rf ./support/* "$workdir/support"
 	else
-		echo -en "  is up to date\n  Online Revision: $online_revision\n\n";
+		printf "  is up to date\n  Online Revision: $online_revision\n\n"
 	fi
-	sleep 1;
+	sleep 1
 }
 
 update_emu(){
-	clear;s3logo;
-	local_revision=0;
-	online_revision=0;
-	source "$configdir/urls";
-	emulocal="$dldir/emu_github";
-	echo -en "  emu_git CHECK:\n  --------------\n";
-	if [ -d "$emulocal/.svn" ]; then
-		local_revision=$(gitrevision $emulocal);
+	clear
+	s3logo
+	local_revision=0
+	online_revision=0
+	source "$configdir/urls"
+	emulocal="$dldir/emu_github"
+	printf "  emu_git CHECK:\n  --------------\n"
+
+	if [ -d "$emulocal/.svn" ]
+	then
+		local_revision=$(gitrevision $emulocal)
 	fi
-	online_revision=$(gitrevision $emuurl);
-	if [ ! $local_revision == $online_revision ]; then
-		echo -en "  update emu_git to\n  Local Revision: $online_revision\n";
-		svn -q checkout "$emuurl" "$emulocal";
+
+	online_revision=$(gitrevision $emuurl)
+	if [ ! $local_revision == $online_revision ]
+	then
+		printf "  update emu_git to\n  Local Revision: $online_revision\n"
+		svn -q checkout "$emuurl" "$emulocal"
 	else
-		echo -en "  is up to date\n  Online Revision: $online_revision\n";
+		printf "  is up to date\n  Online Revision: $online_revision\n"
 	fi
-	if [ -f "$emulocal/VERSION" ];then
-                echo -en "  EmuVersion: ";
-                grep '\$Version:' "$emulocal/VERSION" |cut -d " " -f 2;
-                echo -e "\n";
-        fi
-	sleep 1;
+	if [ -f "$emulocal/VERSION" ]
+	then
+		printf "  EmuVersion: "
+		grep '\$Version:' "$emulocal/VERSION" |cut -d " " -f 2
+		_nl
+	fi
+	sleep 1
 }
 
 fix_me(){
-	clear;s3logo;
-	source "$configdir/urls";
-	s3local="$dldir/s3_github";
-	emulocal="$dldir/emu_github";
-	if [ -d "$s3local" ];then
-		rm -rf $s3local;
+	clear
+	s3logo
+	source "$configdir/urls"
+	s3local="$dldir/s3_github"
+	emulocal="$dldir/emu_github"
+
+	if [ -d "$s3local" ]
+	then
+		rm -rf $s3local
 		update_me
 	else
-		update_me;
+		update_me
 	fi
-	if [ -d "$emulocal" ];then
-		rm -rf $emulocal;
-		update_emu;
+
+	if [ -d "$emulocal" ]
+	then
+		rm -rf $emulocal
+		update_emu
 	else
-		update_emu;
+		update_emu
 	fi
 }
-

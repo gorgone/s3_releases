@@ -1,55 +1,62 @@
 #!/bin/bash
 
 upload_cam(){
-	clear;
-	slogo;
-	FILENAME=$1;
+	clear
+	slogo
+	FILENAME=$1
 
-	if [ ! -f "$profdir/$FILENAME" ];then
-		echo -e "$r_l\n  $txt_error $FILENAME $txt_upload_cam1 $re_";
-		exit;
+	if [ ! -f "$profdir/$FILENAME" ]
+	then
+		printf "$r_l\n  $txt_error $FILENAME $txt_upload_cam1 $re_"
+		exit
 	else
-		echo -e "$w_l\n  CONFIG  : $g_l$FILENAME $txt_upload_cam2 $re_";
-	fi;
+		printf "$w_l\n  CONFIG  : $g_l$FILENAME $txt_upload_cam2 $re_"
+	fi
 
 #load data from config
-	source "$profdir/$FILENAME";
+	source "$profdir/$FILENAME"
 
 #find newest build by date for toolchain
-	cd "$bdir";
-	buildcamname="$(find . -type f \( -iname "*$toolchain*" ! -iname "*list_smargo" \) -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" " |sed 's@./@@g')";
-	cd "$workdir";
+	cd "$bdir"
+	buildcamname="$(find . -type f \( -iname "*$toolchain*" ! -iname "*list_smargo" \) -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" " |sed 's@./@@g')"
+	cd "$workdir"
 
 #output date from cam
-	if [ -f "$bdir/$buildcamname" ];then
-		echo -e "$w_l  CAMNAME : $y_l$buildcamname";
-		echo -en "$w_l  FILEDATE: "$(
-						stat -c %y "$bdir/$buildcamname" |awk '{print $1" "; printf substr($2,1,8)}');
-		echo -e "$w_l";
+	if [ -f "$bdir/$buildcamname" ]
+	then
+		printf "$w_l  CAMNAME : $y_l$buildcamname"
+		printf "$w_l  FILEDATE: "$(
+			stat -c %y "$bdir/$buildcamname" |awk '{print $1" "; printf substr($2,1,8)}'
+		)
+		printf "$w_l"
 	else
-		echo -e "$r_l\n  matching \$CAM not found in $bdir$re_";
-		exit;
-	fi;
-	echo -e "$p_l\n  $txt_LOAD  > $w_l$txt_to IP:$b_l$ip$w_l port:$b_l$port";
-	sshpass -p "$password" scp -P "$port" "$bdir/$buildcamname" "$loginname@$ip":/tmp;
+		printf "\n  matching \$CAM not found in $bdir$re_"
+		exit
+	fi
+
+	printf "$p_l\n  $txt_LOAD  > $w_l$txt_to IP:$b_l$ip$w_l port:$b_l$port"
+	sshpass -p "$password" scp -P "$port" "$bdir/$buildcamname" "$loginname@$ip":/tmp
 
 #replace target cam
-	if [ "$replace_target" == "y" ];then
-		echo -en "$p_l  REPLACE > $y_l$targetcam$re_";
+	if [ "$replace_target" == "y" ]
+	then
+		printf "$p_l  REPLACE > $y_l$targetcam$re_"
 		sshpass -p "$password" ssh -p "$port" -o StrictHostKeyChecking=no "$loginname@$ip" \
-		"cd /tmp;if [ -f \"$buildcamname\" ];then if [ -f \"$targetcam\" ];then if [ \"$backup_target\" == \"y\" ]; then cp -pf \"$targetcam\" \"$targetcam.backup\"; fi;mv -f \"$buildcamname\" \"$targetcam\";fi;fi;exit;";
-		echo -e "$g_l$txt_done!$re_";
-	fi;
+		"cd /tmp;if [ -f \"$buildcamname\" ];then if [ -f \"$targetcam\" ];then if [ \"$backup_target\" == \"y\" ]; then cp -pf \"$targetcam\" \"$targetcam.backup\"; fi;mv -f \"$buildcamname\" \"$targetcam\";fi;fi;exit;"
+		printf "$g_l$txt_done!$re_"
+	fi
 
 #stop target cam
-	if [ "$stop_target" == 'y' ];then
-		stop="killall -9 $(basename "$targetcam")";
-	fi;
+	if [ "$stop_target" == 'y' ]
+	then
+		stop="killall -9 $(basename "$targetcam")"
+	fi
 
 #remote command (example restart cam)
-	if [ ! "$remote_command" == "none" ];then
-		echo -e "$w_l  SSH COMMANDS $remote_command $y_l$txt_wait";
+	if [ ! "$remote_command" == "none" ]
+	then
+		printf "$w_l  SSH COMMANDS $remote_command $y_l$txt_wait"
 		# do remote commands
-		sshpass -p "$password" ssh -p "$port" -o StrictHostKeyChecking=no "$loginname@$ip" "$remote_command;";
-	fi;
-};
+		sshpass -p "$password" ssh -p "$port" -o StrictHostKeyChecking=no "$loginname@$ip" "$remote_command;"
+	fi
+}
