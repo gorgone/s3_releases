@@ -1,97 +1,138 @@
 #!/bin/bash
 
-get_patch(){ _get_patch; };
+get_patch(){ _get_patch; }
+
 _get_patch(){
-	cd $pdir;
-	[ -f patch.url ] && source patch.url;
-	clear;
-	echo -e $C;
-	ologo;
-	echo -e $WH;
-	[ -f $PATCHNAME ] && echo -e "$Y   old patch found\n  remove  $P$PATCHNAME" && rm -f $PATCHNAME;
-	echo -e $W"  load $PATCHNAME";
-	wget -q -O$PATCHNAME $PATCHURL;
-	[ -f $PATCHNAME ] && echo -e $G"   ok$W new $PATCHNAME loaded\n" || echo -e $R"   patch not found\n"$W;
-};
+	cd $pdir
+	[ -f patch.url ] && source patch.url
+	clear
+	printf $C
+	ologo
+	printf $WH;
+	[ -f $PATCHNAME ] && printf "$Y $PATCHNAME $txt_found\n $txt_delete $P$PATCHNAME" && rm -f $PATCHNAME
+	printf $W"\n $txt_load $PATCHNAME"
+
+	if [[ `wget -S --spider $PATCHURL  2>&1 | grep 'HTTP/1.1 200 OK'` ]]
+	then
+		wget -q -O$PATCHNAME $PATCHURL
+		[ -f $PATCHNAME ] && printf $G" ok$W\n\n"
+	else
+		printf $R"\n\n $PATCHURL\n\n >> $txt_not_found <<$W\n\n"
+	fi
+}
+
 _apply_menupatch(){
-	[ -f "$workdir/SVN-IS-PATCHED" ] && quicksvnrestore $_toolchainname 2>/dev/null;
-		cd "$pdir";
-			(if [ "$(ls -1 "$pdir"/*.patch 2>/dev/null | wc -l)" -gt "0" ];then
-				cd "$pdir";
-				unset patchlist;patchlist=`ls *.patch | sort -st '/' -k1,1`;
-				patchlog="$(mktemp)";
-				for e in ${patchlist[@]};do
-					_w="ok";
-					cd "$svndir";
-					echo "PATCH : apply $e";
-					patch -f -p0 < "$pdir/$e" >>"$patchlog" 2>/dev/null;
-					hunks=$(grep -c1 '^Hunk' "$patchlog");
-					fails=$(grep -c1 'hunks FAILED' "$patchlog");
-					if [ "$hunks" -gt "0" ];then
-						echo "PATCH : $hunks x HUNK for $e";
-						_w="hunk";
-					fi;
-					if [ "$fails" -gt "0" ];then
-						echo "PATCH : $fails x FAILS for $e";
-						_w="fail";
-					fi;
-				done;
+	[ -f "$workdir/SVN-IS-PATCHED" ] && quicksvnrestore $_toolchainname 2>/dev/null
+		cd "$pdir"
+			(if [ "$(ls -1 "$pdir"/*.patch 2>/dev/null | wc -l)" -gt "0" ]
+			then
+
+				cd "$pdir"
+				unset patchlist
+				patchlist=`ls *.patch | sort -st '/' -k1,1`
+				patchlog="$(mktemp)"
+
+				for e in ${patchlist[@]}
+				do
+
+					_w="ok"
+					cd "$svndir"
+					printf "PATCH : apply $e"
+					patch -f -p0 < "$pdir/$e" >>"$patchlog" 2>/dev/null
+					hunks=$(grep -c1 '^Hunk' "$patchlog")
+					fails=$(grep -c1 'hunks FAILED' "$patchlog")
+
+					if [ "$hunks" -gt "0" ]
+					then
+						printf "PATCH : $hunks x HUNK for $e"
+						_w="hunk"
+					fi
+
+					if [ "$fails" -gt "0" ]
+					then
+						printf "PATCH : $fails x FAILS for $e"
+						_w="fail"
+					fi
+
+				done
+
 				case $_w in
 					ok)
-							echo "PATCH : done all ok";
+							printf "PATCH : done all ok"
 							touch "$workdir/SVN-IS-PATCHED";;
 					hunk)
-							echo "PATCH : done with warnings save $e.log";
-							cat $patchlog >>"$ldir/$e.log";
-							ln -sf "$ldir/$e.log" "$workdir/lastpatch.log";
+							printf "PATCH : done with warnings save $e.log"
+							cp -f $patchlog "$ldir/$e.log"
+							ln -sf "$ldir/$e.log" "$workdir/lastpatch.log"
 							touch "$workdir/SVN-IS-PATCHED";;
 					fail)
-							echo "PATCH : break build save $e.log";
-							cat $patchlog >>"$ldir/$e.log";
-							ln -sf "$ldir/$e.log" "$workdir/lastpatch.log";
+							printf "PATCH : break build save $e.log"
+							cp -f $patchlog "$ldir/$e.log"
+							ln -sf "$ldir/$e.log" "$workdir/lastpatch.log"
 							touch "$workdir/SVN-IS-PATCHED";;
-				esac;
-				rm -rf "$patchlog";
-			fi;)|"$gui" "$st_" "$bt_" "$title_" "$pb_" 12 62;sleep 2;
-};
+				esac
+
+				rm -rf "$patchlog"
+			fi;)|"$gui" "$st_" "$bt_" "$title_" "$pb_" 12 62
+				sleep 2
+}
+
 _apply_consolepatch(){
-	if [ ! -f "$workdir/SVN-IS-PATCHED" ];then
-		cd "$pdir";
-		if [ "$(ls -1 "$pdir"/*.patch 2>/dev/null | wc -l)" -gt "0" ];then
-			unset patchlist;patchlist=`ls *.patch | sort -st '/' -k1,1`;
-			patchlog="$(mktemp)";
-			for e in ${patchlist[@]};do
-				_w=0;cd "$svndir";
-				echo -e "$y_l |     PATCH : apply $e";
-				patch -F 10 -f -p0 < "$pdir/$e" >>"$patchlog" 2>/dev/null;
-				hunks=$(grep -c1 "^Hunk" "$patchlog");
-				fails=$(grep -c1 "hunks FAILED" "$patchlog");
-				if [ "$hunks" -gt "0" ];then
-					echo -e "$y_l |     PATCH :$w_l $hunks x HUNK for $e";
-					_w=1;
-				fi;
-				if [ "$fails" -gt "0" ];then
-					echo -e  "$y_l |     PATCH :$r_n FAIL (breaking Build) = $fails";
-					echo -en "$w_l |   RESTORE :$c_w LAST SVN BACKUP in ";
-					for (( i=6; i>0; i--));do
-						sleep 1 & echo -en "$i\b";
-						wait;
-					done;
+	if [ ! -f "$workdir/SVN-IS-PATCHED" ]
+	then
+
+		cd "$pdir"
+		if [ "$(ls -1 "$pdir"/*.patch 2>/dev/null | wc -l)" -gt "0" ]
+		then
+
+			unset patchlist;patchlist=`ls *.patch | sort -st '/' -k1,1`
+			patchlog="$(mktemp)"
+			for e in ${patchlist[@]}
+			do
+
+				_w=0
+				cd "$svndir"
+				printf "$y_l\n |     PATCH : apply $e\n"
+				patch -F 10 -f -p0 < "$pdir/$e" >>"$patchlog" 2>/dev/null
+				hunks=$(grep -c1 "^Hunk" "$patchlog")
+				fails=$(grep -c1 "hunks FAILED" "$patchlog")
+
+				if [ "$hunks" -gt "0" ]
+				then
+					printf "$y_l\n |     PATCH :$w_l $hunks x HUNK for $e"
+					_w=1
+				fi
+
+				if [ "$fails" -gt "0" ]
+				then
+					printf "$y_l\n |     PATCH :$r_n FAIL (breaking Build) = $fails"
+					printf "$w_l\n |   RESTORE :$c_w LAST SVN BACKUP in "
+					for (( i=6; i>0; i--))
+					do
+						sleep 1 & echo -en "$i\b"
+						wait
+					done
 					svnrestore lastsvn;
-					exit;
-				fi;
+					exit
+				fi
+
 				cat $patchlog >"$ldir/$e.log";
 				ln -sf "$ldir/$e.log" "$workdir/lastpatch.log";
-			done;
-			rm -rf "$patchlog";
-			if [ "$_w" -gt "0" ];then echo -e "$y_l |     PATCH : done with warnings";
-				touch "$workdir/SVN-IS-PATCHED";
+			done
+
+			rm -rf "$patchlog"
+
+			if [ "$_w" -gt "0" ]
+			then
+				printf "$y_l\n |     PATCH : done with warnings"
+				touch  "$workdir/SVN-IS-PATCHED"
 			else
-				echo -e "$y_l |     PATCH :$g_l done all ok$rs_";
-				touch "$workdir/SVN-IS-PATCHED";
-			fi;
+				printf "$y_l\n |     PATCH :$g_l done all ok$rs_"
+				touch  "$workdir/SVN-IS-PATCHED"
+			fi
+
 		else
-			echo -en "$y_l |     PATCH : no patch found\n";
-		fi;
-	fi;
-};
+			printf "$y_l\n |     PATCH : no patch found\n"
+		fi
+	fi
+}

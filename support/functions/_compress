@@ -63,7 +63,7 @@ tar_cam(){
 
 	if [ -n $2 ]
 	then
-		echo -en "$y_n\n TAR -------->$w_l $1$g_l $txt_as$w_l $1.tar.gz$rs_"
+		printf "$y_n\n TAR -------->$w_l $1$g_l $txt_as$w_l $1.tar.gz$rs_"
 	fi
 
 	erg=$(tar zcf $1.tar.gz $1 $2)
@@ -79,7 +79,7 @@ tar_cam(){
 			printf "$c_l"" MOVE -------> $p_l$1.tar.gz $g_l$txt_to $y_n$workdir/archive$rs_\n\n"
 		else
 			mv -f "$1.tar.gz" "$adir"
-			echo -e "$c_l"" MOVE -------> $p_l$1.tar.gz $g_l$txt_to $y_n$workdir/archive$rs_\n\n"
+			printf "$c_l"" MOVE -------> $p_l$1.tar.gz $g_l$txt_to $y_n$workdir/archive$rs_\n\n"
 		fi
 
 	else

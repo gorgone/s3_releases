@@ -134,6 +134,8 @@ fi
 	then
 		if [ -f "$workdir/SVN-IS-PATCHED" ]
 		then
+			printf "$y_l\n |  $r_l WARNING : patch upon patch"
+			printf "$y_l\n |  $r_l UNCLEAN $y_l: restore SVN $G$txt_wait"
 			quicksvnrestore $_toolchainname
 			_apply_consolepatch
 		else
@@ -145,7 +147,7 @@ fi
 	[ ! "$pf" == "empty" ] && printf "$y_l |   PROFILE : $pf_name"
 
 #IF SVN is Patched
-	[ -f "$workdir/SVN-IS-PATCHED" ] && printf $w_l" | ISPATCHED :$P YES"
+	[ -f "$workdir/SVN-IS-PATCHED" ] && printf $y_l"\n | ISPATCHED :$P YES"
 
 #max cpu usage
 	if [ -f "$configdir/max_cpus" ]
