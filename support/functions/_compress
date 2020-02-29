@@ -76,10 +76,10 @@ tar_cam(){
 		then
 			rm -rf "$adir/$1.tar.gz"
 			mv -f "$1.tar.gz" "$adir"
-			printf "$c_l"" MOVE -------> $p_l$1.tar.gz $g_l$txt_to $y_n$workdir/archive\n$rs_"
+			printf "$c_l"" MOVE -------> $p_l$1.tar.gz $g_l$txt_to $y_n$workdir/archive$rs_\n\n"
 		else
 			mv -f "$1.tar.gz" "$adir"
-			echo -e "$c_l"" MOVE -------> $p_l$1.tar.gz $g_l$txt_to $y_n$workdir/archive\n$rs_"
+			echo -e "$c_l"" MOVE -------> $p_l$1.tar.gz $g_l$txt_to $y_n$workdir/archive$rs_\n\n"
 		fi
 
 	else
