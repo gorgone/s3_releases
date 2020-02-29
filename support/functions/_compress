@@ -29,12 +29,9 @@ compress_cam_gui(){
 	erg=$(upx "$upx_c" "$1" |grep oscam |awk '{print $1" "$3" "$4 }')
 	e1="$(echo "$erg"| awk '{printf("%4.2f k\n", $1 /1024)}')"
 	e2="$(echo "$erg"| awk '{printf("%4.2fk\n", $2 /1024)}')"
-	e3="$(echo "$erg"| awk '{print $3}')"
+	e3="$(echo "$erg"| awk '{print $3}')\n"
 
-	echo -en "
-	$txt_compress1\t= $e1
-	$txt_compress2\t= $e2
-	$txt_compress3\t= $e3"
+	echo -en "\n$txt_compress1\t= $e1\n$txt_compress2\t= $e2\n$txt_compress3\t= $e3"
 }
 
 tar_cam_gui(){
@@ -43,18 +40,18 @@ tar_cam_gui(){
 
 	if [ -f "$1.tar.gz" ]
 	then
-		printf "\n $1.tar.gz\n created\n"
+		printf "\n$1.tar.gz\ncreated\n"
 		if [ -f "$adir/$1.tar.gz" ]
 		then
 			rm -rf "$adir/$1.tar.gz"
 			mv -f "$1.tar.gz" "$adir"
-			printf "\n $1.tar.gz\n $txt_to\n $workdir/archive\n"
+			printf "\n$1.tar.gz\n$txt_to\n$workdir/archive\n"
 		else
 			mv -f "$1.tar.gz" "$adir"
-			printf "\n $1.tar.gz\n $txt_to\n $workdir/archive\n"
+			printf "\n$1.tar.gz\n$txt_to\n$workdir/archive\n"
 		fi
 	else
-		printf "\nerror\n no $1.tar.gz\n created\n"
+		printf "\nerror\nno $1.tar.gz\ncreated\n"
 	fi
 }
 

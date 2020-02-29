@@ -115,7 +115,7 @@ _gui_build(){
 	fi
 
 #show buildtime
-	printf "\n |  TIME  >\t[ $txt_buildtime $((Tcalc / 60)) min(s) $((Tcalc % 60)) secs ]"| tee -a "$ldir/$log_name"
+	printf "\n |  TIME  >\t[ $txt_buildtime $((Tcalc / 60)) min(s) $((Tcalc % 60)) secs ]\n"| tee -a "$ldir/$log_name"
 	sleep 1
 
 #remove debug binary
