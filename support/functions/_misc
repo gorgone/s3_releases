@@ -581,19 +581,19 @@ save_config(){
 	done
 
 	[ -f "$menudir/$_toolchainname.save" ] && rm -rf "$menudir/$_toolchainname.save"
-	printf "enabled=\"${enabled[*]}\""  >"$menudir/$_toolchainname.save"
-	printf "disabled=\"${disabled[*]}\"">>"$menudir/$_toolchainname.save"
+	printf "enabled=\"${enabled[*]}\"\n"  >"$menudir/$_toolchainname.save"
+	printf "disabled=\"${disabled[*]}\"\n">>"$menudir/$_toolchainname.save"
 	if [ "$stapi_allowed" == "1" ]
 	then
 		if [ "${#stapivar}" -gt "15" ]
 		then
-			printf "stapivar=\"$stapivar\"">>"$menudir/$_toolchainname.save"
-			printf "usevars=\"$usevars $addstapi\"" >>"$menudir/$_toolchainname.save"
+			printf "stapivar=\"$stapivar\"\n">>"$menudir/$_toolchainname.save"
+			printf "usevars=\"$usevars $addstapi\"\n" >>"$menudir/$_toolchainname.save"
 		else
-			printf "usevars=\"$usevars\"" >>"$menudir/$_toolchainname.save"
+			printf "usevars=\"$usevars\"\n" >>"$menudir/$_toolchainname.save"
 		fi
 	else
-		printf "usevars=\"$usevars\"" >>"$menudir/$_toolchainname.save"
+		printf "usevars=\"$usevars\"\n" >>"$menudir/$_toolchainname.save"
 	fi
 };
 
