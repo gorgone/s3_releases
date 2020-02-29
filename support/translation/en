@@ -36,6 +36,7 @@ txt_too_old='(too old or not supported)'
 txt_selected='selected'
 txt_update='now updating'
 txt_tc="Toolchain"
+txt_ssh_profiles="SSH $txt_profiles"
 
 # menu txt
 txt_start_menu='Main menu'

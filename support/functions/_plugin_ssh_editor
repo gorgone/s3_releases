@@ -3,21 +3,22 @@
 #simplebuild_plugin ssh_editor
 
 ssh_editor(){
-if [ ! -n "$1" ];
-then
-	loginname="$(whoami)";
-	password="$(whoami |rev)";
-	ip="192.168.1.";
-	port="22";
-	replace_target="y";
-	stop_target="y";
-	targetcam="/usr/bin/oscam_unstable";
-	toolchain="openpli40";
-	remote_command="/usr/bin/oscam_unstable -b -r 2 -c /etc/tuxbox/config";
-else
-	[ -f "$profdir/$1" ] && source "$profdir/$1";
-fi;
-i=0;
+	if [ ! -n "$1" ]
+	then
+		loginname="$(whoami)"
+		password="$(whoami |rev)"
+		ip="192.168.1."
+		port="22"
+		replace_target="y"
+		stop_target="y"
+		targetcam="/usr/bin/oscam_unstable"
+		toolchain="dream_one"
+		remote_command="/usr/bin/oscam_unstable -b -r 2 -c /etc/tuxbox/config"
+	else
+		[ -f "$profdir/$1" ] && source "$profdir/$1"
+	fi
+
+i=0
 config_parts=$($gui $st_ --title "-[ SSH Transfer Setup ]-" --form " " 15 65 8 \
 "loginname      :" 1 1 "$loginname"		1 18 40 39 \
 "password       :" 2 1 "$password"		2 18 40 39 \
@@ -25,45 +26,71 @@ config_parts=$($gui $st_ --title "-[ SSH Transfer Setup ]-" --form " " 15 65 8 \
 "port           :" 4 1 "$port"			4 18  6  5 \
 "toolchain      :" 5 1 "$toolchain"		5 18 40 39 \
 "targetcam      :" 6 1 "$targetcam"		6 18 40 39 \
-"replace_target :" 7 1 "$replace_target"	7 18  1  1 \
-"stop_target    :" 8 1 "$stop_target"		8 18  1  1 )
-return_value=$?;[ "$return_value" == "1" ] && bye;[ ! "$return_value" == "0" ] && ssh_editor;
-remote_command_new=$($gui $st_ --title " -[ Remote Commands ]- " --inputbox '' 7 60 "$remote_command");
-return_value=$?;[ "$return_value" == "1" ] && bye;[ ! "$return_value" == "0" ] && ssh_editor;
-config_file_name=$($gui $st_ --title " -[ $txt_ssh_profiles $txt_name ]- " --inputbox "$txt_ssh_profiles $txt_name $txt_example_name" 8 60 $(echo $toolchain| rev));
-return_value=$?;[ "$return_value" == "1" ] && bye;[ ! "$return_value" == "0" ] && ssh_editor;[ "${#config_file_name}" -lt "1" ] && ssh_editor;
-for e in $config_parts;
-do
-	case $i in
-		0) echo "loginname=\"$e\""	 >"$profdir/$config_file_name.ssh";;
-		1) echo "password=\"$e\""	>>"$profdir/$config_file_name.ssh";;
-		2) echo "ip=\"$e\""		>>"$profdir/$config_file_name.ssh";;
-		3) echo "port=\"$e\""		>>"$profdir/$config_file_name.ssh";;
-		4) echo "toolchain=\"$e\""	>>"$profdir/$config_file_name.ssh";;
-		5) echo "targetcam=\"$e\""	>>"$profdir/$config_file_name.ssh";;
-		6) echo "replace_target=\"$e\""	>>"$profdir/$config_file_name.ssh";;
-		7) echo "stop_target=\"$e\""	>>"$profdir/$config_file_name.ssh";;
-	esac;
-	((i++));
-done
-echo "remote_command=\"$remote_command_new\""	>>"$profdir/$config_file_name.ssh";_list_ssh_profiles;};
+"replace_target :" 7 1 "$replace_target"	7 18  2  2 \
+"stop_target    :" 8 1 "$stop_target"		8 18  2  2 )
 
-ssh_profiles(){ _list_ssh_profiles;exit;};
-_list_ssh_profiles(){ cd $profdir;[ ! $menucall == "yes" ] && clear && echo -e $c_l && ologo;
-if [ "$(ls -A $profdir/*.ssh 2>/dev/null)" ];
-then
-	sshprofiles=(*.ssh);
-	echo -e $y_l"\n  $txt_ssh_profiles $txt_found $txt_for ( ./$(basename $0) upload name.ssh )";
-	echo -e   $w_l"  =================================================\n";
-	i=0;
-	for e in ${sshprofiles[@]};
-	do
-		((i++));
-		echo -e $w_l"  ($i) > $e";
-	done;
-else
-	echo -e $y_l"\n  $txt_ssh_profiles $txt_found $txt_for ( ./$(basename $0) upload name.ssh )";
-	echo -e   $w_l"  =================================================\n";
-	echo -e $r_l"  > $txt_error: $w_l$txt_ssh_profiles $txt_not_found";
-fi;
-echo -e "\n$rs_";};
+return_value=$?
+[ "$return_value" == "1" ] && bye
+[ ! "$return_value" == "0" ] && ssh_editor
+
+remote_command_new=$(
+$gui $st_ --title " -[ Remote Commands ]- " --inputbox '' 7 60 "$remote_command")
+return_value=$?
+[ "$return_value" == "1" ] && bye
+[ ! "$return_value" == "0" ] && ssh_editor
+
+config_file_name=$(
+$gui $st_ --title " -[ $txt_ssh_profiles $txt_name ]- " --inputbox "$txt_ssh_profiles $txt_name $txt_example_name" 8 60 $(echo $toolchain| rev))
+
+return_value=$?;
+[ "$return_value" == "1" ] && bye
+[ ! "$return_value" == "0" ] && ssh_editor
+[ "${#config_file_name}" -lt "1" ] && ssh_editor
+
+for e in $config_parts
+do
+
+	case $i in
+		0) printf "loginname=\"$e\"\n"		 >"$profdir/$config_file_name.ssh";;
+		1) printf "password=\"$e\"\n"		>>"$profdir/$config_file_name.ssh";;
+		2) printf "ip=\"$e\"\n"				>>"$profdir/$config_file_name.ssh";;
+		3) printf "port=\"$e\"\n"			>>"$profdir/$config_file_name.ssh";;
+		4) printf "toolchain=\"$e\"\n"		>>"$profdir/$config_file_name.ssh";;
+		5) printf "targetcam=\"$e\"\n"		>>"$profdir/$config_file_name.ssh";;
+		6) printf "replace_target=\"$e\"\n"	>>"$profdir/$config_file_name.ssh";;
+		7) printf "stop_target=\"$e\"\n"	>>"$profdir/$config_file_name.ssh";;
+	esac
+
+((i++))
+done
+
+printf "remote_command=\"$remote_command_new\"\n" >>"$profdir/$config_file_name.ssh"
+_list_ssh_profiles
+}
+
+ssh_profiles(){
+	_list_ssh_profiles
+	exit
+}
+
+_list_ssh_profiles(){
+	cd $profdir
+	[ ! $menucall == "yes" ] && clear && printf $c_l && ologo
+	if [ "$(ls -A $profdir/*.ssh 2>/dev/null)" ]
+	then
+		sshprofiles=(*.ssh)
+		printf $y_l"\n  $txt_ssh_profiles $txt_found $txt_for ( ./$(basename $0) upload name.ssh )\n"
+		printf   $w_l"  =================================================\n"
+		i=0
+		for e in ${sshprofiles[@]}
+		do
+			((i++));
+			printf $w_l"  ($i) > $e\n"
+		done
+	else
+		printf $y_l"\n  $txt_ssh_profiles $txt_found $txt_for ( ./$(basename $0) upload name.ssh )";
+		printf $w_l"  =================================================\n";
+		printf $r_l"  > $txt_error: $w_l$txt_ssh_profiles $txt_not_found";
+	fi
+	printf "\n$rs_"
+}
