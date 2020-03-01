@@ -96,6 +96,7 @@ _toolchain_main_menu(){
 		do
 			if [ ! "$i" == "native" ]
 			then
+				unset _self_build
 				source "$tccfgdir/$i"
 				if [ "$systype" == "ok" ]
 				then
