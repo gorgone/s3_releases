@@ -36,7 +36,7 @@ _fill_tc_array(){
 		MISS_TCLIST=(
 		$(for el in $(diff_array AVAI_TCLIST[@] INST_TCLIST[@])
 		do
-			printf "$el\n"
+			echo "$el"
 		done |sort)
 		)
 	fi
