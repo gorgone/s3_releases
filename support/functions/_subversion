@@ -139,8 +139,13 @@ svnpatch(){
 			for p in "${patchlist[@]}"
 			do
 				echo -e $WH"\n\n    -> $p <-\n"$W
+				if _streamboard_patch "$pdir/$p"; then
+					SKIPPATHS=-p0
+				else
+					SKIPPATHS=-p1
+				fi
 				sleep 1
-				patch -d$svndir/ -p1 < "$pdir/$p" |sed -e "s/^patching file/$G patching > $WH/g;s/^Hunk/$P Hunk     > $Y/g;s/FAILED/$R FAILED/g; ;s/-- saving/$Y -- saving/g;"
+				patch -d$svndir/ $SKIPPATHS < "$pdir/$p" |sed -e "s/^patching file/$G patching > $WH/g;s/^Hunk/$P Hunk     > $Y/g;s/FAILED/$R FAILED/g; ;s/-- saving/$Y -- saving/g;"
 			done
 		else
 			printf $WH"    $txt_no patch $txt_found"
