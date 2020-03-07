@@ -77,6 +77,21 @@ _apply_menupatch(){
 				sleep 2
 }
 
+_checkpatch(){
+	files_to_patch=$(grep "^+++ " -i $pdir/$1 | awk '{print $2}' | sort | uniq)
+
+	for fil in ${files_to_patch[@]}
+	do
+
+		if [ ! -f "$svndir/$fil" ]
+		then
+			fil_n=$(sed 's@^[^/]*/@@g' <<<"$fil")
+			sed -i "s@+++ $fil@+++ $fil_n@g" "$pdir/$1"
+		fi
+
+	done
+}
+
 _apply_consolepatch(){
 	if [ ! -f "$workdir/SVN-IS-PATCHED" ]
 	then
@@ -90,9 +105,11 @@ _apply_consolepatch(){
 			for e in ${patchlist[@]}
 			do
 
+				_checkpatch $e
+
 				_w=0
 				cd "$svndir"
-				printf "$y_l\n |     PATCH : apply $e\n"
+				printf "$y_l\n |     PATCH : apply $e"
 				patch -F 10 -f -p0 < "$pdir/$e" >>"$patchlog" 2>/dev/null
 				hunks=$(grep -c1 "^Hunk" "$patchlog")
 				fails=$(grep -c1 "hunks FAILED" "$patchlog")

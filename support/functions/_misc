@@ -89,15 +89,15 @@ _generate_oscam_name(){
 }
 e_readers(){
 	silent=$("$svndir/config.sh" -s readers)
-	printf ${silent//READER_/}
+	echo ${silent//READER_/}
 }
 e_protocols() {
 	silent=$("$svndir/config.sh" -s protocols)
-	printf ${silent//MODULE_/}
+	echo ${silent//MODULE_/}
 }
 e_card_readers(){
 	silent=$("$svndir/config.sh" -s card_readers)
-	printf ${silent//CARDREADER_/}
+	echo ${silent//CARDREADER_/}
 }
 e_addons(){
 	"$svndir/config.sh" -s addons |sed 's/WEBIF_//g;s/WITH_//g;s/MODULE_//g;s/CS_//g;s/HAVE_//g;s/_CHARSETS//g;s/CW_CYCLE_CHECK/CWCC/g;s/SUPPORT//g'
