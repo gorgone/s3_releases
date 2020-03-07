@@ -30,7 +30,7 @@ _save_profile(){
 	then
 		source "$menudir/$_toolchainname.save"
 		input=$("$gui" "$st_" "$bt_" "$title_" --title " -[ $1 Toolchain ]- " $ip_ "\n SAVE PROFILE\n" 0 0 "$_toolchainname")
-		printf $enabled $usevars | sed -e 's/CARDREADER_//g;s/READER_//g;s/MODULE_//g;s/HAVE_//g;s/WEBIF_//g;s/WITH_//g;s/CS_//g;s/_CHARSETS//g;s/CW_CYCLE_CHECK/CWCC/g;s/SUPPORT//g;' >"$profdir/$input.profile"
+		echo $enabled $usevars | sed -e 's/CARDREADER_//g;s/READER_//g;s/MODULE_//g;s/HAVE_//g;s/WEBIF_//g;s/WITH_//g;s/CS_//g;s/_CHARSETS//g;s/CW_CYCLE_CHECK/CWCC/g;s/SUPPORT//g;' >"$profdir/$input.profile"
 	fi
 }
 
