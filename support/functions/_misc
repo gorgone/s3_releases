@@ -77,14 +77,20 @@ _generate_oscam_name(){
 	[ "$(./config.sh --enabled WEBIF)" == Y ] && echo -webif || printf ''; );_ssl=$(
 	[ "$(./config.sh --enabled WITH_SSL)" == Y ] && echo -ssl || printf ''; );_emu=$(
 	[ "$(./config.sh --enabled WITH_EMU)" == Y ] && echo -emu$(./config.sh --emu-version) || printf ''; );_ipv6=$(
-	[ "$(./config.sh --enabled IPV6SUPPORT)" == Y ] && echo -ipv6 || printf ''; )
+	[ "$(./config.sh --enabled IPV6SUPPORT)" == N ] && echo -n -ipv4only || printf ''; )
 	[ "${USE_vars[USE_COMPRESS]}" == "USE_COMPRESS=1" ] && _upx="-upx" || _upx=''
 	[ "$1" == "native" ] && _b_name="$(hostname)" || _b_name="$1"
+	$(USEGIT) && PREFIX="git" || PREFIX="svn"
+	VARIANT="trunk"
+	$(echo $trunkurl | grep -q "modern") && VARIANT="modern"
+	$(echo $trunkurl | grep -q "smod") && VARIANT="smod"
+	CAM="oscam-"
+	$(echo $trunkurl | grep -q "ncam") && CAM="ncam-" && VARIANT=""
 	if [ "${s3cfg_vars[ADD_PROFILE_NAME]}" == "0" ] || [ $pf_name == "not_set" ]
 	then
-		oscam_name="oscam-svn$(REVISION)-$_b_name$_webif$_dvbapi$_ssl$_usb$_pcsc$_stapi$_stapi5$_emu$_ipv6$_upx"
+		oscam_name="${CAM}${VARIANT}-${PREFIX}$(REVISION)-$_b_name$_webif$_dvbapi$_ssl$_usb$_pcsc$_stapi$_stapi5$_emu$_ipv6$_upx";
 	else
-		oscam_name="oscam-svn$(REVISION)-${pf_name%.*}";
+		oscam_name="${CAM}${VARIANT}-${PREFIX}$(REVISION)-${pf_name%.*}";
 	fi
 }
 e_readers(){

@@ -37,7 +37,7 @@ txt_tc="Toolchain      ";
 txt_start_menu='Главно меню';
 txt_remove_menu='Премахни toolchain';
 txt_add_menu='Добави toolchain';
-txt_main_revision="\n локалната SVN ревизия е : r";
+txt_main_revision="\n локална $(REPO) ревизия е : r";
 
 # help txt
 txt_help1="започнете с"
@@ -45,8 +45,8 @@ txt_help2="Параметрите на командния ред са"
 txt_help3="[ENTER] за продължаване..."
 
 # firstmenu ################################################
-txt_firstmenu_continue="продължи с локалния SVN";
-   txt_firstmenu_chose="зареди различен SVN (7000+)";
+txt_firstmenu_continue="продължи с локалния $(REPO)";
+   txt_firstmenu_chose="зареди различен $(REPO) (7000+)";
    txt_firstmenu_cedit="стартирай конфигурационния редактор";
    txt_firstmenu_tcupdate="стартирай опресняване на toolchain"; 
     txt_firstmenu_lang="ръчен избор на системен език";
@@ -88,10 +88,10 @@ txt_menu_back="обратно към меню toolchain";
 
 # _dialog_checkout
 txt_verify_syscheck='проверявам системата:';
-     txt_verify_svn='проверявам съществуващия SVN:';
-     txt_update_svn="$txt_update SVN:";
-    txt_prepare_svn="подготвям SVN checkout:";
-         txt_latest="последен SVN";
+     txt_verify_svn='проверявам съществуващия '$(REPO)':';
+     txt_update_svn="$txt_update $(REPO):";
+    txt_prepare_svn="подготвям $(REPO) checkout:";
+         txt_latest="последен $(REPO)";
 
 # _load_profile ###########################################
   txt_select_profile_title="налични профили";

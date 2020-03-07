@@ -47,7 +47,7 @@ txt_tc="Toolchain";
 txt_start_menu='Ana menü'; 
 txt_remove_menu="$txt_tc kaldır"; 
 txt_add_menu="$txt_tc ekle"; 
-txt_main_revision="\n yerel SVN revizyonu : r";
+txt_main_revision="\n yerel $(REPO) revizyonu : r";
 
 # help txt 
 txt_help1="ile başla" 
@@ -55,8 +55,8 @@ txt_help2="komut satırıyla başlayın Parametreler"
 txt_help3="[ENTER] ile devam eder ..." 
 
 # firstmenu #################### ########################### 
-txt_firstmenu_continue="yerel SVN ile devam et";
-   txt_firstmenu_chose="Farklı bir SVN yükle (7000+)";
+txt_firstmenu_continue="yerel $(REPO) ile devam et";
+   txt_firstmenu_chose="Farklı bir $(REPO) yükle (7000+)";
    txt_firstmenu_cedit="yapılandırma düzenleyicisini başlat"; 
     txt_firstmenu_lang="sistem dili seç"; 
     txt_firstmenu_exit="Simplebuild'i kapat"; 
@@ -99,10 +99,10 @@ txt_menu_back="$txt_tc menüsüne geri dön";
 
 # _dialog_checkout 
 txt_verify_syscheck="sistemi kontrol et          :";
-     txt_verify_svn="mevcut SVN'yi kontrol et    :";
-     txt_update_svn="$txt_update SVN           :";
-    txt_prepare_svn="SVN ödemesini hazırla    :";
-         txt_latest="en son SVN"; 
+     txt_verify_svn="mevcut $(REPO)'yi kontrol et    :";
+     txt_update_svn="$txt_update $(REPO)           :";
+    txt_prepare_svn="$(REPO) ödemesini hazırla    :";
+         txt_latest="en son $(REPO)"; 
 
 # _load_profile ############################################ 
   txt_select_profile_title="kullanılabilir profiller "; 

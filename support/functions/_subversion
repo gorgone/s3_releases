@@ -16,29 +16,29 @@ checkout(){
 		printf "$p_l\n  $txt_no oscam-svn $txt_found\n$re_"
 	fi
 
-	printf "$w_l  SVN TrunkURL  : $g_l$trunkurl$re_"
-	[ ! -z "$1" ] && [ $(($1)) -gt 6999 ] && opt_="-r$1" && mac_="($txt_selected)" || opt_=''
+	printf "$w_l  $(REPO) TrunkURL  : $g_l$trunkurl$re_"
+	[ ! -z "$1" ] && [ $(($1)) -gt 6999 ] && opt_="-r$1" && mac_="($txt_selected)" || opt_='';
 
-	printf "\n$w_l  SVN FileCount : "
-	svn info -R "$trunkurl" |grep '^URL' |uniq |wc -l >"$fc1"
+	printf "\n$w_l  $(REPO) FileCount : "
+	svn ls -R "$trunkurl" 2>/dev/null | wc -l >"$fc1"
 	n=$(cat "$fc1")
 	printf "$g_l""$txt_found $n"
-	printf "\n$w_l  SVN checkout  : "
+	printf "\n$w_l  $(REPO) checkout  : "
 
 	while read line filename
 	do
-		counter=$(( 100*(++i)/n))
-		tput cup 10 18
-		[ "$counter" -lt "100" ] && echo -en "$g_l""$counter%$re_" || echo -e "$g_l""100%$re_"
-	done < <( svn co "$trunkurl" $opt_ "$svndir" |sed "s|$svndir/||g")
+		counter=$(( 100*(++i)/n));
+		tput cup 11 18;
+		[ "$counter" -lt "100" ] && echo -en "$g_l""$counter%$re_" || echo -en "$g_l""100%$re_";
+	done < <( $(USEGIT) && git clone "$trunkurl" "$svndir";
+                  $(USEGIT) || svn co "$trunkurl" $opt_ "$svndir" $_rev| sed "s@$svndir@@g"| awk '{print $2}');
 
 	tput cup 10 18;
 	echo -e "$g_l""100%$re_"
-
 	if [ -f "$svndir/config.sh" ]
 	then
 		tput cup 11 0;
-		printf "$w_l  SVN Revision  :$y_l $("$svndir/config.sh" -r) $b_l$mac_$re_\n$w_l  SVN UserPath  :$y_l $svndir"
+		printf "$w_l $(REPO) Revision  :$y_l $("$svndir/config.sh" -r) $b_l$mac_$re_\n$w_l  $(REPO) UserPath  :$y_l $svndir"
 	fi
 
 	[ -f "$svndir/config.h" ]&& reset_="$("$svndir/config.sh" -R)"
@@ -53,7 +53,6 @@ svnrestore(){
 	clear
 	echo -en "$c_l"
 	ologo
-
 	if [ "$1" == "list" ]
 	then
 		cd "$bsvn"
@@ -84,7 +83,7 @@ svnrestore(){
 	fi
 
 	untarsvn $1
-	[ -f "$svndir/config.h" ]&& printf "$w_l""  SVN Revision  : $y_l""$("$svndir/config.sh" -r) restored\n\n$re_"
+	[ -f "$svndir/config.h" ]&& printf "$w_l""  $(REPO) Revision  : $y_l""$("$svndir/config.sh" -r) restored\n\n$re_"
 	[ -L "$workdir/lastbuild.log" ]&& rm "$workdir/lastbuild.log";
 	[ -L "$workdir/lastpatch.log" ]&& rm "$workdir/lastpatch.log";
 	[ -f "$workdir/SVN-IS-PATCHED" ] && rm -f "$workdir/SVN-IS-PATCHED";
@@ -109,13 +108,13 @@ svnup(){
 		return
 	fi
 
-	printf "\n$w_l  SVN TrunkURL  : $g_l""$trunkurl""$re_"
+	printf "\n$w_l  $(REPO) TrunkURL  : $g_l""$trunkurl""$re_"
 	svn co "$trunkurl" "$svndir" -q
 
 	if [ -f "$svndir/config.sh" ]
 	then
 		tput cup 10 2
-		printf "\n$w_l  SVN Revision  : ""$y_l$("$svndir/config.sh" -r) $b_l$mac_$re_\n$w_l  SVN UserPath  : $y_l""$svndir\n$re_"
+		printf "\n$w_l  $(REPO) Revision  : ""$y_l$("$svndir/config.sh" -r) $b_l$mac_$re_\n$w_l  $(REPO) UserPath  : $y_l""$svndir\n$re_"
 	fi
 
 	if [ -f "$svndir/config.h" ]
@@ -141,7 +140,7 @@ svnpatch(){
 			do
 				echo -e $WH"\n\n    -> $p <-\n"$W
 				sleep 1
-				patch -d$svndir/ -p0 < "$pdir/$p" |sed -e "s/^patching file/$G patching > $WH/g;s/^Hunk/$P Hunk     > $Y/g;s/FAILED/$R FAILED/g; ;s/-- saving/$Y -- saving/g;"
+				patch -d$svndir/ -p1 < "$pdir/$p" |sed -e "s/^patching file/$G patching > $WH/g;s/^Hunk/$P Hunk     > $Y/g;s/FAILED/$R FAILED/g; ;s/-- saving/$Y -- saving/g;"
 			done
 		else
 			printf $WH"    $txt_no patch $txt_found"
@@ -170,7 +169,8 @@ _dialog_checkout(){
 			sleep 1
 			printf " $txt_update_svn $txt_wait\n"
 			cd "$svndir"
-			svn -q update
+			$(USEGIT) && git pull -q
+			$(USEGIT) || svn -q update
 			echo 1 >"$upc"
 			sleep 1
 		fi
@@ -222,14 +222,15 @@ _dialog_checkout1(){
 	fi
 	(printf "$txt_prepare_svn $txt_wait";)| "$gui" "$st_" "$bt_" "$title_" "$pb_" 3 55
 	nnn="$(svn info $_rev -R "$trunkurl" |grep "^URL: " |uniq |wc -l)"
-	"$gui" "$st_" "$bt_" "$title_" --title " -[ SVN Checkout $sc_text ]- " --gauge "  $txt_wait" 6 75 < <(while read line filename;do ((++i));PCT=$(( 100*i/(nnn+1) ))
+	"$gui" "$st_" "$bt_" "$title_" --title " -[ $(REPO) Checkout $sc_text ]- " --gauge "  $txt_wait" 6 75 < <(while read line filename;do ((++i));PCT=$(( 100*i/(nnn+1) ))
 cat <<EOF
 XXX
 $PCT
   $line
 XXX
 EOF
-done < <(svn co "$trunkurl" "$svndir" $_rev| sed "s@$svndir@@g"| awk '{print $2}'
+done < <($(USEGIT) && git clone "$trunkurl" "$svndir";
+        $(USEGIT) || svn co "$trunkurl" "$svndir" $_rev| sed "s@$svndir@@g"| awk '{print $2}'
 	cd "$svndir"
 	if [ -f "$svndir/config.sh" ]
 	then
@@ -240,7 +241,22 @@ done < <(svn co "$trunkurl" "$svndir" $_rev| sed "s@$svndir@@g"| awk '{print $2}
 		_get_config_menu
 	fi;))
 }
-
 REVISION(){
-	[ -d "$svndir" ] && cd "$svndir" && svnversion -n . 2>/dev/null| sed 's/[^0-9]//g' || printf " nosvn "
+	if [ -d "$svndir" ]; then
+		if cd "$svndir"; then
+			if $(USEGIT); then
+				git rev-list --count HEAD 2>/dev/null || echo " nogit ";
+			else
+				svnversion -n . 2>/dev/null| sed 's/[^0-9]//g' || echo " nosvn ";
+			fi
+		fi
+	fi
+};
+
+USEGIT(){
+	echo $trunkurl | grep -qe '^git@\|.git$';
+}
+
+REPO(){
+	$(USEGIT) && echo "GIT" || echo "SVN";
 }

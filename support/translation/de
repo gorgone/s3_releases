@@ -48,7 +48,7 @@ txt_tc="Toolchain"
 # menu txt
 txt_remove_menu="$txt_tc entfernen"
 txt_add_menu="$txt_tc hinzufügen"
-txt_main_revision="\n Die aktuelle SVN REVISION ist : r"
+txt_main_revision="\n Die aktuelle $(REPO) REVISION ist : r"
 txt_bmenu_title="Baumenü"
 
 # help txt
@@ -57,8 +57,8 @@ txt_help2="Kommandozeilen Parameter sind"
 txt_help3="Taste [ENTER] zum fortsetzen..."
 
 # firstmenu ################################################
-txt_firstmenu_continue="weiter mit lokalem SVN"
-   txt_firstmenu_chose="anderen SVN Stand (7000+) laden"
+txt_firstmenu_continue="weiter mit lokalem $(REPO)"
+   txt_firstmenu_chose="anderen $(REPO) Stand (7000+) laden"
    txt_firstmenu_cedit="$txt_conf""s Editor starten"
    txt_firstmenu_tcupdate="Toolchain Updater starten"
     txt_firstmenu_lang="Systemsprache manuell $txt_sel"
@@ -104,9 +104,9 @@ txt_menu_back="Zurück zum $txt_tc $txt_menu"
 
 # _dialog_checkout ########################################
 txt_verify_syscheck='überprüfe System            :'
-     txt_verify_svn='überprüfe existierenden SVN :'
-     txt_update_svn="$txt_update SVN            :"
-    txt_prepare_svn="bereite SVN checkout vor :"
+     txt_verify_svn='überprüfe existierenden '$(REPO)' :'
+     txt_update_svn="$txt_update $(REPO)            :"
+    txt_prepare_svn="bereite $(REPO) checkout vor :"
          txt_latest="letzter Stand"
 
 # _load_profile ###########################################

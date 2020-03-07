@@ -199,13 +199,13 @@ fi
 
 		if [ "$_toolchainname" == "native" ]
 		then
-			printf "$g_n"" SAVE -------> $w_l$lsmn$g_l $txt_as$y_l oscam-svn$(REVISION)-$(hostname)-list_smargo"
-			mv -f "$lsmn" "$bdir/oscam-svn$(REVISION)-$(hostname)-list_smargo"
-			tartmp="oscam-svn$(REVISION)-$(hostname)-list_smargo"
+			printf "$g_n"" SAVE -------> $w_l$lsmn$g_l $txt_as$y_l ${CAM}${VARIANT}-${PREFIX}$(REVISION)-$(hostname)-list_smargo"
+			mv -f "$lsmn" "$bdir/${CAM}${VARIANT}-${PREFIX}$(REVISION)-$(hostname)-list_smargo"
+			tartmp="${CAM}${VARIANT}-${PREFIX}$(REVISION)-$(hostname)-list_smargo"
 		else
-			printf "$g_n"" SAVE -------> $w_l$lsmn$g_l $txt_as$y_l oscam-svn$(REVISION)-$_toolchainname-list_smargo"
-			mv -f "$lsmn" "$bdir/oscam-svn$(REVISION)-$_toolchainname-list_smargo"
-			tartmp="oscam-svn$(REVISION)-$_toolchainname-list_smargo"
+			printf "$g_n"" SAVE -------> $w_l$lsmn$g_l $txt_as$y_l ${CAM}${VARIANT}_${PREFIX}$(REVISION)-$_toolchainname-list_smargo"
+			mv -f "$lsmn" "$bdir/${CAM}${VARIANT}-${PREFIX}$(REVISION)-$_toolchainname-list_smargo"
+			tartmp="${CAM}${VARIANT}_${PREFIX}$(REVISION)-$_toolchainname-list_smargo"
 		fi
 
 	fi

@@ -38,7 +38,7 @@ _apply_menupatch(){
 					_w="ok"
 					cd "$svndir"
 					printf "PATCH : apply $e"
-					patch -f -p0 < "$pdir/$e" >>"$patchlog" 2>/dev/null
+					patch -f -p1 < "$pdir/$e" >>"$patchlog" 2>/dev/null
 					hunks=$(grep -c1 '^Hunk' "$patchlog")
 					fails=$(grep -c1 'hunks FAILED' "$patchlog")
 
@@ -93,7 +93,7 @@ _apply_consolepatch(){
 				_w=0
 				cd "$svndir"
 				printf "$y_l\n |     PATCH : apply $e\n"
-				patch -F 10 -f -p0 < "$pdir/$e" >>"$patchlog" 2>/dev/null
+				patch -F 10 -f -p1 < "$pdir/$e" >>"$patchlog" 2>/dev/null
 				hunks=$(grep -c1 "^Hunk" "$patchlog")
 				fails=$(grep -c1 "hunks FAILED" "$patchlog")
 

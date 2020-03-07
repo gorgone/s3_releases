@@ -130,7 +130,7 @@ then
 	done
 fi
 
-binvars=( dialog grep gawk wget tar bzip2 svn xz upx patch gcc make scp sshpass openssl dos2unix );
+binvars=( dialog git grep gawk wget tar bzip2 svn xz upx patch gcc make scp sshpass openssl dos2unix );
 headervars=( crypto.h libusb.h pcsclite.h pthread.h )
 libvars=( libccidtwin.so )
 sanity=1
