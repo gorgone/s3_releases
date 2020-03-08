@@ -154,28 +154,6 @@ if ! hash sshpass 2>/dev/null; then
 	$prefix rpm -i $sshpass_src >> "$install_log" 2>&1 || failed=1;
 fi
 
-#if ! hash upx 2>/dev/null; then
-#	[ -f "$bindir"/upx ] && rm -f "$bindir"/upx &>/dev/null;
-#	if [ "$(uname -m)" == "x86_64" ]; then
-#		upxarch="upx-3.95-amd64_linux";
-#	else
-#		upxarch="upx-3.95-i386_linux";
-#	fi
-#	upxarchive=$upxarch".tar.bz2";
-#	[ -f "$dldir"/$upxarchive ] && rm -f "$dldir"/$upxarchive &>/dev/null;
-#	upxurl="http://upx.sourceforge.net/download/$upxarchive";
-#	echo -e "$w_l  get$g_l upx$y_l\tfrom: $upxurl";
-#	echo "+++ $(date): wget $upxurl" >> "$install_log";
-#	if wget --directory-prefix="$dldir" --append-output="$install_log" $upxurl; then
-#		echo "+++ $(date): tar xjvf $upxarchive" >> "$install_log";
-#		tar xjvf "$dldir"/$upxarchive --directory="$bindir" $upxarch/upx --strip-components=1 >> "$install_log" 2>&1 || failed=1;
-#		[ -f "$dldir"/$upxarchive ] && rm -f "$dldir"/$upxarchive &>/dev/null;
-#	else
-#		failed=1;
-#	fi
-#fi
-
-
 [ $failed == 1 ] && echo -e "\n$r_l  Installation with errors - see: $install_log";
 
 return $failed;
