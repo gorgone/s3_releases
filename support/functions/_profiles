@@ -114,17 +114,25 @@ _create_native_profile(){
 	[ -L "$strip_link" ]    || ln -sf "$stripvar" "$strip_link"
 	cd "$tccfgdir"
 
+
+	if [ -f native ]; then
+		source native
+	else
+		_oscamconfdir_custom="not_set"
+		_libsearchdir="/lib"
+		_sysroot="/"
+	fi
 	cat << EOF > native
 _toolchainname="native";
 default_use="USE_UTF8 USE_LIBCRYPTO";
 _oscamconfdir_default="/usr/local/etc";
-_oscamconfdir_custom="not_set";
+_oscamconfdir_custom="$_oscamconfdir_custom";
 _compiler="$($g -dumpmachine)-";
 _tc_info="Native System Compiler \
 $(gcc --version)";
-_libsearchdir="/lib";
+_libsearchdir="$_libsearchdir";
 _menuname="native";
-_sysroot="/usr/include";
+_sysroot="$_sysroot";
 EOF
 cd "$workdir"
 
