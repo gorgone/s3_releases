@@ -6,34 +6,39 @@
 #echo -e $r_n"red text"$re_"normal text"
 
 initializeANSI(){
-nc='\033[0;';#nc normal color
-lc='\033[1;';#lc light  color
+
+nc='\033[0;' #nc normal color
+lc='\033[1;' #lc light  color
+
 # normal
-r_n=$nc'31m';#red
-g_n=$nc'32m';#green
-y_n=$nc'33m';#yellow
-b_n=$nc'34m';#blue
-p_n=$nc'35m';#pink
-c_n=$nc'36m';#cyan
-w_n=$nc'37m';#white
+r_n=$nc'31m' #red
+g_n=$nc'32m' #green
+y_n=$nc'33m' #yellow
+b_n=$nc'34m' #blue
+p_n=$nc'35m' #pink
+c_n=$nc'36m' #cyan
+w_n=$nc'37m' #white
+
 #light
-r_l=$lc'31m';#red
-g_l=$lc'32m';#green
-y_l=$lc'33m';#yellow
-b_l=$lc'34m';#blue
-p_l=$lc'35m';#pink
-c_l=$lc'36m';#cyan
-w_l=$lc'37m';#white
+r_l=$lc'31m' #red
+g_l=$lc'32m' #green
+y_l=$lc'33m' #yellow
+b_l=$lc'34m' #blue
+p_l=$lc'35m' #pink
+c_l=$lc'36m' #cyan
+w_l=$lc'37m' #white
+
 #reset to normal
-re_='\033[0m'  ;#resets all colors
-re_f='\033[39m';#resets only foreground color
-re_b='\033[49m';#resets only background color
+re_='\033[0m'   #resets all colors
+re_f='\033[39m' #resets only foreground color
+re_b='\033[49m' #resets only background color
+
 #sed replace
-W=$(echo -e '\033[0m')    ;#normal
-Y=$(echo -e '\033[1;33m') ;#yellow
-R=$(echo -e '\033[1;31m') ;#red
-G=$(echo -e '\033[1;32m') ;#green
-P=$(echo -e '\033[1;35m') ;#pink
-C=$(echo -e '\033[1;36m') ;#cyan
-WH=$(echo -e '\033[1;37m');#lightgray
-};
+W=$(echo -e '\033[0m')     #normal
+Y=$(echo -e '\033[1;33m')  #yellow
+R=$(echo -e '\033[1;31m')  #red
+G=$(echo -e '\033[1;32m')  #green
+P=$(echo -e '\033[1;35m')  #pink
+C=$(echo -e '\033[1;36m')  #cyan
+WH=$(echo -e '\033[1;37m') #lightgray
+}
