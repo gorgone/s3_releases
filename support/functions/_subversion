@@ -25,13 +25,16 @@ checkout(){
 	printf "$g_l""$txt_found $n"
 	printf "\n$w_l  $(REPO) checkout  : "
 
-	while read line filename
-	do
-		counter=$(( 100*(++i)/n));
-		tput cup 11 18;
-		[ "$counter" -lt "100" ] && echo -en "$g_l""$counter%$re_" || echo -en "$g_l""100%$re_";
-	done < <( $(USEGIT) && git clone "$trunkurl" "$svndir";
-                  $(USEGIT) || svn co "$trunkurl" $opt_ "$svndir" $_rev| sed "s@$svndir@@g"| awk '{print $2}');
+	if $(USEGIT); then
+		git clone "$trunkurl" "$svndir";
+	else
+		while read line filename
+		do
+			counter=$(( 100*(++i)/n));
+			tput cup 11 18;
+			[ "$counter" -lt "100" ] && echo -en "$g_l""$counter%$re_" || echo -en "$g_l""100%$re_";
+		done < <(svn co "$trunkurl" $opt_ "$svndir" $_rev| sed "s@$svndir@@g"| awk '{print $2}');
+	fi
 
 	tput cup 10 18;
 	echo -e "$g_l""100%$re_"
