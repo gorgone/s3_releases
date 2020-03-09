@@ -107,6 +107,7 @@ _apply_consolepatch(){
 			patchlog="$(mktemp)"
 			for e in ${patchlist[@]}
 			do
+
 				_w=0
 				cd "$svndir"
 				if _streamboard_patch "$pdir/$e"; then
