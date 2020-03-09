@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.11.0";
+	pversion="0.11.1";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -115,9 +115,9 @@ tcupdate(){
 		done;
 	fi;
 
-	#toolchain native not supported and exists check 
+	#toolchain native not supported and exists check
 	if ! _check_toolchain $tc;then
-		[ -z "$CMDTC" ] && sleep 2 && tcupdate "$CMDTC" "$OPTION1" "$OPTION2" "$FLAG" || _nl && [ "$FLAG" == "1" ] && sleep 2 && return || exit;
+		[ -z "$CMDTC" ] && sleep 2 && tcupdate "$CMDTC" "$OPTION1" "$OPTION2" "$FLAG" || _nl && [ "$FLAG" == "1" ] || [ "$FLAG" == "2" ] && sleep 2 && return || exit;
 	fi;
 	
 	#load toolchain config
