@@ -26,7 +26,7 @@ checkout(){
 	printf "\n$w_l  $(REPO) checkout  : "
 
 	if $(USEGIT); then
-		git clone "$trunkurl" "$svndir";
+		git clone --quiet "$trunkurl" "$svndir";
 	else
 		while read line filename
 		do
