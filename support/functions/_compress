@@ -91,7 +91,7 @@ tarsvn(){
 	then
 		cp -f "$svndir/config.sh" "$configdir/config.sh.master"
 		[ -f "$svndir/Makefile" ] && cp -f "$svndir/Makefile" "$configdir/Makefile.master"
-		printf "$w_l  SVN Backup    :$c_l "
+		printf "$w_l  $(REPO) Backup    :$c_l "
 		tar -zcf "$bsvn/$("$svndir/config.sh" -r).tar.gz" oscam-svn
 	fi
 
