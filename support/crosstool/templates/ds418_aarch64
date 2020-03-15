@@ -1,4 +1,4 @@
-#toolchain template: Raspberry Pi 3 Modell B+, 4 Model B (aarch64 based, gcc 9.2.0, Glibc 2.30)
+#toolchain template: Synology DS418 (aarch64 based, gcc 9.2.0, Glibc 2.25)
 CT_CONFIGURE_has_static_link=y
 CT_CONFIGURE_has_cxx11=y
 CT_CONFIGURE_has_wget=y
@@ -32,13 +32,14 @@ CT_SAVE_TARBALLS=y
 # CT_TARBALLS_BUILDROOT_LAYOUT is not set
 CT_WORK_DIR="${CT_TOP_DIR}/.build"
 CT_BUILD_TOP_DIR="${CT_WORK_DIR:-${CT_TOP_DIR}/.build}/${CT_HOST:+HOST-${CT_HOST}/}${CT_TARGET}"
+CT_BUILD_DIR="${CT_BUILD_TOP_DIR}/build"
 CT_PREFIX_DIR="${CT_PREFIX:-${HOME}/x-tools}/${CT_HOST:+HOST-${CT_HOST}/}${CT_TARGET}"
 CT_RM_RF_PREFIX_DIR=y
 CT_REMOVE_DOCS=y
 CT_INSTALL_LICENSES=y
 # CT_PREFIX_DIR_RO is not set
 CT_STRIP_HOST_TOOLCHAIN_EXECUTABLES=y
-# CT_STRIP_TARGET_TOOLCHAIN_EXECUTABLES is not set
+CT_STRIP_TARGET_TOOLCHAIN_EXECUTABLES=y
 CT_DOWNLOAD_AGENT_WGET=y
 # CT_DOWNLOAD_AGENT_CURL is not set
 # CT_DOWNLOAD_AGENT_NONE is not set
@@ -99,11 +100,10 @@ CT_ARCH_ARM=y
 # CT_ARCH_XTENSA is not set
 CT_ARCH="arm"
 CT_ARCH_CHOICE_KSYM="ARM"
-CT_ARCH_CPU="cortex-a53"
+CT_ARCH_CPU=""
+CT_ARCH_TUNE=""
 CT_ARCH_ARM_SHOW=y
 CT_ARCH_ARM_PKG_KSYM=""
-# CT_ARCH_ARM_MODE_ARM is not set
-# CT_ARCH_ARM_MODE_THUMB is not set
 CT_ALL_ARCH_CHOICES="ALPHA ARC ARM AVR M68K MICROBLAZE MIPS MOXIE MSP430 NIOS2 POWERPC RISCV S390 SH SPARC X86 XTENSA"
 CT_ARCH_SUFFIX=""
 # CT_OMIT_TARGET_VENDOR is not set
@@ -128,10 +128,7 @@ CT_ARCH_SUPPORTS_WITH_ARCH=y
 CT_ARCH_SUPPORTS_WITH_CPU=y
 CT_ARCH_SUPPORTS_WITH_TUNE=y
 CT_ARCH_EXCLUSIVE_WITH_CPU=y
-# CT_ARCH_FLOAT_AUTO is not set
-# CT_ARCH_FLOAT_HW is not set
-# CT_ARCH_FLOAT_SOFTFP is not set
-# CT_ARCH_FLOAT_SW is not set
+CT_ARCH_ARCH=""
 CT_TARGET_CFLAGS=""
 CT_TARGET_LDFLAGS=""
 CT_FORCE_SYSROOT=y
@@ -144,7 +141,7 @@ CT_WANTS_STATIC_LINK_CXX=y
 CT_SHOW_CT_VERSION=y
 CT_TOOLCHAIN_PKGVERSION=""
 CT_TOOLCHAIN_BUGURL=""
-CT_TARGET_VENDOR="rpi3"
+CT_TARGET_VENDOR="ds418"
 CT_TARGET_ALIAS_SED_EXPR=""
 CT_TARGET_ALIAS=""
 CT_CROSS=y
@@ -153,7 +150,7 @@ CT_TOOLCHAIN_TYPE="cross"
 CT_BUILD=""
 CT_BUILD_PREFIX=""
 CT_BUILD_SUFFIX=""
-# CT_TOOLCHAIN_ENABLE_NLS is not set
+CT_TOOLCHAIN_ENABLE_NLS=y
 CT_KERNEL_SUPPORTS_SHARED_LIBS=y
 # CT_KERNEL_BARE_METAL is not set
 CT_KERNEL_LINUX=y
@@ -188,8 +185,6 @@ CT_LINUX_V_5_4=y
 # CT_LINUX_V_3_13 is not set
 # CT_LINUX_V_3_12 is not set
 # CT_LINUX_V_3_10 is not set
-# CT_LINUX_V_3_4 is not set
-# CT_LINUX_V_3_2 is not set
 # CT_LINUX_NO_VERSIONS is not set
 CT_LINUX_VERSION="5.4.6"
 CT_LINUX_MIRRORS="$(CT_Mirrors kernel.org linux ${CT_LINUX_VERSION})"
@@ -224,28 +219,24 @@ CT_BINUTILS_USE="BINUTILS"
 CT_BINUTILS_PKG_NAME="binutils"
 CT_BINUTILS_SRC_RELEASE=y
 CT_BINUTILS_PATCH_ORDER="global"
-CT_BINUTILS_V_2_33=y
-# CT_BINUTILS_V_2_32 is not set
-# CT_BINUTILS_V_2_31 is not set
-# CT_BINUTILS_V_2_30 is not set
-# CT_BINUTILS_V_2_29 is not set
+CT_BINUTILS_V_2_29=y
 # CT_BINUTILS_V_2_28 is not set
 # CT_BINUTILS_V_2_27 is not set
 # CT_BINUTILS_V_2_26 is not set
 # CT_BINUTILS_NO_VERSIONS is not set
-CT_BINUTILS_VERSION="2.33.1"
+CT_BINUTILS_VERSION="2.29.1"
 CT_BINUTILS_MIRRORS="$(CT_Mirrors GNU binutils) $(CT_Mirrors sourceware binutils/releases)"
 CT_BINUTILS_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_BINUTILS_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_BINUTILS_ARCHIVE_FORMATS=".tar.xz .tar.bz2 .tar.gz"
 CT_BINUTILS_SIGNATURE_FORMAT="packed/.sig"
-CT_BINUTILS_later_than_2_30=y
-CT_BINUTILS_2_30_or_later=y
+CT_BINUTILS_2_30_or_older=y
+CT_BINUTILS_older_than_2_30=y
+CT_BINUTILS_REQUIRE_older_than_2_30=y
 CT_BINUTILS_later_than_2_27=y
 CT_BINUTILS_2_27_or_later=y
 CT_BINUTILS_later_than_2_25=y
 CT_BINUTILS_2_25_or_later=y
-CT_BINUTILS_REQUIRE_2_25_or_later=y
 CT_BINUTILS_later_than_2_23=y
 CT_BINUTILS_2_23_or_later=y
 CT_BINUTILS_HAS_HASH_STYLE=y
@@ -267,7 +258,9 @@ CT_BINUTILS_PLUGINS=y
 CT_BINUTILS_RELRO=m
 CT_BINUTILS_DETERMINISTIC_ARCHIVES=y
 CT_BINUTILS_EXTRA_CONFIG_ARRAY=""
-# CT_BINUTILS_FOR_TARGET is not set
+CT_BINUTILS_FOR_TARGET=y
+CT_BINUTILS_FOR_TARGET_IBERTY=y
+CT_BINUTILS_FOR_TARGET_BFD=y
 CT_ALL_BINUTILS_CHOICES="BINUTILS"
 CT_LIBC_GLIBC=y
 # CT_LIBC_UCLIBC is not set
@@ -282,34 +275,34 @@ CT_GLIBC_USE="GLIBC"
 CT_GLIBC_PKG_NAME="glibc"
 CT_GLIBC_SRC_RELEASE=y
 CT_GLIBC_PATCH_ORDER="global"
-CT_GLIBC_V_2_30=y
+# CT_GLIBC_V_2_30 is not set
 # CT_GLIBC_V_2_29 is not set
 # CT_GLIBC_V_2_28 is not set
 # CT_GLIBC_V_2_27 is not set
 # CT_GLIBC_V_2_26 is not set
-# CT_GLIBC_V_2_25 is not set
+CT_GLIBC_V_2_25=y
 # CT_GLIBC_V_2_24 is not set
 # CT_GLIBC_V_2_23 is not set
 # CT_GLIBC_V_2_19 is not set
 # CT_GLIBC_V_2_17 is not set
 # CT_GLIBC_V_2_12_1 is not set
 # CT_GLIBC_NO_VERSIONS is not set
-CT_GLIBC_VERSION="2.30"
+CT_GLIBC_VERSION="2.25"
 CT_GLIBC_MIRRORS="$(CT_Mirrors GNU glibc)"
 CT_GLIBC_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_GLIBC_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_GLIBC_ARCHIVE_FORMATS=".tar.xz .tar.bz2 .tar.gz"
 CT_GLIBC_SIGNATURE_FORMAT="packed/.sig"
-CT_GLIBC_2_30_or_later=y
 CT_GLIBC_2_30_or_older=y
-CT_GLIBC_later_than_2_29=y
-CT_GLIBC_2_29_or_later=y
-CT_GLIBC_later_than_2_27=y
-CT_GLIBC_2_27_or_later=y
-CT_GLIBC_later_than_2_26=y
-CT_GLIBC_2_26_or_later=y
-CT_GLIBC_later_than_2_25=y
+CT_GLIBC_older_than_2_30=y
+CT_GLIBC_2_29_or_older=y
+CT_GLIBC_older_than_2_29=y
+CT_GLIBC_2_27_or_older=y
+CT_GLIBC_older_than_2_27=y
+CT_GLIBC_2_26_or_older=y
+CT_GLIBC_older_than_2_26=y
 CT_GLIBC_2_25_or_later=y
+CT_GLIBC_2_25_or_older=y
 CT_GLIBC_later_than_2_24=y
 CT_GLIBC_2_24_or_later=y
 CT_GLIBC_later_than_2_23=y
@@ -337,10 +330,10 @@ CT_GLIBC_ENABLE_OBSOLETE_RPC=y
 CT_GLIBC_OLDEST_ABI=""
 CT_GLIBC_FORCE_UNWIND=y
 # CT_GLIBC_LOCALES is not set
-# CT_GLIBC_KERNEL_VERSION_NONE is not set
-CT_GLIBC_KERNEL_VERSION_AS_HEADERS=y
+CT_GLIBC_KERNEL_VERSION_NONE=y
+# CT_GLIBC_KERNEL_VERSION_AS_HEADERS is not set
 # CT_GLIBC_KERNEL_VERSION_CHOSEN is not set
-CT_GLIBC_MIN_KERNEL="5.4.6"
+CT_GLIBC_MIN_KERNEL=""
 CT_GLIBC_SSP_DEFAULT=y
 # CT_GLIBC_SSP_NO is not set
 # CT_GLIBC_SSP_YES is not set
@@ -377,6 +370,8 @@ CT_GCC_V_9=y
 # CT_GCC_V_8 is not set
 # CT_GCC_V_7 is not set
 # CT_GCC_V_6 is not set
+# CT_GCC_V_5 is not set
+# CT_GCC_V_4_9 is not set
 # CT_GCC_NO_VERSIONS is not set
 CT_GCC_VERSION="9.2.0"
 CT_GCC_MIRRORS="$(CT_Mirrors GNU gcc/gcc-${CT_GCC_VERSION}) $(CT_Mirrors sourceware gcc/releases/gcc-${CT_GCC_VERSION})"
@@ -388,13 +383,10 @@ CT_GCC_later_than_7=y
 CT_GCC_7_or_later=y
 CT_GCC_later_than_6=y
 CT_GCC_6_or_later=y
-CT_GCC_REQUIRE_6_or_later=y
 CT_GCC_later_than_5=y
 CT_GCC_5_or_later=y
-CT_GCC_REQUIRE_5_or_later=y
 CT_GCC_later_than_4_9=y
 CT_GCC_4_9_or_later=y
-CT_GCC_REQUIRE_4_9_or_later=y
 CT_GCC_later_than_4_8=y
 CT_GCC_4_8_or_later=y
 CT_CC_GCC_ENABLE_PLUGINS=y
@@ -409,11 +401,11 @@ CT_CC_GCC_CONFIG_TLS=m
 CT_CC_GCC_USE_GRAPHITE=y
 CT_CC_GCC_USE_LTO=y
 CT_CC_GCC_ENABLE_TARGET_OPTSPACE=y
-# CT_CC_GCC_LIBMUDFLAP is not set
-# CT_CC_GCC_LIBGOMP is not set
-# CT_CC_GCC_LIBSSP is not set
-# CT_CC_GCC_LIBQUADMATH is not set
-# CT_CC_GCC_LIBSANITIZER is not set
+CT_CC_GCC_LIBMUDFLAP=y
+CT_CC_GCC_LIBGOMP=y
+CT_CC_GCC_LIBSSP=y
+CT_CC_GCC_LIBQUADMATH=y
+CT_CC_GCC_LIBSANITIZER=y
 CT_CC_CXA_ATEXIT=y
 # CT_CC_GCC_DISABLE_PCH is not set
 CT_CC_GCC_SJLJ_EXCEPTIONS=m
@@ -485,7 +477,6 @@ CT_GMP_later_than_5_1_0=y
 CT_GMP_5_1_0_or_later=y
 CT_GMP_later_than_5_0_0=y
 CT_GMP_5_0_0_or_later=y
-CT_GMP_REQUIRE_5_0_0_or_later=y
 CT_COMP_LIBS_ISL=y
 CT_COMP_LIBS_ISL_PKG_KSYM="ISL"
 CT_ISL_DIR_NAME="isl"
@@ -555,37 +546,36 @@ CT_MPC_DIR_NAME="mpc"
 CT_MPC_PKG_NAME="mpc"
 CT_MPC_SRC_RELEASE=y
 CT_MPC_PATCH_ORDER="global"
-CT_MPC_V_1_1=y
-# CT_MPC_V_1_0 is not set
+# CT_MPC_V_1_1 is not set
+CT_MPC_V_1_0=y
 # CT_MPC_NO_VERSIONS is not set
-CT_MPC_VERSION="1.1.0"
+CT_MPC_VERSION="1.0.3"
 CT_MPC_MIRRORS="http://www.multiprecision.org/downloads $(CT_Mirrors GNU mpc)"
 CT_MPC_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_MPC_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_MPC_ARCHIVE_FORMATS=".tar.gz"
 CT_MPC_SIGNATURE_FORMAT="packed/.sig"
-CT_MPC_1_1_0_or_later=y
 CT_MPC_1_1_0_or_older=y
+CT_MPC_older_than_1_1_0=y
 CT_COMP_LIBS_MPFR=y
 CT_COMP_LIBS_MPFR_PKG_KSYM="MPFR"
 CT_MPFR_DIR_NAME="mpfr"
 CT_MPFR_PKG_NAME="mpfr"
 CT_MPFR_SRC_RELEASE=y
 CT_MPFR_PATCH_ORDER="global"
-CT_MPFR_V_4_0=y
-# CT_MPFR_V_3_1 is not set
+CT_MPFR_V_3_1=y
 # CT_MPFR_NO_VERSIONS is not set
-CT_MPFR_VERSION="4.0.2"
+CT_MPFR_VERSION="3.1.6"
 CT_MPFR_MIRRORS="http://www.mpfr.org/mpfr-${CT_MPFR_VERSION} $(CT_Mirrors GNU mpfr)"
 CT_MPFR_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_MPFR_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_MPFR_ARCHIVE_FORMATS=".tar.xz .tar.bz2 .tar.gz .zip"
 CT_MPFR_SIGNATURE_FORMAT="packed/.asc"
-CT_MPFR_later_than_4_0_0=y
-CT_MPFR_4_0_0_or_later=y
+CT_MPFR_4_0_0_or_older=y
+CT_MPFR_older_than_4_0_0=y
+CT_MPFR_REQUIRE_older_than_4_0_0=y
 CT_MPFR_later_than_3_0_0=y
 CT_MPFR_3_0_0_or_later=y
-CT_MPFR_REQUIRE_3_0_0_or_later=y
 CT_COMP_LIBS_NCURSES=y
 CT_COMP_LIBS_NCURSES_PKG_KSYM="NCURSES"
 CT_NCURSES_DIR_NAME="ncurses"
