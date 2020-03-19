@@ -2,8 +2,11 @@ _toolchainname="native";
 default_use="USE_UTF8 USE_LIBCRYPTO";
 _oscamconfdir_default="/usr/local/etc";
 _oscamconfdir_custom="not_set";
-_compiler="-";
-_tc_info="Native System Compiler ";
+_compiler="x86_64-linux-gnu-";
+_tc_info="Native System Compiler gcc (Debian 8.3.0-6) 8.3.0
+Copyright (C) 2018 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.";
 _libsearchdir="/lib";
 _menuname="native";
-_sysroot="/";
+_sysroot="/usr/include";
