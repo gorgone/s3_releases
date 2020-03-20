@@ -17,7 +17,7 @@ s3logo(){
 echo -e $C"
     _________________
    /   _____/\\_____  \\   ===============
-   \_____  \\   _(__  <  $w_l Version $SIMPLEVERSION$C
+   \_____  \\   _(__  <  $w_l Ver. $VERSIONCOUNTER$g_l $SIMPLEVERSION$C
    /        \\ /       \\  ===============
   /_______  //______  / $y_l by gorgone$p_l 2020$C
           \\/        \/   ===============\n$W";

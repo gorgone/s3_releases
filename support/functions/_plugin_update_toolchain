@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.11.1";
+	pversion="0.11.3";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -165,9 +165,13 @@ tcupdate(){
 			libexports="$i"_exports[@];libexports=("${!libexports}");
 			libconfigure="$i"_configure[@];libconfigure=("${!libconfigure}");
 			libmake="$i"_make[@];libmake=("${!libmake}");
-
-			MENU_OPTIONS+=("$i"		"$libname $libversion  	$([ $libversioncurrent ] && echo $libversioncompare)	$(echo $libversioncurrent | sed -e 's/^$/ ---/g')"		"$([ $libversioncurrent ] && echo "on" || echo "off")"	"$([ $libname ] && echo "$libname $libversion: $liburl")");counter;
 			
+			#Preselection and formatting
+			[ "$libversioncompare" == "=" ] && libtxtfmt="\Z2" || libtxtfmt="";
+			[ "$libversioncompare" == ">" ] && [ ${#libversioncurrent} -gt 0 ] && libselected="on" && libtxtfmt="\Z5" || libselected="off";
+			
+			MENU_OPTIONS+=("$i"		"$libname $libversion		$([ $libversioncurrent ] && echo $libversioncompare)	$libtxtfmt$(echo $libversioncurrent | sed -e 's/^$/ ---/g')\Zn"		"$(echo $libselected)"	"$([ $libname ] && echo "$libname $libversion: $liburl")");counter;
+
 			#     0 key     1 desc     2 version     3 checkversion     4 checkfile 5 current version    6 url      7 tasks array
 			lib=("$libkey" "$libname" "$libversion" "$libversioncheck" "$libcheck" "$libversioncurrent" "$liburl" "(${libtasks[*]@Q})");
 			libs+=("(${lib[*]@Q})");
@@ -288,101 +292,81 @@ _create_tc(){
 
 		case $ret in
 			0) #Start - Build cross toolchain
-				if [ -f "$ctsrcdir/ct-ng" ]; then
-					icount=$(echo $opts | wc -w);i=0;
+				#Setup crosstool-NG automatically if not installed
+				if [ ! -f "$ctsrcdir/ct-ng" ]; then
+					echo -e "$r_l""\nCHECK -> crosstool-NG is not setup correctly. Try to fix it automatically...\n""$re_";
+					_paktc_timer 5;
+					_ctng_setup "$START_BUILD";
+				fi;
 				
-					for tpl in $opts;do
-						if [ -f "$cttpldir/$tpl" ]; then
+				#Build cross toolchains
+				icount=$(echo $opts | wc -w);i=0;
+				for tpl in $opts;do
+					if [ -f "$cttpldir/$tpl" ]; then
+						
+						logfile="$ldir/$(date +%F)_$(date +%T)_update_toolchain_crosstoolchain_"$tpl".log"; ((i++)); 
+
+						clear;
+						sp=$(printf '%*s' 80 | tr ' ' '=')
+						echo -e "$sp\nbuild ($i/$icount): command list for cross toolchain $tpl:\n$sp" | tee -a "$logfile";
+						
+						#copy template and patching them
+						echo "rm \"$ctsrcdir/.config\"* 2>/dev/null;cp --no-preserve=mode,ownership -f \"$cttpldir/$tpl\" \"$ctsrcdir/.config\";" | tee -a "$logfile";
+						rm "$ctsrcdir/.config"* 2>/dev/null;cp --no-preserve=mode,ownership -f "$cttpldir/$tpl" "$ctsrcdir/.config";
+
+						#CT_LOCAL_TARBALLS_DIR aka cache folder for downloads
+						echo "sed -i \"s#.*CT_LOCAL_TARBALLS_DIR=.*#CT_LOCAL_TARBALLS_DIR=\"$dldir\"#g\" \"$ctsrcdir/.config\";" | tee -a "$logfile";
+						sed -i "s#.*CT_LOCAL_TARBALLS_DIR=.*#CT_LOCAL_TARBALLS_DIR=\"$dldir\"#g" "$ctsrcdir/.config";
+						#CT_PREFIX_DIR aka folder that contains the final toolchain
+						echo "sed -i \"s#.*CT_PREFIX_DIR=.*#CT_PREFIX_DIR=\"$tcdir/$tpl\"#g\" \"$ctsrcdir/.config\";" | tee -a "$logfile";
+						sed -i "s#.*CT_PREFIX_DIR=.*#CT_PREFIX_DIR=\"$tcdir/$tpl\"#g" "$ctsrcdir/.config";
+						#CT_ALLOW_BUILD_AS_ROOT aka force build as root
+						_check_root && [ "$CTNG_BUILD_AS_ROOT" == "1" ] && echo "echo -e \"\nCT_EXPERIMENTAL=y\nCT_ALLOW_BUILD_AS_ROOT=y\nCT_ALLOW_BUILD_AS_ROOT_SURE=y\" >>\"$ctsrcdir/.config\";" | tee -a "$logfile";
+						_check_root && [ "$CTNG_BUILD_AS_ROOT" == "1" ] && echo -e "\nCT_EXPERIMENTAL=y\nCT_ALLOW_BUILD_AS_ROOT=y\nCT_ALLOW_BUILD_AS_ROOT_SURE=y" >>"$ctsrcdir/.config";
+
+						#run build
+						bcl=$(printf '%s\n' "${CTNG_BUILD_tasks[@]}");
+						echo -e "cd \"$ctsrcdir\";\n$(_replace_tokens "$bcl")\n$sp" | tee -a "$logfile";
+						sleep 2;
+						
+						if [ $START_BUILD -eq 1 ]; then
+							cd "$ctsrcdir";
+							#generate build command list
+							unset buildtasks;
+							for task in "${CTNG_BUILD_tasks[@]}";do
+								task=$(_replace_tokens "$task");	#replace tokens
+								buildtasks+=("$task");
+							done;
+							( eval "${buildtasks[@]}" ) 2>&1;
+							err=$(grep '\[ERROR\]' "$ctsrcdir/build.log" | wc -l)
+
+							#save build.log in logs
+							cat "$ctsrcdir/build.log" >>"$logfile";
 							
-							logfile="$ldir/$(date +%F)_$(date +%T)_update_toolchain_crosstoolchain_"$tpl".log"; ((i++)); 
-
-							clear;
-							sp=$(printf '%*s' 80 | tr ' ' '=')
-							echo -e "$sp\nbuild ($i/$icount): command list for cross toolchain $tpl:\n$sp" | tee -a "$logfile";
+							if [ ! $err -gt 0 ]; then
+								#get target from build.log
+								target=$(sed -n -e '/target = / s/.*\= *//p' "$ctsrcdir/build.log");
 							
-							#copy template and patching them
-							echo "rm \"$ctsrcdir/.config\"* 2>/dev/null;cp --no-preserve=mode,ownership -f \"$cttpldir/$tpl\" \"$ctsrcdir/.config\";" | tee -a "$logfile";
-							rm "$ctsrcdir/.config"* 2>/dev/null;cp --no-preserve=mode,ownership -f "$cttpldir/$tpl" "$ctsrcdir/.config";
-
-							#CT_LOCAL_TARBALLS_DIR aka cache folder for downloads
-							echo "sed -i \"s#.*CT_LOCAL_TARBALLS_DIR=.*#CT_LOCAL_TARBALLS_DIR=\"$dldir\"#g\" \"$ctsrcdir/.config\";" | tee -a "$logfile";
-							sed -i "s#.*CT_LOCAL_TARBALLS_DIR=.*#CT_LOCAL_TARBALLS_DIR=\"$dldir\"#g" "$ctsrcdir/.config";
-							#CT_PREFIX_DIR aka folder that contains the final toolchain
-							echo "sed -i \"s#.*CT_PREFIX_DIR=.*#CT_PREFIX_DIR=\"$tcdir/$tpl\"#g\" \"$ctsrcdir/.config\";" | tee -a "$logfile";
-							sed -i "s#.*CT_PREFIX_DIR=.*#CT_PREFIX_DIR=\"$tcdir/$tpl\"#g" "$ctsrcdir/.config";
-							#CT_ALLOW_BUILD_AS_ROOT aka force build as root
-							_check_root && [ "$CTNG_BUILD_AS_ROOT" == "1" ] && echo "echo -e \"\nCT_EXPERIMENTAL=y\nCT_ALLOW_BUILD_AS_ROOT=y\nCT_ALLOW_BUILD_AS_ROOT_SURE=y\" >>\"$ctsrcdir/.config\";" | tee -a "$logfile";
-							_check_root && [ "$CTNG_BUILD_AS_ROOT" == "1" ] && echo -e "\nCT_EXPERIMENTAL=y\nCT_ALLOW_BUILD_AS_ROOT=y\nCT_ALLOW_BUILD_AS_ROOT_SURE=y" >>"$ctsrcdir/.config";
-
-							#run build
-							bcl=$(printf '%s\n' "${CTNG_BUILD_tasks[@]}");
-							echo -e "cd \"$ctsrcdir\";\n$(_replace_tokens "$bcl")\n$sp" | tee -a "$logfile";
-							sleep 2;
-							
-							if [ $START_BUILD -eq 1 ]; then
-								cd "$ctsrcdir";
-								#generate build command list
-								unset buildtasks;
-								for task in "${CTNG_BUILD_tasks[@]}";do
-									task=$(_replace_tokens "$task");	#replace tokens
-									buildtasks+=("$task");
-								done;
-								( eval "${buildtasks[@]}" ) 2>&1;
-								err=$(grep '\[ERROR\]' "$ctsrcdir/build.log" | wc -l)
-
-								#save build.log in logs
-								cat "$ctsrcdir/build.log" >>"$logfile";
+								#compress toolchain
+								_compress "$dldir/Toolchain-$tpl.tar.xz" "$tcdir/$tpl" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Compress cross toolchain $tpl to Toolchain-$tpl.tar.xz ]- " "$pb_" "$_lines" "$_cols";
 								
-								if [ ! $err -gt 0 ]; then
-									#get target from build.log
-									target=$(sed -n -e '/target = / s/.*\= *//p' "$ctsrcdir/build.log");
-								
-									#compress toolchain
-									_compress "$dldir/Toolchain-$tpl.tar.xz" "$tcdir/$tpl" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Compress cross toolchain $tpl to Toolchain-$tpl.tar.xz ]- " "$pb_" "$_lines" "$_cols";
-									
-									#create toolchain.cfg
-									desc=$(sed -n -e '/#toolchain template/ s/.*\: *//p' "$cttpldir/$tpl");
-									_create_toolchaincfg "$tcdir/$tpl" "$tpl" "$target" "" "" "$desc" "" "$dldir/Toolchain-$tpl.tar.xz" "yes";
-								else
-									_paktc_timer 10;
-								fi;
+								#create toolchain.cfg
+								desc=$(sed -n -e '/#toolchain template/ s/.*\: *//p' "$cttpldir/$tpl");
+								_create_toolchaincfg "$tcdir/$tpl" "$tpl" "$target" "" "" "$desc" "" "$dldir/Toolchain-$tpl.tar.xz" "yes";
 							else
-								echo -e "$r_l""\nERROR -> The execution of crosstool-NG was aborted\n         because it must not run as root!\n""$re_" | tee -a "$logfile";
 								_paktc_timer 10;
 							fi;
 						else
-							echo -e "$r_l  $txt_error:$y_l $tpl$w_l Template $txt_n_installed""$rs_";
-							sleep 2;
+							echo -e "$r_l""\nERROR -> The execution of crosstool-NG was aborted\n         because it must not run as root!\n""$re_" | tee -a "$logfile";
+							_paktc_timer 10;
 						fi;
-					done;
-				else
-					echo -e "$r_l""\nCHECK -> crosstool-NG is not setup correctly. Please run 'Setup' from menu!\n""$re_";
-					_paktc_timer 10;
-				fi;;
+					else
+						echo -e "$r_l  $txt_error:$y_l $tpl$w_l Template $txt_n_installed""$rs_";
+						sleep 2;
+					fi;
+				done;;
 			1) #Setup - Setup crosstool-NG
-				logfile="$ldir/$(date +%F)_$(date +%T)_update_toolchain_crosstool-NG_setup.log"
-				(
-				bcl=$(printf '%s\n' "${CTNG_SETUP_tasks[@]}");
-				sp=$(printf '%*s' 80 | tr ' ' '=')
-				echo -e "$sp\nbuild command list for crosstool-NG:\n$sp\ncd "$ctsrcdir"\n$(_replace_tokens "$bcl")\n$sp";
-				sleep 2;
-				
-				if [ $START_BUILD -eq 1 ]; then
-					# setup crosstool wc
-					echo "Cleanup source directory "$ctsrcdir/"..."
-					rm -rf "$ctsrcdir" 2>/dev/null;
-					mkdir --parents "$ctsrcdir";
-					cd "$ctsrcdir";
-					#generate setup command list
-					for task in "${CTNG_SETUP_tasks[@]}";do
-						task=$(_replace_tokens "$task");	#replace tokens
-						setuptasks+=("$task");
-					done
-					( eval "${setuptasks[@]}" ) 2>&1;
-				else
-					echo -e "\nERROR -> The execution of crosstool-NG was aborted\n         because it must not run as root!\n";
-				fi;
-				) | tee "$logfile" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Setup crosstool-NG ]- " "$pb_" "$_lines" "$_cols";
+				_ctng_setup "$START_BUILD";
 				_paktc_timer 10;;
 			2) #Edit
 				tpl=$(echo "$opts" | awk '{printf $2}';);
@@ -461,6 +445,31 @@ _ctng_menu(){
 		configtasks+=("$task");
 	done;
 	( eval "${configtasks[@]}" ) 2>&1;
+};
+_ctng_setup(){
+	logfile="$ldir/$(date +%F)_$(date +%T)_update_toolchain_crosstool-NG_setup.log"
+	(
+	bcl=$(printf '%s\n' "${CTNG_SETUP_tasks[@]}");
+	sp=$(printf '%*s' 80 | tr ' ' '=')
+	echo -e "$sp\nbuild command list for crosstool-NG:\n$sp\ncd "$ctsrcdir"\n$(_replace_tokens "$bcl")\n$sp";
+	sleep 2;
+	
+	if [ $1 -eq 1 ]; then
+		# setup crosstool wc
+		echo "Cleanup source directory "$ctsrcdir/"..."
+		rm -rf "$ctsrcdir" 2>/dev/null;
+		mkdir --parents "$ctsrcdir";
+		cd "$ctsrcdir";
+		#generate setup command list
+		for task in "${CTNG_SETUP_tasks[@]}";do
+			task=$(_replace_tokens "$task");	#replace tokens
+			setuptasks+=("$task");
+		done
+		( eval "${setuptasks[@]}" ) 2>&1;
+	else
+		echo -e "\nERROR -> The execution of crosstool-NG was aborted\n         because it must not run as root!\n";
+	fi;
+	) | tee "$logfile" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Setup crosstool-NG ]- " "$pb_" "$_lines" "$_cols";
 };
 _dl(){
 	[ -d "$dldir/#tmp" ] && rm --recursive --force "$dldir/#tmp"
