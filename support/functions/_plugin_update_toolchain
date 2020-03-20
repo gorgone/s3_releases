@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.11.2";
+	pversion="0.11.3";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -165,9 +165,13 @@ tcupdate(){
 			libexports="$i"_exports[@];libexports=("${!libexports}");
 			libconfigure="$i"_configure[@];libconfigure=("${!libconfigure}");
 			libmake="$i"_make[@];libmake=("${!libmake}");
-
-			MENU_OPTIONS+=("$i"		"$libname $libversion  	$([ $libversioncurrent ] && echo $libversioncompare)	$(echo $libversioncurrent | sed -e 's/^$/ ---/g')"		"$([ $libversioncurrent ] && echo "on" || echo "off")"	"$([ $libname ] && echo "$libname $libversion: $liburl")");counter;
 			
+			#Preselection and formatting
+			[ "$libversioncompare" == "=" ] && libtxtfmt="\Z2" || libtxtfmt="";
+			[ "$libversioncompare" == ">" ] && [ ${#libversioncurrent} -gt 0 ] && libselected="on" && libtxtfmt="\Z5" || libselected="off";
+			
+			MENU_OPTIONS+=("$i"		"$libname $libversion		$([ $libversioncurrent ] && echo $libversioncompare)	$libtxtfmt$(echo $libversioncurrent | sed -e 's/^$/ ---/g')\Zn"		"$(echo $libselected)"	"$([ $libname ] && echo "$libname $libversion: $liburl")");counter;
+
 			#     0 key     1 desc     2 version     3 checkversion     4 checkfile 5 current version    6 url      7 tasks array
 			lib=("$libkey" "$libname" "$libversion" "$libversioncheck" "$libcheck" "$libversioncurrent" "$liburl" "(${libtasks[*]@Q})");
 			libs+=("(${lib[*]@Q})");
