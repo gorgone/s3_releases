@@ -150,7 +150,7 @@ then
 	[ -f /etc/redhat-release ] && installer="redhat_os"
 
 	# Manjaro (/etc/os-release)
-	[ -f /etc/manjaro-release ] && installer="manjaro_os"
+	[ -f /etc/manjaro-release ] || [ -f /etc/arch-release ] && installer="manjaro_os"
 
 	# SuSE (/etc/SuSE-release is depreciated -> check for YaST2)
 	[ -d /etc/YaST2 ] && installer="suse_os"
