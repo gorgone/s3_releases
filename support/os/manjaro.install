@@ -29,6 +29,21 @@ do
 		xz)
 			inst="xz-utils";
 			;;
+		scp)
+			inst="scponly";
+			;;
+		makeinfo)
+			inst="texinfo";
+			;;
+		python3-config)
+			inst="python3-devel";
+			;;
+		libtool|libtoolize)
+			inst="libtool";
+			;;
+		cmp)
+			inst="diffutils";
+			;;
 		esac;
 		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
 		packages="$packages $inst";
@@ -52,6 +67,9 @@ do
 		pthread.h)
 				inst="libc-dev-bin";
 			;;
+		ncurses)
+				inst="ncurses";
+			;;
 		esac;
 		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
 		packages="$packages $inst";
@@ -66,16 +84,19 @@ do
 		libccidtwin.so)
 				inst="ccid";
 			;;
+		libstdc++.so.6)
+				inst="gcc-libs";
+			;;
 		esac;
 		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
 		packages="$packages $inst";
 	fi;
 done;
 
-if [ "$(uname -m)" == "x86_64" ] && [ ! -f /usr/lib32/libz.so.1 ]; then
-	if [ ! -f /usr/lib32/libz.so.1 ]; then
+if [ "$(uname -m)" == "x86_64" ] && [ ! -f /usr/lib/libz.so ]; then
+	if [ ! -f /usr/lib/libz.so ]; then
 		e="zlib32";
-		inst="lib32z1";
+		inst="lib32-zlib";
 		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
 		packages="$packages $inst";
 	fi
