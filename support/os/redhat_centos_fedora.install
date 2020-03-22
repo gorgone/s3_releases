@@ -26,14 +26,17 @@ case $rh_version in
 	[6-7])
 		# Redhat/CentOS 6+7 ok
 		;;
-	2[2-3])
-		# Fedora 22+23 ok
+	[8])
+		# Redhat/CentOS 8 ok
 		installer="dnf";
 		;;
-	24)
-		# Fedora 24 still beta
+	2?)
+		# Fedora 20+23 ok
 		installer="dnf";
-		echo -e "$r_l  This installer is still in the testing stage!";
+		;;
+	3?)
+		# Fedora 30+ ok
+		installer="dnf";
 		;;
 	*)
 		echo "This version is not supported!" >"$install_log" 2>/dev/null;
@@ -66,6 +69,24 @@ do
 		case $e in
 		svn)
 			inst="subversion";
+			;;
+		xz)
+			inst="xz-utils";
+			;;
+		makeinfo)
+			inst="texinfo";
+			;;
+		python3-config)
+			inst="python3-devel";
+			;;
+		libtool|libtoolize)
+			inst="libtool";
+			;;
+		cmp)
+			inst="diffutils";
+			;;
+		g++)
+			inst="gcc-c++";
 			;;
 		# the following guys have no official packages
 		sshpass)
@@ -100,6 +121,9 @@ do
 			;;
 		pthread.h)
 				inst="glibc-headers";
+			;;
+		ncurses)
+				inst="ncurses-devel";
 			;;
 		esac;
 		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
