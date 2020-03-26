@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.11.3";
+	pversion="0.11.4";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -17,7 +17,7 @@ tcupdate(){
 	[ -z "$4" ] && FLAG="0" || FLAG="$4"; #1 - tcupdate call from s3 main menu, 2 - tcupdate call from s3 toolchain menu;
 	tc="$CMDTC";
 	
-	clear && _check_bin;
+	clear && _check_pkg;
 
 	#backup config
 	if [ "$CMDTC" == "-r" ] || [ "$CMDTC" == "--reset" ];then
@@ -179,7 +179,7 @@ tcupdate(){
 		[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "no libraries found" "no libraries found") && counter;
 
 		if [ ${#OPTION1} -gt 0 ];then #Force build library call
-			opts=$(echo "$OPTION1" | tr ',' "\n");
+			opts=$(echo "$OPTION1" | tr ',' '\n');
 			ret="0";
 		else
 			clear;clear;
@@ -303,13 +303,13 @@ _create_tc(){
 				icount=$(echo $opts | wc -w);i=0;
 				for tpl in $opts;do
 					if [ -f "$cttpldir/$tpl" ]; then
-						
+
 						logfile="$ldir/$(date +%F)_$(date +%T)_update_toolchain_crosstoolchain_"$tpl".log"; ((i++)); 
 
 						clear;
 						sp=$(printf '%*s' 80 | tr ' ' '=')
-						echo -e "$sp\nbuild ($i/$icount): command list for cross toolchain $tpl:\n$sp" | tee -a "$logfile";
-						
+						echo -e "$y_l$sp\nbuild ($i/$icount): command list for cross toolchain $tpl:\n$sp" | tee -a "$logfile";
+
 						#copy template and patching them
 						echo "rm \"$ctsrcdir/.config\"* 2>/dev/null;cp --no-preserve=mode,ownership -f \"$cttpldir/$tpl\" \"$ctsrcdir/.config\";" | tee -a "$logfile";
 						rm "$ctsrcdir/.config"* 2>/dev/null;cp --no-preserve=mode,ownership -f "$cttpldir/$tpl" "$ctsrcdir/.config";
@@ -326,11 +326,13 @@ _create_tc(){
 
 						#run build
 						bcl=$(printf '%s\n' "${CTNG_BUILD_tasks[@]}");
-						echo -e "cd \"$ctsrcdir\";\n$(_replace_tokens "$bcl")\n$sp" | tee -a "$logfile";
+						echo -e "cd \"$ctsrcdir\";\n$(_replace_tokens "$bcl")\n$sp""$re_" | tee -a "$logfile";
 						sleep 2;
-						
+
 						if [ $START_BUILD -eq 1 ]; then
 							cd "$ctsrcdir";
+							#print out crosstool-NG version
+							echo -e "$g_l\n$(./ct-ng | grep 'crosstool-NG version' &2>/dev/null | tail -1)\n""$re_" | tee -a "$logfile";
 							#generate build command list
 							unset buildtasks;
 							for task in "${CTNG_BUILD_tasks[@]}";do
@@ -619,7 +621,7 @@ _check_lib(){
 	case "$1" in
 		"PCSC")	#Create symlink to the PCSC header files, if the last include path of the compiler don't point to it
 				echo -e "\nCheck for PCSC header files and try to symlink to the correct PCSC header files if the last compiler include path points to the wrong location...";
-				if [ ${#incdir} -gt 0 ] && [ ! -d "$incdir/PCSC" ]; then
+				if [ ${#incdir} -gt 0 ] && [ ! -d "$incdir/PCSC" ];then
 					headerdir="$(dirname $(find "$prefixdir" -type f -name "pcsclite.h" | head -n 1))";
 					[ ${#headerdir} -gt 0 ] && ln -s "$(realpath --relative-to="$incdir" "$headerdir")" "$incdir/PCSC";
 					[ ${#headerdir} -gt 0 ] && echo "Symlink $incdir/PCSC -> $headerdir created, to point to the PCSC header files." || "No PCSC header files found in $prefixdir and it's sub directories!";
@@ -629,22 +631,14 @@ _check_lib(){
 		*) echo "not implemented yet!";
 	esac;
 };
-_check_bin(){
-
-	bins=( git curl jq gcc g++ gperf bison flex texinfo help2man make libncurses5-dev \
-		   python3-dev autoconf automake libtool libtool-bin gawk wget bzip2 xz-utils unzip \
-		   patch libstdc++6 rsync );
-	failed=0;
-	for e in "${bins[@]}";
-	do
-		dpkg -s "$e" &>/dev/null;
-		if [ ! "$?" -eq "0" ];then
-			packages="$packages $e";
-			failed=1;
-		fi;
-	done;
-	[ "$failed" == 1 ] && echo -e "$r_l""\nCHECK -> You need to install the following tools to use this plugin properly:\n"$y_l"apt install$packages\n""$re_" && _paktc_timer 10;
-	return $failed;
+_check_pkg(){
+	pkgs=( git patch curl jq gcc g++ gperf bison flex makeinfo help2man make file cmp \
+		  python3-config autoconf automake libtoolize libtool gawk wget bzip2 xz unzip rsync );
+	headers=( ncurses );
+	libs=( libstdc++.so.6 );
+	if syscheck "" "" "${pkgs[*]}" "${headers[*]}" "${libs[*]}";then
+		echo -e "$r_l""\nCHECK -> You need to manually install the following packages to use this plugin properly:\n"$y_l"$prefix apt install$packages\n""$re_" && _paktc_timer 10;
+	fi;
 };
 _check_config(){
 	nok=0;

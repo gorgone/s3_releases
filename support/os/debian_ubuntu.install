@@ -21,6 +21,20 @@ do
 		xz)
 			inst="xz-utils";
 			;;
+		makeinfo)
+			inst="texinfo";
+			;;
+		python3-config)
+			inst="python3-dev";
+			;;
+		libtoolize)
+			inst="libtool";
+			;;
+		libtool)
+			inst="libtool-bin";
+			;;
+		cmp)
+			inst="diffutils";
 		esac;
 		printf -v pad %40s; e=$e$pad; e=${e:0:15};
 		echo -e "$w_l  select $g_l$e$y_l from: $inst";
@@ -45,6 +59,9 @@ do
 		pthread.h)
 				inst="libc-dev-bin";
 			;;
+		ncurses)
+				inst="libncurses-dev";
+			;;
 		esac;
 		printf -v pad %40s; e=$e$pad; e=${e:0:15};
 		echo -e "$w_l  select $g_l$e$y_l from: $inst";
@@ -59,6 +76,9 @@ do
 		case $e in
 		libccidtwin.so)
 				inst="libccid";
+			;;
+		libstdc++.so.6)
+				inst="libstdc++6";
 			;;
 		esac;
 		printf -v pad %40s; e=$e$pad; e=${e:0:15};

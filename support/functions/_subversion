@@ -26,7 +26,17 @@ checkout(){
 	printf "\n$w_l  $(REPO) checkout  : "
 
 	if $(USEGIT); then
-		git clone --quiet "$trunkurl" "$svndir";
+		git clone --quiet "$trunkurl" "$svndir"
+		if [[ $? eq 0 ]]; then
+			pushd "$svndir" >/dev/null
+			while read line filename; do
+				counter=$(( 100*(++i)/n));
+				tput cup 11 18;
+				[ "$counter" -lt "100" ] && echo -en "$g_l""$counter%$re_" || echo -en "$g_l""100%$re_";
+			done < <(git ls-files| awk '{print $1}');
+			popd >/dev/null
+		fi
+
 	else
 		while read line filename
 		do

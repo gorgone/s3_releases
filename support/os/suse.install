@@ -52,6 +52,24 @@ do
 		xz)
 			inst="xz-utils";
 			;;
+		makeinfo)
+			inst="texinfo";
+			;;
+		python3-config)
+			inst="python3-devel";
+			;;
+		libtoolize)
+			inst="libtool";
+			;;
+		libtool)
+			inst="libtool-bin";
+			;;
+		cmp)
+			inst="diffutils";
+			;;
+		g++)
+			inst="gcc-c++";
+			;;
 		esac;
 		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
 		packages="$packages $inst";
@@ -75,6 +93,9 @@ do
 		pthread.h)
 				inst="glibc-devel";
 			;;
+		ncurses)
+				inst="ncurses-devel";
+			;;
 		esac;
 		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
 		packages="$packages $inst";
@@ -88,6 +109,9 @@ do
 		case $e in
 		libccidtwin.so)
 				inst="pcsc-ccid";
+			;;
+		libstdc++.so.6)
+				inst="libstdc++6";
 			;;
 		esac;
 		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";

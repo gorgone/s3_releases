@@ -130,9 +130,9 @@ then
 	done
 fi
 
-binvars=( dialog git grep gawk wget tar bzip2 svn xz upx patch gcc make scp sshpass openssl dos2unix );
-headervars=( crypto.h libusb.h pcsclite.h pthread.h )
-libvars=( libccidtwin.so )
+[ -z ${3+x} ] && binvars=( dialog git grep gawk wget tar bzip2 svn xz upx patch gcc make scp sshpass openssl dos2unix ) || binvars=( $(echo "$3" | tr ' ' '\n') )
+[ -z ${4+x} ] && headervars=( crypto.h libusb.h pcsclite.h pthread.h ) || headervars=( $(echo "$4" | tr ' ' '\n') )
+[ -z ${5+x} ] && libvars=( libccidtwin.so ) || libvars=( $(echo "$5" | tr ' ' '\n') )
 sanity=1
 
 if ! prerequisites silent || [ "$now" == "now" ]
@@ -150,7 +150,7 @@ then
 	[ -f /etc/redhat-release ] && installer="redhat_os"
 
 	# Manjaro (/etc/os-release)
-	[ -f /etc/manjaro-release ] && installer="manjaro_os"
+	[ -f /etc/manjaro-release ] || [ -f /etc/arch-release ] && installer="manjaro_os"
 
 	# SuSE (/etc/SuSE-release is depreciated -> check for YaST2)
 	[ -d /etc/YaST2 ] && installer="suse_os"
