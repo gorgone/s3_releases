@@ -27,7 +27,7 @@ checkout(){
 
 	if $(USEGIT); then
 		git clone --quiet "$trunkurl" "$svndir"
-		if [[ $? eq 0 ]]; then
+		if [ $? eq 0 ]; then
 			pushd "$svndir" >/dev/null
 			while read line filename; do
 				counter=$(( 100*(++i)/n));
