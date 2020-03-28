@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.11.4";
+	pversion="0.11.5";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -348,7 +348,11 @@ _create_tc(){
 							if [ ! $err -gt 0 ]; then
 								#get target from build.log
 								target=$(sed -n -e '/target = / s/.*\= *//p' "$ctsrcdir/build.log");
-							
+								
+								#get CT_BUILD_TOP_DIR aka temporary toolchain build directory from build.log and delete it to save disk space
+								buildtopdir=$(sed -n -e '/CT_BUILD_TOP_DIR=\// s/.*\= *//p' "$ctsrcdir/build.log");
+								[ -d "$buildtopdir" ] && rm -rf "$buildtopdir" 2>/dev/null;
+								
 								#compress toolchain
 								_compress "$dldir/Toolchain-$tpl.tar.xz" "$tcdir/$tpl" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Compress cross toolchain $tpl to Toolchain-$tpl.tar.xz ]- " "$pb_" "$_lines" "$_cols";
 								
