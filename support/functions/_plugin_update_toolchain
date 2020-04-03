@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.12.0";
+	pversion="0.12.1";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -49,7 +49,7 @@ tcupdate(){
 	#change config value's
 	if [ "$CMDTC" == "-cfg" ] || [ "$CMDTC" == "--config" ];then
 		_change_config "$OPTION1" "$OPTION2";
-		CMDTC="" && OPTION1="$2" &&	OPTION2="$3";
+		[ "$FLAG" == "1" ] && return || bye;
 	fi;
 	
 	#load config	
@@ -59,7 +59,7 @@ tcupdate(){
 	_check_config;
 	
 	#ct-ng must not be run as root unless you forcing it by config
-	if [ ! _check_root ] || [ "$CTNG_BUILD_AS_ROOT" == "1" ];then
+	if ! _check_root || [ "$CTNG_BUILD_AS_ROOT" == "1" ];then
 		CTNG_START_BUILD=1;
 	else
 		CTNG_START_BUILD=0;
@@ -67,7 +67,7 @@ tcupdate(){
 		CTNG_ROOT_BUILD_ERROR="\nERROR -> The execution of crosstool-NG was aborted because it must not run as root!\n\n""$sp""If you are aware of the danger of running crosstool-NG as root and you\n""$sp""know what you are doing, you can force it with the following command:\n\n";
 		CTNG_ROOT_BUILD_CMD="$sp""./s3 tcupdate --config \"CTNG_BUILD_AS_ROOT\" \"1\"\n";
 	fi;
-	
+
 	if [ "$CMDTC" == "-c" ] || [ "$CMDTC" == "--create" ];then	#start toolchain builder menu
 		_create_tc "$OPTION1" "" "$FLAG";
 		[ "$FLAG" == "1" ] && return || bye;
@@ -308,6 +308,7 @@ _create_tc(){
 			0) #Start - Build cross toolchain
 				#Setup crosstool-NG automatically if not installed
 				if [ ! -f "$ctsrcdir/ct-ng" ]; then
+					clear;
 					echo -e "$r_l""\nCHECK -> crosstool-NG is not setup correctly. Try to fix it automatically...\n""$re_";
 					_paktc_timer 5;
 					_ctng_setup "$CTNG_START_BUILD";
@@ -386,8 +387,7 @@ _create_tc(){
 					fi;
 				done;;
 			1) #Setup - Setup crosstool-NG
-				_ctng_setup "$CTNG_START_BUILD";
-				_paktc_timer 10;;
+				_ctng_setup "$CTNG_START_BUILD";;
 			2) #Edit
 				tpl=$(echo "$opts" | awk '{printf $2}';);
 				_ctng_menu "$tpl";;
@@ -487,7 +487,8 @@ _ctng_setup(){
 		done
 		( eval "${setuptasks[@]}" ) 2>&1;
 	else
-		echo -e "$CTNG_ROOT_BUILD_ERROR$CTNG_ROOT_BUILD_CMD"
+		echo -e "$CTNG_ROOT_BUILD_ERROR$CTNG_ROOT_BUILD_CMD";
+		sleep 5;
 	fi;
 	) | tee "$logfile" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Setup crosstool-NG ]- " "$pb_" "$_lines" "$_cols";
 };
@@ -702,6 +703,7 @@ _change_config(){
 		echo -e "$r_l""\nCHECK -> Modifying "$y_l"tasks-variables"$r_l" not implemented yet!\n""$re_";
 		_paktc_timer 10;
 	else
+		cp -f "$configname" "$configname.$(date +"%Y%m%d%H%M%S")"
 		sed -i "s#^$1=.*#$1=$qte$2$qte; \#changed on $ts via tcupdate commandline#g" "$configname";
 		result=$(grep -E "^$1=.*" "$configname" | awk '{printf $1}');
 		echo -e "$g_l""\nDONE -> Variable changed to: "$y_l"$result\n""$re_";
