@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.12.1";
+	pversion="0.12.2";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -170,8 +170,9 @@ tcupdate(){
 			[ "${!i}" == "0" ] && continue;
 			libkey=$i;
 			libname="$i"_name;libname=${!libname};
-			libdesc="$i"_desc;libdesc=${!libdesc};
 			libversion="$i"_version;libversion=${!libversion};
+			libdesc="$i"_desc;libdesc=${!libdesc};
+			[ ${#libdesc} -eq 0 ] && libdesc="$libname $libversion";
 			libcheck="$i"_check;libcheck=${!libcheck};
 			libversioncheck=$(echo "$libcheck" | awk '{printf $2}')
 			libcheck=$(echo "$libcheck" | awk '{printf $1}')
@@ -182,12 +183,13 @@ tcupdate(){
 			libexports="$i"_exports[@];libexports=("${!libexports}");
 			libconfigure="$i"_configure[@];libconfigure=("${!libconfigure}");
 			libmake="$i"_make[@];libmake=("${!libmake}");
-			
+
 			#Preselection and formatting
 			[ "$libversioncompare" == "=" ] && libtxtfmt="\Z2" || libtxtfmt="";
+			[ "$libversioncompare" == "<" ] && libtxtfmt="\Z1";
 			[ "$libversioncompare" == ">" ] && [ ${#libversioncurrent} -gt 0 ] && libselected="on" && libtxtfmt="\Z5" || libselected="off";
 			
-			MENU_OPTIONS+=("$i"		"$libname $libversion		$([ $libversioncurrent ] && echo $libversioncompare)	$libtxtfmt$(echo $libversioncurrent | sed -e 's/^$/ ---/g')\Zn"		"$(echo $libselected)"	"$([ $libname ] && echo "$libname $libversion: $liburl")");counter;
+			MENU_OPTIONS+=("$i"		"$libdesc""$(printf '%*s' $((24-${#libdesc})))""$libtxtfmt$([ $libversioncurrent ] && echo $libversioncompare)	$(echo $libversioncurrent | sed -e 's/^$/ ---/g')\Zn"		"$(echo $libselected)"	"$([ $libname ] && echo "$libdesc: $liburl")");counter;
 
 			#     0 key     1 desc     2 version     3 checkversion     4 checkfile 5 current version    6 url      7 tasks array
 			lib=("$libkey" "$libname" "$libversion" "$libversioncheck" "$libcheck" "$libversioncurrent" "$liburl" "(${libtasks[*]@Q})");
@@ -201,7 +203,7 @@ tcupdate(){
 		else
 			clear;clear;
 			opts=$("$gui" "--item-help" "--help-tags" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--default-item" "$lkey" "--ok-label" "Start" "--help-button" "--help-label" "Info" "--cancel-label" "$([ "$backxit" == "1" ] && echo "Back" || echo "Exit")" "--title" "-[ Library Update Menu - \Z2$tc\Zn ]-" "$cl_"\
-				"\nSelect all libraries to update in toolchain's SYSROOT folder:\n$prefixdir\n\n       library version    NEW                    CURRENT" \
+				"\nSelect all libraries to update in toolchain's SYSROOT folder:\n$prefixdir\n\n         library   version NEW                   CURRENT" \
 				"${COUNT+12}" 70 0 "${MENU_OPTIONS[@]}");
 			ret="$?"
 		fi;
