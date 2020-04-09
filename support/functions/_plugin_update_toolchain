@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.11.4";
+	pversion="0.12.2";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -17,6 +17,7 @@ tcupdate(){
 	[ -z "$4" ] && FLAG="0" || FLAG="$4"; #1 - tcupdate call from s3 main menu, 2 - tcupdate call from s3 toolchain menu;
 	tc="$CMDTC";
 	
+	#check/install prerequisites
 	clear && _check_pkg;
 
 	#backup config
@@ -45,12 +46,28 @@ tcupdate(){
 		_paktc_timer 5;
 	fi;
 	
+	#change config value's
+	if [ "$CMDTC" == "-cfg" ] || [ "$CMDTC" == "--config" ];then
+		_change_config "$OPTION1" "$OPTION2";
+		[ "$FLAG" == "1" ] && return || bye;
+	fi;
+	
 	#load config	
 	source "$configname";
 	
 	#check config
 	_check_config;
 	
+	#ct-ng must not be run as root unless you forcing it by config
+	if ! _check_root || [ "$CTNG_BUILD_AS_ROOT" == "1" ];then
+		CTNG_START_BUILD=1;
+	else
+		CTNG_START_BUILD=0;
+		sp=$(printf '%*s' 9);
+		CTNG_ROOT_BUILD_ERROR="\nERROR -> The execution of crosstool-NG was aborted because it must not run as root!\n\n""$sp""If you are aware of the danger of running crosstool-NG as root and you\n""$sp""know what you are doing, you can force it with the following command:\n\n";
+		CTNG_ROOT_BUILD_CMD="$sp""./s3 tcupdate --config \"CTNG_BUILD_AS_ROOT\" \"1\"\n";
+	fi;
+
 	if [ "$CMDTC" == "-c" ] || [ "$CMDTC" == "--create" ];then	#start toolchain builder menu
 		_create_tc "$OPTION1" "" "$FLAG";
 		[ "$FLAG" == "1" ] && return || bye;
@@ -71,7 +88,7 @@ tcupdate(){
 		else
 			_nl && exit;
 		fi;
-	elif [ "$CMDTC" == "-ctng" ];then #croostool-NG menu
+	elif [ "$CMDTC" == "-ctng" ] || [ "$CMDTC" == "--crosstool-ng" ];then #croostool-NG menu
 		_ctng_menu "$OPTION1";
 		bye;
 	elif [ -z "$CMDTC" ];then
@@ -153,8 +170,9 @@ tcupdate(){
 			[ "${!i}" == "0" ] && continue;
 			libkey=$i;
 			libname="$i"_name;libname=${!libname};
-			libdesc="$i"_desc;libdesc=${!libdesc};
 			libversion="$i"_version;libversion=${!libversion};
+			libdesc="$i"_desc;libdesc=${!libdesc};
+			[ ${#libdesc} -eq 0 ] && libdesc="$libname $libversion";
 			libcheck="$i"_check;libcheck=${!libcheck};
 			libversioncheck=$(echo "$libcheck" | awk '{printf $2}')
 			libcheck=$(echo "$libcheck" | awk '{printf $1}')
@@ -165,12 +183,13 @@ tcupdate(){
 			libexports="$i"_exports[@];libexports=("${!libexports}");
 			libconfigure="$i"_configure[@];libconfigure=("${!libconfigure}");
 			libmake="$i"_make[@];libmake=("${!libmake}");
-			
+
 			#Preselection and formatting
 			[ "$libversioncompare" == "=" ] && libtxtfmt="\Z2" || libtxtfmt="";
+			[ "$libversioncompare" == "<" ] && libtxtfmt="\Z1";
 			[ "$libversioncompare" == ">" ] && [ ${#libversioncurrent} -gt 0 ] && libselected="on" && libtxtfmt="\Z5" || libselected="off";
 			
-			MENU_OPTIONS+=("$i"		"$libname $libversion		$([ $libversioncurrent ] && echo $libversioncompare)	$libtxtfmt$(echo $libversioncurrent | sed -e 's/^$/ ---/g')\Zn"		"$(echo $libselected)"	"$([ $libname ] && echo "$libname $libversion: $liburl")");counter;
+			MENU_OPTIONS+=("$i"		"$libdesc""$(printf '%*s' $((24-${#libdesc})))""$libtxtfmt$([ $libversioncurrent ] && echo $libversioncompare)	$(echo $libversioncurrent | sed -e 's/^$/ ---/g')\Zn"		"$(echo $libselected)"	"$([ $libname ] && echo "$libdesc: $liburl")");counter;
 
 			#     0 key     1 desc     2 version     3 checkversion     4 checkfile 5 current version    6 url      7 tasks array
 			lib=("$libkey" "$libname" "$libversion" "$libversioncheck" "$libcheck" "$libversioncurrent" "$liburl" "(${libtasks[*]@Q})");
@@ -184,7 +203,7 @@ tcupdate(){
 		else
 			clear;clear;
 			opts=$("$gui" "--item-help" "--help-tags" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--default-item" "$lkey" "--ok-label" "Start" "--help-button" "--help-label" "Info" "--cancel-label" "$([ "$backxit" == "1" ] && echo "Back" || echo "Exit")" "--title" "-[ Library Update Menu - \Z2$tc\Zn ]-" "$cl_"\
-				"\nSelect all libraries to update in toolchain's SYSROOT folder:\n$prefixdir\n\n       library version    NEW                    CURRENT" \
+				"\nSelect all libraries to update in toolchain's SYSROOT folder:\n$prefixdir\n\n         library   version NEW                   CURRENT" \
 				"${COUNT+12}" 70 0 "${MENU_OPTIONS[@]}");
 			ret="$?"
 		fi;
@@ -248,9 +267,6 @@ tcupdate(){
 _create_tc(){
 	_sz;					# Prepare DIALOG settings
 
-	#ct-ng must not be run as root unless you forcing it by config
-	! _check_root && START_BUILD=1 || [ "$CTNG_BUILD_AS_ROOT" == "1" ] && START_BUILD=1 || START_BUILD=0;
-	
 	local menu_close;
 	while [ ! $menu_close ]
 	do
@@ -294,9 +310,10 @@ _create_tc(){
 			0) #Start - Build cross toolchain
 				#Setup crosstool-NG automatically if not installed
 				if [ ! -f "$ctsrcdir/ct-ng" ]; then
+					clear;
 					echo -e "$r_l""\nCHECK -> crosstool-NG is not setup correctly. Try to fix it automatically...\n""$re_";
 					_paktc_timer 5;
-					_ctng_setup "$START_BUILD";
+					_ctng_setup "$CTNG_START_BUILD";
 				fi;
 				
 				#Build cross toolchains
@@ -329,7 +346,7 @@ _create_tc(){
 						echo -e "cd \"$ctsrcdir\";\n$(_replace_tokens "$bcl")\n$sp""$re_" | tee -a "$logfile";
 						sleep 2;
 
-						if [ $START_BUILD -eq 1 ]; then
+						if [ $CTNG_START_BUILD -eq 1 ]; then
 							cd "$ctsrcdir";
 							#print out crosstool-NG version
 							echo -e "$g_l\n$(./ct-ng | grep 'crosstool-NG version' &2>/dev/null | tail -1)\n""$re_" | tee -a "$logfile";
@@ -348,7 +365,11 @@ _create_tc(){
 							if [ ! $err -gt 0 ]; then
 								#get target from build.log
 								target=$(sed -n -e '/target = / s/.*\= *//p' "$ctsrcdir/build.log");
-							
+								
+								#get CT_BUILD_TOP_DIR aka temporary toolchain build directory from build.log and delete it to save disk space
+								buildtopdir=$(sed -n -e '/CT_BUILD_TOP_DIR=\// s/.*\= *//p' "$ctsrcdir/build.log");
+								[ -d "$buildtopdir" ] && rm -rf "$buildtopdir" 2>/dev/null;
+								
 								#compress toolchain
 								_compress "$dldir/Toolchain-$tpl.tar.xz" "$tcdir/$tpl" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Compress cross toolchain $tpl to Toolchain-$tpl.tar.xz ]- " "$pb_" "$_lines" "$_cols";
 								
@@ -359,7 +380,7 @@ _create_tc(){
 								_paktc_timer 10;
 							fi;
 						else
-							echo -e "$r_l""\nERROR -> The execution of crosstool-NG was aborted\n         because it must not run as root!\n""$re_" | tee -a "$logfile";
+							echo -e "$r_l""$CTNG_ROOT_BUILD_ERROR""$y_l""$CTNG_ROOT_BUILD_CMD""$re_" | tee -a "$logfile";
 							_paktc_timer 10;
 						fi;
 					else
@@ -368,8 +389,7 @@ _create_tc(){
 					fi;
 				done;;
 			1) #Setup - Setup crosstool-NG
-				_ctng_setup "$START_BUILD";
-				_paktc_timer 10;;
+				_ctng_setup "$CTNG_START_BUILD";;
 			2) #Edit
 				tpl=$(echo "$opts" | awk '{printf $2}';);
 				_ctng_menu "$tpl";;
@@ -469,7 +489,8 @@ _ctng_setup(){
 		done
 		( eval "${setuptasks[@]}" ) 2>&1;
 	else
-		echo -e "\nERROR -> The execution of crosstool-NG was aborted\n         because it must not run as root!\n";
+		echo -e "$CTNG_ROOT_BUILD_ERROR$CTNG_ROOT_BUILD_CMD";
+		sleep 5;
 	fi;
 	) | tee "$logfile" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Setup crosstool-NG ]- " "$pb_" "$_lines" "$_cols";
 };
@@ -640,19 +661,6 @@ _check_pkg(){
 		echo -e "$r_l""\nCHECK -> You need to manually install the following packages to use this plugin properly:\n"$y_l"$prefix apt install$packages\n""$re_" && _paktc_timer 10;
 	fi;
 };
-_check_config(){
-	nok=0;
-	[ -z ${CTNG_CONFIG_tasks+x} ] && nok=1;
-	[ -z ${CTNG_BUILD_AS_ROOT+x} ] && nok=1;
-	[ -z ${LIBS+x} ] && nok=1;
-	
-	if [ $nok -eq 1 ]; then 
-		clear;
-		echo -e "$r_l""\nCHECK -> Your config file seems to be outdated. Please restart s3 as follows to recreate an updated config file:\n"$y_l"./s3 tcupdate -r\n""$re_";
-		_paktc_timer 10;
-		return $nok;
-	fi;
-};	
 _check_github_api_limits(){
 	
 	limit=$(curl --silent "https://api.github.com/rate_limit" | jq -r '.resources.core.limit');
@@ -671,6 +679,41 @@ _check_github_api_limits(){
 	else
 		return 1;
 	fi;
+};
+_check_config(){
+	nok=0;
+	[ -z ${CTNG_CONFIG_tasks+x} ] && nok=1;
+	[ -z ${CTNG_BUILD_AS_ROOT+x} ] && nok=1;
+	[ -z ${LIBS+x} ] && nok=1;
+	
+	if [ $nok -eq 1 ]; then 
+		clear;
+		echo -e "$r_l""\nCHECK -> Your config file seems to be outdated. Please restart s3 as follows to recreate an updated config file:\n"$y_l"./s3 tcupdate -r\n""$re_";
+		_paktc_timer 10;
+		return $nok;
+	fi;
+};	
+_change_config(){
+	nok=1;
+	ts="$(date +%F) $(date +%T)";
+	[[ ! $2 =~ "(" ]] && [[ ! $string =~ ")" ]] && qte="\"" || qte=""; #no quotes if value contains parentheses
+	
+	if ! grep -Eq "^$1=.*" "$configname";then
+		echo -e "$r_l""\nCHECK -> Variable "$y_l"$1"$r_l" does not exist in the configuration file!\n""$re_";
+		_paktc_timer 10;
+	elif [ "${1:(-6)}" == "_tasks" ];then
+		echo -e "$r_l""\nCHECK -> Modifying "$y_l"tasks-variables"$r_l" not implemented yet!\n""$re_";
+		_paktc_timer 10;
+	else
+		cp -f "$configname" "$configname.$(date +"%Y%m%d%H%M%S")"
+		sed -i "s#^$1=.*#$1=$qte$2$qte; \#changed on $ts via tcupdate commandline#g" "$configname";
+		result=$(grep -E "^$1=.*" "$configname" | awk '{printf $1}');
+		echo -e "$g_l""\nDONE -> Variable changed to: "$y_l"$result\n""$re_";
+		_paktc_timer 5;
+		nok=0;
+	fi;
+
+	return $nok;
 };
 _create_config(){
 	#check existing jq
