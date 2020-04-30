@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.12.2";
+	pversion="0.12.3";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -103,7 +103,7 @@ tcupdate(){
 					for i in "${INST_TCLIST[@]}";do
 						if [ ! "$i" == "native" ];then
 							source "$tccfgdir/$i";
-							[ -f "$tcdir/$i/build.log.bz2" ] && tcdate=" ct-ng."$(date -r "$tcdir/$i/build.log.bz2" "+%Y-%m-%d %H:%M:%S") || tcdate="";
+							[ -f "$tcdir/$i/build.log.bz2" ] && tcdate=" ct-ng."$(date -r "$tcdir/$i/build.log.bz2" "+%F %T") || tcdate="";
 							MENU_OPTIONS+=("$_toolchainname" "$_description\Z2$tcdate\Zn" "toolchain folder:$tcdir/$i | config file:$tccfgdir/$i");
 							counter;
 						fi;
@@ -213,7 +213,7 @@ tcupdate(){
 
 		case $ret in
 			0) #Start - Build library
-				ts=$(date +%F)_$(date +%T);
+				ts=$(date +%F.%H%M%S);
 				tmpdir="/tmp/lib_source/$ts";
 				icount=$(echo $opts | wc -w);i=0;
 				for o in $opts;do
@@ -221,7 +221,7 @@ tcupdate(){
 					for l in "${libs[@]}";do
 						declare -a lib="${l[*]}";				#populate libs array element
 						[ ! "$o" == "${lib[0]}" ] && continue || ((i++));
-						logfile="$ldir/"$ts"_update_toolchain_"$_toolchainname"_"${lib[1]}"_"${lib[2]}".log"
+						logfile="$ldir/"$ts"_tup_"$_toolchainname"_"${lib[1]}"_"${lib[2]}".log"
 
 						#generate build command list
 						declare -a libtasks="${lib[7]}";		#populate tasks array element
@@ -321,10 +321,11 @@ _create_tc(){
 				for tpl in $opts;do
 					if [ -f "$cttpldir/$tpl" ]; then
 
-						logfile="$ldir/$(date +%F)_$(date +%T)_update_toolchain_crosstoolchain_"$tpl".log"; ((i++)); 
+						logfile="$ldir/$(date +%F.%H%M%S)_tup_crosstoolchain_"$tpl".log"; ((i++)); 
 
 						clear;
 						sp=$(printf '%*s' 80 | tr ' ' '=')
+						echo -e "$pdesc - create cross toolchain log - $(date +"%F %T")" | tee -a "$logfile";
 						echo -e "$y_l$sp\nbuild ($i/$icount): command list for cross toolchain $tpl:\n$sp" | tee -a "$logfile";
 
 						#copy template and patching them
@@ -433,6 +434,7 @@ _build(){
 	bcl=$(printf '%s\n' "${tasks[@]}");
 	
 	sp=$(printf '%*s' 80 | tr ' ' '=')
+	echo -e "$pdesc - update library log - $(date +"%F %T")" | tee -a "$lf";
 	echo -e "$sp\nbuild command list for $desc:\n$sp\ncd "$libsrcdir\;"\n$bcl\n$sp" | tee -a "$lf";
 	sleep 2;
 	cd "$libsrcdir";
@@ -469,10 +471,11 @@ _ctng_menu(){
 	( eval "${configtasks[@]}" ) 2>&1;
 };
 _ctng_setup(){
-	logfile="$ldir/$(date +%F)_$(date +%T)_update_toolchain_crosstool-NG_setup.log"
+	logfile="$ldir/$(date +%F.%H%M%S)_tup_ctng_setup.log"
 	(
 	bcl=$(printf '%s\n' "${CTNG_SETUP_tasks[@]}");
 	sp=$(printf '%*s' 80 | tr ' ' '=')
+	echo -e "$pdesc - install ctng log - $(date +"%F %T")";
 	echo -e "$sp\nbuild command list for crosstool-NG:\n$sp\ncd "$ctsrcdir"\n$(_replace_tokens "$bcl")\n$sp";
 	sleep 2;
 	
@@ -695,7 +698,7 @@ _check_config(){
 };	
 _change_config(){
 	nok=1;
-	ts="$(date +%F) $(date +%T)";
+	ts="$(date +%F %T)";
 	[[ ! $2 =~ "(" ]] && [[ ! $string =~ ")" ]] && qte="\"" || qte=""; #no quotes if value contains parentheses
 	
 	if ! grep -Eq "^$1=.*" "$configname";then
@@ -726,7 +729,7 @@ _create_config(){
 						"('./ct-ng menuconfig;')"
 						"('TPL_SAVE=\$(\$gui --defaultno --output-fd 1 --ok-label \"Yes\" --cancel-label \"No\" --colors \$bt_ \"\$title_ - \Z0\$pdesc\Zn\" --title \"-[ Save Cross Toolchain Template ]-\" --inputbox \"\\\nWould you like to \ZrSAVE\ZR this toolchain template \Zrnow\ZR?\" 10 55 \"@TEMPLATE@\") && cp \"\$ctsrcdir/.config\" \"\$TPL_SAVE\";')"
 						"('TC_SAVE=\$(\$gui --defaultno --output-fd 1 --ok-label \"Yes\" --cancel-label \"No\" --colors \$bt_ \"\$title_ - \Z0\$pdesc\Zn\" --title \"-[ Build Cross Toolchain ]-\" --inputbox \"\\\nWould you like to \ZrBUILD\ZR this toolchain \Zrnow\ZR?\" 10 55 \"@TOOLCHAIN@\");')"
-						"('[ -n \"\$TC_SAVE\" ] && BUILD_TC=\$(basename \"\$TC_SAVE\") && BUILD_LOG=\"\$ldir/\$(date +%F)_\$(date +%T)_update_toolchain_crosstoolchain_\$(basename \"\$TC_SAVE\").log\";')"
+						"('[ -n \"\$TC_SAVE\" ] && BUILD_TC=\$(basename \"\$TC_SAVE\") && BUILD_LOG=\"\$ldir/\$(date +%F.%H%M%S)_tup_crosstoolchain_\$(basename \"\$TC_SAVE\").log\";')"
 						"('[ -n \"\$TC_SAVE\" ] && sed -i \"s#.*CT_LOCAL_TARBALLS_DIR=.*#CT_LOCAL_TARBALLS_DIR=\\\"\$dldir\\\"#g\" \"\$ctsrcdir/.config\" && sed -i \"s#.*CT_PREFIX_DIR=.*#CT_PREFIX_DIR=\\\"\$TC_SAVE\\\"#g\" \"\$ctsrcdir/.config\";')"
 						"('[ -n \"\$TC_SAVE\" ] && clear && ./ct-ng show-config && ./ct-ng build;')"
 						"('[ -n \"\$TC_SAVE\" ] && cat \"\$ctsrcdir/build.log\" >\"\$BUILD_LOG\";')"
