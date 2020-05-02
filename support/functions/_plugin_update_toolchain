@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.12.3";
+	pversion="0.12.4";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -451,7 +451,7 @@ _build(){
 	
 };
 _ctng_menu(){
-	tc="$1";tpl="$tc";
+	tc="$1";tpl="$tc";unset configtasks;
 
 	if [ -f "$cttpldir/$tpl" ];then #copy the existing template to edit it
 		cp --no-preserve=mode,ownership -f "$cttpldir/$tpl" "$ctsrcdir/.config"
