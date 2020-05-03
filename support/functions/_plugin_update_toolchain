@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.12.6";
+	pversion="0.12.7";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -757,8 +757,7 @@ _create_config(){
 		return 1;
 	fi;
 	
-	ctng_config_tasks=( "('./ct-ng upgradeconfig;')"
-						"('./ct-ng menuconfig;')"
+	ctng_config_tasks=( "('./ct-ng menuconfig;')"
 						"('TPL_SAVE=\$(\$gui --defaultno --output-fd 1 --ok-label \"Yes\" --cancel-label \"No\" --colors \$bt_ \"\$title_ - \Z0\$pdesc\Zn\" --title \"-[ Save Cross Toolchain Template ]-\" --inputbox \"\\\nWould you like to \ZrSAVE\ZR this toolchain template \Zrnow\ZR?\" 10 55 \"@TEMPLATE@\") && cp \"\$ctsrcdir/.config\" \"\$TPL_SAVE\";')"
 						"('TC_SAVE=\$(\$gui --defaultno --output-fd 1 --ok-label \"Yes\" --cancel-label \"No\" --colors \$bt_ \"\$title_ - \Z0\$pdesc\Zn\" --title \"-[ Build Cross Toolchain ]-\" --inputbox \"\\\nWould you like to \ZrBUILD\ZR this toolchain \Zrnow\ZR?\" 10 55 \"@TOOLCHAIN@\");')"
 						"('[ -n \"\$TC_SAVE\" ] && BUILD_TC=\$(basename \"\$TC_SAVE\") && BUILD_LOG=\"\$ldir/\$(date +%F.%H%M%S)_tup_crosstoolchain_\$(basename \"\$TC_SAVE\").log\";')"
@@ -771,8 +770,7 @@ _create_config(){
 						"('[ -n \"\$TC_SAVE\" ] && [ ! \$BUILD_ERROR -gt 0 ] && @CREATECFG@ \"\$tcdir/\$BUILD_TC\" \"\$BUILD_TC\" \"\$BUILD_TARGET\" \"\" \"\" \"\$BUILD_DESC\" \"\" \"\$dldir/Toolchain-\$BUILD_TC.tar.xz\" \"yes\";')" );
 	ctng_config_tasks_comment="#config command";
 	
-	ctng_build_tasks=( "('./ct-ng upgradeconfig | tee -a \"@LOGFILE@\";')"
-					   "('./ct-ng show-config | tee -a \"@LOGFILE@\";')"
+	ctng_build_tasks=( "('./ct-ng show-config | tee -a \"@LOGFILE@\";')"
 					   "('./ct-ng build;')" );
 	ctng_build_tasks_comment="#build command";
 	
