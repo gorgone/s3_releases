@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.12.4";
+	pversion="0.12.5";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -290,8 +290,7 @@ _create_tc(){
 			unset MENU_OPTIONS;COUNT=0;
 			if [ "$tplempty" == "0" ];then
 				for t in "${TPL_LIST[@]}";do
-					desc=$(sed -n -e '/#toolchain template/ s/.*\: *//p' $t);
-					[ ! "$desc" ] && desc="no description available";
+					desc=$(_get_template_properties "$t")
 					[ -d "$tcdir/$t" ] && [ -f "$tccfgdir/$t" ] && color="\Z1" || color="";
 					MENU_OPTIONS+=("$t" "$color$desc\Zn" "off" "template filename:$cttpldir/$t");counter;
 					counter;
@@ -375,7 +374,7 @@ _create_tc(){
 								_compress "$dldir/Toolchain-$tpl.tar.xz" "$tcdir/$tpl" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Compress cross toolchain $tpl to Toolchain-$tpl.tar.xz ]- " "$pb_" "$_lines" "$_cols";
 								
 								#create toolchain.cfg
-								desc=$(sed -n -e '/#toolchain template/ s/.*\: *//p' "$cttpldir/$tpl");
+								desc=$(_get_template_properties "$cttpldir/$tpl");
 								_create_toolchaincfg "$tcdir/$tpl" "$tpl" "$target" "" "" "$desc" "" "$dldir/Toolchain-$tpl.tar.xz" "yes";
 							else
 								_paktc_timer 10;
@@ -445,7 +444,7 @@ _build(){
 	error_on_build=$(grep -cw1 Error "$lf");
 	if [ "$error_on_build" -gt "0" ]; then
 		echo -e ""$r_l"ERRORS on build found, details:\n$b_l  $lf\n$y_l" >$(tty);
-		read -n 1 -s -r -p "Press any key to continue";
+		_paktc_timer 10;
 		echo -e "$re_$w_l";
 	fi;
 	
@@ -583,6 +582,37 @@ _tidy_tasks(){
 						s#$2"_tasks+=\(\'"##g; \
 						s#"\"\)\;"##g; \
 						s#"\'\)\;"##g;";
+};
+_get_template_properties(){
+	desc="";
+	if [ -f "$1" ];then
+		if [ -z "$2" ]; then
+			desc=$(sed -n -e '/#toolchain template/ s/.*\: *//p' "$1" | awk -F'(' '{print $1}' | xargs);
+		else
+			desc="$2";
+		fi;
+		[ -z "$desc" ] && desc="missing description"; 
+		
+		#extract template properties
+		arch=$(grep '^CT_ARCH=' "$1" | awk -F'"' '{print $2}');
+		endian=$(grep '^CT_ARCH_ENDIAN=' "$1" | awk -F'"' '{print $2}');
+		end=${endian^};
+		bitness=$(grep '^CT_ARCH_BITNESS=' "$1" | awk -F'=' '{print $2}');
+		[ "$arch" == "arm" ] && [ "$bitness" == "64" ] && arch="aarch64";
+		cpu=$(grep '^CT_ARCH_CPU=' "$1" | awk -F'"' '{print $2}');
+		[ -n "$cpu" ] && cpu=" $cpu";
+		cc=$(grep '^CT_CC=' "$1" | awk -F'"' '{print $2}');
+		ccv=$(grep -i "CT_${cc}_VERSION=" "$1" | awk -F'"' '{print $2}');
+		libc=$(grep '^CT_LIBC=' "$1" | awk -F'"' '{print $2}');
+		libcv=$(grep -i "CT_${libc}_VERSION=" "$1" | awk -F'"' '{print $2}');
+		kernel=$(grep '^CT_KERNEL=' "$1" | awk -F'"' '{print $2}');
+		kernelv=$(grep -i "CT_${kernel}_VERSION=" "$1" | awk -F'"' '{print $2}');
+
+		#build template property string
+		desc="$desc ($arch$cpu $bitness-bit ${end:0:1}E, $libc $libcv, $cc $ccv, $kernel $kernelv)";
+	fi;
+	echo $desc;
+	[ -n "$desc" ] && exit 0 || exit 1;
 };
 _get_version(){
 	r="";
@@ -782,10 +812,10 @@ _create_config(){
 				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export RANLIB=@RANLIB@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'./Configure --prefix=@PREFIX@/ linux-generic32 shared;'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" )'
 				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export RANLIB=@RANLIB@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'./Configure --prefix=@PREFIX@/ linux-generic32 shared;'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" )'
 				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export RANLIB=@RANLIB@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'./Configure --prefix=@PREFIX@/ linux-generic32 shared;'"'"')" "('"'"'make;'"'"')" "('"'"'make install SHLIB_VERSION_NUMBER=1.0.2 SHLIB_MINOR=0.2;'"'"')" )'
-				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export RANLIB=@RANLIB@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'./Configure --prefix=@PREFIX@/ linux-generic32 shared;'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" )'
-				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export RANLIB=@RANLIB@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'./Configure --prefix=@PREFIX@/ linux-generic32 shared;'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" )'
+				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export RANLIB=@RANLIB@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'[ \$(echo -e \"\$_tc_info\" | grep -ic \"musl\") -gt 0 ] && echo \"Apply the musl libc patch to avoid OpenSSL build errors due to missing termio.h...\" && curl --silent \"https://raw.githubusercontent.com/beagleboard/buildroot/master/package/openssl/openssl-004-musl-termios.patch\" | patch -p1;'"'"')" "('"'"'./Configure --prefix=@PREFIX@/ linux-generic32 shared;'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" )'
+				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export RANLIB=@RANLIB@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'[ \$(echo -e \"\$_tc_info\" | grep -ic \"musl\") -gt 0 ] && echo \"Apply the musl libc patch to avoid OpenSSL build errors due to missing termio.h...\" && curl --silent \"https://raw.githubusercontent.com/beagleboard/buildroot/master/package/openssl/openssl-004-musl-termios.patch\" | patch -p1;'"'"')" "('"'"'./Configure --prefix=@PREFIX@/ linux-generic32 shared;'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" )'
 				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'./configure --prefix=@PREFIX@/ --host=@HOST@ --disable-udev;'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" )'
-				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'./configure --prefix=@PREFIX@/ --host=@HOST@ --disable-libudev --disable-libsystemd LIBUSB_LIBS=\"-L@PREFIX@/lib -lusb-1.0 -lrt\" LIBUSB_CFLAGS=\"-I@PREFIX@/include/libusb-1.0\";'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" "('"'"'@VALIDATE@ \"PCSC\";'"'"')" )'
+				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'./configure --prefix=@PREFIX@/ --host=@HOST@ --disable-libudev --disable-libsystemd --with-systemdsystemunitdir=@PREFIX@/lib/systemd/system LIBUSB_LIBS=\"-L@PREFIX@/lib -lusb-1.0 -lrt\" LIBUSB_CFLAGS=\"-I@PREFIX@/include/libusb-1.0\";'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" "('"'"'@VALIDATE@ \"PCSC\";'"'"')" )'
 				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'./configure --prefix=@PREFIX@/;'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" )' );
 
 	echo '#CROSS toolchain build settings'	 						 						 				 				 >"$configname";
@@ -859,14 +889,14 @@ _create_toolchaincfg(){
 	[ ${#7} -gt 0 ] && info="$7" || info="$(echo -e "\\\n
 !!! crosstool-NG Toolchain !!!\\\n
 \\\n
-$6\\\n
-\\\n")";
+$(echo "$6" | awk -F'[()]' '{print $1}' | xargs)\\\n
+$(echo "$6" | awk -F'[()]' '{print $2}' | xargs)\\\n")";
 	
 	cd "$tccfgdir";
 	cat << EOF > $2
 _toolchainname="$2";
 default_use="USE_UTF8 USE_LIBCRYPTO";
-_description="$6";
+_description="$(echo "$6" | awk -F'[()]' '{print $1}' | xargs)";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
 _self_build="$([ ! "$9" == "yes" ] && echo "no" || echo "$9")";
