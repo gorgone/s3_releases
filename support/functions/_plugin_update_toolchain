@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.12.5";
+	pversion="0.12.6";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -604,7 +604,9 @@ _get_template_properties(){
 		cc=$(grep '^CT_CC=' "$1" | awk -F'"' '{print $2}');
 		ccv=$(grep -i "CT_${cc}_VERSION=" "$1" | awk -F'"' '{print $2}');
 		libc=$(grep '^CT_LIBC=' "$1" | awk -F'"' '{print $2}');
-		libcv=$(grep -i "CT_${libc}_VERSION=" "$1" | awk -F'"' '{print $2}');
+		libcu=$(grep -i "^CT_${libc}_USE=" "$1" | awk -F'"' '{print $2}');
+		[ -n "$libcu" ] && libcv=$(grep -i "CT_${libcu}_VERSION=" "$1" | awk -F'"' '{print $2}');
+		[ -z "$libcu" ] && libcv=$(grep -i "CT_${libc}_VERSION=" "$1" | awk -F'"' '{print $2}');
 		kernel=$(grep '^CT_KERNEL=' "$1" | awk -F'"' '{print $2}');
 		kernelv=$(grep -i "CT_${kernel}_VERSION=" "$1" | awk -F'"' '{print $2}');
 
