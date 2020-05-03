@@ -1,4 +1,4 @@
-#toolchain template: Dreambox DM9x0 UHD (arm based, gcc 9.2.0, Glibc 2.23)
+#toolchain template: Dreambox DM9x0 UHD
 CT_CONFIGURE_has_static_link=y
 CT_CONFIGURE_has_cxx11=y
 CT_CONFIGURE_has_wget=y
@@ -32,6 +32,7 @@ CT_SAVE_TARBALLS=y
 # CT_TARBALLS_BUILDROOT_LAYOUT is not set
 CT_WORK_DIR="${CT_TOP_DIR}/.build"
 CT_BUILD_TOP_DIR="${CT_WORK_DIR:-${CT_TOP_DIR}/.build}/${CT_HOST:+HOST-${CT_HOST}/}${CT_TARGET}"
+CT_BUILD_DIR="${CT_BUILD_TOP_DIR}/build"
 CT_PREFIX_DIR="${CT_PREFIX:-${HOME}/x-tools}/${CT_HOST:+HOST-${CT_HOST}/}${CT_TARGET}"
 CT_RM_RF_PREFIX_DIR=y
 CT_REMOVE_DOCS=y
@@ -177,7 +178,8 @@ CT_LINUX_DIR_NAME="linux"
 CT_LINUX_PKG_NAME="linux"
 CT_LINUX_SRC_RELEASE=y
 CT_LINUX_PATCH_ORDER="global"
-CT_LINUX_V_5_4=y
+CT_LINUX_V_5_5=y
+# CT_LINUX_V_5_4 is not set
 # CT_LINUX_V_5_3 is not set
 # CT_LINUX_V_5_2 is not set
 # CT_LINUX_V_5_1 is not set
@@ -204,7 +206,7 @@ CT_LINUX_V_5_4=y
 # CT_LINUX_V_3_2 is not set
 # CT_LINUX_V_2_6_32 is not set
 # CT_LINUX_NO_VERSIONS is not set
-CT_LINUX_VERSION="5.4.6"
+CT_LINUX_VERSION="5.5.5"
 CT_LINUX_MIRRORS="$(CT_Mirrors kernel.org linux ${CT_LINUX_VERSION})"
 CT_LINUX_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_LINUX_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
@@ -235,6 +237,7 @@ CT_BINUTILS_USE="BINUTILS"
 CT_BINUTILS_PKG_NAME="binutils"
 CT_BINUTILS_SRC_RELEASE=y
 CT_BINUTILS_PATCH_ORDER="global"
+# CT_BINUTILS_V_2_34 is not set
 CT_BINUTILS_V_2_33=y
 # CT_BINUTILS_V_2_32 is not set
 # CT_BINUTILS_V_2_31 is not set
@@ -292,6 +295,7 @@ CT_GLIBC_USE="GLIBC"
 CT_GLIBC_PKG_NAME="glibc"
 CT_GLIBC_SRC_RELEASE=y
 CT_GLIBC_PATCH_ORDER="global"
+# CT_GLIBC_V_2_31 is not set
 # CT_GLIBC_V_2_30 is not set
 # CT_GLIBC_V_2_29 is not set
 # CT_GLIBC_V_2_28 is not set
@@ -314,6 +318,8 @@ CT_GLIBC_2_30_or_older=y
 CT_GLIBC_older_than_2_30=y
 CT_GLIBC_2_29_or_older=y
 CT_GLIBC_older_than_2_29=y
+CT_GLIBC_2_28_or_older=y
+CT_GLIBC_older_than_2_28=y
 CT_GLIBC_2_27_or_older=y
 CT_GLIBC_older_than_2_27=y
 CT_GLIBC_2_26_or_older=y
@@ -334,6 +340,7 @@ CT_GLIBC_DEP_KERNEL_HEADERS_VERSION=y
 CT_GLIBC_DEP_BINUTILS=y
 CT_GLIBC_DEP_GCC=y
 CT_GLIBC_DEP_PYTHON=y
+CT_GLIBC_SPARC_ALLOW_V7=y
 CT_GLIBC_HAS_LIBIDN_ADDON=y
 # CT_GLIBC_USE_LIBIDN_ADDON is not set
 CT_GLIBC_NO_SPARC_V8=y
@@ -349,7 +356,7 @@ CT_GLIBC_FORCE_UNWIND=y
 # CT_GLIBC_KERNEL_VERSION_NONE is not set
 CT_GLIBC_KERNEL_VERSION_AS_HEADERS=y
 # CT_GLIBC_KERNEL_VERSION_CHOSEN is not set
-CT_GLIBC_MIN_KERNEL="5.4.6"
+CT_GLIBC_MIN_KERNEL="5.5.5"
 CT_ALL_LIBC_CHOICES="AVR_LIBC BIONIC GLIBC MINGW_W64 MOXIEBOX MUSL NEWLIB NONE UCLIBC"
 CT_LIBC_SUPPORT_THREADS_ANY=y
 CT_LIBC_SUPPORT_THREADS_NATIVE=y
@@ -389,6 +396,8 @@ CT_GCC_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_GCC_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_GCC_ARCHIVE_FORMATS=".tar.xz .tar.gz"
 CT_GCC_SIGNATURE_FORMAT=""
+CT_GCC_later_than_8=y
+CT_GCC_8_or_later=y
 CT_GCC_later_than_7=y
 CT_GCC_7_or_later=y
 CT_GCC_later_than_6=y
@@ -434,39 +443,9 @@ CT_ALL_CC_CHOICES="GCC"
 CT_CC_LANG_CXX=y
 # CT_CC_LANG_FORTRAN is not set
 # CT_DEBUG_DUMA is not set
-# CT_DUMA_SRC_RELEASE is not set
-# CT_DUMA_V_2_5_15 is not set
 # CT_DEBUG_GDB is not set
-# CT_GDB_USE_GNU is not set
-# CT_GDB_SRC_RELEASE is not set
-# CT_GDB_V_8_3 is not set
-# CT_GDB_V_8_2 is not set
-# CT_GDB_V_8_1 is not set
-# CT_GDB_V_8_0 is not set
-# CT_GDB_V_7_12 is not set
-# CT_GDB_V_7_11 is not set
 # CT_DEBUG_LTRACE is not set
-# CT_LTRACE_SRC_RELEASE is not set
-# CT_LTRACE_V_0_7_3 is not set
 # CT_DEBUG_STRACE is not set
-# CT_STRACE_SRC_RELEASE is not set
-# CT_STRACE_V_5_4 is not set
-# CT_STRACE_V_5_3 is not set
-# CT_STRACE_V_5_2 is not set
-# CT_STRACE_V_5_1 is not set
-# CT_STRACE_V_5_0 is not set
-# CT_STRACE_V_4_26 is not set
-# CT_STRACE_V_4_25 is not set
-# CT_STRACE_V_4_24 is not set
-# CT_STRACE_V_4_23 is not set
-# CT_STRACE_V_4_22 is not set
-# CT_STRACE_V_4_21 is not set
-# CT_STRACE_V_4_20 is not set
-# CT_STRACE_V_4_19 is not set
-# CT_STRACE_V_4_18 is not set
-# CT_STRACE_V_4_17 is not set
-# CT_STRACE_V_4_16 is not set
-# CT_STRACE_V_4_15 is not set
 CT_ALL_DEBUG_CHOICES="DUMA GDB LTRACE STRACE"
 # CT_COMPLIBS_CHECK is not set
 # CT_COMP_LIBS_CLOOG is not set
@@ -482,7 +461,7 @@ CT_EXPAT_VERSION="2.2.9"
 CT_EXPAT_MIRRORS="http://downloads.sourceforge.net/project/expat/expat/${CT_EXPAT_VERSION}"
 CT_EXPAT_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_EXPAT_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
-CT_EXPAT_ARCHIVE_FORMATS=".tar.bz2"
+CT_EXPAT_ARCHIVE_FORMATS=".tar.xz .tar.lz .tar.bz2 .tar.gz"
 CT_EXPAT_SIGNATURE_FORMAT=""
 CT_COMP_LIBS_GETTEXT=y
 CT_COMP_LIBS_GETTEXT_PKG_KSYM="GETTEXT"
@@ -505,9 +484,10 @@ CT_GMP_DIR_NAME="gmp"
 CT_GMP_PKG_NAME="gmp"
 CT_GMP_SRC_RELEASE=y
 CT_GMP_PATCH_ORDER="global"
-CT_GMP_V_6_1=y
+CT_GMP_V_6_2=y
+# CT_GMP_V_6_1 is not set
 # CT_GMP_NO_VERSIONS is not set
-CT_GMP_VERSION="6.1.2"
+CT_GMP_VERSION="6.2.0"
 CT_GMP_MIRRORS="https://gmplib.org/download/gmp https://gmplib.org/download/gmp/archive $(CT_Mirrors GNU gmp)"
 CT_GMP_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_GMP_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
@@ -624,10 +604,11 @@ CT_NCURSES_DIR_NAME="ncurses"
 CT_NCURSES_PKG_NAME="ncurses"
 CT_NCURSES_SRC_RELEASE=y
 CT_NCURSES_PATCH_ORDER="global"
-CT_NCURSES_V_6_1=y
+CT_NCURSES_V_6_2=y
+# CT_NCURSES_V_6_1 is not set
 # CT_NCURSES_V_6_0 is not set
 # CT_NCURSES_NO_VERSIONS is not set
-CT_NCURSES_VERSION="6.1"
+CT_NCURSES_VERSION="6.2"
 CT_NCURSES_MIRRORS="ftp://invisible-island.net/ncurses $(CT_Mirrors GNU ncurses)"
 CT_NCURSES_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_NCURSES_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
