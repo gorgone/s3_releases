@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.12.2";
+	pversion="0.12.8";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -103,7 +103,7 @@ tcupdate(){
 					for i in "${INST_TCLIST[@]}";do
 						if [ ! "$i" == "native" ];then
 							source "$tccfgdir/$i";
-							[ -f "$tcdir/$i/build.log.bz2" ] && tcdate=" ct-ng."$(date -r "$tcdir/$i/build.log.bz2" "+%Y-%m-%d %H:%M:%S") || tcdate="";
+							[ -f "$tcdir/$i/build.log.bz2" ] && tcdate=" ct-ng."$(date -r "$tcdir/$i/build.log.bz2" "+%F %T") || tcdate="";
 							MENU_OPTIONS+=("$_toolchainname" "$_description\Z2$tcdate\Zn" "toolchain folder:$tcdir/$i | config file:$tccfgdir/$i");
 							counter;
 						fi;
@@ -213,7 +213,7 @@ tcupdate(){
 
 		case $ret in
 			0) #Start - Build library
-				ts=$(date +%F)_$(date +%T);
+				ts=$(date +%F.%H%M%S);
 				tmpdir="/tmp/lib_source/$ts";
 				icount=$(echo $opts | wc -w);i=0;
 				for o in $opts;do
@@ -221,7 +221,7 @@ tcupdate(){
 					for l in "${libs[@]}";do
 						declare -a lib="${l[*]}";				#populate libs array element
 						[ ! "$o" == "${lib[0]}" ] && continue || ((i++));
-						logfile="$ldir/"$ts"_update_toolchain_"$_toolchainname"_"${lib[1]}"_"${lib[2]}".log"
+						logfile="$ldir/"$ts"_tup_"$_toolchainname"_"${lib[1]}"_"${lib[2]}".log"
 
 						#generate build command list
 						declare -a libtasks="${lib[7]}";		#populate tasks array element
@@ -290,8 +290,7 @@ _create_tc(){
 			unset MENU_OPTIONS;COUNT=0;
 			if [ "$tplempty" == "0" ];then
 				for t in "${TPL_LIST[@]}";do
-					desc=$(sed -n -e '/#toolchain template/ s/.*\: *//p' $t);
-					[ ! "$desc" ] && desc="no description available";
+					desc=$(_get_template_properties "$t")
 					[ -d "$tcdir/$t" ] && [ -f "$tccfgdir/$t" ] && color="\Z1" || color="";
 					MENU_OPTIONS+=("$t" "$color$desc\Zn" "off" "template filename:$cttpldir/$t");counter;
 					counter;
@@ -321,10 +320,11 @@ _create_tc(){
 				for tpl in $opts;do
 					if [ -f "$cttpldir/$tpl" ]; then
 
-						logfile="$ldir/$(date +%F)_$(date +%T)_update_toolchain_crosstoolchain_"$tpl".log"; ((i++)); 
+						logfile="$ldir/$(date +%F.%H%M%S)_tup_crosstoolchain_"$tpl".log"; ((i++)); 
 
 						clear;
 						sp=$(printf '%*s' 80 | tr ' ' '=')
+						echo -e "$pdesc - creating cross toolchain log - $(date +"%F %T")" | tee -a "$logfile";
 						echo -e "$y_l$sp\nbuild ($i/$icount): command list for cross toolchain $tpl:\n$sp" | tee -a "$logfile";
 
 						#copy template and patching them
@@ -374,7 +374,7 @@ _create_tc(){
 								_compress "$dldir/Toolchain-$tpl.tar.xz" "$tcdir/$tpl" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Compress cross toolchain $tpl to Toolchain-$tpl.tar.xz ]- " "$pb_" "$_lines" "$_cols";
 								
 								#create toolchain.cfg
-								desc=$(sed -n -e '/#toolchain template/ s/.*\: *//p' "$cttpldir/$tpl");
+								desc=$(_get_template_properties "$cttpldir/$tpl");
 								_create_toolchaincfg "$tcdir/$tpl" "$tpl" "$target" "" "" "$desc" "" "$dldir/Toolchain-$tpl.tar.xz" "yes";
 							else
 								_paktc_timer 10;
@@ -433,6 +433,7 @@ _build(){
 	bcl=$(printf '%s\n' "${tasks[@]}");
 	
 	sp=$(printf '%*s' 80 | tr ' ' '=')
+	echo -e "$pdesc - updating library log - $(date +"%F %T")" | tee -a "$lf";
 	echo -e "$sp\nbuild command list for $desc:\n$sp\ncd "$libsrcdir\;"\n$bcl\n$sp" | tee -a "$lf";
 	sleep 2;
 	cd "$libsrcdir";
@@ -443,13 +444,13 @@ _build(){
 	error_on_build=$(grep -cw1 Error "$lf");
 	if [ "$error_on_build" -gt "0" ]; then
 		echo -e ""$r_l"ERRORS on build found, details:\n$b_l  $lf\n$y_l" >$(tty);
-		read -n 1 -s -r -p "Press any key to continue";
+		_paktc_timer 10;
 		echo -e "$re_$w_l";
 	fi;
 	
 };
 _ctng_menu(){
-	tc="$1";tpl="$tc";
+	tc="$1";tpl="$tc";unset configtasks;
 
 	if [ -f "$cttpldir/$tpl" ];then #copy the existing template to edit it
 		cp --no-preserve=mode,ownership -f "$cttpldir/$tpl" "$ctsrcdir/.config"
@@ -469,10 +470,11 @@ _ctng_menu(){
 	( eval "${configtasks[@]}" ) 2>&1;
 };
 _ctng_setup(){
-	logfile="$ldir/$(date +%F)_$(date +%T)_update_toolchain_crosstool-NG_setup.log"
+	logfile="$ldir/$(date +%F.%H%M%S)_tup_ctng_setup.log"
 	(
 	bcl=$(printf '%s\n' "${CTNG_SETUP_tasks[@]}");
 	sp=$(printf '%*s' 80 | tr ' ' '=')
+	echo -e "$pdesc - installing ctng log - $(date +"%F %T")";
 	echo -e "$sp\nbuild command list for crosstool-NG:\n$sp\ncd "$ctsrcdir"\n$(_replace_tokens "$bcl")\n$sp";
 	sleep 2;
 	
@@ -580,6 +582,39 @@ _tidy_tasks(){
 						s#$2"_tasks+=\(\'"##g; \
 						s#"\"\)\;"##g; \
 						s#"\'\)\;"##g;";
+};
+_get_template_properties(){
+	desc="";
+	if [ -f "$1" ];then
+		if [ -z "$2" ]; then
+			desc=$(sed -n -e '/#toolchain template/ s/.*\: *//p' "$1" | awk -F'(' '{print $1}' | xargs);
+		else
+			desc="$2";
+		fi;
+		[ -z "$desc" ] && desc="missing description"; 
+		
+		#extract template properties
+		arch=$(grep '^CT_ARCH=' "$1" | awk -F'"' '{print $2}');
+		endian=$(grep '^CT_ARCH_ENDIAN=' "$1" | awk -F'"' '{print $2}');
+		end=${endian^};
+		bitness=$(grep '^CT_ARCH_BITNESS=' "$1" | awk -F'=' '{print $2}');
+		[ "$arch" == "arm" ] && [ "$bitness" == "64" ] && arch="aarch64";
+		cpu=$(grep '^CT_ARCH_CPU=' "$1" | awk -F'"' '{print $2}');
+		[ -n "$cpu" ] && cpu=" $cpu";
+		cc=$(grep '^CT_CC=' "$1" | awk -F'"' '{print $2}');
+		ccv=$(grep -i "CT_${cc}_VERSION=" "$1" | awk -F'"' '{print $2}');
+		libc=$(grep '^CT_LIBC=' "$1" | awk -F'"' '{print $2}');
+		libcu=$(grep -i "^CT_${libc}_USE=" "$1" | awk -F'"' '{print $2}');
+		[ -n "$libcu" ] && libcv=$(grep -i "CT_${libcu}_VERSION=" "$1" | awk -F'"' '{print $2}');
+		[ -z "$libcu" ] && libcv=$(grep -i "CT_${libc}_VERSION=" "$1" | awk -F'"' '{print $2}');
+		kernel=$(grep '^CT_KERNEL=' "$1" | awk -F'"' '{print $2}');
+		kernelv=$(grep -i "CT_${kernel}_VERSION=" "$1" | awk -F'"' '{print $2}');
+
+		#build template property string
+		desc="$desc ($arch$cpu $bitness-bit ${end:0:1}E, $libc $libcv, $cc $ccv, $kernel $kernelv)";
+	fi;
+	echo $desc;
+	[ -n "$desc" ] && exit 0 || exit 1;
 };
 _get_version(){
 	r="";
@@ -695,7 +730,7 @@ _check_config(){
 };	
 _change_config(){
 	nok=1;
-	ts="$(date +%F) $(date +%T)";
+	ts="$(date +%F %T)";
 	[[ ! $2 =~ "(" ]] && [[ ! $string =~ ")" ]] && qte="\"" || qte=""; #no quotes if value contains parentheses
 	
 	if ! grep -Eq "^$1=.*" "$configname";then
@@ -722,11 +757,10 @@ _create_config(){
 		return 1;
 	fi;
 	
-	ctng_config_tasks=( "('./ct-ng upgradeconfig;')"
-						"('./ct-ng menuconfig;')"
+	ctng_config_tasks=( "('./ct-ng menuconfig;')"
 						"('TPL_SAVE=\$(\$gui --defaultno --output-fd 1 --ok-label \"Yes\" --cancel-label \"No\" --colors \$bt_ \"\$title_ - \Z0\$pdesc\Zn\" --title \"-[ Save Cross Toolchain Template ]-\" --inputbox \"\\\nWould you like to \ZrSAVE\ZR this toolchain template \Zrnow\ZR?\" 10 55 \"@TEMPLATE@\") && cp \"\$ctsrcdir/.config\" \"\$TPL_SAVE\";')"
 						"('TC_SAVE=\$(\$gui --defaultno --output-fd 1 --ok-label \"Yes\" --cancel-label \"No\" --colors \$bt_ \"\$title_ - \Z0\$pdesc\Zn\" --title \"-[ Build Cross Toolchain ]-\" --inputbox \"\\\nWould you like to \ZrBUILD\ZR this toolchain \Zrnow\ZR?\" 10 55 \"@TOOLCHAIN@\");')"
-						"('[ -n \"\$TC_SAVE\" ] && BUILD_TC=\$(basename \"\$TC_SAVE\") && BUILD_LOG=\"\$ldir/\$(date +%F)_\$(date +%T)_update_toolchain_crosstoolchain_\$(basename \"\$TC_SAVE\").log\";')"
+						"('[ -n \"\$TC_SAVE\" ] && BUILD_TC=\$(basename \"\$TC_SAVE\") && BUILD_LOG=\"\$ldir/\$(date +%F.%H%M%S)_tup_crosstoolchain_\$(basename \"\$TC_SAVE\").log\";')"
 						"('[ -n \"\$TC_SAVE\" ] && sed -i \"s#.*CT_LOCAL_TARBALLS_DIR=.*#CT_LOCAL_TARBALLS_DIR=\\\"\$dldir\\\"#g\" \"\$ctsrcdir/.config\" && sed -i \"s#.*CT_PREFIX_DIR=.*#CT_PREFIX_DIR=\\\"\$TC_SAVE\\\"#g\" \"\$ctsrcdir/.config\";')"
 						"('[ -n \"\$TC_SAVE\" ] && clear && ./ct-ng show-config && ./ct-ng build;')"
 						"('[ -n \"\$TC_SAVE\" ] && cat \"\$ctsrcdir/build.log\" >\"\$BUILD_LOG\";')"
@@ -736,8 +770,7 @@ _create_config(){
 						"('[ -n \"\$TC_SAVE\" ] && [ ! \$BUILD_ERROR -gt 0 ] && @CREATECFG@ \"\$tcdir/\$BUILD_TC\" \"\$BUILD_TC\" \"\$BUILD_TARGET\" \"\" \"\" \"\$BUILD_DESC\" \"\" \"\$dldir/Toolchain-\$BUILD_TC.tar.xz\" \"yes\";')" );
 	ctng_config_tasks_comment="#config command";
 	
-	ctng_build_tasks=( "('./ct-ng upgradeconfig | tee -a \"@LOGFILE@\";')"
-					   "('./ct-ng show-config | tee -a \"@LOGFILE@\";')"
+	ctng_build_tasks=( "('./ct-ng show-config | tee -a \"@LOGFILE@\";')"
 					   "('./ct-ng build;')" );
 	ctng_build_tasks_comment="#build command";
 	
@@ -779,10 +812,10 @@ _create_config(){
 				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export RANLIB=@RANLIB@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'./Configure --prefix=@PREFIX@/ linux-generic32 shared;'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" )'
 				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export RANLIB=@RANLIB@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'./Configure --prefix=@PREFIX@/ linux-generic32 shared;'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" )'
 				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export RANLIB=@RANLIB@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'./Configure --prefix=@PREFIX@/ linux-generic32 shared;'"'"')" "('"'"'make;'"'"')" "('"'"'make install SHLIB_VERSION_NUMBER=1.0.2 SHLIB_MINOR=0.2;'"'"')" )'
-				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export RANLIB=@RANLIB@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'./Configure --prefix=@PREFIX@/ linux-generic32 shared;'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" )'
-				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export RANLIB=@RANLIB@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'./Configure --prefix=@PREFIX@/ linux-generic32 shared;'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" )'
+				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export RANLIB=@RANLIB@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'[ \$(echo -e \"\$_tc_info\" | grep -ic \"musl\") -gt 0 ] && echo \"Apply the musl libc patch to avoid OpenSSL build errors due to missing termio.h...\" && curl --silent \"https://raw.githubusercontent.com/beagleboard/buildroot/master/package/openssl/openssl-004-musl-termios.patch\" | patch -p1;'"'"')" "('"'"'./Configure --prefix=@PREFIX@/ linux-generic32 shared;'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" )'
+				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export RANLIB=@RANLIB@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'[ \$(echo -e \"\$_tc_info\" | grep -ic \"musl\") -gt 0 ] && echo \"Apply the musl libc patch to avoid OpenSSL build errors due to missing termio.h...\" && curl --silent \"https://raw.githubusercontent.com/beagleboard/buildroot/master/package/openssl/openssl-004-musl-termios.patch\" | patch -p1;'"'"')" "('"'"'./Configure --prefix=@PREFIX@/ linux-generic32 shared;'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" )'
 				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'./configure --prefix=@PREFIX@/ --host=@HOST@ --disable-udev;'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" )'
-				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'./configure --prefix=@PREFIX@/ --host=@HOST@ --disable-libudev --disable-libsystemd LIBUSB_LIBS=\"-L@PREFIX@/lib -lusb-1.0 -lrt\" LIBUSB_CFLAGS=\"-I@PREFIX@/include/libusb-1.0\";'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" "('"'"'@VALIDATE@ \"PCSC\";'"'"')" )'
+				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'./configure --prefix=@PREFIX@/ --host=@HOST@ --disable-libudev --disable-libsystemd --with-systemdsystemunitdir=@PREFIX@/lib/systemd/system LIBUSB_LIBS=\"-L@PREFIX@/lib -lusb-1.0 -lrt\" LIBUSB_CFLAGS=\"-I@PREFIX@/include/libusb-1.0\";'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" "('"'"'@VALIDATE@ \"PCSC\";'"'"')" )'
 				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'./configure --prefix=@PREFIX@/;'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" )' );
 
 	echo '#CROSS toolchain build settings'	 						 						 				 				 >"$configname";
@@ -856,14 +889,14 @@ _create_toolchaincfg(){
 	[ ${#7} -gt 0 ] && info="$7" || info="$(echo -e "\\\n
 !!! crosstool-NG Toolchain !!!\\\n
 \\\n
-$6\\\n
-\\\n")";
+$(echo "$6" | awk -F'[()]' '{print $1}' | xargs)\\\n
+$(echo "$6" | awk -F'[()]' '{print $2}' | xargs)\\\n")";
 	
 	cd "$tccfgdir";
 	cat << EOF > $2
 _toolchainname="$2";
 default_use="USE_UTF8 USE_LIBCRYPTO";
-_description="$6";
+_description="$(echo "$6" | awk -F'[()]' '{print $1}' | xargs)";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
 _self_build="$([ ! "$9" == "yes" ] && echo "no" || echo "$9")";
