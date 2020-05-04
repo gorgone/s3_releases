@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.12.8";
+	pversion="0.12.9";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -599,8 +599,8 @@ _get_template_properties(){
 		end=${endian^};
 		bitness=$(grep '^CT_ARCH_BITNESS=' "$1" | awk -F'=' '{print $2}');
 		[ "$arch" == "arm" ] && [ "$bitness" == "64" ] && arch="aarch64";
-		cpu=$(grep '^CT_ARCH_CPU=' "$1" | awk -F'"' '{print $2}');
-		[ -n "$cpu" ] && cpu=" $cpu";
+		cpu=$(grep '^CT_ARCH_CPU=' "$1" | awk -F'"' '{print $2}') && [ -n "$cpu" ] && cpu=" $cpu";
+		aarch=$(grep '^CT_ARCH_ARCH=' "$1" | awk -F'"' '{print $2}') && [ -n "$aarch" ] && aarch=" $aarch";
 		cc=$(grep '^CT_CC=' "$1" | awk -F'"' '{print $2}');
 		ccv=$(grep -i "CT_${cc}_VERSION=" "$1" | awk -F'"' '{print $2}');
 		libc=$(grep '^CT_LIBC=' "$1" | awk -F'"' '{print $2}');
@@ -611,7 +611,7 @@ _get_template_properties(){
 		kernelv=$(grep -i "CT_${kernel}_VERSION=" "$1" | awk -F'"' '{print $2}');
 
 		#build template property string
-		desc="$desc ($arch$cpu $bitness-bit ${end:0:1}E, $libc $libcv, $cc $ccv, $kernel $kernelv)";
+		desc="$desc ($arch$cpu$aarch $bitness-bit ${end:0:1}E, $libc $libcv, $cc $ccv, $kernel $kernelv)";
 	fi;
 	echo $desc;
 	[ -n "$desc" ] && exit 0 || exit 1;
