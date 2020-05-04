@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.12.7";
+	pversion="0.12.8";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -324,7 +324,7 @@ _create_tc(){
 
 						clear;
 						sp=$(printf '%*s' 80 | tr ' ' '=')
-						echo -e "$pdesc - create cross toolchain log - $(date +"%F %T")" | tee -a "$logfile";
+						echo -e "$pdesc - creating cross toolchain log - $(date +"%F %T")" | tee -a "$logfile";
 						echo -e "$y_l$sp\nbuild ($i/$icount): command list for cross toolchain $tpl:\n$sp" | tee -a "$logfile";
 
 						#copy template and patching them
@@ -433,7 +433,7 @@ _build(){
 	bcl=$(printf '%s\n' "${tasks[@]}");
 	
 	sp=$(printf '%*s' 80 | tr ' ' '=')
-	echo -e "$pdesc - update library log - $(date +"%F %T")" | tee -a "$lf";
+	echo -e "$pdesc - updating library log - $(date +"%F %T")" | tee -a "$lf";
 	echo -e "$sp\nbuild command list for $desc:\n$sp\ncd "$libsrcdir\;"\n$bcl\n$sp" | tee -a "$lf";
 	sleep 2;
 	cd "$libsrcdir";
@@ -474,7 +474,7 @@ _ctng_setup(){
 	(
 	bcl=$(printf '%s\n' "${CTNG_SETUP_tasks[@]}");
 	sp=$(printf '%*s' 80 | tr ' ' '=')
-	echo -e "$pdesc - install ctng log - $(date +"%F %T")";
+	echo -e "$pdesc - installing ctng log - $(date +"%F %T")";
 	echo -e "$sp\nbuild command list for crosstool-NG:\n$sp\ncd "$ctsrcdir"\n$(_replace_tokens "$bcl")\n$sp";
 	sleep 2;
 	
