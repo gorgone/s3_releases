@@ -143,7 +143,7 @@ _cmd_build(){
 	CONFDIR="$_oscamconfdir_default"
 
 #if build with profile
-	[ ! "$pf" == "empty" ] && printf "$y_l |   PROFILE : $pf_name"
+	[ ! "$pf" == "empty" ] && printf "\n$y_l |   PROFILE : $pf_name"
 
 #IF SVN is Patched
 	[ -f "$workdir/SVN-IS-PATCHED" ] && printf $y_l"\n | ISPATCHED :$P YES"
