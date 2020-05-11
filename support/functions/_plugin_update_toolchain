@@ -3,13 +3,15 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.12.9";
+	pversion="0.13.0";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
 	ctdir="$sdir/crosstool";
-	ctsrcdir="$ctdir/source";
+	ctsrcdir="$ctdir/crosstool-ng";
 	cttpldir="$ctdir/templates";
+	fngsrcdir="$ctdir/freetz-ng";
+	cpus="$(getconf _NPROCESSORS_ONLN)";
 
 	CMDTC="$1";
 	OPTION1="$2";
@@ -18,12 +20,13 @@ tcupdate(){
 	tc="$CMDTC";
 	
 	#check/install prerequisites
+	[ -d "$ctdir/source" ] && mv -f "$ctdir/source" "$ctsrcdir"; #rename folder for compatibility with pre 0.13.x releases
 	clear && _check_pkg;
 
 	#backup config
 	if [ "$CMDTC" == "-r" ] || [ "$CMDTC" == "--reset" ];then
 		if [ -f "$configname" ];then
-			if ! _check_github_api_limits 12; then
+			if ! _check_github_api_limits 12;then
 				echo -e "$y_l""RESET -> Moving existing config file...""$re_";
 				bcn="$configname".$(date +"%Y%m%d%H%M%S");
 				mv "$configname" "$bcn"
@@ -64,7 +67,7 @@ tcupdate(){
 	else
 		CTNG_START_BUILD=0;
 		sp=$(printf '%*s' 9);
-		CTNG_ROOT_BUILD_ERROR="\nERROR -> The execution of crosstool-NG was aborted because it must not run as root!\n\n""$sp""If you are aware of the danger of running crosstool-NG as root and you\n""$sp""know what you are doing, you can force it with the following command:\n\n";
+		CTNG_ROOT_BUILD_ERROR="\nERROR -> The cross toolchain build process was aborted because it must not run as root!\n\n""$sp""If you are aware of the danger of building toolchains as root and you\n""$sp""know what you are doing, you can force it with the following command:\n\n";
 		CTNG_ROOT_BUILD_CMD="$sp""./s3 tcupdate --config \"CTNG_BUILD_AS_ROOT\" \"1\"\n";
 	fi;
 
@@ -91,6 +94,9 @@ tcupdate(){
 	elif [ "$CMDTC" == "-ctng" ] || [ "$CMDTC" == "--crosstool-ng" ];then #croostool-NG menu
 		_ctng_menu "$OPTION1";
 		bye;
+	elif [ "$CMDTC" == "-fng" ] || [ "$CMDTC" == "--freetz-ng" ];then #croostool-NG menu
+		_fng_menu "$OPTION1";
+		bye;
 	elif [ -z "$CMDTC" ];then
 		unset menu_close;
 		while [ ! $menu_close ]
@@ -102,8 +108,9 @@ tcupdate(){
 				if [ "$tcempty" == "0" ];then
 					for i in "${INST_TCLIST[@]}";do
 						if [ ! "$i" == "native" ];then
-							source "$tccfgdir/$i";
-							[ -f "$tcdir/$i/build.log.bz2" ] && tcdate=" ct-ng."$(date -r "$tcdir/$i/build.log.bz2" "+%F %T") || tcdate="";
+							source "$tccfgdir/$i" && tcdate="";
+							[ -f "$tcdir/$i/build.log.bz2" ] && tcdate=" ct-ng."$(date -r "$tcdir/$i/build.log.bz2" "+%F %T");
+							[ -f "$tcdir/$i/freetz-ng.log.bz2" ] && tcdate=" freetz-ng."$(date -r "$tcdir/$i/freetz-ng.log.bz2" "+%F %T");
 							MENU_OPTIONS+=("$_toolchainname" "$_description\Z2$tcdate\Zn" "toolchain folder:$tcdir/$i | config file:$tccfgdir/$i");
 							counter;
 						fi;
@@ -307,18 +314,13 @@ _create_tc(){
 
 		case $ret in
 			0) #Start - Build cross toolchain
-				#Setup crosstool-NG automatically if not installed
-				if [ ! -f "$ctsrcdir/ct-ng" ]; then
-					clear;
-					echo -e "$r_l""\nCHECK -> crosstool-NG is not setup correctly. Try to fix it automatically...\n""$re_";
-					_paktc_timer 5;
-					_ctng_setup "$CTNG_START_BUILD";
-				fi;
-				
+				#Setup crosstool-NG and Freetz-NG automatically if not installed
+				_check_crosstool_setup;
+
 				#Build cross toolchains
 				icount=$(echo $opts | wc -w);i=0;
 				for tpl in $opts;do
-					if [ -f "$cttpldir/$tpl" ]; then
+					if [ -f "$cttpldir/$tpl" ];then
 
 						logfile="$ldir/$(date +%F.%H%M%S)_tup_crosstoolchain_"$tpl".log"; ((i++)); 
 
@@ -327,48 +329,87 @@ _create_tc(){
 						echo -e "$pdesc - creating cross toolchain log - $(date +"%F %T")" | tee -a "$logfile";
 						echo -e "$y_l$sp\nbuild ($i/$icount): command list for cross toolchain $tpl:\n$sp" | tee -a "$logfile";
 
-						#copy template and patching them
-						echo "rm \"$ctsrcdir/.config\"* 2>/dev/null;cp --no-preserve=mode,ownership -f \"$cttpldir/$tpl\" \"$ctsrcdir/.config\";" | tee -a "$logfile";
-						rm "$ctsrcdir/.config"* 2>/dev/null;cp --no-preserve=mode,ownership -f "$cttpldir/$tpl" "$ctsrcdir/.config";
+						#copy template
+						[ $(_get_template_type "$cttpldir/$tpl") == "CTNG" ] && tpltargetdir="$ctsrcdir";
+						[ $(_get_template_type "$cttpldir/$tpl") == "FNG" ]  && tpltargetdir="$fngsrcdir";
+						echo "rm \"$tpltargetdir/.config\"* 2>/dev/null;cp -f \"$cttpldir/$tpl\" \"$tpltargetdir/.config\";" | tee -a "$logfile";
+						rm "$tpltargetdir/.config"* 2>/dev/null;cp -f "$cttpldir/$tpl" "$tpltargetdir/.config";
 
-						#CT_LOCAL_TARBALLS_DIR aka cache folder for downloads
-						echo "sed -i \"s#.*CT_LOCAL_TARBALLS_DIR=.*#CT_LOCAL_TARBALLS_DIR=\"$dldir\"#g\" \"$ctsrcdir/.config\";" | tee -a "$logfile";
-						sed -i "s#.*CT_LOCAL_TARBALLS_DIR=.*#CT_LOCAL_TARBALLS_DIR=\"$dldir\"#g" "$ctsrcdir/.config";
-						#CT_PREFIX_DIR aka folder that contains the final toolchain
-						echo "sed -i \"s#.*CT_PREFIX_DIR=.*#CT_PREFIX_DIR=\"$tcdir/$tpl\"#g\" \"$ctsrcdir/.config\";" | tee -a "$logfile";
-						sed -i "s#.*CT_PREFIX_DIR=.*#CT_PREFIX_DIR=\"$tcdir/$tpl\"#g" "$ctsrcdir/.config";
-						#CT_ALLOW_BUILD_AS_ROOT aka force build as root
-						_check_root && [ "$CTNG_BUILD_AS_ROOT" == "1" ] && echo "echo -e \"\nCT_EXPERIMENTAL=y\nCT_ALLOW_BUILD_AS_ROOT=y\nCT_ALLOW_BUILD_AS_ROOT_SURE=y\" >>\"$ctsrcdir/.config\";" | tee -a "$logfile";
-						_check_root && [ "$CTNG_BUILD_AS_ROOT" == "1" ] && echo -e "\nCT_EXPERIMENTAL=y\nCT_ALLOW_BUILD_AS_ROOT=y\nCT_ALLOW_BUILD_AS_ROOT_SURE=y" >>"$ctsrcdir/.config";
+						#patch template
+						if [ $(_get_template_type "$cttpldir/$tpl") == "CTNG" ];then
+							#CT_LOCAL_TARBALLS_DIR aka cache folder for downloads
+							echo "sed -i \"s#.*CT_LOCAL_TARBALLS_DIR=.*#CT_LOCAL_TARBALLS_DIR=\"$dldir\"#g\" \"$tpltargetdir/.config\";" | tee -a "$logfile";
+							sed -i "s#.*CT_LOCAL_TARBALLS_DIR=.*#CT_LOCAL_TARBALLS_DIR=\"$dldir\"#g" "$tpltargetdir/.config";
+							#CT_PREFIX_DIR aka folder that contains the final toolchain
+							echo "sed -i \"s#.*CT_PREFIX_DIR=.*#CT_PREFIX_DIR=\"$tcdir/$tpl\"#g\" \"$tpltargetdir/.config\";" | tee -a "$logfile";
+							sed -i "s#.*CT_PREFIX_DIR=.*#CT_PREFIX_DIR=\"$tcdir/$tpl\"#g" "$tpltargetdir/.config";
+							#CT_PARALLEL_JOBS aka parallel task count for building
+							echo "echo -e \"\nCT_PARALLEL_JOBS=$cpus\" >>\"$tpltargetdir/.config\";" | tee -a "$logfile";
+							echo -e "\nCT_PARALLEL_JOBS=$cpus" >>"$tpltargetdir/.config";
+							#CT_ALLOW_BUILD_AS_ROOT aka force build as root
+							_check_root && [ "$CTNG_BUILD_AS_ROOT" == "1" ] && echo "echo -e \"\nCT_EXPERIMENTAL=y\nCT_ALLOW_BUILD_AS_ROOT=y\nCT_ALLOW_BUILD_AS_ROOT_SURE=y\" >>\"$tpltargetdir/.config\";" | tee -a "$logfile";
+							_check_root && [ "$CTNG_BUILD_AS_ROOT" == "1" ] && echo -e "\nCT_EXPERIMENTAL=y\nCT_ALLOW_BUILD_AS_ROOT=y\nCT_ALLOW_BUILD_AS_ROOT_SURE=y" >>"$tpltargetdir/.config";
+						elif [ $(_get_template_type "$cttpldir/$tpl") == "FNG" ];then
+							#FREETZ_JLEVEL aka parallel task count for building
+							echo "echo -e \"\FREETZ_JLEVEL=$cpus\" >>\"$tpltargetdir/.config\";" | tee -a "$logfile";
+							echo -e "\nFREETZ_JLEVEL=$cpus" >>"$tpltargetdir/.config";
+						fi;
 
 						#run build
-						bcl=$(printf '%s\n' "${CTNG_BUILD_tasks[@]}");
-						echo -e "cd \"$ctsrcdir\";\n$(_replace_tokens "$bcl")\n$sp""$re_" | tee -a "$logfile";
+						[ $(_get_template_type "$cttpldir/$tpl") == "CTNG" ] && bcl=$(printf '%s\n' "${CTNG_BUILD_tasks[@]}");
+						[ $(_get_template_type "$cttpldir/$tpl") == "FNG" ]  && bcl=$(printf '%s\n' "${FNG_BUILD_tasks[@]}");
+						echo -e "cd \"$tpltargetdir\";\n$(_replace_tokens "$bcl")\n$sp""$re_" | tee -a "$logfile";
 						sleep 2;
 
-						if [ $CTNG_START_BUILD -eq 1 ]; then
-							cd "$ctsrcdir";
-							#print out crosstool-NG version
-							echo -e "$g_l\n$(./ct-ng | grep 'crosstool-NG version' &2>/dev/null | tail -1)\n""$re_" | tee -a "$logfile";
+						if [ $CTNG_START_BUILD -eq 1 ];then
+							cd "$tpltargetdir";
+							#print out crosstool version
+							[ $(_get_template_type "$cttpldir/$tpl") == "CTNG" ] && echo -e "$g_l\n$(./ct-ng | grep 'crosstool-NG version' &2>/dev/null | tail -1)\n""$re_" | tee -a "$logfile";
+							[ $(_get_template_type "$cttpldir/$tpl") == "FNG" ]  && echo -e "$g_l\n$(tools/freetz-revision 2>&1 | tail -1)\n""$re_" | tee -a "$logfile";
+
 							#generate build command list
 							unset buildtasks;
-							for task in "${CTNG_BUILD_tasks[@]}";do
-								task=$(_replace_tokens "$task");	#replace tokens
-								buildtasks+=("$task");
-							done;
+							if [ $(_get_template_type "$cttpldir/$tpl") == "CTNG" ];then
+								for task in "${CTNG_BUILD_tasks[@]}";do
+									task=$(_replace_tokens "$task");	#replace tokens
+									buildtasks+=("$task");
+								done;
+							elif [ $(_get_template_type "$cttpldir/$tpl") == "FNG" ];then
+								[[ ! $(umask) == 0022 ]] && umask 0022;
+								for task in "${FNG_BUILD_tasks[@]}";do
+									task=$(_replace_tokens "$task");	#replace tokens
+									buildtasks+=("$task");
+								done;
+							fi;
 							( eval "${buildtasks[@]}" ) 2>&1;
-							err=$(grep '\[ERROR\]' "$ctsrcdir/build.log" | wc -l)
-
-							#save build.log in logs
-							cat "$ctsrcdir/build.log" >>"$logfile";
+							[ $(_get_template_type "$cttpldir/$tpl") == "CTNG" ] && err=$(grep -c '\[ERROR\]' "$tpltargetdir/build.log");
+							[ $(_get_template_type "$cttpldir/$tpl") == "FNG" ]  && err=$(grep 'Error .*' "$logfile" | grep -vc '(ignored)');
 							
-							if [ ! $err -gt 0 ]; then
-								#get target from build.log
-								target=$(sed -n -e '/target = / s/.*\= *//p' "$ctsrcdir/build.log");
-								
-								#get CT_BUILD_TOP_DIR aka temporary toolchain build directory from build.log and delete it to save disk space
-								buildtopdir=$(sed -n -e '/CT_BUILD_TOP_DIR=\// s/.*\= *//p' "$ctsrcdir/build.log");
-								[ -d "$buildtopdir" ] && rm -rf "$buildtopdir" 2>/dev/null;
+							#save build.log in logs
+							[ $(_get_template_type "$cttpldir/$tpl") == "CTNG" ] && cat "$tpltargetdir/build.log" >>"$logfile";
+
+							if [ ! $err -gt 0 ];then
+								if [ $(_get_template_type "$cttpldir/$tpl") == "CTNG" ];then
+									#get target from build.log
+									target=$(sed -n -e '/target = / s/.*\= *//p' "$tpltargetdir/build.log");
+
+									#get CT_BUILD_TOP_DIR aka temporary toolchain build directory from build.log and delete it to save disk space
+									buildtopdir=$(sed -n -e '/CT_BUILD_TOP_DIR=\// s/.*\= *//p' "$tpltargetdir/build.log");
+									[ -d "$buildtopdir" ] && rm -rf "$buildtopdir" 2>/dev/null;
+								elif [ $(_get_template_type "$cttpldir/$tpl") == "FNG" ];then
+									#get toolchain and target from logfile
+									btcbindir=$(grep -i '{ PATH=.*kernel.*' "$logfile" | head -n 1 | awk -F':|"' '{print $2}');
+									btcdir=$(realpath "$btcbindir/../");
+									target=$(basename "$btcdir");
+									
+									#copy toolchain folder
+									rm -rf "$tcdir/$tpl";
+									cp -rf "$btcdir" "$tcdir/$tpl";
+									
+									#compress log file
+									cp -f "$logfile" "$tcdir/$tpl/freetz-ng.log";
+									bzip2 -zf9 "$tcdir/$tpl/freetz-ng.log";
+								fi;
 								
 								#compress toolchain
 								_compress "$dldir/Toolchain-$tpl.tar.xz" "$tcdir/$tpl" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Compress cross toolchain $tpl to Toolchain-$tpl.tar.xz ]- " "$pb_" "$_lines" "$_cols";
@@ -389,10 +430,12 @@ _create_tc(){
 					fi;
 				done;;
 			1) #Setup - Setup crosstool-NG
-				_ctng_setup "$CTNG_START_BUILD";;
+				_ctng_setup "$CTNG_START_BUILD";
+				_fng_setup "$CTNG_START_BUILD";;
 			2) #Edit
 				tpl=$(echo "$opts" | awk '{printf $2}';);
-				_ctng_menu "$tpl";;
+				[ $(_get_template_type "$cttpldir/$tpl") == "CTNG" ] && _ctng_menu "$tpl";
+				[ $(_get_template_type "$cttpldir/$tpl") == "FNG" ]  && _fng_menu "$tpl";;
 			3)	#Exit
 				menu_close="1";
 				return;;
@@ -442,7 +485,7 @@ _build(){
 	
 	#build error message
 	error_on_build=$(grep -cw1 Error "$lf");
-	if [ "$error_on_build" -gt "0" ]; then
+	if [ "$error_on_build" -gt "0" ];then
 		echo -e ""$r_l"ERRORS on build found, details:\n$b_l  $lf\n$y_l" >$(tty);
 		_paktc_timer 10;
 		echo -e "$re_$w_l";
@@ -453,7 +496,7 @@ _ctng_menu(){
 	tc="$1";tpl="$tc";unset configtasks;
 
 	if [ -f "$cttpldir/$tpl" ];then #copy the existing template to edit it
-		cp --no-preserve=mode,ownership -f "$cttpldir/$tpl" "$ctsrcdir/.config"
+		cp -f "$cttpldir/$tpl" "$ctsrcdir/.config"
 	elif [ -n "$tpl" ];then #create an empty template
 		[ -f "$ctsrcdir/.config" ] && rm "$ctsrcdir/.config"* 2>/dev/null;
 		touch "$ctsrcdir/.config";
@@ -469,16 +512,37 @@ _ctng_menu(){
 	done;
 	( eval "${configtasks[@]}" ) 2>&1;
 };
+_fng_menu(){
+	tc="$1";tpl="$tc";unset configtasks;
+
+	if [ -f "$cttpldir/$tpl" ];then #copy the existing template to edit it
+		cp -f "$cttpldir/$tpl" "$fngsrcdir/.config"
+	elif [ -n "$tpl" ];then #create an empty template
+		[ -f "$fngsrcdir/.config" ] && rm "$fngsrcdir/.config"* 2>/dev/null;
+		touch "$fngsrcdir/.config";
+	else #use existing (self copied) template
+		[ ! -f "$fngsrcdir/.config" ] && touch "$fngsrcdir/.config";
+		tc="_test$(( $RANDOM % 100 ))";tpl="$tc";
+	fi;
+
+	cd "$fngsrcdir";
+	for task in "${FNG_CONFIG_tasks[@]}";do
+		task=$(_replace_tokens "$task");	#replace tokens
+		configtasks+=("$task");
+	done;
+	( eval "${configtasks[@]}" ) 2>&1;
+};
 _ctng_setup(){
-	logfile="$ldir/$(date +%F.%H%M%S)_tup_ctng_setup.log"
+	logfile="$ldir/$(date +%F.%H%M%S)_tup_ctng_setup.log";
+	unset setuptasks;
 	(
 	bcl=$(printf '%s\n' "${CTNG_SETUP_tasks[@]}");
 	sp=$(printf '%*s' 80 | tr ' ' '=')
-	echo -e "$pdesc - installing ctng log - $(date +"%F %T")";
+	echo -e "$pdesc - installing crosstool-ng log - $(date +"%F %T")";
 	echo -e "$sp\nbuild command list for crosstool-NG:\n$sp\ncd "$ctsrcdir"\n$(_replace_tokens "$bcl")\n$sp";
 	sleep 2;
 	
-	if [ $1 -eq 1 ]; then
+	if [ $1 -eq 1 ];then
 		# setup crosstool wc
 		echo "Cleanup source directory "$ctsrcdir/"..."
 		rm -rf "$ctsrcdir" 2>/dev/null;
@@ -495,6 +559,35 @@ _ctng_setup(){
 		sleep 5;
 	fi;
 	) | tee "$logfile" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Setup crosstool-NG ]- " "$pb_" "$_lines" "$_cols";
+};
+_fng_setup(){
+	logfile="$ldir/$(date +%F.%H%M%S)_tup_fng_setup.log";
+	unset setuptasks;
+	(
+	bcl=$(printf '%s\n' "${FNG_SETUP_tasks[@]}");
+	sp=$(printf '%*s' 80 | tr ' ' '=')
+	echo -e "$pdesc - installing freetz-ng log - $(date +"%F %T")";
+	echo -e "$sp\nbuild command list for Freetz-NG:\n$sp\ncd "$fngsrcdir"\n$(_replace_tokens "$bcl")\n$sp";
+	sleep 2;
+	
+	if [ $1 -eq 1 ];then
+		# setup freetz-ng wc
+		echo "Cleanup source directory "$fngsrcdir/"..."
+		rm -rf "$fngsrcdir" 2>/dev/null;
+		mkdir --parents "$fngsrcdir";
+		cd "$fngsrcdir";
+		[[ ! $(umask) == 0022 ]] && umask 0022;
+		#generate setup command list
+		for task in "${FNG_SETUP_tasks[@]}";do
+			task=$(_replace_tokens "$task");	#replace tokens
+			setuptasks+=("$task");
+		done
+		( eval "${setuptasks[@]}" ) 2>&1;
+	else
+		echo -e "$CTNG_ROOT_BUILD_ERROR$CTNG_ROOT_BUILD_CMD";
+		sleep 5;
+	fi;
+	) | tee "$logfile" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Setup Freetz-NG ]- " "$pb_" "$_lines" "$_cols";
 };
 _dl(){
 	[ -d "$dldir/#tmp" ] && rm --recursive --force "$dldir/#tmp"
@@ -529,7 +622,7 @@ _extract(){
         c='';
         e=1;
 		
-        if [[ ! -r $i ]]; then
+        if [[ ! -r $i ]];then
             echo "$0: file is unreadable: \`$i'" >&2;
             continue;
         fi
@@ -570,6 +663,7 @@ _replace_tokens(){
 						s#@PREFIX@#$prefixdir#g; \
 						s#@HOST@#$hostname#g; \
 						s#@CTNGSOURCE@#$ctsrcdir#g; \
+						s#@FNGSOURCE@#$fngsrcdir#g; \
 						s#@VALIDATE@#_check_lib#g; \
 						s#@COMPRESS@#_compress#g; \
 						s#@CREATECFG@#_create_toolchaincfg#g; \
@@ -586,42 +680,73 @@ _tidy_tasks(){
 _get_template_properties(){
 	desc="";
 	if [ -f "$1" ];then
-		if [ -z "$2" ]; then
+		if [ -z "$2" ];then
 			desc=$(sed -n -e '/#toolchain template/ s/.*\: *//p' "$1" | awk -F'(' '{print $1}' | xargs);
 		else
 			desc="$2";
 		fi;
 		[ -z "$desc" ] && desc="missing description"; 
-		
+
 		#extract template properties
-		arch=$(grep '^CT_ARCH=' "$1" | awk -F'"' '{print $2}');
-		endian=$(grep '^CT_ARCH_ENDIAN=' "$1" | awk -F'"' '{print $2}');
-		end=${endian^};
-		bitness=$(grep '^CT_ARCH_BITNESS=' "$1" | awk -F'=' '{print $2}');
-		[ "$arch" == "arm" ] && [ "$bitness" == "64" ] && arch="aarch64";
-		cpu=$(grep '^CT_ARCH_CPU=' "$1" | awk -F'"' '{print $2}') && [ -n "$cpu" ] && cpu=" $cpu";
-		aarch=$(grep '^CT_ARCH_ARCH=' "$1" | awk -F'"' '{print $2}') && [ -n "$aarch" ] && aarch=" $aarch";
-		cc=$(grep '^CT_CC=' "$1" | awk -F'"' '{print $2}');
-		ccv=$(grep -i "CT_${cc}_VERSION=" "$1" | awk -F'"' '{print $2}');
-		libc=$(grep '^CT_LIBC=' "$1" | awk -F'"' '{print $2}');
-		libcu=$(grep -i "^CT_${libc}_USE=" "$1" | awk -F'"' '{print $2}');
-		[ -n "$libcu" ] && libcv=$(grep -i "CT_${libcu}_VERSION=" "$1" | awk -F'"' '{print $2}');
-		[ -z "$libcu" ] && libcv=$(grep -i "CT_${libc}_VERSION=" "$1" | awk -F'"' '{print $2}');
-		kernel=$(grep '^CT_KERNEL=' "$1" | awk -F'"' '{print $2}');
-		kernelv=$(grep -i "CT_${kernel}_VERSION=" "$1" | awk -F'"' '{print $2}');
+		if [ $(_get_template_type "$1") == "CTNG" ];then
+			arch=$(grep '^CT_ARCH=' "$1" | awk -F'"' '{print $2}');
+			endian=$(grep '^CT_ARCH_ENDIAN=' "$1" | awk -F'"' '{print $2}');
+			end=${endian^};
+			bitness=$(grep '^CT_ARCH_BITNESS=' "$1" | awk -F'=' '{print $2}');
+			[ "$arch" == "arm" ] && [ "$bitness" == "64" ] && arch="aarch64";
+			cpu=$(grep '^CT_ARCH_CPU=' "$1" | awk -F'"' '{print $2}') && [ -n "$cpu" ] && cpu=" $cpu";
+			aarch=$(grep '^CT_ARCH_ARCH=' "$1" | awk -F'"' '{print $2}') && [ -n "$aarch" ] && aarch=" $aarch";
+			cc=$(grep '^CT_CC=' "$1" | awk -F'"' '{print $2}');
+			ccv=$(grep -i "CT_${cc}_VERSION=" "$1" | awk -F'"' '{print $2}');
+			libc=$(grep '^CT_LIBC=' "$1" | awk -F'"' '{print $2}');
+			libcu=$(grep -i "^CT_${libc}_USE=" "$1" | awk -F'"' '{print $2}');
+			[ -n "$libcu" ] && libcv=$(grep -i "CT_${libcu}_VERSION=" "$1" | awk -F'"' '{print $2}');
+			[ -z "$libcu" ] && libcv=$(grep -i "CT_${libc}_VERSION=" "$1" | awk -F'"' '{print $2}');
+			kernel=$(grep '^CT_KERNEL=' "$1" | awk -F'"' '{print $2}');
+			kernelv=$(grep -i "CT_${kernel}_VERSION=" "$1" | awk -F'"' '{print $2}');
+		elif [ $(_get_template_type "$1") == "FNG" ];then
+			if [ -d "$fngsrcdir" ];then
+				cp "$1" "$fngsrcdir/.config";
+				cd "$fngsrcdir";
+				[[ ! $(umask) == 0022 ]] && umask 0022;
+				make olddefconfig >/dev/null;
+				arch=$(grep '^FREETZ_TARGET_ARCH=' ".config" | awk -F'"' '{print $2}');
+				bitness=$(grep '^FREETZ_GCC_ABI=' ".config" | awk -F'"' '{print $2}');
+				[ $(grep -i '^FREETZ_TARGET_ARCH_BE=y' ".config") ] && end="B" || end="L";
+				[ $(grep -i '^FREETZ_LIB_libuClibc=y' ".config") ] && libc="uClibc";
+				[ $(grep -i '^FREETZ_LIB_libglibc=y' ".config") ] && libc="glibc";
+				[ $(grep -i '^FREETZ_LIB_libumusl=y' ".config") ] && libc="musl";
+				libcv=$(grep -i "^FREETZ_TARGET_${libc}_VERSION=" ".config" | awk -F'"' '{print $2}');
+				[ $(grep -i '^FREETZ_TARGET_GCC_[0-9]=y' ".config") ] && cc="gcc";
+				ccv=$(grep -i "^FREETZ_TARGET_${cc}_MAJOR_VERSION=" ".config" | awk -F'"' '{print $2}').$(grep -i "^FREETZ_TARGET_${cc}_MINOR_VERSION=" ".config" | awk -F'"' '{print $2}');
+				kernel='linux';
+				kernelv=$(grep -i "^FREETZ_KERNEL_VERSION=" ".config" | awk -F'"' '{print $2}');
+				rm -f "$fngsrcdir/.config";
+			else
+				setup=0;
+				desc="$desc (run \Zr<Setup>\ZR to show details)";
+			fi;
+		fi;
 
 		#build template property string
-		desc="$desc ($arch$cpu$aarch $bitness-bit ${end:0:1}E, $libc $libcv, $cc $ccv, $kernel $kernelv)";
+		[ -z $setup ] && desc="$desc ($arch$cpu$aarch $bitness-bit ${end:0:1}E, $libc $libcv, $cc $ccv, $kernel $kernelv)";
 	fi;
 	echo $desc;
 	[ -n "$desc" ] && exit 0 || exit 1;
+};
+_get_template_type(){
+	if [ $(grep -c '^FREETZ_' "$1") -gt 0 ];then
+		echo "FNG";
+	else
+		echo "CTNG";
+	fi;
 };
 _get_version(){
 	r="";
 	if [ -f "$1" ];then
 		content=$(cat "$1");
 		ver=$(echo "$content" | grep 'Version:' | sed -e "s/Version: //g");
-		if [ -z "$2" ]; then
+		if [ -z "$2" ];then
 			r="$ver";
 		else
 			(echo "$ver" | grep -qc "$2") && r="$ver";
@@ -689,11 +814,12 @@ _check_lib(){
 };
 _check_pkg(){
 	pkgs=( git patch curl jq gcc g++ gperf bison flex makeinfo help2man make file cmp \
-		  python3-config autoconf automake libtoolize libtool gawk wget bzip2 xz unzip rsync );
-	headers=( ncurses );
-	libs=( libstdc++.so.6 );
+		  python3-config autoconf automake libtoolize libtool gawk wget bzip2 xz unzip rsync \
+		  composite inkscape pkg-config python gettext ruby );
+	headers=( ncurses libacl.h sys/capability.h readline.h glib-2.0/glib.h );
+	libs=( libstdc++.so.6 libstdc++.a libc\\.a );
 	if syscheck "" "" "${pkgs[*]}" "${headers[*]}" "${libs[*]}";then
-		echo -e "$r_l""\nCHECK -> You need to manually install the following packages to use this plugin properly:\n"$y_l"$prefix apt install$packages\n""$re_" && _paktc_timer 10;
+		echo -e "$r_l""\nCHECK -> You need to manually install the following packages to use this plugin properly:\n"$y_l"$prefix install$packages\n""$re_" && _paktc_timer 10;
 	fi;
 };
 _check_github_api_limits(){
@@ -703,7 +829,7 @@ _check_github_api_limits(){
 	reset=$(curl --silent "https://api.github.com/rate_limit" | jq -r '.resources.core.reset');
 	reset_time=$(date -d @$reset);
 	
-	if [ "$remaining" -lt "$1" ]; then
+	if [ "$remaining" -lt "$1" ];then
 		echo -e "$y_l""NOTE -> Please wait until "$g_l"$reset_time"$y_l" to reset your configuration file."\
 					"The most recent versions and download links for the libraries are determined dynamically via the Github API."\
 					"Exceeding the rate limit on Github API will result in failures on generationg the configuration file."\
@@ -715,13 +841,35 @@ _check_github_api_limits(){
 		return 1;
 	fi;
 };
+_check_crosstool_setup(){
+	#Setup crosstool-NG automatically if not installed
+	if [ "$1" == "CTNG" ] || [ -z "$1" ];then
+		if [ ! -f "$ctsrcdir/ct-ng" ];then
+			clear;
+			echo -e "$r_l""\nCHECK -> crosstool-NG is not setup correctly. Try to fix it automatically...\n""$re_";
+			[ -z "$1" ] && _paktc_timer 5;
+			_ctng_setup "$CTNG_START_BUILD";
+		fi;
+	fi;
+
+	#Setup Freetz-NG automatically if not installed
+	if [ "$1" == "FNG" ] || [ -z "$1" ];then
+		if [ ! -d "$fngsrcdir/dl" ];then
+			clear;
+			echo -e "$r_l""\nCHECK -> Freetz-NG is not setup correctly. Try to fix it automatically...\n""$re_";
+			[ -z "$1" ] && _paktc_timer 5;
+			_fng_setup "$CTNG_START_BUILD";
+		fi;
+	fi;
+};
 _check_config(){
 	nok=0;
+	[ -z ${FNG_REPO_URL+x} ] && nok=1;
 	[ -z ${CTNG_CONFIG_tasks+x} ] && nok=1;
 	[ -z ${CTNG_BUILD_AS_ROOT+x} ] && nok=1;
 	[ -z ${LIBS+x} ] && nok=1;
 	
-	if [ $nok -eq 1 ]; then 
+	if [ $nok -eq 1 ];then 
 		clear;
 		echo -e "$r_l""\nCHECK -> Your config file seems to be outdated. Please restart s3 as follows to recreate an updated config file:\n"$y_l"./s3 tcupdate -r\n""$re_";
 		_paktc_timer 10;
@@ -758,16 +906,7 @@ _create_config(){
 	fi;
 	
 	ctng_config_tasks=( "('./ct-ng menuconfig;')"
-						"('TPL_SAVE=\$(\$gui --defaultno --output-fd 1 --ok-label \"Yes\" --cancel-label \"No\" --colors \$bt_ \"\$title_ - \Z0\$pdesc\Zn\" --title \"-[ Save Cross Toolchain Template ]-\" --inputbox \"\\\nWould you like to \ZrSAVE\ZR this toolchain template \Zrnow\ZR?\" 10 55 \"@TEMPLATE@\") && cp \"\$ctsrcdir/.config\" \"\$TPL_SAVE\";')"
-						"('TC_SAVE=\$(\$gui --defaultno --output-fd 1 --ok-label \"Yes\" --cancel-label \"No\" --colors \$bt_ \"\$title_ - \Z0\$pdesc\Zn\" --title \"-[ Build Cross Toolchain ]-\" --inputbox \"\\\nWould you like to \ZrBUILD\ZR this toolchain \Zrnow\ZR?\" 10 55 \"@TOOLCHAIN@\");')"
-						"('[ -n \"\$TC_SAVE\" ] && BUILD_TC=\$(basename \"\$TC_SAVE\") && BUILD_LOG=\"\$ldir/\$(date +%F.%H%M%S)_tup_crosstoolchain_\$(basename \"\$TC_SAVE\").log\";')"
-						"('[ -n \"\$TC_SAVE\" ] && sed -i \"s#.*CT_LOCAL_TARBALLS_DIR=.*#CT_LOCAL_TARBALLS_DIR=\\\"\$dldir\\\"#g\" \"\$ctsrcdir/.config\" && sed -i \"s#.*CT_PREFIX_DIR=.*#CT_PREFIX_DIR=\\\"\$TC_SAVE\\\"#g\" \"\$ctsrcdir/.config\";')"
-						"('[ -n \"\$TC_SAVE\" ] && clear && ./ct-ng show-config && ./ct-ng build;')"
-						"('[ -n \"\$TC_SAVE\" ] && cat \"\$ctsrcdir/build.log\" >\"\$BUILD_LOG\";')"
-						"('[ -n \"\$TC_SAVE\" ] && BUILD_ERROR=\$(grep \"\[ERROR\]\" \"\$ctsrcdir/build.log\" | wc -l);')"
-						"('[ -n \"\$TC_SAVE\" ] && [ ! \$BUILD_ERROR -gt 0 ] && BUILD_TARGET=\$(sed -n -e \"/target = / s/.*\= *//p\" \"\$ctsrcdir/build.log\") && BUILD_DESC=\$(sed -n -e \"/#toolchain template/ s/.*\: *//p\" \"\$cttpldir/\$BUILD_TC\");')"
-						"('[ -n \"\$TC_SAVE\" ] && _sz && [ ! \$BUILD_ERROR -gt 0 ] && @COMPRESS@ \"\$dldir/Toolchain-\$BUILD_TC.tar.xz\" \"\$TC_SAVE\" | \$gui \$st_ \$bt_ \"\$title_ - \Z0\$pdesc\Zn\" --colors --title \"-[ Compress cross toolchain \$BUILD_TC to Toolchain-\$BUILD_TC.tar.xz ]-\" \$pb_ \$_lines \$_cols;')"
-						"('[ -n \"\$TC_SAVE\" ] && [ ! \$BUILD_ERROR -gt 0 ] && @CREATECFG@ \"\$tcdir/\$BUILD_TC\" \"\$BUILD_TC\" \"\$BUILD_TARGET\" \"\" \"\" \"\$BUILD_DESC\" \"\" \"\$dldir/Toolchain-\$BUILD_TC.tar.xz\" \"yes\";')" );
+						"('TPL_SAVE=\$(\$gui --defaultno --output-fd 1 --ok-label \"Yes\" --cancel-label \"No\" --colors \$bt_ \"\$title_ - \Z0\$pdesc\Zn\" --title \"-[ Save Cross Toolchain Template ]-\" --inputbox \"\\\nWould you like to \ZrSAVE\ZR this toolchain template \Zrnow\ZR?\" 10 55 \"@TEMPLATE@\") && cp \"\$ctsrcdir/.config\" \"\$TPL_SAVE\";')" );
 	ctng_config_tasks_comment="#config command";
 	
 	ctng_build_tasks=( "('./ct-ng show-config | tee -a \"@LOGFILE@\";')"
@@ -779,7 +918,20 @@ _create_config(){
 					   "('./configure --enable-local;')"
 					   "('make;')" );
 	ctng_setup_tasks_comment="#setup command";
-
+	
+	fng_config_tasks=( "('make menuconfig;')"
+						"('TPL_SAVE=\$(\$gui --defaultno --output-fd 1 --ok-label \"Yes\" --cancel-label \"No\" --colors \$bt_ \"\$title_ - \Z0\$pdesc\Zn\" --title \"-[ Save Cross Toolchain Template ]-\" --inputbox \"\\\nWould you like to \ZrSAVE\ZR this toolchain template \Zrnow\ZR?\" 10 55 \"@TEMPLATE@\") && cp \"\$fngsrcdir/.config\" \"\$TPL_SAVE\";')" );
+	fng_config_tasks_comment="#config command";
+	
+	fng_build_tasks=( "('make olddefconfig | tee -a \"@LOGFILE@\";')"
+					  "('make toolchain-dirclean | tee -a \"@LOGFILE@\";')"
+					  "('make toolchain | tee -a \"@LOGFILE@\";')" );
+	fng_build_tasks_comment="#build command";
+	
+	fng_setup_tasks=( "('git clone --progress \"\$FNG_REPO_URL\" \"@FNGSOURCE@\";')"
+					  "('ln -s \"../../downloads\" \"@FNGSOURCE@/dl\";')" );
+	fng_setup_tasks_comment="#setup command";
+	
 	lib_comments=(	"#Enable/Disable (1|0)"
 					"#Displayname"
 					"#Versionnumber"
@@ -840,6 +992,26 @@ _create_config(){
 	for st in "${ctng_setup_tasks[@]}";
 	do
 		echo -e "CTNG_SETUP_tasks"$([ "$i" -gt "0" ] && echo "+")"=$st; $ctng_setup_tasks_comment$(($i+1))"					>>"$configname";
+		((i++));
+	done;
+	
+	echo -e '\nFNG_REPO_URL="https://github.com/Freetz-NG/freetz-ng.git"; #Repository to load freetz-ng from'					>>"$configname";
+	i=0;
+	for ct in "${fng_config_tasks[@]}";
+	do
+		echo -e "FNG_CONFIG_tasks"$([ "$i" -gt "0" ] && echo "+")"=$ct; $fng_config_tasks_comment$(($i+1))"					>>"$configname";
+		((i++));
+	done;
+	i=0;
+	for bt in "${fng_build_tasks[@]}";
+	do
+		echo -e "FNG_BUILD_tasks"$([ "$i" -gt "0" ] && echo "+")"=$bt; $fng_build_tasks_comment$(($i+1))"					>>"$configname";
+		((i++));
+	done;
+	i=0;
+	for st in "${fng_setup_tasks[@]}";
+	do
+		echo -e "FNG_SETUP_tasks"$([ "$i" -gt "0" ] && echo "+")"=$st; $fng_setup_tasks_comment$(($i+1))"					>>"$configname";
 		((i++));
 	done;
 	
