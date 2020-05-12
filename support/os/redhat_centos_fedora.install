@@ -72,6 +72,7 @@ do
 			;;
 		xz)
 			inst="xz-utils";
+			[ "$rh_version" -gt 29 ] && inst="xz";
 			;;
 		makeinfo)
 			inst="texinfo";
@@ -82,11 +83,17 @@ do
 		libtool|libtoolize)
 			inst="libtool";
 			;;
-		cmp)
-			inst="diffutils";
-			;;
 		g++)
 			inst="gcc-c++";
+			;;
+		python)
+			[ "$rh_version" == 8 ] && inst="python3";
+			;;
+		composite)
+			inst="ImageMagick";
+			;;
+		cmp)
+			inst="diffutils";
 			;;
 		# the following guys have no official packages
 		sshpass)
@@ -125,6 +132,18 @@ do
 		ncurses)
 				inst="ncurses-devel";
 			;;
+		libacl.h)
+				inst="libacl-devel";
+			;;
+		sys/capability.h)
+				inst="libcap-devel";
+			;;
+		readline.h)
+				inst="readline-devel";
+			;;
+		glib-2.0/glib.h)
+				inst="glib2-devel";
+			;;
 		esac;
 		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
 		packages="$packages $inst";
@@ -139,6 +158,12 @@ do
 		libccidtwin.so)
 				inst="ccid";
 				[ "$rh_version" -gt 6 ] && inst="pcsc-lite-ccid";
+			;;
+		libstdc++.a)
+				inst="libstdc++-static";
+			;;
+		libc\\.a)
+				inst="glibc-static";
 			;;
 		esac;
 		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
@@ -175,7 +200,7 @@ if ! hash sshpass 2>/dev/null; then
 	[ "$(arch)" == "i686" ] && sshpass_src=$sshpass86_src;
 	echo -e "$w_l  install$g_l sshpass$y_l\tfrom: $sshpass_src";
 	echo "+++ $(date): rpm -i $sshpass_src" >> "$install_log";
-	$prefix rpm -i $sshpass_src >> "$install_log" 2>&1 || failed=1;
+	$prefix rpm --nosignature -i $sshpass_src >> "$install_log" 2>&1 || failed=1;
 fi
 
 [ $failed == 1 ] && echo -e "\n$r_l  Installation with errors - see: $install_log";

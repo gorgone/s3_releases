@@ -9,7 +9,7 @@ packages="";
 echo -n >"$install_log" &2>/dev/null;
 echo -e "$w_l\n  INSTALLATION\n  ============\n";
 
-source /etc/lsb-release
+[ -f /etc/lsb-release ] && source /etc/lsb-release;
 manjaro_version=$DISTRIB_RELEASE
 
 # without sudo no user installation allowed
@@ -41,6 +41,9 @@ do
 		libtool|libtoolize)
 			inst="libtool";
 			;;
+		composite)
+			inst="imagemagick";
+			;;
 		cmp)
 			inst="diffutils";
 			;;
@@ -69,6 +72,18 @@ do
 			;;
 		ncurses)
 				inst="ncurses";
+			;;
+		libacl.h)
+				inst="acl";
+			;;
+		sys/capability.h)
+				inst="libcap";
+			;;
+		readline.h)
+			inst="readline";
+			;;
+		glib-2.0/glib.h)
+				inst="glib2";
 			;;
 		esac;
 		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
