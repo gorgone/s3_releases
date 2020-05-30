@@ -33,8 +33,12 @@ do
 		libtool)
 			inst="libtool-bin";
 			;;
+		composite)
+			inst="imagemagick";
+			;;
 		cmp)
 			inst="diffutils";
+			;;
 		esac;
 		printf -v pad %40s; e=$e$pad; e=${e:0:15};
 		echo -e "$w_l  select $g_l$e$y_l from: $inst";
@@ -61,6 +65,18 @@ do
 			;;
 		ncurses)
 				inst="libncurses-dev";
+			;;
+		libacl.h)
+				inst="libacl1-dev";
+			;;
+		sys/capability.h)
+				inst="libcap-dev";
+			;;
+		readline.h)
+				inst="libreadline-dev";
+			;;
+		glib-2.0/glib.h)
+				inst="libglib2.0-dev";
 			;;
 		esac;
 		printf -v pad %40s; e=$e$pad; e=${e:0:15};

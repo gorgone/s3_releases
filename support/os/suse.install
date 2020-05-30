@@ -64,11 +64,17 @@ do
 		libtool)
 			inst="libtool-bin";
 			;;
-		cmp)
-			inst="diffutils";
-			;;
 		g++)
 			inst="gcc-c++";
+			;;
+		gettext)
+			inst="gettext-tools";
+			;;
+		composite)
+			inst="ImageMagick";
+			;;
+		cmp)
+			inst="diffutils";
 			;;
 		esac;
 		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
@@ -96,6 +102,18 @@ do
 		ncurses)
 				inst="ncurses-devel";
 			;;
+		libacl.h)
+				inst="libacl-devel";
+			;;
+		sys/capability.h)
+				inst="libcap-devel";
+			;;
+		readline.h)
+				inst="readline-devel";
+			;;
+		glib-2.0/glib.h)
+				inst="glib2-devel-32bit";
+			;;
 		esac;
 		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
 		packages="$packages $inst";
@@ -112,6 +130,9 @@ do
 			;;
 		libstdc++.so.6)
 				inst="libstdc++6";
+			;;
+		libc\\.a)
+				inst="glibc-static";
 			;;
 		esac;
 		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
