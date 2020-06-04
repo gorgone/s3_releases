@@ -14,7 +14,7 @@ update_me(){
 	fi
 
 	online_revision=$(gitrevision $s3url)
-	if [ ! $local_revision == $online_revision ]
+	if [ ! "$local_revision" == "$online_revision" ]
 	then
 		printf "  update s3_git to\n  Local Revision: $online_revision\n"
 		svn -q checkout "$s3url" "$s3local"
