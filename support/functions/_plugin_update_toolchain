@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.13.0";
+	pversion="0.13.1";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -695,6 +695,7 @@ _get_template_properties(){
 			bitness=$(grep '^CT_ARCH_BITNESS=' "$1" | awk -F'=' '{print $2}');
 			[ "$arch" == "arm" ] && [ "$bitness" == "64" ] && arch="aarch64";
 			cpu=$(grep '^CT_ARCH_CPU=' "$1" | awk -F'"' '{print $2}') && [ -n "$cpu" ] && cpu=" $cpu";
+			[ -z "$cpu" ] && cpu=$(grep -i "^CT_ARCH_${arch}_VARIANT=" "$1" | awk -F'"' '{print $2}') && [ -n "$cpu" ] && cpu=" $cpu";
 			aarch=$(grep '^CT_ARCH_ARCH=' "$1" | awk -F'"' '{print $2}') && [ -n "$aarch" ] && aarch=" $aarch";
 			cc=$(grep '^CT_CC=' "$1" | awk -F'"' '{print $2}');
 			ccv=$(grep -i "CT_${cc}_VERSION=" "$1" | awk -F'"' '{print $2}');
