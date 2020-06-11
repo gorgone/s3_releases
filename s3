@@ -103,14 +103,14 @@ loadprofile="no"
 s3cfg="$configdir/simplebuild.config"
 
 # Compiler settings
-cc_warn="-W -Wall -Wshadow -Wredundant-decls -Wstrict-prototypes -Wold-style-definition";
-cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections";
+cc_warn="-W -Wall -Wshadow -Wredundant-decls -Wstrict-prototypes -Wold-style-definition"
+cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections"
 
 #default url
-trunkurl="http://www.streamboard.tv/svn/oscam/trunk";
-#trunkurl="http://www.streamboard.tv/svn/oscam-addons/modern";
++trunkurl="https://svn.streamboard.tv/oscam/trunk"
++#trunkurl="https://svn.streamboard.tv/oscam-addons/modern"
 
-[ -f "$workdir/oscamsource.url" ] && source "$workdir/oscamsource.url";
+[ -f "$workdir/oscamsource.url" ] && source "$workdir/oscamsource.url"
 
 #load translationlist
 cd "$tdir"
