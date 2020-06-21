@@ -690,10 +690,10 @@ _get_template_properties(){
 		#extract template properties
 		if [ $(_get_template_type "$1") == "CTNG" ];then
 			arch=$(grep '^CT_ARCH=' "$1" | awk -F'"' '{print $2}');
-			[ $(grep -i '^CT_ARCH_LE=y' "$1") ] && endianness ="LE";
-			[ $(grep -i '^CT_ARCH_BE=y' "$1") ] && endianness ="BE";
-			[ $(grep -i '^CT_ARCH_LE_BE=y' "$1") ] && endianness ="LE+BE";
-			[ $(grep -i '^CT_ARCH_BE_LE=y' "$1") ] && endianness ="BE+LE";
+			[ $(grep -i '^CT_ARCH_LE=y' "$1") ] && endianness="LE";
+			[ $(grep -i '^CT_ARCH_BE=y' "$1") ] && endianness="BE";
+			[ $(grep -i '^CT_ARCH_LE_BE=y' "$1") ] && endianness="LE+BE";
+			[ $(grep -i '^CT_ARCH_BE_LE=y' "$1") ] && endianness="BE+LE";
 			bitness=$(grep '^CT_ARCH_BITNESS=' "$1" | awk -F'=' '{print $2}');
 			[ "$arch" == "arm" ] && [ "$bitness" == "64" ] && arch="aarch64";
 			cpu=$(grep '^CT_ARCH_CPU=' "$1" | awk -F'"' '{print $2}') && [ -n "$cpu" ] && cpu=" $cpu";
@@ -715,7 +715,7 @@ _get_template_properties(){
 				make olddefconfig >/dev/null;
 				arch=$(grep '^FREETZ_TARGET_ARCH=' ".config" | awk -F'"' '{print $2}');
 				bitness=$(grep '^FREETZ_GCC_ABI=' ".config" | awk -F'"' '{print $2}');
-				[ $(grep -i '^FREETZ_TARGET_ARCH_BE=y' ".config") ] && endianness ="BE" || endianness ="LE";
+				[ $(grep -i '^FREETZ_TARGET_ARCH_BE=y' ".config") ] && endianness="BE" || endianness="LE";
 				[ $(grep -i '^FREETZ_LIB_libuClibc=y' ".config") ] && libc="uClibc";
 				[ $(grep -i '^FREETZ_LIB_libglibc=y' ".config") ] && libc="glibc";
 				[ $(grep -i '^FREETZ_LIB_libumusl=y' ".config") ] && libc="musl";
