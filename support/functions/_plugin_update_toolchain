@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.13.0";
+	pversion="0.13.2";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -690,11 +690,14 @@ _get_template_properties(){
 		#extract template properties
 		if [ $(_get_template_type "$1") == "CTNG" ];then
 			arch=$(grep '^CT_ARCH=' "$1" | awk -F'"' '{print $2}');
-			endian=$(grep '^CT_ARCH_ENDIAN=' "$1" | awk -F'"' '{print $2}');
-			end=${endian^};
+			[ $(grep -i '^CT_ARCH_LE=y' "$1") ] && endianness ="LE";
+			[ $(grep -i '^CT_ARCH_BE=y' "$1") ] && endianness ="BE";
+			[ $(grep -i '^CT_ARCH_LE_BE=y' "$1") ] && endianness ="LE+BE";
+			[ $(grep -i '^CT_ARCH_BE_LE=y' "$1") ] && endianness ="BE+LE";
 			bitness=$(grep '^CT_ARCH_BITNESS=' "$1" | awk -F'=' '{print $2}');
 			[ "$arch" == "arm" ] && [ "$bitness" == "64" ] && arch="aarch64";
 			cpu=$(grep '^CT_ARCH_CPU=' "$1" | awk -F'"' '{print $2}') && [ -n "$cpu" ] && cpu=" $cpu";
+			[ -z "$cpu" ] && cpu=$(grep -i "^CT_ARCH_${arch}_VARIANT=" "$1" | awk -F'"' '{print $2}') && [ -n "$cpu" ] && cpu=" $cpu";
 			aarch=$(grep '^CT_ARCH_ARCH=' "$1" | awk -F'"' '{print $2}') && [ -n "$aarch" ] && aarch=" $aarch";
 			cc=$(grep '^CT_CC=' "$1" | awk -F'"' '{print $2}');
 			ccv=$(grep -i "CT_${cc}_VERSION=" "$1" | awk -F'"' '{print $2}');
@@ -712,7 +715,7 @@ _get_template_properties(){
 				make olddefconfig >/dev/null;
 				arch=$(grep '^FREETZ_TARGET_ARCH=' ".config" | awk -F'"' '{print $2}');
 				bitness=$(grep '^FREETZ_GCC_ABI=' ".config" | awk -F'"' '{print $2}');
-				[ $(grep -i '^FREETZ_TARGET_ARCH_BE=y' ".config") ] && end="B" || end="L";
+				[ $(grep -i '^FREETZ_TARGET_ARCH_BE=y' ".config") ] && endianness ="BE" || endianness ="LE";
 				[ $(grep -i '^FREETZ_LIB_libuClibc=y' ".config") ] && libc="uClibc";
 				[ $(grep -i '^FREETZ_LIB_libglibc=y' ".config") ] && libc="glibc";
 				[ $(grep -i '^FREETZ_LIB_libumusl=y' ".config") ] && libc="musl";
@@ -729,7 +732,7 @@ _get_template_properties(){
 		fi;
 
 		#build template property string
-		[ -z $setup ] && desc="$desc ($arch$cpu$aarch $bitness-bit ${end:0:1}E, $libc $libcv, $cc $ccv, $kernel $kernelv)";
+		[ -z $setup ] && desc="$desc ($arch$cpu$aarch $bitness-bit $endianness , $libc $libcv, $cc $ccv, $kernel $kernelv)";
 	fi;
 	echo $desc;
 	[ -n "$desc" ] && exit 0 || exit 1;
