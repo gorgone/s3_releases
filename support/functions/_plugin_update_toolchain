@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.13.2";
+	pversion="0.13.3";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -715,7 +715,7 @@ _get_template_properties(){
 				make olddefconfig >/dev/null;
 				arch=$(grep '^FREETZ_TARGET_ARCH=' ".config" | awk -F'"' '{print $2}');
 				bitness=$(grep '^FREETZ_GCC_ABI=' ".config" | awk -F'"' '{print $2}');
-				[ $(grep -i '^FREETZ_TARGET_ARCH_BE=y' ".config") ] && endianness="BE" || endianness="LE";
+				[ $(grep -i '^FREETZ_TARGET_ARCH_BE=y' ".config") ] && endianness="BE" || endianness ="LE";
 				[ $(grep -i '^FREETZ_LIB_libuClibc=y' ".config") ] && libc="uClibc";
 				[ $(grep -i '^FREETZ_LIB_libglibc=y' ".config") ] && libc="glibc";
 				[ $(grep -i '^FREETZ_LIB_libumusl=y' ".config") ] && libc="musl";
@@ -732,7 +732,7 @@ _get_template_properties(){
 		fi;
 
 		#build template property string
-		[ -z $setup ] && desc="$desc ($arch$cpu$aarch $bitness-bit $endianness , $libc $libcv, $cc $ccv, $kernel $kernelv)";
+		[ -z $setup ] && desc="$desc ($arch$cpu$aarch $bitness-bit $endianness, $libc $libcv, $cc $ccv, $kernel $kernelv)";
 	fi;
 	echo $desc;
 	[ -n "$desc" ] && exit 0 || exit 1;
