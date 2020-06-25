@@ -715,7 +715,7 @@ _get_template_properties(){
 				make olddefconfig >/dev/null;
 				arch=$(grep '^FREETZ_TARGET_ARCH=' ".config" | awk -F'"' '{print $2}');
 				bitness=$(grep '^FREETZ_GCC_ABI=' ".config" | awk -F'"' '{print $2}');
-				[ $(grep -i '^FREETZ_TARGET_ARCH_BE=y' ".config") ] && endianness="BE" || endianness ="LE";
+				[ $(grep -i '^FREETZ_TARGET_ARCH_BE=y' ".config") ] && endianness="BE" || endianness="LE";
 				[ $(grep -i '^FREETZ_LIB_libuClibc=y' ".config") ] && libc="uClibc";
 				[ $(grep -i '^FREETZ_LIB_libglibc=y' ".config") ] && libc="glibc";
 				[ $(grep -i '^FREETZ_LIB_libumusl=y' ".config") ] && libc="musl";
