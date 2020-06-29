@@ -1,4 +1,6 @@
-#toolchain template: OpenWrt 18.06 ar71xx, mips_24kc BE devices
+#toolchain template: OpenWrt 19.07 mpc85xx, Freescale MPC85xx BE devices
+#toolchain template version: 3
+#toolchain template migrate: mpc85xx_powerpc
 CT_CONFIGURE_has_static_link=y
 CT_CONFIGURE_has_cxx11=y
 CT_CONFIGURE_has_wget=y
@@ -95,24 +97,26 @@ CT_LOG_FILE_COMPRESS=y
 # CT_ARCH_AVR is not set
 # CT_ARCH_M68K is not set
 # CT_ARCH_MICROBLAZE is not set
-CT_ARCH_MIPS=y
+# CT_ARCH_MIPS is not set
 # CT_ARCH_MOXIE is not set
 # CT_ARCH_MSP430 is not set
 # CT_ARCH_NIOS2 is not set
-# CT_ARCH_POWERPC is not set
+CT_ARCH_POWERPC=y
 # CT_ARCH_RISCV is not set
 # CT_ARCH_S390 is not set
 # CT_ARCH_SH is not set
 # CT_ARCH_SPARC is not set
 # CT_ARCH_X86 is not set
 # CT_ARCH_XTENSA is not set
-CT_ARCH="mips"
-CT_ARCH_CHOICE_KSYM="MIPS"
+CT_ARCH="powerpc"
+CT_ARCH_CHOICE_KSYM="POWERPC"
+CT_ARCH_CPU=""
 CT_ARCH_TUNE=""
-CT_ARCH_MIPS_SHOW=y
-CT_ARCH_MIPS_PKG_KSYM=""
-CT_ARCH_mips_o32=y
-CT_ARCH_mips_ABI="32"
+CT_ARCH_POWERPC_SHOW=y
+CT_ARCH_POWERPC_PKG_KSYM=""
+CT_ARCH_powerpc_ABI=""
+CT_ARCH_powerpc_ABI_DEFAULT=y
+# CT_ARCH_powerpc_ABI_SPE is not set
 CT_ALL_ARCH_CHOICES="ALPHA ARC ARM AVR M68K MICROBLAZE MIPS MOXIE MSP430 NIOS2 POWERPC RISCV S390 SH SPARC X86 XTENSA"
 CT_ARCH_SUFFIX=""
 # CT_OMIT_TARGET_VENDOR is not set
@@ -130,10 +134,12 @@ CT_ARCH_DEFAULT_32=y
 CT_ARCH_BITNESS=32
 CT_ARCH_32=y
 # CT_ARCH_64 is not set
-CT_ARCH_SUPPORTS_WITH_ARCH=y
+CT_ARCH_SUPPORTS_WITH_32_64=y
+CT_ARCH_SUPPORTS_WITH_ABI=y
+CT_ARCH_SUPPORTS_WITH_CPU=y
 CT_ARCH_SUPPORTS_WITH_TUNE=y
 CT_ARCH_SUPPORTS_WITH_FLOAT=y
-CT_ARCH_ARCH="mips1"
+CT_ARCH_ABI=""
 # CT_ARCH_FLOAT_AUTO is not set
 # CT_ARCH_FLOAT_HW is not set
 CT_ARCH_FLOAT_SW=y
@@ -150,7 +156,7 @@ CT_WANTS_STATIC_LINK_CXX=y
 CT_SHOW_CT_VERSION=y
 CT_TOOLCHAIN_PKGVERSION=""
 CT_TOOLCHAIN_BUGURL=""
-CT_TARGET_VENDOR="ar71xx"
+CT_TARGET_VENDOR="mpc85xx"
 CT_TARGET_ALIAS_SED_EXPR=""
 CT_TARGET_ALIAS=""
 # CT_NATIVE is not set
@@ -287,7 +293,6 @@ CT_BINUTILS_FOR_TARGET=y
 CT_BINUTILS_FOR_TARGET_IBERTY=y
 CT_BINUTILS_FOR_TARGET_BFD=y
 CT_ALL_BINUTILS_CHOICES="BINUTILS"
-# CT_LIBC_BIONIC is not set
 # CT_LIBC_GLIBC is not set
 CT_LIBC_MUSL=y
 # CT_LIBC_UCLIBC is not set
@@ -308,17 +313,17 @@ CT_MUSL_PATCH_GLOBAL=y
 # CT_MUSL_PATCH_LOCAL_BUNDLED is not set
 # CT_MUSL_PATCH_NONE is not set
 CT_MUSL_PATCH_ORDER="global"
-# CT_MUSL_V_1_1_24 is not set
+CT_MUSL_V_1_1_24=y
 # CT_MUSL_V_1_1_23 is not set
 # CT_MUSL_V_1_1_22 is not set
 # CT_MUSL_V_1_1_21 is not set
 # CT_MUSL_V_1_1_20 is not set
-CT_MUSL_V_1_1_19=y
+# CT_MUSL_V_1_1_19 is not set
 # CT_MUSL_V_1_1_18 is not set
 # CT_MUSL_V_1_1_17 is not set
 # CT_MUSL_V_1_1_16 is not set
 # CT_MUSL_NO_VERSIONS is not set
-CT_MUSL_VERSION="1.1.19"
+CT_MUSL_VERSION="1.1.24"
 CT_MUSL_MIRRORS="http://www.musl-libc.org/releases"
 CT_MUSL_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_MUSL_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
@@ -420,10 +425,6 @@ CT_CC_GCC_DEC_FLOAT_AUTO=y
 # CT_CC_GCC_DEC_FLOAT_BID is not set
 # CT_CC_GCC_DEC_FLOAT_DPD is not set
 # CT_CC_GCC_DEC_FLOATS_NO is not set
-CT_CC_GCC_HAS_ARCH_OPTIONS=y
-CT_CC_GCC_mips_llsc=m
-CT_CC_GCC_mips_synci=m
-CT_CC_GCC_mips_plt=y
 CT_ALL_CC_CHOICES="GCC"
 CT_CC_LANG_CXX=y
 # CT_CC_LANG_FORTRAN is not set

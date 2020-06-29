@@ -3,25 +3,27 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.13.3";
+	pversion="0.14.0";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
 	ctdir="$sdir/crosstool";
-	ctsrcdir="$ctdir/crosstool-ng";
 	cttpldir="$ctdir/templates";
+	ctngsrcdir="$ctdir/crosstool-ng";
 	fngsrcdir="$ctdir/freetz-ng";
 	cpus="$(getconf _NPROCESSORS_ONLN)";
 
 	CMDTC="$1";
 	OPTION1="$2";
 	OPTION2="$3";
-	[ -z "$4" ] && FLAG="0" || FLAG="$4"; #1 - tcupdate call from s3 main menu, 2 - tcupdate call from s3 toolchain menu;
+	[ -z "$4" ] && FLAG="0" || FLAG="$4"; #0 - tcupdate call from s3.TUP itself, 1 - tcupdate call from s3 main menu, 2 - tcupdate call from s3 toolchain menu;
 	tc="$CMDTC";
 	
+	#some migrations to upgrade older s3.TUP versions
+	[ -z "$4" ] && clear && _migrations;
+	
 	#check/install prerequisites
-	[ -d "$ctdir/source" ] && mv -f "$ctdir/source" "$ctsrcdir"; #rename folder for compatibility with pre 0.13.x releases
-	clear && _check_pkg;
+	[ -z "$4" ] && _check_pkg;
 
 	#backup config
 	if [ "$CMDTC" == "-r" ] || [ "$CMDTC" == "--reset" ];then
@@ -91,11 +93,8 @@ tcupdate(){
 		else
 			_nl && exit;
 		fi;
-	elif [ "$CMDTC" == "-ctng" ] || [ "$CMDTC" == "--crosstool-ng" ];then #croostool-NG menu
-		_ctng_menu "$OPTION1";
-		bye;
-	elif [ "$CMDTC" == "-fng" ] || [ "$CMDTC" == "--freetz-ng" ];then #croostool-NG menu
-		_fng_menu "$OPTION1";
+	elif [ "$CMDTC" == "-ctng" ] || [ "$CMDTC" == "--crosstool-ng" ] || [ "$CMDTC" == "-fng" ] || [ "$CMDTC" == "--freetz-ng" ];then #toolchain editor menu
+		_tpl_editor "$(_get_template_type "$cttpldir/$OPTION1")" "$OPTION1";
 		bye;
 	elif [ -z "$CMDTC" ];then
 		unset menu_close;
@@ -120,7 +119,7 @@ tcupdate(){
 			fi;
 			clear;clear;
 			out=$("$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--item-help" "--help-tags" "--default-item" "$tc" "--ok-label" "Update" "--cancel-label" "Create" "--help-button" "--help-label" "Backup" "--extra-button" "--extra-label" "$([ ! "$FLAG" == "1" ] && echo "Exit" || echo "Back")" "--title" "-[ Toolchain Menu ]-" \
-				--menu "\nSelect one of the installed tool chains that you want to update:\n " \
+				--menu "\nSelect one of the $COUNT installed cross toolchains that you want to update:\n " \
 				"${COUNT+10}" 0 0 "${MENU_OPTIONS[@]}");
 			ret="$?";
 			[ $ret -eq 2 ] && tc=$(echo "$out" | awk '{printf $2}') || tc=$(echo "$out" | awk '{printf $1}');
@@ -176,6 +175,7 @@ tcupdate(){
 		do
 			[ "${!i}" == "0" ] && continue;
 			libkey=$i;
+			libbeta="$i"_beta; [ "$LIBS_LIST_BETA" == "0" ] && [ "${!libbeta}" == "1" ] && continue; #skip beta libraries in list
 			libname="$i"_name;libname=${!libname};
 			libversion="$i"_version;libversion=${!libversion};
 			libdesc="$i"_desc;libdesc=${!libdesc};
@@ -273,7 +273,7 @@ tcupdate(){
 };
 _create_tc(){
 	_sz;					# Prepare DIALOG settings
-
+	unset TPL_LIST;
 	local menu_close;
 	while [ ! $menu_close ]
 	do
@@ -297,9 +297,18 @@ _create_tc(){
 			unset MENU_OPTIONS;COUNT=0;
 			if [ "$tplempty" == "0" ];then
 				for t in "${TPL_LIST[@]}";do
-					desc=$(_get_template_properties "$t")
-					[ -d "$tcdir/$t" ] && [ -f "$tccfgdir/$t" ] && color="\Z1" || color="";
-					MENU_OPTIONS+=("$t" "$color$desc\Zn" "off" "template filename:$cttpldir/$t");counter;
+					props=$(_get_template_properties "$t");
+					desc=$(echo "$props" | awk -F'^' '{print $1}' | xargs);
+					version=$(echo "$props" | awk -F'^' '{print $2}' | xargs);
+					changed=$(echo "$props" | awk -F'^' '{print $4}' | xargs);[ -n "$changed" ] && changed=", changed:$changed";
+					copyof=$(echo "$props" | awk -F'^' '{print $5}' | xargs);[ -n "$copyof" ] && copyof=", copy of:$copyof";
+					version_tc=$(echo $(_get_template_properties "$tcdir/$t/.config") | awk -F'^' '{print $2}' | xargs); [ -z "$version_tc" ] && version_tc="0";
+					if [[ -d "$tcdir/$t" && -f "$tccfgdir/$t" ]];then
+						[ "$version" -gt "$version_tc" ] && color="\Z1" || color="\Zb\Z1";
+					else
+						color="";
+					fi
+					MENU_OPTIONS+=("$t" "$color$desc\Zn" "off" "template filename:$cttpldir/$t, version:$version$changed$copyof");
 					counter;
 				done;
 			fi;
@@ -307,7 +316,7 @@ _create_tc(){
 			[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "no templates found" "no templates found") && counter;
 			clear;clear;
 			opts=$("$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--item-help" "--help-tags" "--default-item" "$tpl" "--ok-label" "Start" "--extra-button" "--extra-label" "$([ ! "$3" == "1" ] && echo "Exit" || echo "Back")" "--cancel-label" "Setup" "--help-button" "--help-label" "Edit" "--title" "-[ Cross Toolchain Template Menu ]-" "$cl_"\
-				 "\nSelect on of the templates to create the cross toolchain you want:\n\n\Z1NOTE: If you create a cross toolchain from a template with a red colored description, an existing one with the same name will be replaced without asking!\Zn" \
+				 "\nSelect one of the $COUNT templates to create the cross toolchain you want:\n\n\Z1NOTE: \ZbIf you create a cross toolchain from a template with a red colored description, an existing one with the same name will be replaced without asking!\ZB Dark red colored descriptions indicates that the version of the template is higher than the existing toolchain. An update could make sense.\Zn" \
 				 "${COUNT+11}" 0 0 "${MENU_OPTIONS[@]}");
 			ret="$?";
 		fi;
@@ -330,7 +339,7 @@ _create_tc(){
 						echo -e "$y_l$sp\nbuild ($i/$icount): command list for cross toolchain $tpl:\n$sp" | tee -a "$logfile";
 
 						#copy template
-						[ $(_get_template_type "$cttpldir/$tpl") == "CTNG" ] && tpltargetdir="$ctsrcdir";
+						[ $(_get_template_type "$cttpldir/$tpl") == "CTNG" ] && tpltargetdir="$ctngsrcdir";
 						[ $(_get_template_type "$cttpldir/$tpl") == "FNG" ]  && tpltargetdir="$fngsrcdir";
 						echo "rm \"$tpltargetdir/.config\"* 2>/dev/null;cp -f \"$cttpldir/$tpl\" \"$tpltargetdir/.config\";" | tee -a "$logfile";
 						rm "$tpltargetdir/.config"* 2>/dev/null;cp -f "$cttpldir/$tpl" "$tpltargetdir/.config";
@@ -411,11 +420,15 @@ _create_tc(){
 									bzip2 -zf9 "$tcdir/$tpl/freetz-ng.log";
 								fi;
 								
+								#save config in target toolchain folder
+								[ -f "$tpltargetdir/.config" ] && cp -f "$tpltargetdir/.config" "$tcdir/$tpl/";
+								
 								#compress toolchain
 								_compress "$dldir/Toolchain-$tpl.tar.xz" "$tcdir/$tpl" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Compress cross toolchain $tpl to Toolchain-$tpl.tar.xz ]- " "$pb_" "$_lines" "$_cols";
 								
 								#create toolchain.cfg
-								desc=$(_get_template_properties "$cttpldir/$tpl");
+								props=$(_get_template_properties "$cttpldir/$tpl");
+								desc=$(echo "$props" | awk -F'^' '{print $1}' | xargs);
 								_create_toolchaincfg "$tcdir/$tpl" "$tpl" "$target" "" "" "$desc" "" "$dldir/Toolchain-$tpl.tar.xz" "yes";
 							else
 								_paktc_timer 10;
@@ -434,8 +447,7 @@ _create_tc(){
 				_fng_setup "$CTNG_START_BUILD";;
 			2) #Edit
 				tpl=$(echo "$opts" | awk '{printf $2}';);
-				[ $(_get_template_type "$cttpldir/$tpl") == "CTNG" ] && _ctng_menu "$tpl";
-				[ $(_get_template_type "$cttpldir/$tpl") == "FNG" ]  && _fng_menu "$tpl";;
+				_tpl_editor "$(_get_template_type "$cttpldir/$tpl")" "$tpl";;
 			3)	#Exit
 				menu_close="1";
 				return;;
@@ -445,6 +457,38 @@ _create_tc(){
 		[ ${#2} -gt 0 ] || [ ${#1} -gt 0 ] && menu_close=1;
 		
 	done;
+};
+_migrations(){
+	
+	#rename folder for compatibility with pre 0.13.x releases
+	[ -d "$ctdir/source" ] && mv -f "$ctdir/source" "$ctngsrcdir";
+	
+	#migrate renamed templates
+	unset TPL_LIST;unset mig_list;unset rm_list;
+	if [ -d "$cttpldir" ];then
+		cd "$cttpldir";
+		if [ "$(ls -A "$cttpldir")" ];then
+			TPL_LIST=(*);
+			for tpl in "${TPL_LIST[@]}";do
+				props=$(_get_template_properties "$cttpldir/$tpl"); #get template properties
+				desc=$(echo "$props" | awk -F'^' '{print $1}' | xargs); #extract description
+				tc_migrate=$(echo "$props" | awk -F'^' '{print $3}' | xargs); #extract template name to migrate
+				if [[ -n "$tc_migrate" && -d "$tcdir/$tc_migrate" ]];then
+					mig_list+="\ntoolchain ${y_l}${tc_migrate}${re_}\n\ttemplate ${y_l}${tc_migrate}${re_} was renamed to ${p_l}${tpl}\n${re_}";
+					rm_list+="\nremove toolchain ${y_l}${tc_migrate}${re_}\n\trm -r \"${tcdir}/${y_l}${tc_migrate}${re_}\"\n\trm -f \"${tccfgdir}/${y_l}${tc_migrate}${re_}\"\n";
+				fi;
+			done;
+
+			if [ -n "$mig_list" ];then
+				echo -e "${y_l}MIGRATION -> The following cross toolchains are out of date due to the renaming of cross toolchain templates:${re_}"
+				echo -e "$mig_list";
+				echo -e "You can still use the ${y_l}old cross toolchains${re_} from above, but it's better to create new ones based on the ${p_l}new cross toolchain templates${re_} to get future template updates.\nThe ${y_l}old cross toolchains${re_} can be removed manually as follows:"
+				echo -e "$rm_list";
+				_paktc_timer 5
+			fi;
+			unset tpl;
+		fi;
+	fi;
 };
 _backup(){
 
@@ -492,45 +536,44 @@ _build(){
 	fi;
 	
 };
-_ctng_menu(){
-	tc="$1";tpl="$tc";unset configtasks;
+_tpl_editor(){
+	tc="$2";tpl="$tc";unset TASKS;unset configtasks;
+	props=$(_get_template_properties "$cttpldir/$tpl");
+	desc=$(echo "$props" | awk -F'(' '{print $1}' | xargs);
+	version=$(echo "$props" | awk -F'^' '{print $2}' | xargs);[ -z "$version" ] && version="0";
+	copyof=$(echo "$props" | awk -F'^' '{print $5}' | xargs);
+
+	editordir="$(echo "$1" | awk '{print tolower($0)}')srcdir";editordir="${!editordir}";
 
 	if [ -f "$cttpldir/$tpl" ];then #copy the existing template to edit it
-		cp -f "$cttpldir/$tpl" "$ctsrcdir/.config"
+		cp -f "$cttpldir/$tpl" "$editordir/.config"
 	elif [ -n "$tpl" ];then #create an empty template
-		[ -f "$ctsrcdir/.config" ] && rm "$ctsrcdir/.config"* 2>/dev/null;
-		touch "$ctsrcdir/.config";
+		[ -f "$editordir/.config" ] && rm "$editordir/.config"* 2>/dev/null;
+		touch "$editordir/.config";
 	else #use existing (self copied) template
-		[ ! -f "$ctsrcdir/.config" ] && touch "$ctsrcdir/.config";
+		[ ! -f "$editordir/.config" ] && touch "$editordir/.config";
 		tc="_test$(( $RANDOM % 100 ))";tpl="$tc";
 	fi;
 
-	cd "$ctsrcdir";
-	for task in "${CTNG_CONFIG_tasks[@]}";do
+	cd "$editordir";
+	TASKS=${1}_CONFIG_tasks[@];TASKS=("${!TASKS}");
+
+	for task in "${TASKS[@]}";do
 		task=$(_replace_tokens "$task");	#replace tokens
 		configtasks+=("$task");
 	done;
-	( eval "${configtasks[@]}" ) 2>&1;
-};
-_fng_menu(){
-	tc="$1";tpl="$tc";unset configtasks;
-
-	if [ -f "$cttpldir/$tpl" ];then #copy the existing template to edit it
-		cp -f "$cttpldir/$tpl" "$fngsrcdir/.config"
-	elif [ -n "$tpl" ];then #create an empty template
-		[ -f "$fngsrcdir/.config" ] && rm "$fngsrcdir/.config"* 2>/dev/null;
-		touch "$fngsrcdir/.config";
-	else #use existing (self copied) template
-		[ ! -f "$fngsrcdir/.config" ] && touch "$fngsrcdir/.config";
-		tc="_test$(( $RANDOM % 100 ))";tpl="$tc";
-	fi;
-
-	cd "$fngsrcdir";
-	for task in "${FNG_CONFIG_tasks[@]}";do
-		task=$(_replace_tokens "$task");	#replace tokens
-		configtasks+=("$task");
-	done;
-	( eval "${configtasks[@]}" ) 2>&1;
+	(
+		eval "${configtasks[@]}" #run template editor tasks
+		if [ -f "$TPL_SAVE" ];then #edited template was saved
+			sed -i '/^$\|^#$/d' "$TPL_SAVE"; #cleanup template by removing empty and #-lines
+			sed -i '/^#toolchain template.*:.*/d' "$TPL_SAVE"; #remove existing toolchain template description lines
+			sed -i "1i #toolchain template: $desc" "$TPL_SAVE"; #add toolchain template description line
+			sed -i "2i #toolchain template version: $version" "$TPL_SAVE"; #add toolchain template version property
+			sed -i "3i #toolchain template updated: $(date -r "$TPL_SAVE" "+%F %T")" "$TPL_SAVE"; #add toolchain template updated property
+			[ "$TPL_SAVE" != "$cttpldir/$tpl" ] && copyof="$tpl";
+			[ -n "$copyof" ] &&	sed -i "4i #toolchain template copyof: $copyof" "$TPL_SAVE"; #add toolchain template copyof property
+		fi;
+	) 2>&1;
 };
 _ctng_setup(){
 	logfile="$ldir/$(date +%F.%H%M%S)_tup_ctng_setup.log";
@@ -539,15 +582,15 @@ _ctng_setup(){
 	bcl=$(printf '%s\n' "${CTNG_SETUP_tasks[@]}");
 	sp=$(printf '%*s' 80 | tr ' ' '=')
 	echo -e "$pdesc - installing crosstool-ng log - $(date +"%F %T")";
-	echo -e "$sp\nbuild command list for crosstool-NG:\n$sp\ncd "$ctsrcdir"\n$(_replace_tokens "$bcl")\n$sp";
+	echo -e "$sp\nbuild command list for crosstool-NG:\n$sp\ncd "$ctngsrcdir"\n$(_replace_tokens "$bcl")\n$sp";
 	sleep 2;
 	
 	if [ $1 -eq 1 ];then
 		# setup crosstool wc
-		echo "Cleanup source directory "$ctsrcdir/"..."
-		rm -rf "$ctsrcdir" 2>/dev/null;
-		mkdir --parents "$ctsrcdir";
-		cd "$ctsrcdir";
+		echo "Cleanup source directory "$ctngsrcdir/"..."
+		rm -rf "$ctngsrcdir" 2>/dev/null;
+		mkdir --parents "$ctngsrcdir";
+		cd "$ctngsrcdir";
 		#generate setup command list
 		for task in "${CTNG_SETUP_tasks[@]}";do
 			task=$(_replace_tokens "$task");	#replace tokens
@@ -599,7 +642,7 @@ _dl(){
 		md5sum "$fname" > "$md5file";
 		cd "$dldir";
 		answer=$(md5sum -c "$md5file" 2>/dev/null | awk -F: '{printf $2}');
-		[ ! "$answer" == "OK" ] && mv --force "$dldir/#tmp/$fname" "$dldir/$fname";
+		[ ! "$answer" == "OK" ] && mv -f "$dldir/#tmp/$fname" "$dldir/$fname";
 		rm --recursive --force "$dldir/#tmp";
 	fi;
 	[ -f "$dldir/$fname" ] && echo "$dldir/$fname";
@@ -662,7 +705,7 @@ _replace_tokens(){
 						s#@RANLIB@#$ranlibname#g; \
 						s#@PREFIX@#$prefixdir#g; \
 						s#@HOST@#$hostname#g; \
-						s#@CTNGSOURCE@#$ctsrcdir#g; \
+						s#@CTNGSOURCE@#$ctngsrcdir#g; \
 						s#@FNGSOURCE@#$fngsrcdir#g; \
 						s#@VALIDATE@#_check_lib#g; \
 						s#@COMPRESS@#_compress#g; \
@@ -681,7 +724,15 @@ _get_template_properties(){
 	desc="";
 	if [ -f "$1" ];then
 		if [ -z "$2" ];then
-			desc=$(sed -n -e '/#toolchain template/ s/.*\: *//p' "$1" | awk -F'(' '{print $1}' | xargs);
+			desc="$(awk -F': ' '/^#toolchain template:./{print $NF}' "$1" | xargs)";
+			version="$(awk -F': ' '/^#toolchain template version:./{print $NF}' "$1" | xargs)";
+			migrate="$(awk -F': ' '/^#toolchain template migrate:./{print $NF}' "$1" | xargs)";
+			updated="$(awk -F': ' '/^#toolchain template updated:./{print $NF}' "$1" | xargs)";
+			copyof="$(awk -F': ' '/^#toolchain template copyof:./{print $NF}' "$1" | xargs)";
+			[ -n "$version" ] &&  props="^$version" ||  props="^0";
+			[ -n "$migrate" ] && props+="^$migrate" || props+="^";
+			[ -n "$updated" ] && props+="^$updated" || props+="^";
+			[ -n "$copyof" ]  && props+="^$copyof"  || props+="^";
 		else
 			desc="$2";
 		fi;
@@ -704,7 +755,10 @@ _get_template_properties(){
 			libc=$(grep '^CT_LIBC=' "$1" | awk -F'"' '{print $2}');
 			libcu=$(grep -i "^CT_${libc}_USE=" "$1" | awk -F'"' '{print $2}');
 			[ -n "$libcu" ] && libcv=$(grep -i "CT_${libcu}_VERSION=" "$1" | awk -F'"' '{print $2}');
+			[ -n "$libcu" ] && libcmv=$(grep -i "CT_${libcu}_OLDEST_ABI=" "$1" | awk -F'"' '{print $2}');
 			[ -z "$libcu" ] && libcv=$(grep -i "CT_${libc}_VERSION=" "$1" | awk -F'"' '{print $2}');
+			[ -z "$libcu" ] && libcmv=$(grep -i "CT_${libc}_OLDEST_ABI=" "$1" | awk -F'"' '{print $2}');
+			[ -n "$libcmv" ] && libcmv="${libcmv}-"
 			kernel=$(grep '^CT_KERNEL=' "$1" | awk -F'"' '{print $2}');
 			kernelv=$(grep -i "CT_${kernel}_VERSION=" "$1" | awk -F'"' '{print $2}');
 		elif [ $(_get_template_type "$1") == "FNG" ];then
@@ -714,7 +768,8 @@ _get_template_properties(){
 				[[ ! $(umask) == 0022 ]] && umask 0022;
 				make olddefconfig >/dev/null;
 				arch=$(grep '^FREETZ_TARGET_ARCH=' ".config" | awk -F'"' '{print $2}');
-				bitness=$(grep '^FREETZ_GCC_ABI=' ".config" | awk -F'"' '{print $2}');
+				cpu=$(grep '^FREETZ_GCC_ARCH=' ".config" | awk -F'"' '{print $2}') && [ -n "$cpu" ] && cpu=" $cpu";
+				bitness=$(grep '^FREETZ_GCC_ABI=' ".config" | awk -F'"' '{print $2}') && [ -z "${num##*[!0-9]*}" ] && bitness="32";
 				[ $(grep -i '^FREETZ_TARGET_ARCH_BE=y' ".config") ] && endianness="BE" || endianness="LE";
 				[ $(grep -i '^FREETZ_LIB_libuClibc=y' ".config") ] && libc="uClibc";
 				[ $(grep -i '^FREETZ_LIB_libglibc=y' ".config") ] && libc="glibc";
@@ -732,9 +787,9 @@ _get_template_properties(){
 		fi;
 
 		#build template property string
-		[ -z $setup ] && desc="$desc ($arch$cpu$aarch $bitness-bit $endianness, $libc $libcv, $cc $ccv, $kernel $kernelv)";
+		[ -z $setup ] && desc="$desc ($arch$cpu$aarch $bitness-bit $endianness, $libc $libcmv$libcv, $cc $ccv, $kernel $kernelv)$props";
 	fi;
-	echo $desc;
+	echo "$desc" | xargs;
 	[ -n "$desc" ] && exit 0 || exit 1;
 };
 _get_template_type(){
@@ -821,8 +876,9 @@ _check_pkg(){
 		  composite inkscape pkg-config python gettext ruby );
 	headers=( ncurses libacl.h sys/capability.h readline.h glib-2.0/glib.h );
 	libs=( libstdc++.so.6 libstdc++.a libc\\.a );
+	echo -e "$y_l""SYSCHECK -> Please wait while performing checks of required tools and dependencies...""$re_";
 	if syscheck "" "" "${pkgs[*]}" "${headers[*]}" "${libs[*]}";then
-		echo -e "$r_l""\nCHECK -> You need to manually install the following packages to use this plugin properly:\n"$y_l"$prefix install$packages\n""$re_" && _paktc_timer 10;
+		echo -e "$r_l""\nSYSCHECK -> You need to manually install the following packages to use this plugin properly:\n"$y_l"$prefix install$packages\n""$re_" && _paktc_timer 10;
 	fi;
 };
 _check_github_api_limits(){
@@ -847,7 +903,7 @@ _check_github_api_limits(){
 _check_crosstool_setup(){
 	#Setup crosstool-NG automatically if not installed
 	if [ "$1" == "CTNG" ] || [ -z "$1" ];then
-		if [ ! -f "$ctsrcdir/ct-ng" ];then
+		if [ ! -f "$ctngsrcdir/ct-ng" ];then
 			clear;
 			echo -e "$r_l""\nCHECK -> crosstool-NG is not setup correctly. Try to fix it automatically...\n""$re_";
 			[ -z "$1" ] && _paktc_timer 5;
@@ -867,6 +923,7 @@ _check_crosstool_setup(){
 };
 _check_config(){
 	nok=0;
+	[ -z ${LIBS_LIST_BETA+x} ] && nok=1;
 	[ -z ${FNG_REPO_URL+x} ] && nok=1;
 	[ -z ${CTNG_CONFIG_tasks+x} ] && nok=1;
 	[ -z ${CTNG_BUILD_AS_ROOT+x} ] && nok=1;
@@ -909,7 +966,7 @@ _create_config(){
 	fi;
 	
 	ctng_config_tasks=( "('./ct-ng menuconfig;')"
-						"('TPL_SAVE=\$(\$gui --defaultno --output-fd 1 --ok-label \"Yes\" --cancel-label \"No\" --colors \$bt_ \"\$title_ - \Z0\$pdesc\Zn\" --title \"-[ Save Cross Toolchain Template ]-\" --inputbox \"\\\nWould you like to \ZrSAVE\ZR this toolchain template \Zrnow\ZR?\" 10 55 \"@TEMPLATE@\") && cp \"\$ctsrcdir/.config\" \"\$TPL_SAVE\";')" );
+						"('TPL_SAVE=\$(\$gui --defaultno --output-fd 1 --ok-label \"Yes\" --cancel-label \"No\" --colors \$bt_ \"\$title_ - \Z0\$pdesc\Zn\" --title \"-[ Save Cross Toolchain Template ]-\" --inputbox \"\\\nWould you like to \ZrSAVE\ZR this toolchain template \Zrnow\ZR?\" 10 55 \"@TEMPLATE@\") && cp \".config\" \"\$TPL_SAVE\";')" );
 	ctng_config_tasks_comment="#config command";
 	
 	ctng_build_tasks=( "('./ct-ng show-config | tee -a \"@LOGFILE@\";')"
@@ -923,7 +980,7 @@ _create_config(){
 	ctng_setup_tasks_comment="#setup command";
 	
 	fng_config_tasks=( "('make menuconfig;')"
-						"('TPL_SAVE=\$(\$gui --defaultno --output-fd 1 --ok-label \"Yes\" --cancel-label \"No\" --colors \$bt_ \"\$title_ - \Z0\$pdesc\Zn\" --title \"-[ Save Cross Toolchain Template ]-\" --inputbox \"\\\nWould you like to \ZrSAVE\ZR this toolchain template \Zrnow\ZR?\" 10 55 \"@TEMPLATE@\") && cp \"\$fngsrcdir/.config\" \"\$TPL_SAVE\";')" );
+						"('TPL_SAVE=\$(\$gui --defaultno --output-fd 1 --ok-label \"Yes\" --cancel-label \"No\" --colors \$bt_ \"\$title_ - \Z0\$pdesc\Zn\" --title \"-[ Save Cross Toolchain Template ]-\" --inputbox \"\\\nWould you like to \ZrSAVE\ZR this toolchain template \Zrnow\ZR?\" 10 55 \"@TEMPLATE@\") && cp \".config\" \"\$TPL_SAVE\";')" );
 	fng_config_tasks_comment="#config command";
 	
 	fng_build_tasks=( "('make olddefconfig | tee -a \"@LOGFILE@\";')"
@@ -935,16 +992,19 @@ _create_config(){
 					  "('ln -s \"../../downloads\" \"@FNGSOURCE@/dl\";')" );
 	fng_setup_tasks_comment="#setup command";
 	
-	lib_comments=(	"#Enable/Disable (1|0)"
+	lib_comments=(	"#Enabled/Disabled (1|0)"
+					"#Prereleases Enabled/Disabled (1|0)"
 					"#Displayname"
 					"#Versionnumber"
 					"#Filename and optional version number to check in pkgconfig folder for an existing library to get version information"
 					"#Valid URL for downloading sources of library\n#List of build commands below. Pay attention to the SEMICOLON at the end of EACH\n#command and the correct quoting (' or \") for or to avoid expansion of variables.\n#Tokens @TOOLCHAIN@, @CC@, @RANLIB@, @PREFIX@, @HOST@, @VALIDATE@, @LOGFILE@ are replaced automatically."
 					"#build command" );
-	lib_settings=( "" name version check url tasks );
-	lib_keys=( SAMPLE_LIB SSL_111 SSL_110 SSL_102 SSL_100 SSL_098 LIB_USB LIB_PCSC LIB_ZLIB );
-	lib_names=( "SampleLib" "OpenSSL" "OpenSSL" "OpenSSL" "OpenSSL" "OpenSSL" "libusb" "PCSC-Lite" "zlib" );
+	lib_settings=( "" beta name version check url tasks );
+	lib_keys=( SAMPLE_LIB SSL_300 SSL_111 SSL_110 SSL_102 SSL_100 SSL_098 LIB_USB LIB_PCSC LIB_ZLIB );
+	lib_betas=( "0" "1" "0" "0" "0" "0" "0" "0" "0" "0" );
+	lib_names=( "SampleLib" "OpenSSL" "OpenSSL" "OpenSSL" "OpenSSL" "OpenSSL" "OpenSSL" "libusb" "PCSC-Lite" "zlib" );
 	lib_versions=(	"0.2.9sl"
+					"$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("openssl-3.0.0\\S.*"))][0] | .name' | sed -e 's#openssl-##g; s#_#.#g; s#\"##g')"
 					"$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_1[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')"
 					"$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_0[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')"
 					"$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')"
@@ -953,8 +1013,9 @@ _create_config(){
 					"$(curl --silent "https://api.github.com/repos/libusb/libusb/releases/latest" | jq -r '.tag_name' | cut -c 2-)"
 					"$(curl --silent https://salsa.debian.org/api/v4/projects/19181/repository/tags | jq -r '.[0].name' | awk -F '[/-]' '{printf $2}')"
 					"$(curl --silent https://api.github.com/repos/madler/zlib/tags | jq -r '.[0].name' | cut -c 2-)" );
-	lib_checks=( "samplelib.pc" "openssl.pc" "openssl.pc" "openssl.pc" "openssl.pc" "openssl.pc" "libusb-1.0.pc" "libpcsclite.pc" "zlib.pc" );
+	lib_checks=( "samplelib.pc" "openssl.pc" "openssl.pc" "openssl.pc" "openssl.pc" "openssl.pc" "openssl.pc" "libusb-1.0.pc" "libpcsclite.pc" "zlib.pc" );
 	lib_urls=(	"https://sampleurl.com/archive.tar.bz"
+				"$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("openssl-3.0.0\\S.*"))][0] | .tarball_url' | sed -e 's#\"##g')"
 				"$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_1[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')"
 				"$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_0[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')"
 				"$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')"
@@ -966,6 +1027,7 @@ _create_config(){
 	lib_tasks=(	'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export RANLIB=@RANLIB@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'./Configure --prefix=@PREFIX@/ --host=@HOST@ linux-generic32 shared;'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" )'
 				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export RANLIB=@RANLIB@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'./Configure --prefix=@PREFIX@/ linux-generic32 shared;'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" )'
 				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export RANLIB=@RANLIB@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'./Configure --prefix=@PREFIX@/ linux-generic32 shared;'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" )'
+				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export RANLIB=@RANLIB@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'./Configure --prefix=@PREFIX@/ linux-generic32 shared;'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" )'
 				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export RANLIB=@RANLIB@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'./Configure --prefix=@PREFIX@/ linux-generic32 shared;'"'"')" "('"'"'make;'"'"')" "('"'"'make install SHLIB_VERSION_NUMBER=1.0.2 SHLIB_MINOR=0.2;'"'"')" )'
 				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export RANLIB=@RANLIB@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'[ \$(echo -e \"\$_tc_info\" | grep -ic \"musl\") -gt 0 ] && echo \"Apply the musl libc patch to avoid OpenSSL build errors due to missing termio.h...\" && curl --silent \"https://raw.githubusercontent.com/beagleboard/buildroot/master/package/openssl/openssl-004-musl-termios.patch\" | patch -p1;'"'"')" "('"'"'./Configure --prefix=@PREFIX@/ linux-generic32 shared;'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" )'
 				'( "('"'"'export TOOLCHAIN=@TOOLCHAIN@;'"'"')" "('"'"'export CC=@CC@;'"'"')" "('"'"'export RANLIB=@RANLIB@;'"'"')" "('"'"'export PATH=\"\$TOOLCHAIN/bin:\$PATH\";'"'"')" "('"'"'[ \$(echo -e \"\$_tc_info\" | grep -ic \"musl\") -gt 0 ] && echo \"Apply the musl libc patch to avoid OpenSSL build errors due to missing termio.h...\" && curl --silent \"https://raw.githubusercontent.com/beagleboard/buildroot/master/package/openssl/openssl-004-musl-termios.patch\" | patch -p1;'"'"')" "('"'"'./Configure --prefix=@PREFIX@/ linux-generic32 shared;'"'"')" "('"'"'make;'"'"')" "('"'"'make install;'"'"')" )'
@@ -975,7 +1037,7 @@ _create_config(){
 
 	echo '#CROSS toolchain build settings'	 						 						 				 				 >"$configname";
 	echo 'CTNG_REPO_URL="https://github.com/crosstool-ng/crosstool-ng"; #Repository to load ct-ng from'	 					>>"$configname";
-	echo 'CTNG_BUILD_AS_ROOT="0"; #Enable/Disable (1|0); You normally do *not* need to be root to build a toolchain using crosstool-NG. In fact, it is *VERY* dangerous to run as root, as crosstool-NG will, as part of the build process, remove a few directories. If anything goes wrong, running as root can ruin your host distribution.' >>"$configname";
+	echo 'CTNG_BUILD_AS_ROOT="0"; #Enabled/Disabled (1|0); You normally do *not* need to be root to build a toolchain using crosstool-NG. In fact, it is *VERY* dangerous to run as root, as crosstool-NG will, as part of the build process, remove a few directories. If anything goes wrong, running as root can ruin your host distribution.' >>"$configname";
 	echo '#List of build and setup commands below. Pay attention to the SEMICOLON at the end of EACH'	 					>>"$configname";
 	echo '#command and the correct quoting ('"'"' or ") for or to avoid expansion of variables.'	 						>>"$configname";
 	echo '#Tokens @CTNGSOURCE@, @LOGFILE@, @TEMPLATE@, @COMPRESS@, @CREATECFG@ are replaced automatically. The commands are executed in the context of the current user.'	>>"$configname";
@@ -1020,6 +1082,7 @@ _create_config(){
 	
 	echo -e '\n#LIBRARY update build settings\n#List of ordered libraries. Only libraries in this list are available'		>>"$configname";
 	echo "LIBS=(${lib_keys[@]});"																							>>"$configname";
+	echo 'LIBS_LIST_BETA="0"; #In(Ex)clude libraries defined as beta'														>>"$configname";
 
 	i=0;
 	for key in "${lib_keys[@]}";
@@ -1031,16 +1094,17 @@ _create_config(){
 								echo -e "\n#"${lib_names[$i]}" "${lib_versions[$i]}""		>>"$configname";
 							fi;
 							echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"$([ "$key" == "SAMPLE_LIB" ] && echo '0' || echo '1')\";$([ "$i" -eq "0" ] && echo " ${lib_comments[0]}")"	>>"$configname";;
-				"name")   	echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"${lib_names[$i]}\";$([ "$i" -eq "0" ] && echo " ${lib_comments[1]}")"		>>"$configname";;
-				"version")	echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"${lib_versions[$i]}\";$([ "$i" -eq "0" ] && echo " ${lib_comments[2]}")"	>>"$configname";;
-				"check")	[ $(echo -e "$key" | grep -c "SSL_\|SAMPLE_") -gt 0 ] && chk="$(echo -e "${lib_checks[$i]} $(echo ${lib_versions[$i]} | sed -e 's/[a-zA-Z]//g')")" || chk="${lib_checks[$i]}";
-							echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"$chk\";$([ "$i" -eq "0" ] && echo " ${lib_comments[3]}")"	>>"$configname";;
-				"url")		echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"${lib_urls[$i]}\";$([ "$i" -eq "0" ] && echo " ${lib_comments[4]}")"		>>"$configname";;
+				"beta")   	echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"${lib_betas[$i]}\";$([ "$i" -eq "0" ] && echo " ${lib_comments[1]}")"		>>"$configname";;
+				"name")   	echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"${lib_names[$i]}\";$([ "$i" -eq "0" ] && echo " ${lib_comments[2]}")"		>>"$configname";;
+				"version")	echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"${lib_versions[$i]}\";$([ "$i" -eq "0" ] && echo " ${lib_comments[3]}")"	>>"$configname";;
+				"check")	[ $(echo -e "$key" | grep -c "SSL_\|SAMPLE_") -gt 0 ] && chk="$(echo -e "${lib_checks[$i]} $(echo ${lib_versions[$i]} | sed 's/\([0-9.]*\).*/\1/g')")" || chk="${lib_checks[$i]}";
+							echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"$chk\";$([ "$i" -eq "0" ] && echo " ${lib_comments[4]}")"	>>"$configname";;
+				"url")		echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting""=\"${lib_urls[$i]}\";$([ "$i" -eq "0" ] && echo " ${lib_comments[5]}")"		>>"$configname";;
 				"tasks")	unset tasks;j=0;
 							declare -a tasks="${lib_tasks[$i]}"
 							for t in "${tasks[@]}";
 							do
-								echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting"$([ "$j" -gt "0" ] && echo "+")"=$t;$([ "$i" -eq "0" ] && echo " ${lib_comments[5]}$(($j+1))")"	>>"$configname";
+								echo -e "$key"$([ ! -z $setting ] && echo "_")"$setting"$([ "$j" -gt "0" ] && echo "+")"=$t;$([ "$i" -eq "0" ] && echo " ${lib_comments[6]}$(($j+1))")"	>>"$configname";
 								((j++));
 							done;;
 			esac;
