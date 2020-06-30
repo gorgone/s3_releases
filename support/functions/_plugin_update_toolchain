@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.14.0";
+	pversion="0.14.1";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -199,8 +199,8 @@ tcupdate(){
 			MENU_OPTIONS+=("$i"		"$libdesc""$(printf '%*s' $((24-${#libdesc})))""$libtxtfmt$([ $libversioncurrent ] && echo $libversioncompare)	$(echo $libversioncurrent | sed -e 's/^$/ ---/g')\Zn"		"$(echo $libselected)"	"$([ $libname ] && echo "$libdesc: $liburl")");counter;
 
 			#     0 key     1 desc     2 version     3 checkversion     4 checkfile 5 current version    6 url      7 tasks array
-			lib=("$libkey" "$libname" "$libversion" "$libversioncheck" "$libcheck" "$libversioncurrent" "$liburl" "(${libtasks[*]@Q})");
-			libs+=("(${lib[*]@Q})");
+			lib=("$libkey" "$libname" "$libversion" "$libversioncheck" "$libcheck" "$libversioncurrent" "$liburl" "($(printf " %q" "${libtasks[@]}"))");
+			libs+=("($(printf " %q" "${lib[@]}"))");
 		done;
 		[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "no libraries found" "no libraries found") && counter;
 
@@ -235,7 +235,7 @@ tcupdate(){
 						for task in "${libtasks[@]}";do
 							task=$(_replace_tokens "$task");	#replace tokens
 							buildtasks+=("$task");
-						done
+						done;
 						_build "($i/$icount) $tc: library ${lib[1]} ${lib[2]}" $(_extract $(_dl "${lib[6]}" "${lib[1]} ${lib[2]}") "$tmpdir" 2>/dev/null) "$logfile" "${buildtasks[@]}";
 					done;
 					[ "${#buildtasks[@]}" == "0" ] && echo -e "$r_l  $txt_error:$y_l $o$w_l Library not found in config file""$rs_";
