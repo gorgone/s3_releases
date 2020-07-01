@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.14.1";
+	pversion="0.14.2";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -20,10 +20,10 @@ tcupdate(){
 	tc="$CMDTC";
 	
 	#some migrations to upgrade older s3.TUP versions
-	[ -z "$4" ] && clear && _migrations;
+	[[ -z "$4" || "$FLAG" -gt "0" ]] && clear && _migrations;
 	
 	#check/install prerequisites
-	[ -z "$4" ] && _check_pkg;
+	[[ -z "$4" || "$FLAG" -gt "0" ]] && _check_pkg;
 
 	#backup config
 	if [ "$CMDTC" == "-r" ] || [ "$CMDTC" == "--reset" ];then

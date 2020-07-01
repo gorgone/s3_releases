@@ -16,7 +16,7 @@ _toolchain_build_menu(){
 						tcupdate "$_toolchainname" "" "" "2"
 						_toolchain_build_menu;;
 		BACKUP)
-						tcupdate "-b" "$_toolchainname" "" "" "1"
+						tcupdate "-b" "$_toolchainname" "" "1"
 						_toolchain_build_menu;;
 		EDIT_CONF_DIR)
 						_gtedit
