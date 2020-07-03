@@ -1,5 +1,6 @@
 #toolchain template: QNAP ARM-Cortex-A9 devices
-#toolchain template version: 3
+#toolchain template version: 4
+#toolchain template updated: 2020-07-03 16:52:16
 # Automatically generated file; DO NOT EDIT.
 # crosstool-NG  Configuration
 CT_CONFIGURE_has_static_link=y
@@ -239,7 +240,6 @@ CT_LINUX_later_than_3_7=y
 CT_LINUX_3_7_or_later=y
 CT_LINUX_later_than_3_2=y
 CT_LINUX_3_2_or_later=y
-CT_LINUX_REQUIRE_3_2_or_later=y
 CT_KERNEL_LINUX_VERBOSITY_0=y
 # CT_KERNEL_LINUX_VERBOSITY_1 is not set
 # CT_KERNEL_LINUX_VERBOSITY_2 is not set
@@ -284,7 +284,6 @@ CT_BINUTILS_later_than_2_27=y
 CT_BINUTILS_2_27_or_later=y
 CT_BINUTILS_later_than_2_25=y
 CT_BINUTILS_2_25_or_later=y
-CT_BINUTILS_REQUIRE_2_25_or_later=y
 CT_BINUTILS_later_than_2_23=y
 CT_BINUTILS_2_23_or_later=y
 # GNU binutils
@@ -324,7 +323,7 @@ CT_GLIBC_USE="GLIBC"
 CT_GLIBC_PKG_NAME="glibc"
 CT_GLIBC_SRC_RELEASE=y
 CT_GLIBC_PATCH_ORDER="global"
-CT_GLIBC_V_2_31=y
+# CT_GLIBC_V_2_31 is not set
 # CT_GLIBC_V_2_30 is not set
 # CT_GLIBC_V_2_29 is not set
 # CT_GLIBC_V_2_28 is not set
@@ -334,64 +333,66 @@ CT_GLIBC_V_2_31=y
 # CT_GLIBC_V_2_24 is not set
 # CT_GLIBC_V_2_23 is not set
 # CT_GLIBC_V_2_19 is not set
-# CT_GLIBC_V_2_17 is not set
+CT_GLIBC_V_2_17=y
 # CT_GLIBC_V_2_12_1 is not set
 # CT_GLIBC_NO_VERSIONS is not set
-CT_GLIBC_VERSION="2.31"
+CT_GLIBC_VERSION="2.17"
 CT_GLIBC_MIRRORS="$(CT_Mirrors GNU glibc)"
 CT_GLIBC_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_GLIBC_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_GLIBC_ARCHIVE_FORMATS=".tar.xz .tar.bz2 .tar.gz"
 CT_GLIBC_SIGNATURE_FORMAT="packed/.sig"
-CT_GLIBC_later_than_2_30=y
-CT_GLIBC_2_30_or_later=y
-CT_GLIBC_later_than_2_29=y
-CT_GLIBC_2_29_or_later=y
-CT_GLIBC_later_than_2_28=y
-CT_GLIBC_2_28_or_later=y
-CT_GLIBC_later_than_2_27=y
-CT_GLIBC_2_27_or_later=y
-CT_GLIBC_later_than_2_26=y
-CT_GLIBC_2_26_or_later=y
-CT_GLIBC_later_than_2_25=y
-CT_GLIBC_2_25_or_later=y
-CT_GLIBC_later_than_2_24=y
-CT_GLIBC_2_24_or_later=y
-CT_GLIBC_later_than_2_23=y
-CT_GLIBC_2_23_or_later=y
-CT_GLIBC_later_than_2_20=y
-CT_GLIBC_2_20_or_later=y
-CT_GLIBC_later_than_2_17=y
+CT_GLIBC_2_30_or_older=y
+CT_GLIBC_older_than_2_30=y
+CT_GLIBC_2_29_or_older=y
+CT_GLIBC_older_than_2_29=y
+CT_GLIBC_2_28_or_older=y
+CT_GLIBC_older_than_2_28=y
+CT_GLIBC_2_27_or_older=y
+CT_GLIBC_older_than_2_27=y
+CT_GLIBC_2_26_or_older=y
+CT_GLIBC_older_than_2_26=y
+CT_GLIBC_2_25_or_older=y
+CT_GLIBC_older_than_2_25=y
+CT_GLIBC_2_24_or_older=y
+CT_GLIBC_older_than_2_24=y
+CT_GLIBC_2_23_or_older=y
+CT_GLIBC_older_than_2_23=y
+CT_GLIBC_2_20_or_older=y
+CT_GLIBC_older_than_2_20=y
 CT_GLIBC_2_17_or_later=y
+CT_GLIBC_2_17_or_older=y
 CT_GLIBC_later_than_2_14=y
 CT_GLIBC_2_14_or_later=y
 CT_GLIBC_DEP_KERNEL_HEADERS_VERSION=y
 CT_GLIBC_DEP_BINUTILS=y
 CT_GLIBC_DEP_GCC=y
 CT_GLIBC_DEP_PYTHON=y
-CT_GLIBC_BUILD_SSP=y
+CT_GLIBC_SPARC_ALLOW_V7=y
+CT_GLIBC_HAS_NPTL_ADDON=y
+CT_GLIBC_HAS_PORTS_ADDON=y
 CT_GLIBC_HAS_LIBIDN_ADDON=y
+CT_GLIBC_USE_PORTS_ADDON=y
+CT_GLIBC_USE_NPTL_ADDON=y
 # CT_GLIBC_USE_LIBIDN_ADDON is not set
-CT_GLIBC_NO_SPARC_V8=y
 CT_GLIBC_HAS_OBSOLETE_RPC=y
 CT_GLIBC_EXTRA_CONFIG_ARRAY=""
 CT_GLIBC_CONFIGPARMS=""
 CT_GLIBC_EXTRA_CFLAGS=""
 CT_GLIBC_ENABLE_OBSOLETE_RPC=y
 # CT_GLIBC_DISABLE_VERSIONING is not set
-CT_GLIBC_OLDEST_ABI="2.15"
+CT_GLIBC_OLDEST_ABI=""
 CT_GLIBC_FORCE_UNWIND=y
 # CT_GLIBC_LOCALES is not set
 # CT_GLIBC_KERNEL_VERSION_NONE is not set
 CT_GLIBC_KERNEL_VERSION_AS_HEADERS=y
 # CT_GLIBC_KERNEL_VERSION_CHOSEN is not set
 CT_GLIBC_MIN_KERNEL="5.5.5"
-CT_GLIBC_SSP_DEFAULT=y
+# CT_GLIBC_SSP_DEFAULT is not set
 # CT_GLIBC_SSP_NO is not set
 # CT_GLIBC_SSP_YES is not set
 # CT_GLIBC_SSP_ALL is not set
 # CT_GLIBC_SSP_STRONG is not set
-CT_GLIBC_ENABLE_WERROR=y
 CT_ALL_LIBC_CHOICES="AVR_LIBC BIONIC GLIBC MINGW_W64 MOXIEBOX MUSL NEWLIB NONE UCLIBC"
 CT_LIBC_SUPPORT_THREADS_ANY=y
 CT_LIBC_SUPPORT_THREADS_NATIVE=y
@@ -440,13 +441,10 @@ CT_GCC_later_than_7=y
 CT_GCC_7_or_later=y
 CT_GCC_later_than_6=y
 CT_GCC_6_or_later=y
-CT_GCC_REQUIRE_6_or_later=y
 CT_GCC_later_than_5=y
 CT_GCC_5_or_later=y
-CT_GCC_REQUIRE_5_or_later=y
 CT_GCC_later_than_4_9=y
 CT_GCC_4_9_or_later=y
-CT_GCC_REQUIRE_4_9_or_later=y
 CT_GCC_later_than_4_8=y
 CT_GCC_4_8_or_later=y
 CT_CC_GCC_ENABLE_PLUGINS=y
