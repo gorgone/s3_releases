@@ -27,6 +27,7 @@ update_me(){
 			echo -en "  update all files ...\n\n";
 			yes | cp -rf ./s3 "$workdir/s3";
 			yes | cp -rf ./support/* "$workdir/support";
+		fi
 	else
 		printf "  is up to date\n  Online Revision: $online_revision\n\n"
 	fi
