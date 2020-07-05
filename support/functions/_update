@@ -14,9 +14,9 @@ update_me(){
 	elif [ -d "$s3local/.svn" ]; then
 		local_revision=$(gitrevision $s3local);
 	fi
-	online_revision=$(gitrevision $s3url);
+	online_revision=$(gitrevision $s3url)
 	if [ ! $local_revision == $online_revision ]; then
-		echo -en "  update s3_git to\n  Local Revision: $online_revision\n";
+		printf "  update s3_git to\n  Local Revision: $online_revision\n"
 		if [ -d "$workdir/.git" -a ! -d "$workdir/.svn" ]; then
 			pushd $workdir >/dev/null
 			git pull -q
@@ -27,7 +27,6 @@ update_me(){
 			echo -en "  update all files ...\n\n";
 			yes | cp -rf ./s3 "$workdir/s3";
 			yes | cp -rf ./support/* "$workdir/support";
-	fi
 	else
 		printf "  is up to date\n  Online Revision: $online_revision\n\n"
 	fi
@@ -48,9 +47,10 @@ update_emu(){
 	elif [ -d "$emulocal" ]; then
 		rm -rf "$emulocal"
 	fi
-	online_revision=$(gitrevision $emuurl);
-	if [ ! $local_revision == $online_revision ]; then
-		echo -en "  update emu_git to\n  Local Revision: $online_revision\n";
+
+	online_revision=$(gitrevision $emuurl)
+	if [ ! "$local_revision" == "$online_revision" ]; then
+		printf "  update emu_git to\n  Local Revision: $online_revision\n"
 		git clone -q "$emuurl" "$emulocal";
 	else
 		printf "  is up to date\n  Online Revision: $online_revision\n"

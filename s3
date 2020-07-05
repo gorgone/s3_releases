@@ -88,7 +88,7 @@ UPX="not_set"
 OPENBOX=0
 UFS916003=0
 _t1e="VG9vbGNoYWluLQ=="
-_u1e="aHR0cDovL3N0cmVhbWJvYXJkLnR2L3diYjIvdHV0LXBpY3MvdG9vbGNoYWlucw=="
+_u1e="aHR0cHM6Ly9maWxlcy5zdHJlYW1ib2FyZC50di90b29sY2hhaW5z"
 
 run="0"
 cposx=0
@@ -103,15 +103,15 @@ loadprofile="no"
 s3cfg="$configdir/simplebuild.config"
 
 # Compiler settings
-cc_warn="-W -Wall -Wshadow -Wredundant-decls -Wstrict-prototypes -Wold-style-definition";
-cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections";
+cc_warn="-W -Wall -Wshadow -Wredundant-decls -Wstrict-prototypes -Wold-style-definition"
+cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections"
 
 #default url
 trunkurl="https://github.com/oe-alliance/oscam-smod.git";
-#trunkurl="http://www.streamboard.tv/svn/oscam/trunk";
-#trunkurl="http://www.streamboard.tv/svn/oscam-addons/modern";
+#trunkurl="https://svn.streamboard.tv/oscam/trunk"
+#trunkurl="https://svn.streamboard.tv/oscam-addons/modern"
 
-[ -f "$workdir/oscamsource.url" ] && source "$workdir/oscamsource.url";
+[ -f "$workdir/oscamsource.url" ] && source "$workdir/oscamsource.url"
 
 #load translationlist
 cd "$tdir"

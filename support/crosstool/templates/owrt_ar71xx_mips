@@ -1,4 +1,6 @@
-#toolchain template: OpenWrt 19.07 ath79, mips_24kc BE devices
+#toolchain template: OpenWrt 18.06 ar71xx, mips_24kc BE devices
+#toolchain template version: 3
+#toolchain template migrate: ar71xx_mips
 CT_CONFIGURE_has_static_link=y
 CT_CONFIGURE_has_cxx11=y
 CT_CONFIGURE_has_wget=y
@@ -150,7 +152,7 @@ CT_WANTS_STATIC_LINK_CXX=y
 CT_SHOW_CT_VERSION=y
 CT_TOOLCHAIN_PKGVERSION=""
 CT_TOOLCHAIN_BUGURL=""
-CT_TARGET_VENDOR="ath79"
+CT_TARGET_VENDOR="ar71xx"
 CT_TARGET_ALIAS_SED_EXPR=""
 CT_TARGET_ALIAS=""
 # CT_NATIVE is not set
@@ -308,17 +310,17 @@ CT_MUSL_PATCH_GLOBAL=y
 # CT_MUSL_PATCH_LOCAL_BUNDLED is not set
 # CT_MUSL_PATCH_NONE is not set
 CT_MUSL_PATCH_ORDER="global"
-CT_MUSL_V_1_1_24=y
+# CT_MUSL_V_1_1_24 is not set
 # CT_MUSL_V_1_1_23 is not set
 # CT_MUSL_V_1_1_22 is not set
 # CT_MUSL_V_1_1_21 is not set
 # CT_MUSL_V_1_1_20 is not set
-# CT_MUSL_V_1_1_19 is not set
+CT_MUSL_V_1_1_19=y
 # CT_MUSL_V_1_1_18 is not set
 # CT_MUSL_V_1_1_17 is not set
 # CT_MUSL_V_1_1_16 is not set
 # CT_MUSL_NO_VERSIONS is not set
-CT_MUSL_VERSION="1.1.24"
+CT_MUSL_VERSION="1.1.19"
 CT_MUSL_MIRRORS="http://www.musl-libc.org/releases"
 CT_MUSL_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_MUSL_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
