@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.15.0";
+	pversion="0.15.1";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -21,7 +21,7 @@ tcupdate(){
 
 	#some migrations to upgrade older s3.TUP versions
 	[[ -z "$4" || "$FLAG" -gt "0" ]] && clear && _migrations;
-	
+
 	#check/install prerequisites
 	[[ -z "$4" || "$FLAG" -gt "0" ]] && _check_pkg;
 
@@ -448,7 +448,7 @@ _create_tc(){
 								fi;
 								
 								#save config in target toolchain folder
-								[ -f "$tpltargetdir/.config" ] && cp -f "$tpltargetdir/.config" "$tcdir/$tpl/";
+								cp -f "$cttpldir/$tpl" "$tcdir/$tpl/.config";
 								
 								#auto integrate libs
 								if [ "${#libkeys}" -gt 0 -a "$LIBS_AUTO_INTEGRATE" -eq 1 ];then
@@ -866,7 +866,7 @@ _get_template_properties(){
 				cp "$1" "$fngsrcdir/.config";
 				cd "$fngsrcdir";
 				[[ ! $(umask) == 0022 ]] && umask 0022;
-				make olddefconfig >/dev/null;
+				make olddefconfig >/dev/null 2>&1;
 				arch=$(grep '^FREETZ_TARGET_ARCH=' ".config" | awk -F'"' '{print $2}');
 				cpu=$(grep '^FREETZ_GCC_ARCH=' ".config" | awk -F'"' '{print $2}') && [ -n "$cpu" ] && cpu=" $cpu";
 				bitness=$(grep '^FREETZ_GCC_ABI=' ".config" | awk -F'"' '{print $2}') && [ -z "${num##*[!0-9]*}" ] && bitness="32";
@@ -959,7 +959,7 @@ _check_lib(){
 _check_pkg(){
 	pkgs=( git patch curl jq gcc g++ gperf bison flex makeinfo help2man make file cmp \
 		  python3-config autoconf automake libtoolize libtool gawk wget bzip2 xz unzip rsync \
-		  composite inkscape pkg-config python gettext ruby );
+		  composite inkscape pkg-config python gettext ruby unar );
 	headers=( ncurses libacl.h sys/capability.h readline.h glib-2.0/glib.h );
 	libs=( libstdc++.so.6 libstdc++.a libc\\.a );
 	echo -e "${y_l}SYSCHECK -> Please wait while performing checks of required tools and dependencies...${re_}";
