@@ -49,7 +49,7 @@ txt_lib="Kütüphane";
 txt_start_menu='Ana menü'; 
 txt_remove_menu="$txt_tc kaldır"; 
 txt_add_menu="$txt_tc ekle"; 
-txt_main_revision="\n yerel SVN revizyonu : r";
+txt_main_revision="\n Son SVN revizyonu : r";
 
 # help txt 
 txt_help1="ile başla" 
@@ -84,6 +84,8 @@ txt_module_configure="oscam modüllerini seç";
    txt_bmenu_use="USE_değişkenler     ";
  txt_bmenu_build="şimdi oscam oluştur";
 txt_bmenu_config="oscam/build yapılandırma";
+txt_bmenu_update="update ${txt_lib}"
+txt_bmenu_backup="backup ${txt_tc"
 txt_bmenu_profile="mevcut $txt_profile ile yükle";
 txt_bmenus_profile="$txt_profile $txt_save et";
    txt_bmenu_log="göster lastbuild.log"; 
@@ -95,7 +97,7 @@ txt_bmenus_profile="$txt_profile $txt_save et";
 # _toolchain_main_menu ###################################### 
 txt_menu_builder1="close simplebuild"; 
 txt_menu_builder2="yeni $txt_tc ekle"; 
-txt_menu_builder3="yüklü $txt_tc kaldır";
+txt_menu_builder3="yüklü olan ${txt_tc}i sil";
 txt_menu_builder4="mevcut yerel yapı için oluştur"; 
 txt_menu_back="$txt_tc menüsüne geri dön";
 
