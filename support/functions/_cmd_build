@@ -38,6 +38,7 @@ _cmd_build(){
 #set build defaults
 	CROSS="$tcdir/$_toolchainname/bin/$_compiler"
 	[ "$_stagingdir" == "1" ] && export STAGING_DIR="$tcdir/$_toolchainname"
+	[ "$_androidndkdir" == "1" ] && export ANDROID_NDK="$tcdir/$_toolchainname"
 	[ -f "$configdir/compiler_option" ] && co=$(cat "$configdir/compiler_option") || co="-O2"
 
 #toolchain defaults
@@ -92,6 +93,7 @@ _cmd_build(){
 
 #fill use variables and set name addons
 	USESTRING=;
+	EXTRA_USE=;
 	_usb=;
 	_pcsc=;
 	_stapi=;
@@ -126,8 +128,8 @@ _cmd_build(){
 					s3cfg_vars[COMPRESS]=1;;# overwrite global
 			"USE_STAPI=1")
 					_stapi="-stapi"
-					STAPI_LIB="STAPI_LIB=$sdir/stapi/liboscam_stapi.a"
-					printf "$w_l |      LIB : "$c_l"liboscam_stapi.a"$w_l;;
+					[ -z "$stapi_lib_custom" ] && STAPI_LIB="STAPI_LIB=$sdir/stapi/liboscam_stapi.a" || STAPI_LIB="STAPI_LIB=$sdir/stapi/${stapi_lib_custom}"
+					printf "$w_l |      LIB : ${c_l}$(basename "$STAPI_LIB")${w_l}";;
 			"USE_STAPI5=1")
 					_stapi5="-stapi5"
 					[ "$OPENBOX" == "1" ] && STAPI_LIB="STAPI5_LIB=$sdir/stapi/liboscam_stapi5_OPENBOX.a" && printf "$w_l|       LIB : "$c_l"liboscam_stapi5_OPENBOX.a"$w_l
@@ -162,22 +164,23 @@ _cmd_build(){
 	[ "${s3cfg_vars[USE_VERBOSE]}" == "1" ] && _verbose="V=1"
 
 #killstapi for nonsh4
-	if [ ! "$_toolchainname" == "sh4" ] || [ ! "$_toolchainname" == "sh_4" ]
-	then
-		silent=$("$svndir/config.sh" --disable CARDREADER_STAPI CARDREADER_STAPI5)
-	fi
+#	if [ ! "$_toolchainname" == "sh4" ] || [ ! "$_toolchainname" == "sh_4" ]
+#	then
+#		silent=$("$svndir/config.sh" --disable CARDREADER_STAPI CARDREADER_STAPI5)
+#	fi
 
 #build
 	timer_start
 	_generate_oscam_name "$_toolchainname"
 	_nl
 	USESTRING=${USE_vars[@]}
+	EXTRA_USE=$extra_use
 	make -j"$cpus" $_verbose \
 	"CONF_DIR=$CONFDIR" \
 	"OSCAM_BIN=$bdir/$oscam_name" \
-	"CC_OPTS=$co $cc_opts" \
+	"CC_OPTS=$co $cc_opts $extra_cc" \
 	"CC_WARN=$cc_warn" \
-	"CROSS=$CROSS" $STAPI_LIB $USESTRING 2>&1 \
+	"CROSS=$CROSS" $STAPI_LIB $USESTRING $EXTRA_USE 2>&1 \
 	|tee -a "$ldir/$log_name" \
 	|grep --line-buffered -v 'BFD\|^/' \
 	|grep --line-buffered '^CC\|^GEN\|UseFlags\|  CONF_DIR =\|Binary\|LINK\|STRIP\|BUILD\|Addons\|Protocols\|Readers\|CardRdrs\|^/' \

@@ -3,10 +3,11 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.15.1";
+	pversion="0.16.0";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
+	disable_syscheck="0";
 	ctdir="$sdir/crosstool";
 	cttpldir="$ctdir/templates";
 	ctngsrcdir="$ctdir/crosstool-ng";
@@ -23,16 +24,16 @@ tcupdate(){
 	[[ -z "$4" || "$FLAG" -gt "0" ]] && clear && _migrations;
 
 	#check/install prerequisites
-	[[ -z "$4" || "$FLAG" -gt "0" ]] && _check_pkg;
+	[[ -z "$4" || "$FLAG" -gt 0 ]] && [ ! "$disable_syscheck" -eq 1 ] && _check_pkg;
 
 	#backup config
 	if [ "$CMDTC" == "-r" ] || [ "$CMDTC" == "--reset" ];then
 		if [ -f "$configname" ];then
 			if ! _check_github_api_limits 12;then
-				echo -e "${y_l}RESET -> Moving existing config file...${re_}";
+				echo -e "${y_l}RESET -> ${txt_s3tup_msg_reset_config1}${re_}";
 				bcn="$configname".$(date +"%Y%m%d%H%M%S");
 				mv "$configname" "$bcn"
-				echo -e "config file backup='$bcn'\n";
+				echo -e "${txt_s3tup_msg_reset_config2}'${bcn}'\n";
 			else
 				_paktc_timer 30;
 			fi;
@@ -42,11 +43,11 @@ tcupdate(){
 	
 	#create config
 	if [ ! -f "$configname" ];then
-		echo -e "${g_l}CLEANUP -> Creating new config file. Please wait...${y_l}${re_}";
+		echo -e "${g_l}CLEANUP -> ${txt_s3tup_msg_reset_config3}${y_l}${re_}";
 		if ! _create_config;then
 			exit;
 		else
-			echo -e "config file='$configname'\nYou can change/extend them to fit your needs.\n";
+			echo -e "${txt_s3tup_msg_reset_config4}'$configname'\n${txt_s3tup_msg_reset_config5}\n";
 		fi;
 		_paktc_timer 5;
 	fi;
@@ -69,7 +70,7 @@ tcupdate(){
 	else
 		CTNG_START_BUILD=0;
 		sp=$(printf '%*s' 9);
-		CTNG_ROOT_BUILD_ERROR="\nERROR -> The cross toolchain build process was aborted because it must not run as root!\n\n""$sp""If you are aware of the danger of building toolchains as root and you\n""$sp""know what you are doing, you can force it with the following command:\n\n";
+		CTNG_ROOT_BUILD_ERROR="\nERROR -> ${txt_s3tup_msg_buildasroot_error1}\n\n"${sp}"${txt_s3tup_msg_buildasroot_error2}\n\n";
 		CTNG_ROOT_BUILD_CMD="$sp""./s3 tcupdate --config \"CTNG_BUILD_AS_ROOT\" \"1\"\n";
 	fi;
 
@@ -88,7 +89,7 @@ tcupdate(){
 		fi;
 	elif [ "$CMDTC" == "-d" ] || [ "$CMDTC" == "--duplicate" ];then #duplicate toolchain
 		if _check_toolchain "$OPTION1";then
-			! _check_toolchain "$OPTION2" && _toolchain_repair "$(_backup "$OPTION1" "$OPTION2")" || echo -e "\n\n${r_l}  ${txt_error}:${y_l} ${OPTION2}${w_l} Toolchain already exists!${rs_}" && _nl && exit;
+			! _check_toolchain "$OPTION2" && _toolchain_repair "$(_backup "$OPTION1" "$OPTION2")" || echo -e "\n\n${r_l}  ${txt_error}:${y_l} ${OPTION2}${w_l} ${txt_s3tup_msg_toolchain_exists}${rs_}" && _nl && exit;
 			bye;
 		else
 			_nl && exit;
@@ -110,17 +111,17 @@ tcupdate(){
 							source "$tccfgdir/$i" && tcdate="";
 							[ -f "$tcdir/$i/build.log.bz2" ] && tcdate=" ct-ng."$(date -r "$tcdir/$i/build.log.bz2" "+%F %T");
 							[ -f "$tcdir/$i/freetz-ng.log.bz2" ] && tcdate=" freetz-ng."$(date -r "$tcdir/$i/freetz-ng.log.bz2" "+%F %T");
-							MENU_OPTIONS+=("$_toolchainname" "$_description\Z2$tcdate\Zn" "toolchain folder:$tcdir/$i | config file:$tccfgdir/$i");
+							MENU_OPTIONS+=("$_toolchainname" "$_description\Z2$tcdate\Zn" "${txt_s3tup_menu_toolchain_folder}$tcdir/$i | ${txt_s3tup_menu_toolchain_config}$tccfgdir/$i");
 							counter;
 						fi;
 					done;
 				fi;
-				[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "no toolchains found" "no toolchains found") && counter;
+				[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "$txt_s3tup_menu_toolchain_notfound" "$txt_s3tup_menu_toolchain_notfound");
 			fi;
 			clear;clear;
-			out=$("$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--item-help" "--help-tags" "--default-item" "$tc" "--ok-label" "Update" "--cancel-label" "Create" "--help-button" "--help-label" "Backup" "--extra-button" "--extra-label" "$([ ! "$FLAG" == "1" ] && echo "Exit" || echo "Back")" "--title" "-[ Toolchain Menu ]-" \
-				--menu "\nSelect one of the $COUNT installed cross toolchains that you want to update:\n " \
-				"${COUNT+10}" 0 0 "${MENU_OPTIONS[@]}");
+			out=$("$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--item-help" "--help-tags" "--default-item" "$tc" "--ok-label" "${txt_s3tup_menu_command_label_update}" "--cancel-label" "${txt_s3tup_menu_command_label_create}" "--help-button" "--help-label" "${txt_s3tup_menu_command_label_backup}" "--extra-button" "--extra-label" "$([ ! "$FLAG" == "1" ] && echo "${txt_s3tup_menu_command_label_exit}" || echo "${txt_s3tup_menu_command_label_back}")" "--title" "-[ ${txt_s3tup_menu_toolchain_title} ]-" \
+				--menu "\n${txt_s3tup_menu_toolchain_text1} $COUNT ${txt_s3tup_menu_toolchain_text2}\n " \
+				0 0 "$COUNT" "${MENU_OPTIONS[@]}");
 			ret="$?";
 			[ $ret -eq 2 ] && tc=$(echo "$out" | awk '{printf $2}') || tc=$(echo "$out" | awk '{printf $1}');
 
@@ -147,7 +148,7 @@ _integrate_libs(){
 	
 	#toolchain native not supported and exists check
 	if ! _check_toolchain "$tc";then
-		_nl && [ "$FLAG" -gt "0" ] && sleep 2 && return || exit;
+		_nl && sleep 2 && return;
 	fi;
 	
 	#get toolchain properties
@@ -203,31 +204,35 @@ _integrate_libs(){
 			[ "$libversioncompare" == "=" ] && libtxtfmt="\Z2" || libtxtfmt="";
 			[ "$libversioncompare" == "<" ] && libtxtfmt="\Z1";
 			[ "$libversioncompare" == ">" ] && [ "${#libversioncurrent}" -gt 0 ] && libselected="on" && libtxtfmt="\Z5" || libselected="off";
-			
-			MENU_OPTIONS+=("$i"		"$libdesc""$(printf '%*s' $((24-${#libdesc})))""$libtxtfmt$([ $libversioncurrent ] && echo $libversioncompare)	$(echo $libversioncurrent | sed -e 's/^$/ ---/g')\Zn"		"$(echo $libselected)"	"$([ $libname ] && echo "$libdesc: $liburl")");counter;
+
+			MENU_OPTIONS+=("$i"     "${libdesc}$(printf '%*s' $((24-${#libdesc})))${libtxtfmt}$([ $libversioncurrent ] && echo $libversioncompare)	$(echo $libversioncurrent | sed -e 's/^$/ ---/g')\Zn"     "$(echo $libselected)"     "$([ $libname ] && echo "${libdesc}: ${liburl}")");counter;
 
 			#     0 key     1 desc     2 version     3 checkversion     4 checkfile 5 current version    6 url      7 tasks array
 			lib=("$libkey" "$libname" "$libversion" "$libversioncheck" "$libcheck" "$libversioncurrent" "$liburl" "($(printf " %q" "${libtasks[@]}"))");
 			libs+=("($(printf " %q" "${lib[@]}"))");
 		done;
-		[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "no libraries found" "no libraries found") && counter;
+		[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "$txt_s3tup_menu_library_notfound" "off" "$txt_s3tup_menu_library_notfound");
 
 		if [ "${#libkeys}" -gt 0 ];then #Force integrate libs call
 			opts=$(echo "$libkeys" | tr ',' '\n');
 			ret="0";
 		else
 			clear;clear;
-			opts=$("$gui" "--item-help" "--help-tags" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--default-item" "$lkey" "--ok-label" "Start" "--help-button" "--help-label" "Info" "--cancel-label" "$([ ! "$3" -gt "0" ] && echo "Exit" || echo "Back")" "--title" "-[ Library Update Menu - \Z2$tc\Zn ]-" "$cl_"\
-				"\nSelect all libraries to update in toolchain's SYSROOT folder:\n$prefixdir\n\n         library   version NEW                   CURRENT" \
-				"${COUNT+12}" 70 0 "${MENU_OPTIONS[@]}");
+			opts=$("$gui" "--item-help" "--help-tags" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--default-item" "$lkey" "--ok-label" "${txt_s3tup_menu_command_label_start}" "--help-button" "--help-label" "${txt_s3tup_menu_command_label_info}" "--cancel-label" "$([ ! "$3" -gt "0" ] && echo "${txt_s3tup_menu_command_label_exit}" || echo "${txt_s3tup_menu_command_label_back}")" "--title" "-[ ${txt_s3tup_menu_library_title} - \Z2$tc\Zn ]-" "$cl_"\
+				"\n${txt_s3tup_menu_library_text1}\n$prefixdir\n\n${txt_s3tup_menu_library_text2}" \
+				0 0 "$COUNT" "${MENU_OPTIONS[@]}");
 			ret="$?"
 		fi;
 
+		#extract first command and option for Info Menu before modifying $opts
+		first=$(echo "$opts" | awk '{printf $1}');
+		lkey=$(echo "$opts" | awk '{printf $2}');
+		
 		#sort opts descending to ensure LIB_USB is build before LIB_PCSC
 		opts=$(echo "$opts" | tr ' ' '\n' | sort -hr);
 		
 		#SSL select check
-		[ $(echo $opts | tr ' ' '\n' | grep -c "SSL_") -gt 1 ] && echo -e "${r_l}\n\nPlease select only one SSL version!${re_}" && sleep 3 && [ "${#OPTION1}" -gt 0 ] && menu_close=1 && continue;
+		[ $(echo $opts | tr ' ' '\n' | grep -c "SSL_") -gt 1 ] && echo -e "${r_l}\n\n${txt_s3tup_msg_choose_ssl}${re_}" && sleep 3 && [ "${#OPTION1}" -gt 0 ] && menu_close=1 && continue;
 
 		case $ret in
 			0) #Start - Build library
@@ -248,9 +253,10 @@ _integrate_libs(){
 							task=$(_replace_tokens "$task");	#replace tokens
 							buildtasks+=("$task");
 						done;
-						_build_library "($i/$icount) $tc: library ${lib[1]} ${lib[2]}" $(_extract $(_dl "${lib[6]}" "${lib[1]} ${lib[2]}") "$tmpdir" 2>/dev/null) "$logfile" "${buildtasks[@]}";
+						_build_library "($i/$icount) $tc: ${txt_lib} ${lib[1]} ${lib[2]}" $(_extract $(_dl "${lib[6]}" "${lib[1]} ${lib[2]}") "$tmpdir" 2>/dev/null) "$logfile" "${buildtasks[@]}";
 					done;
-					[ "${#buildtasks[@]}" == "0" ] && echo -e "${r_l}  ${txt_error}:${y_l} ${o}${w_l} Library not found in config file${rs_}";
+					[ "${#buildtasks[@]}" == "0" ] && echo -e "${r_l}  ${txt_error}:${y_l} ${o} ${w_l}${txt_s3tup_msg_library_not_found}${rs_}";
+					sleep 2;
 				done;
 				
 				[ -d "$tmpdir" ] && rm -r "$tmpdir";;
@@ -258,16 +264,13 @@ _integrate_libs(){
 				menu_close="1";
 				return;;
 			2) #Info
-				first=$(echo "$opts" | awk '{printf $1}');
-				lkey=$(echo "$opts" | awk '{printf $2}');
-
 				if [ "$first" == "HELP" ];then
 					sp=$(printf '%*s' 90 | tr ' ' '=');
 					txt=$(cat "$configname" | grep ""$lkey"=\|"$lkey"_");
 					bcd=$(cat "$configname" | grep ""$lkey"_tasks");
-					txt=$(echo -e "Toolchain: $tcdir/$tc\nCompiler:  $compilername\nSysroot:   $sysrootdir\nPrefix:    $prefixdir\nInclude:   $includedir\n$sp\n\nLibrary configuration:\n$txt\n\nBuild command:\n$(_replace_tokens "$(_tidy_tasks "$bcd" "$lkey")")");
+					txt=$(echo -e "${txt_s3tup_menu_info_toolchain}$tcdir/$tc\n${txt_s3tup_menu_info_compiler}$compilername\n${txt_s3tup_menu_info_sysroot}$sysrootdir\n${txt_s3tup_menu_info_prefix}$prefixdir\n${txt_s3tup_menu_info_include}$includedir\n$sp\n\n${txt_s3tup_menu_info_library}\n$txt\n\n${txt_s3tup_menu_info_build}\n$(_replace_tokens "$(_tidy_tasks "$bcd" "$lkey")")");
 					tempfile=$(mktemp) && echo -e "$txt" > "$tempfile";
-					"$gui" "$st_" "$nc_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--ok-label" "Back" "--textbox" "$tempfile" 30 80;
+					"$gui" "$st_" "$nc_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--no-ok" "--extra-button" "--extra-label" "${txt_s3tup_menu_command_label_back}" "--textbox" "$tempfile" 30 80;
 					rm "$tempfile" 2>/dev/null;
 				fi;;
 		esac;
@@ -317,12 +320,11 @@ _create_tc(){
 					counter;
 				done;
 			fi;
-			
-			[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "no templates found" "no templates found") && counter;
+			[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "$txt_s3tup_menu_template_notfound" "off" "$txt_s3tup_menu_template_notfound");
 			clear;clear;
-			opts=$("$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--item-help" "--help-tags" "--default-item" "$tpl" "--ok-label" "Start" "--extra-button" "--extra-label" "$([ ! "$3" == "1" ] && echo "Exit" || echo "Back")" "--cancel-label" "Setup" "--help-button" "--help-label" "Edit" "--title" "-[ Cross Toolchain Template Menu ]-" "$cl_"\
-				 "\nSelect one of the $COUNT templates to create the cross toolchain you want:\n\n\Z1NOTE: \ZbIf you create a cross toolchain from a template with a red colored description, an existing one with the same name will be replaced without asking!\ZB Dark red colored descriptions indicates that the version of the template is higher than the existing toolchain. An update could make sense.\Zn" \
-				 "${COUNT+11}" 0 0 "${MENU_OPTIONS[@]}");
+			opts=$("$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--item-help" "--help-tags" "--default-item" "$tpl" "--ok-label" "${txt_s3tup_menu_command_label_start}" "--extra-button" "--extra-label" "$([ ! "$3" == "1" ] && echo "${txt_s3tup_menu_command_label_exit}" || echo "${txt_s3tup_menu_command_label_back}")" "--cancel-label" "${txt_s3tup_menu_command_label_setup}" "--help-button" "--help-label" "${txt_s3tup_menu_command_label_edit}" "--title" "-[ ${txt_s3tup_menu_template_title} ]-" "$cl_"\
+				 "\n${txt_s3tup_menu_template_text1} $COUNT ${txt_s3tup_menu_template_text2}\n\n\Z1${txt_s3tup_menu_template_text3} \Zb${txt_s3tup_menu_template_text4}\ZB ${txt_s3tup_menu_template_text5}\Zn" \
+				 0 0 "$COUNT" "${MENU_OPTIONS[@]}");
 			ret="$?";
 		fi;
 
@@ -358,8 +360,8 @@ _create_tc(){
 
 						clear;
 						sp=$(printf '%*s' 80 | tr ' ' '=')
-						echo -e "$pdesc - creating cross toolchain log - $(date +"%F %T")" | tee -a "$logfile";
-						echo -e "${y_l}$sp\nbuild ($i/$icount): command list for cross toolchain $tpl:\n$sp" | tee -a "$logfile";
+						echo -e "$pdesc - ${txt_s3tup_msg_cross_toolchain_log} - $(date +"%F %T")" | tee -a "$logfile";
+						echo -e "${y_l}$sp\n${txt_b2} ($i/$icount): ${txt_s3tup_msg_cross_toolchain_commandlist} $tpl:\n$sp" | tee -a "$logfile";
 
 						#copy template
 						[ $(_get_template_type "$cttpldir/$tpl") == "CTNG" ] && tpltargetdir="$ctngsrcdir";
@@ -397,7 +399,7 @@ _create_tc(){
 							cd "$tpltargetdir";
 							
 							#print out detected libs in current toolchain
-							[ "${#libkeys}" -gt 0 -a "$LIBS_AUTO_INTEGRATE" -eq 1 ] && echo -e "${y_l}\nThe following libraries were detected in the existing toolchain:\n${b_l}$(echo "$libkeys" | tr ',' '\n' | sort -hr)${re_}" | tee -a "$logfile";
+							[ "${#libkeys}" -gt 0 -a "$LIBS_AUTO_INTEGRATE" -eq 1 ] && echo -e "${y_l}\n${txt_s3tup_msg_cross_toolchain_library_detection}\n${b_l}$(echo "$libkeys" | tr ',' '\n' | sort -hr)${re_}" | tee -a "$logfile";
 
 							#print out crosstool version
 							[ $(_get_template_type "$cttpldir/$tpl") == "CTNG" ] && echo -e "${g_l}\n$(./ct-ng | grep 'crosstool-NG version' &2>/dev/null | tail -1)\n${re_}" | tee -a "$logfile";
@@ -452,12 +454,12 @@ _create_tc(){
 								
 								#auto integrate libs
 								if [ "${#libkeys}" -gt 0 -a "$LIBS_AUTO_INTEGRATE" -eq 1 ];then
-									echo -e "${y_l}\nThe following libraries will now be integrated into the toolchain:\n${b_l}$(echo "$libkeys" | tr ',' '\n' | sort -hr)${re_}" | tee -a "$logfile";
+									echo -e "${y_l}\n${txt_s3tup_msg_cross_toolchain_library_integration}\n${b_l}$(echo "$libkeys" | tr ',' '\n' | sort -hr)${re_}" | tee -a "$logfile";
 									_integrate_libs "$tpl" "$libkeys" "$FLAG";
 								fi;
 								
 								#compress toolchain
-								_compress "$dldir/Toolchain-$tpl.tar.xz" "$tcdir/$tpl" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Compress cross toolchain $tpl to Toolchain-$tpl.tar.xz ]- " "$pb_" "$_lines" "$_cols";
+								_compress "$dldir/Toolchain-$tpl.tar.xz" "$tcdir/$tpl" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_compress_title} $tpl ${txt_to} Toolchain-$tpl.tar.xz ]- " "$pb_" "$_lines" "$_cols";
 								
 								#create toolchain.cfg
 								props=$(_get_template_properties "$cttpldir/$tpl");
@@ -471,7 +473,7 @@ _create_tc(){
 							_paktc_timer 10;
 						fi;
 					else
-						echo -e "${r_l}  ${txt_error}:${y_l} ${tpl}${w_l} Template ${txt_n_installed}${rs_}";
+						echo -e "${r_l}  ${txt_error}:${y_l} ${tpl} ${w_l}${txt_tpl} ${txt_n_installed}${rs_}";
 						sleep 2;
 					fi;
 				done;;
@@ -506,15 +508,15 @@ _migrations(){
 				desc=$(echo "$props" | awk -F'^' '{print $1}' | xargs); #extract description
 				tc_migrate=$(echo "$props" | awk -F'^' '{print $3}' | xargs); #extract template name to migrate
 				if [[ -n "$tc_migrate" && -d "$tcdir/$tc_migrate" ]];then
-					mig_list+="\ntoolchain ${y_l}${tc_migrate}${re_}\n\ttemplate ${y_l}${tc_migrate}${re_} was renamed to ${p_l}${tpl}\n${re_}";
-					rm_list+="\nremove toolchain ${y_l}${tc_migrate}${re_}\n\trm -r \"${tcdir}/${y_l}${tc_migrate}${re_}\"\n\trm -f \"${tccfgdir}/${y_l}${tc_migrate}${re_}\"\n";
+					mig_list+="\n${txt_tc} ${y_l}${tc_migrate}${re_}\n\t${txt_tpl} ${y_l}${tc_migrate}${re_} ${txt_s3tup_msg_cross_migrations_renamed} ${p_l}${tpl}\n${re_}";
+					rm_list+="\n${txt_s3tup_msg_cross_migrations_remove} ${y_l}${tc_migrate}${re_}\n\trm -r \"${tcdir}/${y_l}${tc_migrate}${re_}\"\n\trm -f \"${tccfgdir}/${y_l}${tc_migrate}${re_}\"\n";
 				fi;
 			done;
 
 			if [ -n "$mig_list" ];then
-				echo -e "${y_l}MIGRATION -> The following cross toolchains are out of date due to the renaming of cross toolchain templates:${re_}"
+				echo -e "${y_l}MIGRATION -> ${txt_s3tup_msg_cross_migrations_outdated}${re_}"
 				echo -e "$mig_list";
-				echo -e "You can still use the ${y_l}old cross toolchains${re_} from above, but it's better to create new ones based on the ${p_l}new cross toolchain templates${re_} to get future template updates.\nThe ${y_l}old cross toolchains${re_} can be removed manually as follows:"
+				echo -e "${txt_s3tup_msg_cross_migrations_hint}"
 				echo -e "$rm_list";
 				_paktc_timer 5
 			fi;
@@ -536,7 +538,7 @@ _backup(){
 	#create toolchain.cfg
 	source "$tccfgdir/$src" && target="${_compiler%?}" && sysroot="$_sysroot" && lsd="$_libsearchdir" && desc="$_description" && info="$_tc_info" && sb="$_self_build";
 	_create_toolchaincfg "$tcdir/$src" "$dest" "$target" "$sysroot" "$lsd" "$desc" "$info" "$xzfile" "$sb";
-	) | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Backup $src to $(basename "$xzfile") ]- " "$pb_" "$_lines" "$_cols";
+	) | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_backup_title} ${src} ${txt_to} $(basename "$xzfile") ]- " "$pb_" "$_lines" "$_cols";
 	[ -f "$newtccfgfile" ] && echo "$dest";
 };
 _build_library(){
@@ -549,17 +551,17 @@ _build_library(){
 	bcl=$(printf '%s\n' "${tasks[@]}");
 	
 	sp=$(printf '%*s' 80 | tr ' ' '=')
-	echo -e "$pdesc - updating library log - $(date +"%F %T")" | tee -a "$lf";
-	echo -e "$sp\nbuild command list for $desc:\n$sp\ncd "$libsrcdir\;"\n$bcl\n$sp" | tee -a "$lf";
+	echo -e "$pdesc - ${txt_s3tup_msg_build_library_log} - $(date +"%F %T")" | tee -a "$lf";
+	echo -e "$sp\n${txt_s3tup_msg_build_library_commandlist} $desc:\n$sp\ncd "$libsrcdir\;"\n$bcl\n$sp" | tee -a "$lf";
 	sleep 2;
 	cd "$libsrcdir";
 	( eval "${tasks[@]}" ) 2>&1 | tee -a "$lf"
-	) | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Build $desc ]- " "$pb_" "$_lines" "$_cols";sleep 2;
+	) | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_build_library_title} $desc ]- " "$pb_" "$_lines" "$_cols";sleep 2;
 	
 	#build error message
 	error_on_build=$(grep -cw1 Error "$lf");
 	if [ "$error_on_build" -gt "0" ];then
-		echo -e "${r_l}ERRORS on build found, details:\n${b_l}  ${lf}\n${y_l}" >$(tty);
+		echo -e "${r_l}${txt_s3tup_msg_build_library_error}\n${b_l}  ${lf}\n${y_l}" >$(tty);
 		_paktc_timer 10;
 		echo -e "${re_}${w_l}";
 	fi;
@@ -610,13 +612,13 @@ _ctng_setup(){
 	(
 	bcl=$(printf '%s\n' "${CTNG_SETUP_tasks[@]}");
 	sp=$(printf '%*s' 80 | tr ' ' '=')
-	echo -e "$pdesc - installing crosstool-ng log - $(date +"%F %T")";
-	echo -e "$sp\nbuild command list for crosstool-NG:\n$sp\ncd "$ctngsrcdir"\n$(_replace_tokens "$bcl")\n$sp";
+	echo -e "$pdesc - ${txt_s3tup_msg_ctng_setup_log} - $(date +"%F %T")";
+	echo -e "$sp\n${txt_s3tup_msg_ctng_setup_commandlist} crosstool-NG:\n$sp\ncd "$ctngsrcdir"\n$(_replace_tokens "$bcl")\n$sp";
 	sleep 2;
 	
 	if [ $1 -eq 1 ];then
 		# setup crosstool wc
-		echo "Cleanup source directory "$ctngsrcdir/"..."
+		echo "${txt_s3tup_msg_ctng_setup_cleanup} "$ctngsrcdir/"..."
 		rm -rf "$ctngsrcdir" 2>/dev/null;
 		mkdir --parents "$ctngsrcdir";
 		cd "$ctngsrcdir";
@@ -630,7 +632,7 @@ _ctng_setup(){
 		echo -e "$CTNG_ROOT_BUILD_ERROR$CTNG_ROOT_BUILD_CMD";
 		sleep 5;
 	fi;
-	) | tee "$logfile" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Setup crosstool-NG ]- " "$pb_" "$_lines" "$_cols";
+	) | tee "$logfile" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_ctng_setup_title} crosstool-NG ]- " "$pb_" "$_lines" "$_cols";
 };
 _fng_setup(){
 	logfile="$ldir/$(date +%F.%H%M%S)_tup_fng_setup.log";
@@ -638,13 +640,13 @@ _fng_setup(){
 	(
 	bcl=$(printf '%s\n' "${FNG_SETUP_tasks[@]}");
 	sp=$(printf '%*s' 80 | tr ' ' '=')
-	echo -e "$pdesc - installing freetz-ng log - $(date +"%F %T")";
-	echo -e "$sp\nbuild command list for Freetz-NG:\n$sp\ncd "$fngsrcdir"\n$(_replace_tokens "$bcl")\n$sp";
+	echo -e "$pdesc - ${txt_s3tup_msg_fng_setup_log} - $(date +"%F %T")";
+	echo -e "$sp\n${txt_s3tup_msg_fng_setup_commandlist} Freetz-NG:\n$sp\ncd "$fngsrcdir"\n$(_replace_tokens "$bcl")\n$sp";
 	sleep 2;
 	
 	if [ $1 -eq 1 ];then
 		# setup freetz-ng wc
-		echo "Cleanup source directory "$fngsrcdir/"..."
+		echo "${txt_s3tup_msg_fng_setup_cleanup} "$fngsrcdir/"..."
 		rm -rf "$fngsrcdir" 2>/dev/null;
 		mkdir --parents "$fngsrcdir";
 		cd "$fngsrcdir";
@@ -659,13 +661,13 @@ _fng_setup(){
 		echo -e "$CTNG_ROOT_BUILD_ERROR$CTNG_ROOT_BUILD_CMD";
 		sleep 5;
 	fi;
-	) | tee "$logfile" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ Setup Freetz-NG ]- " "$pb_" "$_lines" "$_cols";
+	) | tee "$logfile" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_fng_setup_title} Freetz-NG ]- " "$pb_" "$_lines" "$_cols";
 };
 _dl(){
 	[ -d "$dldir/#tmp" ] && rm --recursive --force "$dldir/#tmp"
 	mkdir --parents "$dldir/#tmp";
 	cd "$dldir/#tmp";
-	wget --content-disposition "$1" 2>&1 | stdbuf -o0 awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ download $2 ]- " --gauge "  $txt_loading $txt_wait" 6 74;
+	wget --content-disposition "$1" 2>&1 | stdbuf -o0 awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_download_title} $2 ]- " --gauge "  $txt_loading $txt_wait" 6 74;
 	if [ $? -eq 0 ];then
 		fname="$(ls -t | head -n1)"; md5file="$fname.md5";
 		md5sum "$fname" > "$md5file";
@@ -695,7 +697,7 @@ _extract(){
         e=1;
 		
         if [[ ! -r $i ]];then
-            echo "$0: file is unreadable: \`$i'" >&2;
+            echo "$0: ${txt_s3tup_msg_extract_file_unreadable} \`$i'" >&2;
             continue;
         fi
 		
@@ -710,7 +712,7 @@ _extract(){
             *.rar) c=(unrar -x);;
             *.xz)  c=(unxz);;
             *.zip) c=(unzip -o);;
-            *)     echo "$0: unrecognized file extension: \`$i'" >&2;
+            *)     echo "$0: ${txt_s3tup_msg_extract_extension_unknown} \`$i'" >&2;
                    continue;;
         esac
 		cd "$edir";
@@ -836,7 +838,7 @@ _get_template_properties(){
 		else
 			desc="$2";
 		fi;
-		[ -z "$desc" ] && desc="missing description"; 
+		[ -z "$desc" ] && desc="${txt_s3tup_msg_gtp_missing}"; 
 
 		#extract template properties
 		if [ $(_get_template_type "$1") == "CTNG" ];then
@@ -882,7 +884,7 @@ _get_template_properties(){
 				rm -f "$fngsrcdir/.config";
 			else
 				setup=0;
-				desc="$desc (run \Zr<Setup>\ZR to show details)";
+				desc="$desc (${txt_s3tup_msg_gtp_info})";
 			fi;
 		fi;
 
@@ -910,11 +912,11 @@ _compare_version(){
 };
 _paktc_timer(){
 if [ "$1" == "0" ] || [ "${#1}" -eq 0 ];then
-	read -n 1 -s -r -p "Press any key to continue";
+	read -n 1 -s -r -p "${txt_s3tup_msg_paktc}";
 else
 	for (( i=$1; i>0; i--)); do
 		sp=$(printf '%*s' $[$1-$i+1] | tr ' ' '.');
-		printf "\rPress any key to continue$sp"
+		printf "\r${txt_s3tup_msg_paktc}$sp"
 		read -s -n 1 -t 1 key
 		if [ $? -eq 0 ]
 		then
@@ -927,13 +929,13 @@ echo -e "\033[2K\r"; #remove characters from console
 _check_toolchain(){
 	
 	if [ -z "$1" ];then	#toolchain parameter empty
-		echo -e "\n\n${r_l}  ${txt_error}:${y_l} Parameter${w_l} Toolchain not set!${rs_}";
+		echo -e "\n\n${r_l}  ${txt_error}:${y_l} ${txt_s3tup_msg_check_toolchain_empty}${rs_}";
 		return 1;
 	elif [ "$1" == "native" ];then	#toolchain native not supported
-		echo -e "\n\n${r_l}  ${txt_error}:${y_l} ${1}${w_l} Toolchain library update not supported!${rs_}";
+		echo -e "\n\n${r_l}  ${txt_error}:${y_l} ${1}${w_l} ${txt_s3tup_msg_check_toolchain_not_supported}${rs_}";
 		return 1;
 	elif [ ! -d "$tcdir/$1/bin" ];then	#toolchain not installed
-		echo -e "\n\n${r_l}  ${txt_error}:${y_l} ${1}${w_l} Toolchain ${txt_n_installed}${rs_}";
+		echo -e "\n\n${r_l}  ${txt_error}:${y_l} ${1}${w_l} ${txt_tc} ${txt_n_installed}${rs_}";
 		return 1;
 	else
 		return 0;
@@ -945,13 +947,13 @@ _check_root(){
 _check_lib(){
 	case "$1" in
 		"PCSC")	#Create symlink to the PCSC header files, if the last include path of the compiler don't point to it
-				echo -e "\nCheck for PCSC header files and try to symlink to the correct PCSC header files if the last compiler include path points to the wrong location...";
+				echo -e "\n${txt_s3tup_msg_check_library_info1}";
 				if [ "${#includedir}" -gt 0 ] && [ ! -d "$includedir/PCSC" ];then
 					headerdir="$(dirname $(find "$prefixdir" -type f -name "pcsclite.h" | head -n 1))";
 					[ "${#headerdir}" -gt 0 ] && ln -s "$(realpath --relative-to="$includedir" "$headerdir")" "$includedir/PCSC";
-					[ "${#headerdir}" -gt 0 ] && echo "Symlink $includedir/PCSC -> $headerdir created, to point to the PCSC header files." || "No PCSC header files found in $prefixdir and it's sub directories!";
+					[ "${#headerdir}" -gt 0 ] && echo "$includedir/PCSC -> ${txt_s3tup_msg_check_library_info2a}" || "${txt_s3tup_msg_check_library_info2b} $prefixdir";
 				else
-					[ "${#includedir}" -gt 0 ] && echo "PCSC header files are in the correct location: $includedir/PCSC" || echo "Compiler returns no include directories!";
+					[ "${#includedir}" -gt 0 ] && echo "${txt_s3tup_msg_check_library_info3b} $includedir/PCSC" || echo "${txt_s3tup_msg_check_library_info3b}";
 				fi;;
 		*) echo "not implemented yet!";
 	esac;
@@ -959,12 +961,12 @@ _check_lib(){
 _check_pkg(){
 	pkgs=( git patch curl jq gcc g++ gperf bison flex makeinfo help2man make file cmp \
 		  python3-config autoconf automake libtoolize libtool gawk wget bzip2 xz unzip rsync \
-		  composite inkscape pkg-config python gettext ruby unar );
+		  composite inkscape pkg-config python gettext ruby );
 	headers=( ncurses libacl.h sys/capability.h readline.h glib-2.0/glib.h );
 	libs=( libstdc++.so.6 libstdc++.a libc\\.a );
-	echo -e "${y_l}SYSCHECK -> Please wait while performing checks of required tools and dependencies...${re_}";
+	echo -e "${y_l}SYSCHECK -> ${txt_s3tup_msg_syscheck1}${re_}";
 	if syscheck "" "" "${pkgs[*]}" "${headers[*]}" "${libs[*]}";then
-		echo -e "${r_l}\nSYSCHECK -> You need to manually install the following packages to use this plugin properly:\n${y_l}${prefix} install${packages}\n${re_}" && _paktc_timer 10;
+		echo -e "${r_l}\nSYSCHECK -> ${txt_s3tup_msg_syscheck2}\n${y_l}${prefix} install${packages}\n${re_}" && _paktc_timer 10;
 	fi;
 };
 _check_github_api_limits(){
@@ -975,12 +977,7 @@ _check_github_api_limits(){
 	reset_time=$(date -d @$reset);
 	
 	if [ "$remaining" -lt "$1" ];then
-		echo -e "${y_l}NOTE -> Please wait until ${g_l}${reset_time}${y_l} to reset your configuration file."\
-					"The most recent versions and download links for the libraries are determined dynamically via the Github API."\
-					"Exceeding the rate limit on Github API will result in failures on generationg the configuration file."\
-					"Your Github API rate limit will be reset soon on $reset_time."\
-					"\nFor ${b_l}unauthenticated requests${y_l}, the rate limit allows for ${b_l}up to ${limit} requests per hour${y_l}. Unauthenticated requests are associated with the originating IP address, and not the user making requests."\
-					"\n${re_}";
+		echo -e "${y_l}INFO -> ${txt_s3tup_msg_github_api_limits_info1} ${g_l}${reset_time}${y_l}\n${txt_s3tup_msg_github_api_limits_info2}\n${re_}";
 		return 0;
 	else
 		return 1;
@@ -991,7 +988,7 @@ _check_crosstool_setup(){
 	if [ "$1" == "CTNG" ] || [ -z "$1" ];then
 		if [ ! -f "$ctngsrcdir/ct-ng" ];then
 			clear;
-			echo -e "${r_l}\nCHECK -> crosstool-NG is not setup correctly. Try to fix it automatically...\n${re_}";
+			echo -e "${r_l}\nCHECK -> crosstool-NG ${txt_s3tup_msg_check_crosstool_setup_info}\n${re_}";
 			[ -z "$1" ] && _paktc_timer 5;
 			_ctng_setup "$CTNG_START_BUILD";
 		fi;
@@ -1001,7 +998,7 @@ _check_crosstool_setup(){
 	if [ "$1" == "FNG" ] || [ -z "$1" ];then
 		if [ ! -d "$fngsrcdir/dl" ];then
 			clear;
-			echo -e "${r_l}\nCHECK -> Freetz-NG is not setup correctly. Try to fix it automatically...\n${re_}";
+			echo -e "${r_l}\nCHECK -> Freetz-NG ${txt_s3tup_msg_check_crosstool_setup_info}\n${re_}";
 			[ -z "$1" ] && _paktc_timer 5;
 			_fng_setup "$CTNG_START_BUILD";
 		fi;
@@ -1018,7 +1015,7 @@ _check_config(){
 	
 	if [ $nok -eq 1 ];then 
 		clear;
-		echo -e "${r_l}\nCHECK -> Your config file seems to be outdated. The following settings are missing:\n${y_l}${conf}\n${r_l}Please restart s3 as follows to recreate an updated config file:\n${y_l}./s3 tcupdate -r\n${re_}";
+		echo -e "${r_l}\nCHECK -> ${txt_s3tup_msg_check_config_info1}\n${y_l}${conf}\n${r_l}${txt_s3tup_msg_check_config_info2}\n${y_l}./s3 tcupdate -r\n${re_}";
 		_paktc_timer 20;
 		return $nok;
 	fi;
@@ -1029,7 +1026,7 @@ _change_config(){
 	[[ ! $2 =~ "(" ]] && [[ ! $string =~ ")" ]] && qte="\"" || qte=""; #no quotes if value contains parentheses
 	
 	if ! grep -Eq "^$1=.*" "$configname";then
-		echo -e "${r_l}\nCHECK -> Variable ${y_l}${1}${r_l} does not exist in the configuration file!\n${re_}";
+		echo -e "${r_l}\nCHECK -> ${y_l}${1}${r_l} ${txt_s3tup_msg_change_config_error}\n${re_}";
 		_paktc_timer 10;
 	elif [ "${1:(-6)}" == "_tasks" ];then
 		echo -e "${r_l}\nCHECK -> Modifying ${y_l}tasks-variables${r_l} not implemented yet!\n${re_}";
@@ -1038,7 +1035,7 @@ _change_config(){
 		cp -f "$configname" "$configname.$(date +"%Y%m%d%H%M%S")"
 		sed -i "s#^$1=.*#$1=$qte$2$qte; \#changed on $ts via tcupdate commandline#g" "$configname";
 		result=$(grep -E "^$1=.*" "$configname" | awk '{printf $1}');
-		echo -e "${g_l}\nDONE -> Variable changed to: ${y_l}${result}\n${re_}";
+		echo -e "${g_l}\nDONE -> ${txt_s3tup_msg_change_config_info} ${y_l}${result}\n${re_}";
 		_paktc_timer 5;
 		nok=0;
 	fi;
@@ -1048,12 +1045,12 @@ _change_config(){
 _create_config(){
 	#check existing jq
 	if [ ! "$(which jq)" ];then
-		echo -e "${r_l}\nCHECK -> Without the tool 'jq' automatic config file generation is not possible. Please install it first:\n${y_l}apt install jq\n${re_}" && _paktc_timer 10;
+		echo -e "${r_l}\nCHECK -> ${txt_s3tup_msg_create_config_jq_not_found}\n${y_l}apt install jq\n${re_}" && _paktc_timer 10;
 		return 1;
 	fi;
 	
 	ctng_config_tasks=( "('./ct-ng menuconfig;')"
-						"('TPL_SAVE=\$(\$gui --defaultno --output-fd 1 --ok-label \"Yes\" --cancel-label \"No\" --colors \$bt_ \"\$title_ - \Z0\$pdesc\Zn\" --title \"-[ Save Cross Toolchain Template ]-\" --inputbox \"\\\nWould you like to \ZrSAVE\ZR this toolchain template \Zrnow\ZR?\" 10 55 \"@TEMPLATE@\") && cp \".config\" \"\$TPL_SAVE\";')" );
+						"('TPL_SAVE=\$(\$gui --defaultno --output-fd 1 --ok-label \"\${txt_s3tup_menu_command_label_yes}\" --cancel-label \"\${txt_s3tup_menu_command_label_no}\" --colors \$bt_ \"\$title_ - \Z0\$pdesc\Zn\" --title \"-[ \${txt_s3tup_menu_edit_title} ]-\" --inputbox \"\\\n\${txt_s3tup_menu_edit_text}\" 10 55 \"@TEMPLATE@\") && cp \".config\" \"\$TPL_SAVE\";')" );
 	ctng_config_tasks_comment="#config command";
 	
 	ctng_build_tasks=( "('./ct-ng show-config | tee -a \"@LOGFILE@\";')"
@@ -1067,7 +1064,7 @@ _create_config(){
 	ctng_setup_tasks_comment="#setup command";
 	
 	fng_config_tasks=( "('make menuconfig;')"
-						"('TPL_SAVE=\$(\$gui --defaultno --output-fd 1 --ok-label \"Yes\" --cancel-label \"No\" --colors \$bt_ \"\$title_ - \Z0\$pdesc\Zn\" --title \"-[ Save Cross Toolchain Template ]-\" --inputbox \"\\\nWould you like to \ZrSAVE\ZR this toolchain template \Zrnow\ZR?\" 10 55 \"@TEMPLATE@\") && cp \".config\" \"\$TPL_SAVE\";')" );
+						"('TPL_SAVE=\$(\$gui --defaultno --output-fd 1 --ok-label \"\${txt_s3tup_menu_command_label_yes}\" --cancel-label \"\${txt_s3tup_menu_command_label_no}\" --colors \$bt_ \"\$title_ - \Z0\$pdesc\Zn\" --title \"-[ \${txt_s3tup_menu_edit_title} ]-\" --inputbox \"\\\n${txt_s3tup_menu_edit_text}\" 10 55 \"@TEMPLATE@\") && cp \".config\" \"\$TPL_SAVE\";')" );
 	fng_config_tasks_comment="#config command";
 	
 	fng_build_tasks=( "('make olddefconfig | tee -a \"@LOGFILE@\";')"

@@ -550,7 +550,7 @@ _stapi_select(){
 			0)
 				stapivar=;;
 			1)
-				stapivar="STAPI_LIB=$sdir/stapi/liboscam_stapi.a"
+				[ -z "$stapi_lib_custom" ] && stapivar="STAPI_LIB=$sdir/stapi/liboscam_stapi.a" || stapivar="STAPI_LIB=$sdir/stapi/${stapi_lib_custom}"
 				addstapi="USE_STAPI";;
 			2)
 				stapivar="STAPI5_LIB=$sdir/stapi/liboscam_stapi5_UFS916.a"
