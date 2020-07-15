@@ -19,12 +19,14 @@ _gui_build(){
 	CROSS="$tcdir/$_toolchainname/bin/$_compiler"
 
 	[ "$_stagingdir" == "1" ] && export STAGING_DIR="$tcdir/$_toolchainname"
+	[ "$_androidndkdir" == "1" ] && export ANDROID_NDK="$tcdir/$_toolchainname"
 	[ -f "$configdir/compiler_option" ] && co=$(cat "$configdir/compiler_option") || co="-O2"
 
 #make clean
 	cd "$svndir"
 	make distclean > /dev/null 2>&1
 	USESTRING_=''
+	EXTRA_USE=''
 
 #do use_vars
 	for e2 in $USESTRING
@@ -70,6 +72,7 @@ _gui_build(){
 	fi
 
 	USESTRING_=${USE_vars[@]}
+	EXTRA_USE=$extra_use
 
 #todo add switch for verbose
 	_generate_oscam_name "$_toolchainname"
@@ -86,7 +89,7 @@ _gui_build(){
 	(ologo; _nl
 	timer_start
 	make -j"$cpus" \
-		"CONF_DIR=$_oscamconfdir_default" "OSCAM_BIN=$bdir/$oscam_name" "CC_OPTS=$co $cc_opts" "CC_WARN=$cc_warn" "CROSS=$CROSS" $stapivar $USESTRING_ 2>&1 \
+		"CONF_DIR=$_oscamconfdir_default" "OSCAM_BIN=$bdir/$oscam_name" "CC_OPTS=$co $cc_opts $extra_cc" "CC_WARN=$cc_warn" "CROSS=$CROSS" $stapivar $USESTRING_ $EXTRA_USE 2>&1 \
 		|tee "$ldir/$log_name" \
 		|grep --line-buffered -v 'BFD\|^/' \
 		|grep --line-buffered '^CC\|^GEN\|UseFlags\|  CONF_DIR =\|Binary\|LINK\|STRIP\|BUILD\|Addons\|Protocols\|Readers\|CardRdrs\|^/' \
