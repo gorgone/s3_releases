@@ -140,8 +140,8 @@ _cmd_build(){
 	done
 
 #change default oscam CONF_DIR
-        oc_size=${#_oscamconfdir_custom}
-        [ "$oc_size" -gt "4" ] && _oscamconfdir_default="$_oscamconfdir_custom"
+	oc_size=${#_oscamconfdir_custom}
+	[ "$oc_size" -gt "4" ] && _oscamconfdir_default="$_oscamconfdir_custom"
 	CONFDIR="$_oscamconfdir_default"
 
 #if build with profile
