@@ -123,10 +123,11 @@ _cmd_build(){
 	done
 
 #change default oscam CONF_DIR
-if [ ! "$CUSTOM_CONFDIR" == "not_set" ]
+oc_size=${#_oscamconfdir_custom}
+if [ "$oc_size" -gt "4" ]
 then
-	CONFDIR="$CUSTOM_CONFDIR"
-	printf $w_l" |       set : "$r_l"custom CONF_DIR=$CONFDIR"$w_l
+	CONFDIR="$_oscamconfdir_custom"
+	printf "$y_l\n |       set :$r_l custom CONF_DIR=$CONFDIR$w_l"
 else
     CONFDIR="$_oscamconfdir_default"
 fi
