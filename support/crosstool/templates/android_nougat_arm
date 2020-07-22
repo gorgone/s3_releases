@@ -1,0 +1,11 @@
+#toolchain template: Android 7.0 Nougat STBs
+#toolchain template version: 1
+#toolchain template cflags: -march=armv7-a -mtune=cortex-a9 -mfloat-abi=softfp -mfpu=vfpv3-d16 -DANDROID -D__ANDROID_API__=24 -fpic -fno-addrsig -ffunction-sections -fdata-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wno-invalid-command-line-argument -Wno-unused-command-line-argument
+#toolchain template updated: 2020-07-20 15:28:28
+ANDK_API="24" #https://source.android.com/setup/start/build-numbers
+ANDK_ABI="armeabi-v7a"
+ANDK_ARCH="arm"
+ANDK_ARCH_BITNESS="32"
+ANDK_HOST="arm-linux-androideabi"
+ANDK_CLANG="armv7a-linux-androideabi24-clang"
+ANDK_SSL_TARGET="android-arm" #android-arm, android-arm64, android-x86, android-x86
