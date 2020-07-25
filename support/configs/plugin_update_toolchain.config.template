@@ -1,5 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
+S3TUP_CONFIG_VERSION="18";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -106,7 +107,7 @@ SSL_111_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN
 SSL_111_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="@SSL_TARGET@ --api=0.9.8 -D__ANDROID_API__=@API@ no-shared no-afalgeng no-aria no-asan no-asm no-async no-autoalginit no-autoerrinit no-autoload-config no-bf no-blake2 no-camellia no-capieng no-cast no-chacha no-cmac no-cms no-comp no-crypto-mdebug no-crypto-mdebug-backtrace no-ct no-devcryptoeng no-dgram no-dh no-dsa no-dso no-dynamic-engine no-ec no-ec2m no-ecdh no-ecdsa no-ec_nistp_64_gcc_128 no-egd no-engine no-err no-external-tests no-filenames no-fuzz-libfuzzer no-fuzz-afl no-gost no-idea no-makedepend no-md2 no-mdc2 no-md4 no-multiblock no-nextprotoneg no-ocb no-ocsp no-pic no-poly1305 no-posix-io no-psk no-rc2 no-rc4 no-rc5 no-rdrand no-rfc3779 no-rmd160 no-scrypt no-sctp no-seed no-siphash no-sm2 no-sm3 no-sm4 no-srp no-srtp no-sse2 no-ssl-trace no-tests no-threads no-ts no-ubsan no-ui-console no-unit-test no-whirlpool no-weak-ssl-ciphers no-zlib no-zlib-dynamic no-heartbeats no-msan no-dtls no-dtls1 no-dtls1-method no-dtls1_2 no-dtls1_2-method" || FLAGS="linux-generic32 shared";');
 SSL_111_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_111_tasks+=('make -j@CPUS@;');
-SSL_111_tasks+=('make install_sw;');
+SSL_111_tasks+=('make install;');
 SSL_111_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libcrypto.*" -o -name "libssl.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
 
 # OpenSSL 1.1.0l
@@ -122,7 +123,7 @@ SSL_110_tasks+=('export RANLIB=@RANLIB@;');
 SSL_110_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_110_tasks+=('./Configure --prefix=@PREFIX@ linux-generic32 shared;');
 SSL_110_tasks+=('make -j@CPUS@;');
-SSL_110_tasks+=('make install_sw;');
+SSL_110_tasks+=('make install;');
 
 # OpenSSL 1.0.2u
 SSL_102="1";
@@ -138,7 +139,7 @@ SSL_102_tasks+=('export RANLIB=@RANLIB@;');
 SSL_102_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_102_tasks+=('./Configure --prefix=@PREFIX@ linux-generic32 shared;');
 SSL_102_tasks+=('make -j@CPUS@;');
-SSL_102_tasks+=('make install_sw SHLIB_VERSION_NUMBER=1.0.2 SHLIB_MINOR=0.2;');
+SSL_102_tasks+=('make install SHLIB_VERSION_NUMBER=1.0.2 SHLIB_MINOR=0.2;');
 
 # OpenSSL 1.0.0t
 SSL_100="1";
@@ -152,10 +153,10 @@ SSL_100_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 SSL_100_tasks+=('export CC=@CC@;');
 SSL_100_tasks+=('export RANLIB=@RANLIB@;');
 SSL_100_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
-SSL_100_tasks+=('[ $(echo -e "$_tc_info" | grep -ic "musl") -gt 0 ] && echo "Apply the musl libc patch to avoid OpenSSL build errors due to missing termio.h..." && curl --silent "https://raw.githubusercontent.com/beagleboard/buildroot/master/package/openssl/openssl-004-musl-termios.patch" | patch -p1;');
+SSL_100_tasks+=('[[ @CC@ =~ "musl" ]] && echo "Apply the musl libc patch to avoid OpenSSL build errors due to missing termio.h..." && curl --silent "https://raw.githubusercontent.com/beagleboard/buildroot/master/package/openssl/openssl-004-musl-termios.patch" | patch -p1;');
 SSL_100_tasks+=('./Configure --prefix=@PREFIX@ linux-generic32 shared;');
 SSL_100_tasks+=('make -j@CPUS@;');
-SSL_100_tasks+=('make install_sw;');
+SSL_100_tasks+=('make install;');
 
 # OpenSSL 0.9.8zh
 SSL_098="1";
@@ -169,10 +170,10 @@ SSL_098_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 SSL_098_tasks+=('export CC=@CC@;');
 SSL_098_tasks+=('export RANLIB=@RANLIB@;');
 SSL_098_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
-SSL_098_tasks+=('[ $(echo -e "$_tc_info" | grep -ic "musl") -gt 0 ] && echo "Apply the musl libc patch to avoid OpenSSL build errors due to missing termio.h..." && curl --silent "https://raw.githubusercontent.com/beagleboard/buildroot/master/package/openssl/openssl-004-musl-termios.patch" | patch -p1;');
+SSL_098_tasks+=('[[ @CC@ =~ "musl" ]] && echo "Apply the musl libc patch to avoid OpenSSL build errors due to missing termio.h..." && curl --silent "https://raw.githubusercontent.com/beagleboard/buildroot/master/package/openssl/openssl-004-musl-termios.patch" | patch -p1;');
 SSL_098_tasks+=('./Configure --prefix=@PREFIX@ linux-generic32 shared;');
 SSL_098_tasks+=('make -j@CPUS@;');
-SSL_098_tasks+=('make install_sw;');
+SSL_098_tasks+=('make install;');
 
 # libusb 1.0.23
 LIB_USB="1";

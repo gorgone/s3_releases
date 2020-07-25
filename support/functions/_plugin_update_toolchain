@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.20.1";
+	pversion="0.20.2";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -1141,20 +1141,13 @@ _check_crosstool_setup(){
 	fi;
 };
 _check_config(){
-	nok=0;
-	[ -z "${ANDK_REPO_URL+x}" ]			&& conf+="ANDK_REPO_URL\n" && nok=1;
-	[ -z "${LIBS_AUTO_INTEGRATE+x}" ]	&& conf+="LIBS_AUTO_INTEGRATE\n" && nok=1;
-	[ -z "${LIBS_LIST_BETA+x}" ]		&& conf+="LIBS_LIST_BETA\n" && nok=1;
-	[ -z "${FNG_REPO_URL+x}" ]			&& conf+="FNG_REPO_URL\n" && nok=1;
-	[ -z "${CTNG_CONFIG_tasks+x}" ]		&& conf+="CTNG_CONFIG_tasks\n" && nok=1;
-	[ -z "${CTNG_BUILD_AS_ROOT+x}" ]	&& conf+="CTNG_BUILD_AS_ROOT\n" && nok=1;
-	[ -z "${LIBS+x}" ]					&& conf+="LIBS\n" && nok=1;
-	
-	if [ $nok -eq 1 ];then 
+	tpl_version="$(grep -i '^S3TUP_CONFIG_VERSION=' "$configtemplate" | awk -F'"' '{print $2}' | xargs)";
+	[ -z "$S3TUP_CONFIG_VERSION" ] && S3TUP_CONFIG_VERSION=0;
+	if [ $tpl_version -gt $S3TUP_CONFIG_VERSION ];then
 		clear;
 		echo -e "${r_l}\nCHECK -> ${txt_s3tup_msg_check_config_info1}\n${y_l}${conf}\n${r_l}${txt_s3tup_msg_check_config_info2}\n${y_l}./s3 tcupdate -r\n${re_}";
 		_paktc_timer 20;
-		return $nok;
+		return 1;
 	fi;
 };	
 _change_config(){
