@@ -3,12 +3,13 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.20.0";
+	pversion="0.20.1";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
 	configtemplate="${configname}.template";
 	disable_syscheck="0";
+	disable_template_versioning="0";
 	ctdir="$sdir/crosstool";
 	cttpldir="$ctdir/templates";
 	ctngsrcdir="$ctdir/crosstool-ng";
@@ -613,7 +614,8 @@ _tpl_editor(){
 	
 	props=$(_get_template_properties "$cttpldir/$tpl");
 	desc=$(echo "$props" | awk -F'(' '{print $1}' | xargs);
-	version=$(echo "$props" | awk -F'^' '{print $2}' | xargs);[ -z "$version" ] && version=0; ((version+=1));
+	version=$(echo "$props" | awk -F'^' '{print $2}' | xargs);[ -z "$version" ] && version=0;
+	[ ! "$disable_template_versioning" -eq 1 ] &&  ((version+=1));
 	cflags=$(echo "$props" | awk -F'^' '{print $3}' | xargs);
 	copyof=$(echo "$props" | awk -F'^' '{print $6}' | xargs);
 
