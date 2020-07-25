@@ -182,7 +182,8 @@ fi
 	"OSCAM_BIN=$bdir/$oscam_name" \
 	"CC_OPTS=$co $cc_opts $extra_cc" \
 	"CC_WARN=$cc_warn" \
-	"CROSS=$CROSS" $STAPI_LIB $USESTRING $EXTRA_USE 2>&1 \
+	$EXTRA_USE \
+	"CROSS=$CROSS" $STAPI_LIB $USESTRING 2>&1 \
 	|tee -a "$ldir/$log_name" \
 	|grep --line-buffered -v 'BFD\|^/' \
 	|grep --line-buffered '^CC\|^GEN\|UseFlags\|  CONF_DIR =\|Binary\|LINK\|STRIP\|BUILD\|Addons\|Protocols\|Readers\|CardRdrs\|^/' \
