@@ -126,12 +126,19 @@ _cmd_build(){
 if [ ! "$CUSTOM_CONFDIR" == "not_set" ]
 then
 	CONFDIR="$CUSTOM_CONFDIR"
-	printf "$y_l\n |       set :$r_l custom CONF_DIR=$CONFDIR$w_l"
+	cdtag="$r_lcustom CONF_DIR=$CONFDIR (via commandline)"
 else
 	oc_size=${#_oscamconfdir_custom}
-	[ "$oc_size" -gt "4" ] && CONFDIR="$_oscamconfdir_custom" || CONFDIR="$_oscamconfdir_default"
-	printf "$y_l\n |       set :$r_l CONF_DIR=$CONFDIR$w_l"
+	if [ "$oc_size" -gt "4" ]
+	then
+		CONFDIR="$_oscamconfdir_custom"
+		cdtag="$r_lcustom CONF_DIR=$CONFDIR (via toolchain.cfg)"
+	else
+		CONFDIR="$_oscamconfdir_default"
+		cdtag="CONF_DIR=$CONFDIR"
+	fi
 fi
+printf "$y_l\n |       set : ${cdtag}$w_l"
 
 #patching
 	if [ "$_do_patch" == "1" ]
