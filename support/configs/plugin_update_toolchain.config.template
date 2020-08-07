@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="18";
+S3TUP_CONFIG_VERSION="19";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -36,8 +36,9 @@ CTNG_SETUP_tasks=('git clone --progress "$CTNG_REPO_URL" "@CTNGSOURCE@";'); # se
 #CTNG_SETUP_tasks+=('echo "Patch 1: Add option to build binary toolchain tarball..." && curl --silent https://github.com/crosstool-ng/crosstool-ng/commit/77c44ad9a01293983e95949a1ece4b1f2270ad9c.diff | git apply -v;'); # setup command2
 #CTNG_SETUP_tasks+=('echo "Patch 2: gcc: Remove nested 8.3.0 directory..."           && curl --silent https://github.com/crosstool-ng/crosstool-ng/commit/1b29292f897f28b3ffc55cb7e254fba040b078cf.diff | git apply -v;'); # setup command3
 #CTNG_SETUP_tasks+=('echo "Patch 3: Update to GCC 9.x to latest release 9.3.0..."    && curl https://github.com/crosstool-ng/crosstool-ng/commit/44ca1ca171f63300869ec1f3f8a18707843ad747.diff | git apply -v;'); # setup command3
-#CTNG_SETUP_tasks+=('echo "Patch 4: Add support for GCC 10.1.0..."                   && curl https://github.com/crosstool-ng/crosstool-ng/commit/ac16f40b09f20bfef870cead2c8188bcd4b5aacc.diff | git apply -v;'); # setup command5
-#CTNG_SETUP_tasks+=('echo "Patch 5: Allow glibc 2.12 - 2.20 to work with GCC 10+..." && curl https://github.com/crosstool-ng/crosstool-ng/commit/3a39186a4ba7f549e4297f77ca28d89ae6b615b7.diff | git apply -v;'); # setup command6
+#CTNG_SETUP_tasks+=('echo "Patch 4: Add support for GCC 10.2.0..."                   && curl https://github.com/crosstool-ng/crosstool-ng/commit/9177e805a8ad1342b115d1d4dff7ff6df301672f.diff | git apply -v;'); # setup command5
+#CTNG_SETUP_tasks+=('echo "Patch 5: Add support for binutils 2.35..."                && curl https://github.com/crosstool-ng/crosstool-ng/commit/81a85a721b0d91a43cf6c960e13845dcc0cf31ea.diff | git apply -v;'); # setup command6
+#CTNG_SETUP_tasks+=('echo "Patch 6: Allow glibc 2.12 - 2.20 to work with GCC 10+..." && curl https://github.com/crosstool-ng/crosstool-ng/commit/3a39186a4ba7f549e4297f77ca28d89ae6b615b7.diff | git apply -v;'); # setup command7
 CTNG_SETUP_tasks+=('./bootstrap;'); # setup command7
 CTNG_SETUP_tasks+=('./configure --enable-local;'); # setup command8
 CTNG_SETUP_tasks+=('make;'); # setup command9
@@ -53,7 +54,8 @@ FNG_SETUP_tasks=('git clone --progress "$FNG_REPO_URL" "@FNGSOURCE@";'); # setup
 FNG_SETUP_tasks+=('ln -s "../../downloads" "@FNGSOURCE@/dl";'); # setup command2
 
 # android-NDK toolchain build settings
-ANDK_REPO_URL="https://dl.google.com/android/repository/android-ndk-r21d-linux-x86_64.zip"; # Location to load Android Native Development Kit (NDK) from freetz-ng from
+ANDK_PKG_URL="https://dl.google.com/android/repository/android-ndk-r21d-linux-x86_64.zip"; # Location to load Android Native Development Kit (NDK) from freetz-ng from
+ANDK_PKG_SHA1="bcf4023eb8cb6976a4c7cff0a8a8f145f162bf4d";
 ANDK_CONFIG_tasks=('editor ".config";'); # config command1
 ANDK_CONFIG_tasks+=('TPL_SAVE=$($gui --defaultno --output-fd 1 --ok-label "${txt_s3tup_menu_command_label_yes}" --cancel-label "${txt_s3tup_menu_command_label_no}" --colors $bt_ "$title_ - \Z0$pdesc\Zn" --title "-[ ${txt_s3tup_menu_edit_title} ]-" --inputbox "\n${txt_s3tup_menu_edit_text}" 10 55 "@TEMPLATE@") && cp ".config" "$TPL_SAVE";'); # config command2
 ANDK_BUILD_tasks=('TOOLCHAIN="@TOOLCHAIN@";'); # build command1
@@ -63,13 +65,14 @@ ANDK_BUILD_tasks+=('cleanups=${cleanups//$ANDK_ARCH/} && cleanups=${cleanups//$A
 ANDK_BUILD_tasks+=('printf "Cleaning up extracted toolchain to save disk space..." | tee -a "@LOGFILE@" && for c in $cleanups; do find "@TOOLCHAIN@" -name "*$c*" ! -name "*libc++*" -exec rm -rf {} \; 2>/dev/null >>"@LOGFILE@" 2>&1; done;'); # build command5
 ANDK_BUILD_tasks+=('rm -rf "$TOOLCHAIN/include" "$TOOLCHAIN/libexec" | tee -a "@LOGFILE@";'); # build command6
 ANDK_BUILD_tasks+=('printf "Creating symlinks "$TOOLCHAIN/bin/${ANDK_HOST}-gcc", "$TOOLCHAIN/bin/${ANDK_HOST}-clang" to wrap "$TOOLCHAIN/bin/${ANDK_CLANG}"..." | tee -a "@LOGFILE@" && ln -rsf "$TOOLCHAIN/bin/${ANDK_CLANG}" "$TOOLCHAIN/bin/${ANDK_HOST}-gcc" && ln -rsf "$TOOLCHAIN/bin/${ANDK_CLANG}" "$TOOLCHAIN/bin/${ANDK_HOST}-clang" && chmod 775 "$TOOLCHAIN/bin/${ANDK_HOST}*" | tee -a "@LOGFILE@";'); # build command7
-ANDK_SETUP_tasks=('curl --silent "$ANDK_REPO_URL" | busybox unzip -;'); # setup command1
-ANDK_SETUP_tasks+=('mv --force "$(basename "$ANDK_REPO_URL" | cut -d "-" -f 1-3)" "@ANDKSOURCE@";'); # setup command2
+ANDK_SETUP_tasks=('pushd "$dldir" >/dev/null && [ ! "$(sha1sum "$(basename "$ANDK_PKG_URL")" 2>/dev/null | cut -d " " -f 1)" == "$ANDK_PKG_SHA1" ] && curl "$ANDK_PKG_URL" -o "$(basename "$ANDK_PKG_URL")";'); # setup command1
+ANDK_SETUP_tasks+=('unzip -o -d "$ctdir" "$(basename "$ANDK_PKG_URL")" && popd >/dev/null;'); # setup command1
+ANDK_SETUP_tasks+=('mv --force "$(basename "$ANDK_PKG_URL" | cut -d "-" -f 1-3)" "@ANDKSOURCE@";'); # setup command2
 ANDK_SETUP_tasks+=('chmod -R 755 "@ANDKSOURCE@";'); # setup command3
 
 # Library build settings
 LIBS=(SSL_300 SSL_111 SSL_110 SSL_102 SSL_100 SSL_098 LIB_USB LIB_USB0 LIB_PCSC LIB_CCID LIB_ZLIB); # List of ordered libraries. Only libraries in this list are available
-LIBS_LIST_BETA="1"; # In(Ex)clude libraries defined as beta
+LIBS_LIST_BETA="0"; # In(Ex)clude libraries defined as beta
 LIBS_AUTO_INTEGRATE="1"; # Automatically reintegrate libraries when rebuilding toolchains
 
 # OpenSSL 3.0.0-alpha5
