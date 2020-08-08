@@ -153,6 +153,7 @@ txt_s3tup_msg_cross_toolchain_library_integration="Die folgenden ${txt_lib}en we
 txt_s3tup_msg_cross_migrations_renamed="wurde umbenannt in"
 txt_s3tup_msg_cross_migrations_remove="Lösche ${txt_tc}"
 txt_s3tup_msg_cross_migrations_outdated="Die folgenden Cross ${txt_tc}s sind aufgrund der Umbenennung von Cross ${txt_tc} ${txt_tpl}n veraltet:"
+txt_s3tup_msg_cross_migrations_outdated2="Die folgenden ${txt_tc} ${txt_conf}en sind aufgrund der Korrektur einiger Parameter veraltet und werden automatisch korrigiert:"
 txt_s3tup_msg_cross_migrations_hint="Die ${y_l}alten Cross ${txt_tc}s${re_} von oben können weiterhin verwendet verwenden. Es ist jedoch besser, aktuelle Cross ${txt_tc}s basierend auf den ${p_l}neuen Cross ${txt_tc} ${txt_tpl}n${re_} zu erstellen, um zukünftige Aktualisierungen nachverfolgen zu können.\nDie ${y_l}alten Cross ${txt_tc}s${re_} können wie folgt manuell entfernt werden:"
 txt_s3tup_msg_build_library_log="Aktualisierung ${txt_lib} Log"
 txt_s3tup_msg_build_library_commandlist="Befehlszeilen zum Erstellen von"

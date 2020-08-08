@@ -144,6 +144,7 @@ txt_s3tup_msg_cross_toolchain_library_integration="The following libraries will 
 txt_s3tup_msg_cross_migrations_renamed="was renamed to"
 txt_s3tup_msg_cross_migrations_remove="Remove ${txt_tc}"
 txt_s3tup_msg_cross_migrations_outdated="The following cross ${txt_tc,,}s are out of date due to the renaming of cross ${txt_tc,,} ${txt_tpl,,}s:"
+txt_s3tup_msg_cross_migrations_outdated2="The following ${txt_tc,,} ${txt_conf}s are out of date due to the correction of some parameters and are corrected automatically:"
 txt_s3tup_msg_cross_migrations_hint="You can still use the ${y_l}old cross ${txt_tc,,}s${re_} from above, but it's better to create new ones based on the ${p_l}new cross ${txt_tc,,} ${txt_tpl,,}s${re_} to get future ${txt_tpl,,} updates.\nThe ${y_l}old cross ${txt_tc,,}s${re_} can be removed manually as follows:"
 txt_s3tup_msg_build_library_log="updating ${txt_lib,,} log"
 txt_s3tup_msg_build_library_commandlist="build command list for"

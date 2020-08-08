@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.20.2";
+	pversion="0.20.3";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -112,7 +112,7 @@ tcupdate(){
 					for i in "${INST_TCLIST[@]}";do
 						if [ ! "$i" == "native" ];then
 							source "$tccfgdir/$i" && tcdate="";
-							tcdate=" $(_get_toolchain_date "$i")";
+							tcdate=" $(_get_toolchain_date "$i")" && [ "${#tcdate}" -eq 1 ] && tcdate="";
 							MENU_OPTIONS+=("$_toolchainname" "$_description\Z2$tcdate\Zn" "${txt_s3tup_menu_toolchain_folder}$tcdir/$i | ${txt_s3tup_menu_toolchain_config}$tccfgdir/$i");
 							counter;
 						fi;
@@ -494,13 +494,13 @@ _create_tc(){
 								fi;
 								
 								#compress toolchain
-								_compress "$dldir/Toolchain-$tpl.tar.xz" "$tcdir/$tpl" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_compress_title} $tpl ${txt_to} Toolchain-$tpl.tar.xz ]- " "$pb_" "$_lines" "$_cols";
+								_compress "$dldir/$(decode "$_t1e")$tpl.tar.xz" "$tcdir/$tpl" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_compress_title} $tpl ${txt_to} $(decode "$_t1e")$tpl.tar.xz ]- " "$pb_" "$_lines" "$_cols";
 								
 								#create toolchain.cfg
 								props=$(_get_template_properties "$cttpldir/$tpl");
 								desc=$(echo "$props" | awk -F'^' '{print $1}' | xargs);
 								cflags=$(echo "$props" | awk -F'^' '{print $3}' | xargs);
-								_create_toolchaincfg "$tcdir/$tpl" "$tpl" "$target" "$sysroot" "" "$desc" "" "$dldir/Toolchain-$tpl.tar.xz" "yes" "$tpl_type_name" "$use" "$cflags" "$tpl_type";
+								_create_toolchaincfg "$tcdir/$tpl" "$tpl" "$target" "$sysroot" "" "$desc" "" "$dldir/$(decode "$_t1e")$tpl.tar.xz" "yes" "$tpl_type_name" "$use" "$cflags" "$tpl_type";
 							else
 								_paktc_timer 10;
 							fi;
@@ -560,13 +560,37 @@ _migrations(){
 			unset tpl;
 		fi;
 	fi;
+	
+	#remove 'Toolchain-' from encoded _toolchainfilename
+	unset mig_list;
+	for t in "${INST_TCLIST[@]}";do
+		tc_type="$(_get_toolchain_date "$t" | awk -F'.' '{print $1}' | xargs)";
+		if [ ${#tc_type} -gt 0 ]; then
+			tf=$(grep '^_toolchainfilename=' "$tccfgdir/$t");
+			tfn=$(echo "$tf" | awk -F'"' '{print $2}' | xargs);
+			if [[ $(decode "$tfn") =~ ^$(decode "$_t1e").* ]];then
+				new_tfn="$(decode "$tfn")" && new_tfn="$(printf ${new_tfn/$(decode "$_t1e")/} | base64)";
+				sed -i "s|$tfn|$new_tfn|g" "$tccfgdir/$t";
+				new_tf=$(grep '^_toolchainfilename=' "$tccfgdir/$t");
+				mig_list+="\n${txt_update} ${p_l}${t}${re_} ${txt_tc} ${txt_conf} ${p_l}$tccfgdir/$t${re_}\n${y_l}   - ${tf}${re_}\n${g_l}   + ${new_tf}\n${re_}";
+			fi;
+		fi;
+	done;
+	
+	if [ -n "$mig_list" ];then
+		echo -e "${y_l}MIGRATION -> ${txt_s3tup_msg_cross_migrations_outdated2}${re_}"
+		echo -e "$mig_list";
+		_paktc_timer 5
+	fi;
+	unset t;
+	
 };
 _backup(){
 	_sz;					# Prepare DIALOG settings
 	src=$1;
 	dest=$2;
 	newtccfgfile="$tccfgdir/$dest";
-	xzfile="$dldir/Toolchain-$dest.tar.xz";
+	xzfile="$dldir/$(decode "$_t1e")$dest.tar.xz";
 	
 	(
 	#compress toolchain
@@ -719,7 +743,7 @@ _andk_setup(){
 	bcl=$(printf '%s\n' "${ANDK_SETUP_tasks[@]}");
 	sp=$(printf '%*s' 80 | tr ' ' '=')
 	echo -e "$pdesc - ${txt_s3tup_msg_andk_setup_log} - $(date +"%F %T")";
-	echo -e "$sp\n${txt_s3tup_msg_andk_setup_commandlist} Android-NDK:\n$sp\ncd "$andksrcdir"\n$(_replace_tokens "$bcl")\n$sp";
+	echo -e "$sp\n${txt_s3tup_msg_andk_setup_commandlist} Android-NDK:\n$sp\ncd "$ctdir"\n$(_replace_tokens "$bcl")\n$sp";
 	sleep 2;
 
 	if [ $1 -eq 1 ];then
@@ -923,7 +947,7 @@ _get_toolchain_libs(){
 	[ -n "$libs" ] && exit 0 || exit 1;
 };
 _get_toolchain_date(){
-	local tc_date="built-in";
+	local tc_date;
 	[ -f "$tcdir/$1/build.log.bz2" ] && tc_date="ct-ng.$(date -r "$tcdir/$1/build.log.bz2" "+%F %T")";
 	[ -f "$tcdir/$1/freetz-ng.log.bz2" ] && tc_date="freetz-ng.$(date -r "$tcdir/$1/freetz-ng.log.bz2" "+%F %T")";
 	[ -f "$tcdir/$1/android-ndk.log.bz2" ] && tc_date="android-ndk.$(date -r "$tcdir/$1/android-ndk.log.bz2" "+%F %T")";
@@ -1145,7 +1169,7 @@ _check_config(){
 	[ -z "$S3TUP_CONFIG_VERSION" ] && S3TUP_CONFIG_VERSION=0;
 	if [ $tpl_version -gt $S3TUP_CONFIG_VERSION ];then
 		clear;
-		echo -e "${r_l}\nCHECK -> ${txt_s3tup_msg_check_config_info1}\n${y_l}${conf}\n${r_l}${txt_s3tup_msg_check_config_info2}\n${y_l}./s3 tcupdate -r\n${re_}";
+		echo -e "${r_l}\nCHECK -> ${txt_s3tup_msg_check_config_info1}\n${y_l}${conf}\n${r_l}${txt_s3tup_msg_check_config_info2}\n${y_l}./s3 tcupdate --reset\n${re_}";
 		_paktc_timer 20;
 		return 1;
 	fi;
@@ -1215,6 +1239,7 @@ _androidndkdir="1";
 stapi_lib_custom="libwi.a";
 stapi_allowed="1";' || andk_vars='_oscamconfdir_custom="";';
 
+	tfn="$(basename "${8/$(decode "$_t1e")/}" | base64)"; #remove 'Toolchain-' from filename before encoding
 	[ "${#5}" -gt 0 ] && lsd="$5" || lsd="/usr/lib";
 	[ "${#7}" -gt 0 ] && info="$7" || info="$(echo -e "\\\n
 !!! ${10} Toolchain !!!\\\n
@@ -1235,8 +1260,8 @@ _self_build="$([ ! "$9" == "yes" ] && echo "no" || echo "$9")";
 _compiler="$3-";
 _sysroot="$sysroot";
 _libsearchdir="$lsd";
-_toolchainfilename="$(echo -en "$(basename "${8%..*}")" | base64)";
-_md5sum="$(cd "$dldir" && md5sum $(basename "${8%..*}"))";
+_toolchainfilename="$tfn";
+_md5sum="$(cd "$dldir" && md5sum $(basename "$8"))";
 _tc_info="$info";
 _tc_infolines="5";
 EOF

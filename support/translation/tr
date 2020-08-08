@@ -150,6 +150,7 @@ txt_s3tup_msg_cross_toolchain_library_integration="Devamındaki ${txt_lib}en olu
 txt_s3tup_msg_cross_migrations_renamed="dosya adi degistirildi yeni dosya adi"
 txt_s3tup_msg_cross_migrations_remove="sil ${txt_tc}"
 txt_s3tup_msg_cross_migrations_outdated="Devamındaki Cross ${txt_tc}s Cross adını değiştiriyor ${txt_tc} ${txt_tpl}n eski:"
+txt_s3tup_msg_cross_migrations_outdated2="The following ${txt_tc,,} ${txt_conf}s are out of date due to the correction of some parameters and are corrected automatically:"
 txt_s3tup_msg_cross_migrations_hint="bu ${y_l}eski Cross ${txt_tc}s${re_} yukardakini daha kullanabilirsiniz. Ancak, daha iyi, bugünkü Cross ${txt_tc}s buna bagli oglan ${p_l}yeni Cross ${txt_tc} ${txt_tpl}n${re_} gelecekteki güncellemeler oluşturmak için.\nbu ${y_l}eski Cross ${txt_tc}s${re_} manuel olarak aşağıdaki gibi çıkarılabilir:"
 txt_s3tup_msg_build_library_log="Güncelleştirme ${txt_lib} Log"
 txt_s3tup_msg_build_library_commandlist="komut oluşturmak itibaren"
