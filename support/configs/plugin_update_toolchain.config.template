@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="20";
+S3TUP_CONFIG_VERSION="21";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -88,10 +88,13 @@ SSL_300_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 SSL_300_tasks+=('[ "@TYPE@" == "android-ndk" ] && export CC="gcc" || export CC=@CC@;');
 SSL_300_tasks+=('[ "@TYPE@" == "android-ndk" ] && export RANLIB=ranlib || export RANLIB=@RANLIB@;');
 SSL_300_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
-SSL_300_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="@SSL_TARGET@ --api=0.9.8 -D__ANDROID_API__=@API@ no-shared no-afalgeng no-aria no-asan no-asm no-async no-autoalginit no-autoerrinit no-autoload-config no-bf no-blake2 no-camellia no-capieng no-cast no-chacha no-cmac no-cms no-comp no-crypto-mdebug no-crypto-mdebug-backtrace no-ct no-devcryptoeng no-dgram no-dh no-dsa no-dso no-dynamic-engine no-ec no-ec2m no-ecdh no-ecdsa no-ec_nistp_64_gcc_128 no-egd no-engine no-err no-external-tests no-filenames no-fuzz-libfuzzer no-fuzz-afl no-gost no-idea no-makedepend no-md2 no-mdc2 no-md4 no-multiblock no-nextprotoneg no-ocb no-ocsp no-pic no-poly1305 no-posix-io no-psk no-rc2 no-rc4 no-rc5 no-rdrand no-rfc3779 no-rmd160 no-scrypt no-sctp no-seed no-siphash no-sm2 no-sm3 no-sm4 no-srp no-srtp no-sse2 no-ssl-trace no-tests no-threads no-ts no-ubsan no-ui-console no-unit-test no-whirlpool no-weak-ssl-ciphers no-zlib no-zlib-dynamic no-heartbeats no-msan no-dtls no-dtls1 no-dtls1-method no-dtls1_2 no-dtls1_2-method" || FLAGS="linux-generic32 shared";');
+SSL_300_tasks+=('FLAGS="linux-generic32 shared";');
+SSL_300_tasks+=('[[ "@CC@" =~ "uclibc"|"musl" ]] && FLAGS+=" -DOPENSSL_NO_ASYNC";');
+SSL_300_tasks+=('[[ "@CC@" =~ "atom" ]] && FLAGS+=" no-threads";');
+SSL_300_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="@SSL_TARGET@ --api=0.9.8 -D__ANDROID_API__=@API@ no-shared no-afalgeng no-aria no-asan no-asm no-async no-autoalginit no-autoerrinit no-autoload-config no-bf no-blake2 no-camellia no-capieng no-cast no-chacha no-cmac no-cms no-comp no-crypto-mdebug no-crypto-mdebug-backtrace no-ct no-devcryptoeng no-dgram no-dh no-dsa no-dso no-dynamic-engine no-ec no-ec2m no-ecdh no-ecdsa no-ec_nistp_64_gcc_128 no-egd no-engine no-err no-external-tests no-filenames no-fuzz-libfuzzer no-fuzz-afl no-gost no-idea no-makedepend no-md2 no-mdc2 no-md4 no-multiblock no-nextprotoneg no-ocb no-ocsp no-pic no-poly1305 no-posix-io no-psk no-rc2 no-rc4 no-rc5 no-rdrand no-rfc3779 no-rmd160 no-scrypt no-sctp no-seed no-siphash no-sm2 no-sm3 no-sm4 no-srp no-srtp no-sse2 no-ssl-trace no-tests no-threads no-ts no-ubsan no-ui-console no-unit-test no-whirlpool no-weak-ssl-ciphers no-zlib no-zlib-dynamic no-heartbeats no-msan no-dtls no-dtls1 no-dtls1-method no-dtls1_2 no-dtls1_2-method";');
 SSL_300_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_300_tasks+=('make -j@CPUS@;');
-SSL_300_tasks+=('make install;');
+SSL_300_tasks+=('make install_sw;');
 SSL_300_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libcrypto.*" -o -name "libssl.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
 
 # OpenSSL 1.1.1
@@ -107,10 +110,13 @@ SSL_111_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 SSL_111_tasks+=('[ "@TYPE@" == "android-ndk" ] && export CC="gcc" || export CC=@CC@;');
 SSL_111_tasks+=('[ "@TYPE@" == "android-ndk" ] && export RANLIB="ranlib" || export RANLIB=@RANLIB@;');
 SSL_111_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
-SSL_111_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="@SSL_TARGET@ --api=0.9.8 -D__ANDROID_API__=@API@ no-shared no-afalgeng no-aria no-asan no-asm no-async no-autoalginit no-autoerrinit no-autoload-config no-bf no-blake2 no-camellia no-capieng no-cast no-chacha no-cmac no-cms no-comp no-crypto-mdebug no-crypto-mdebug-backtrace no-ct no-devcryptoeng no-dgram no-dh no-dsa no-dso no-dynamic-engine no-ec no-ec2m no-ecdh no-ecdsa no-ec_nistp_64_gcc_128 no-egd no-engine no-err no-external-tests no-filenames no-fuzz-libfuzzer no-fuzz-afl no-gost no-idea no-makedepend no-md2 no-mdc2 no-md4 no-multiblock no-nextprotoneg no-ocb no-ocsp no-pic no-poly1305 no-posix-io no-psk no-rc2 no-rc4 no-rc5 no-rdrand no-rfc3779 no-rmd160 no-scrypt no-sctp no-seed no-siphash no-sm2 no-sm3 no-sm4 no-srp no-srtp no-sse2 no-ssl-trace no-tests no-threads no-ts no-ubsan no-ui-console no-unit-test no-whirlpool no-weak-ssl-ciphers no-zlib no-zlib-dynamic no-heartbeats no-msan no-dtls no-dtls1 no-dtls1-method no-dtls1_2 no-dtls1_2-method" || FLAGS="linux-generic32 shared";');
+SSL_111_tasks+=('FLAGS="linux-generic32 shared";');
+SSL_111_tasks+=('[[ "@CC@" =~ "uclibc"|"musl" ]] && FLAGS+=" -DOPENSSL_NO_ASYNC";');
+SSL_111_tasks+=('[[ "@CC@" =~ "atom" ]] && FLAGS+=" no-threads";');
+SSL_111_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="@SSL_TARGET@ --api=0.9.8 -D__ANDROID_API__=@API@ no-shared no-afalgeng no-aria no-asan no-asm no-async no-autoalginit no-autoerrinit no-autoload-config no-bf no-blake2 no-camellia no-capieng no-cast no-chacha no-cmac no-cms no-comp no-crypto-mdebug no-crypto-mdebug-backtrace no-ct no-devcryptoeng no-dgram no-dh no-dsa no-dso no-dynamic-engine no-ec no-ec2m no-ecdh no-ecdsa no-ec_nistp_64_gcc_128 no-egd no-engine no-err no-external-tests no-filenames no-fuzz-libfuzzer no-fuzz-afl no-gost no-idea no-makedepend no-md2 no-mdc2 no-md4 no-multiblock no-nextprotoneg no-ocb no-ocsp no-pic no-poly1305 no-posix-io no-psk no-rc2 no-rc4 no-rc5 no-rdrand no-rfc3779 no-rmd160 no-scrypt no-sctp no-seed no-siphash no-sm2 no-sm3 no-sm4 no-srp no-srtp no-sse2 no-ssl-trace no-tests no-threads no-ts no-ubsan no-ui-console no-unit-test no-whirlpool no-weak-ssl-ciphers no-zlib no-zlib-dynamic no-heartbeats no-msan no-dtls no-dtls1 no-dtls1-method no-dtls1_2 no-dtls1_2-method";');
 SSL_111_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_111_tasks+=('make -j@CPUS@;');
-SSL_111_tasks+=('make install;');
+SSL_111_tasks+=('make install_sw;');
 SSL_111_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libcrypto.*" -o -name "libssl.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
 
 # OpenSSL 1.1.0
@@ -120,13 +126,16 @@ SSL_110_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/t
 SSL_110_check="openssl.pc $(printf "$SSL_110_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
 SSL_110_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_0[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
 SSL_110_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
+SSL_110_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_110_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 SSL_110_tasks+=('export CC=@CC@;');
 SSL_110_tasks+=('export RANLIB=@RANLIB@;');
-SSL_110_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
-SSL_110_tasks+=('./Configure --prefix=@PREFIX@ linux-generic32 shared;');
+SSL_110_tasks+=('FLAGS="linux-generic32 shared";');
+SSL_110_tasks+=('[[ "@CC@" =~ "uclibc"|"musl" ]] && FLAGS+=" -DOPENSSL_NO_ASYNC";');
+SSL_110_tasks+=('[[ "@CC@" =~ "atom" ]] && FLAGS+=" no-threads";');
+SSL_110_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_110_tasks+=('make -j@CPUS@;');
-SSL_110_tasks+=('make install;');
+SSL_110_tasks+=('make install_sw;');
 
 # OpenSSL 1.0.2
 SSL_102="1";
@@ -136,11 +145,12 @@ SSL_102_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/t
 SSL_102_check="openssl.pc $(printf "$SSL_102_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
 SSL_102_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
 SSL_102_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
+SSL_102_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_102_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 SSL_102_tasks+=('export CC=@CC@;');
 SSL_102_tasks+=('export RANLIB=@RANLIB@;');
-SSL_102_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
-SSL_102_tasks+=('./Configure --prefix=@PREFIX@ linux-generic32 shared;');
+SSL_102_tasks+=('FLAGS="linux-generic32 shared";');
+SSL_102_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_102_tasks+=('make -j@CPUS@;');
 SSL_102_tasks+=('make install SHLIB_VERSION_NUMBER=1.0.2 SHLIB_MINOR=0.2;');
 
@@ -152,12 +162,13 @@ SSL_100_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/t
 SSL_100_check="openssl.pc $(printf "$SSL_100_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
 SSL_100_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_0[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
 SSL_100_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
+SSL_100_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_100_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 SSL_100_tasks+=('export CC=@CC@;');
 SSL_100_tasks+=('export RANLIB=@RANLIB@;');
-SSL_100_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
-SSL_100_tasks+=('[[ @CC@ =~ "musl" ]] && echo "Apply the musl libc patch to avoid OpenSSL build errors due to missing termio.h..." && curl --silent "https://raw.githubusercontent.com/beagleboard/buildroot/master/package/openssl/openssl-004-musl-termios.patch" | patch -p1;');
-SSL_100_tasks+=('./Configure --prefix=@PREFIX@ linux-generic32 shared;');
+SSL_100_tasks+=('FLAGS="linux-generic32 shared";');
+SSL_100_tasks+=('[[ "@CC@" =~ "musl" ]] && echo "Apply the musl libc patch to avoid OpenSSL build errors due to missing termio.h..." && curl --silent "https://raw.githubusercontent.com/beagleboard/buildroot/master/package/openssl/openssl-004-musl-termios.patch" | patch -p1;');
+SSL_100_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_100_tasks+=('make -j@CPUS@;');
 SSL_100_tasks+=('make install;');
 
@@ -169,12 +180,13 @@ SSL_098_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/t
 SSL_098_check="openssl.pc $(printf "$SSL_098_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
 SSL_098_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_0_9_8[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
 SSL_098_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
+SSL_098_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_098_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 SSL_098_tasks+=('export CC=@CC@;');
 SSL_098_tasks+=('export RANLIB=@RANLIB@;');
-SSL_098_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
-SSL_098_tasks+=('[[ @CC@ =~ "musl" ]] && echo "Apply the musl libc patch to avoid OpenSSL build errors due to missing termio.h..." && curl --silent "https://raw.githubusercontent.com/beagleboard/buildroot/master/package/openssl/openssl-004-musl-termios.patch" | patch -p1;');
-SSL_098_tasks+=('./Configure --prefix=@PREFIX@ linux-generic32 shared;');
+SSL_098_tasks+=('FLAGS="linux-generic32 shared";');
+SSL_098_tasks+=('[[ "@CC@" =~ "musl" ]] && echo "Apply the musl libc patch to avoid OpenSSL build errors due to missing termio.h..." && curl --silent "https://raw.githubusercontent.com/beagleboard/buildroot/master/package/openssl/openssl-004-musl-termios.patch" | patch -p1;');
+SSL_098_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_098_tasks+=('make -j@CPUS@;');
 SSL_098_tasks+=('make install;');
 
@@ -206,9 +218,9 @@ LIB_USB0_check="libusb.pc $(printf "$LIB_USB0_version" | grep -Eo '[0-9]+\.[0-9]
 LIB_USB0_url="http://downloads.sourceforge.net/libusb/libusb-0.1.12.tar.gz";
 LIB_USB0_tasks=('echo "Patch 1: Handle compile failures with GCC 7+..." && curl --silent https://sources.debian.org/data/main/libu/libusb/2:0.1.12-32/debian/patches/12_ENAMETOOLONG.diff | git apply -v;');
 LIB_USB0_tasks+=('export TOOLCHAIN=@TOOLCHAIN@;');
+LIB_USB0_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_USB0_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 LIB_USB0_tasks+=('export CC=@CC@;');
-LIB_USB0_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_USB0_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ --disable-udev;');
 LIB_USB0_tasks+=('make -j@CPUS@;');
 LIB_USB0_tasks+=('make install;');
@@ -265,10 +277,10 @@ LIB_ZLIB_version="$(curl --silent https://api.github.com/repos/madler/zlib/tags 
 LIB_ZLIB_check="zlib.pc $(printf "$LIB_ZLIB_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
 LIB_ZLIB_url="$(curl --silent "https://api.github.com/repos/madler/zlib/tags" | jq -r '.[0].tarball_url')";
 LIB_ZLIB_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
+LIB_ZLIB_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_ZLIB_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 LIB_ZLIB_tasks+=('export CC=@CC@;');
 LIB_ZLIB_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
-LIB_ZLIB_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_ZLIB_tasks+=('./configure --prefix=@PREFIX@;');
 LIB_ZLIB_tasks+=('make -j@CPUS@;');
 LIB_ZLIB_tasks+=('make install;');
