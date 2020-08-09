@@ -144,7 +144,6 @@ txt_s3tup_msg_reset_config5="Die Datei kann an die eigenen Bedürfnisse angepass
 txt_s3tup_msg_buildasroot_error1="Der Cross ${txt_tc} Erstellungsprozess wurde abgebrochen, da er nicht als Root ausgeführt werden darf!"
 txt_s3tup_msg_buildasroot_error2="Wenn Sie sich der Gefahren bewusst sind, die beim Erstellen von ${txt_tc}s als Root auftreten können\n         und wissen was Sie tun, dann können Sie dies mit dem folgenden Befehl erzwingen:"
 txt_s3tup_msg_toolchain_exists="${txt_tc} bereits vorhanden!"
-txt_s3tup_msg_choose_ssl="Bitte eine einzelne SSL-Version auswählen!"
 txt_s3tup_msg_library_not_found="${txt_lib} in der Konfigurationsdatei nicht gefunden!"
 txt_s3tup_msg_cross_toolchain_log="Erstellen des Cross ${txt_tc} Log"
 txt_s3tup_msg_cross_toolchain_commandlist="Befehlszeilen für die Cross ${txt_tc} Erstellung"
@@ -197,6 +196,7 @@ txt_s3tup_menu_library_title="${txt_lib} Aktualisierung Menü"
 txt_s3tup_menu_library_text1="Wählen Sie alle zu aktualisierenden ${txt_lib}en im SYSROOT-Verzeichnis der ${txt_tc} aus:"
 txt_s3tup_menu_library_text2="         ${txt_lib} Version NEU                   AKTUELL" #56 chars
 txt_s3tup_menu_library_notfound="Keine ${txt_lib}en gefunden"
+txt_s3tup_menu_library_wrong_selection="Integrieren Sie nicht dieselbe Bibliothek mit verschiedene Versionen!"
 
 txt_s3tup_menu_template_title="Cross ${txt_tc} ${txt_tpl}n Menü"
 txt_s3tup_menu_template_text1="Wählen Sie eine der"

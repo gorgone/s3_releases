@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.20.3";
+	pversion="0.20.4";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -136,6 +136,7 @@ tcupdate(){
 					_check_toolchain $tc && _backup "$tc" "$tc" >/dev/null || [ -z "$CMDTC" ] && sleep 2 && tcupdate "$CMDTC" "$OPTION1" "$OPTION2" "$FLAG" || _nl && exit;
 					sleep 2;;
 				3) #Exit
+					unset MENU_OPTIONS;
 					[ "$FLAG" == "1" ] && return || bye;;
 			esac;
 		done;
@@ -240,7 +241,15 @@ _integrate_libs(){
 		opts=$(echo "$opts" | tr ' ' '\n' | sort -hr);
 		
 		#SSL select check
-		[ $(echo $opts | tr ' ' '\n' | grep -c "SSL_") -gt 1 ] && echo -e "${r_l}\n\n${txt_s3tup_msg_choose_ssl}${re_}" && sleep 3 && [ "${#OPTION1}" -gt 0 ] && menu_close=1 && continue;
+		if [ $(echo -e "$opts" | grep -c "SSL")  -gt 1 \
+		  -o $(echo -e "$opts" | grep -c "USB")  -gt 1 \
+		  -o $(echo -e "$opts" | grep -c "PCSC") -gt 1 \
+		  -o $(echo -e "$opts" | grep -c "CCID") -gt 1 \
+		  -o $(echo -e "$opts" | grep -c "ZLIB") -gt 1 ];then
+			echo -e "${r_l}\n\n${txt_s3tup_menu_library_wrong_selection}\n${y_l}${opts}${re_}"
+			[ "${#OPTION1}" -gt 0 ] && menu_close=1;
+			sleep 3 && continue;
+		fi;
 
 		case $ret in
 			0) #Start - Build library
@@ -269,6 +278,7 @@ _integrate_libs(){
 				
 				[ -d "$tmpdir" ] && rm -r "$tmpdir";;
 			1) #Exit/Back
+				unset MENU_OPTIONS;
 				menu_close="1";
 				return;;
 			2) #Info
@@ -521,6 +531,7 @@ _create_tc(){
 				tpl=$(echo "$opts" | awk '{printf $2}';);
 				_tpl_editor "$(_get_template_type "$cttpldir/$tpl" | awk -F';' '{print $1}' | xargs)" "$tpl";;
 			3)	#Exit
+				unset MENU_OPTIONS;
 				menu_close="1";
 				return;;
 		esac;
