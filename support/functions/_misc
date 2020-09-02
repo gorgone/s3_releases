@@ -10,7 +10,7 @@ _nl(){
 	printf "$rs_\n"
 }
 _set_dialog_types(){
-	gui="$(which dialog)"
+	gui="$(type -pf dialog)"
 	st_="--stdout"
 	ib_="--infobox"
 	ip_="--inputbox"
@@ -104,14 +104,14 @@ e_addons(){
 }
 sysinfo(){
 	printf "$g_l\nSYSTEM$w_l\n"
-	system_info=$(which lsb_release)
+	system_info=$(type -pf lsb_release)
 	[ ${#system_info} -ge 11 ] && lsb_release -irc
 	printf "Uptime:\t\t$(uptime -p)\n"
 	printf "$g_l\nMEMORY$w_l\n"
 	free -mht | awk '/Mem/{print "Memory:\t\tTotal: " $2 "Mb\tUsed: " $3 "Mb\tFree: " $4 "Mb"} /Swap/{print "Swap:\t\tTotal: " $2 "Mb\tUsed: " $3 "Mb\tFree: " $4 "Mb" }'
 	[ -f /sys/dev/block ] && lsblk
 	printf "$g_l\n CPU$w_l\n"
-	cpu_info=$(which lscpu)
+	cpu_info=$(type -pf lscpu)
 	[ ${#cpu_info} -ge 5 ] && lscpu | grep -iE 'model name|vendor id|Architecture|per socket|MHz'
 	printf "$g_l\nNetwork\n"
 	printf "$w_l""Hostname:\t$HOSTNAME\n"

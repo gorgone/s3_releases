@@ -1211,7 +1211,7 @@ _create_config(){
 	if [ ! -f "$configtemplate" ];then #check existing config template file
 		echo -e "${r_l}\nERROR -> ${txt_s3tup_msg_create_config_template_not_found}${re_}" && _paktc_timer 10;
 		return 1;
-	elif [ ! "$(which jq)" ];then #check existing jq
+	elif [ ! "$(type -pf jq)" ];then #check existing jq
 		echo -e "${r_l}\nCHECK -> ${txt_s3tup_msg_create_config_jq_not_found}\n${y_l}apt install jq\n${re_}" && _paktc_timer 10;
 		return 1;
 	else #copy the config template file
