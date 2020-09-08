@@ -34,7 +34,7 @@ cd $sourcedir
 #example dream_one
 #
 # _compiler="aarch64-dream_one-linux-gnu-";
-# - u can use $_compiler"-ar" {strip,ranlib,ld...}
+# - u can use $_compiler"ar" {strip,ranlib,ld...}
 #
 # _sysroot="aarch64-dream_one-linux-gnu/sysroot/";
 # -if the source needs a sysroot
