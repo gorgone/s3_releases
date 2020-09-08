@@ -40,7 +40,7 @@ cd $sourcedir
 # -if the source needs a sysroot
 #
 # _libsearchdir="/lib";
-# if needet on the tharget system
+# if needet on the target system
 #
 # toolchain directory
 # $tcdir
