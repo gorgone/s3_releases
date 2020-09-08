@@ -1,6 +1,9 @@
 #!/bin/bash
 
 #simplebuild_plugin vlmcsd
+#line 3 is absolutely necessary
+#without it no entry is created in the simplebuild
+#the end of the line indicates how to call the module
 
 build_vlmcsd() {
 
@@ -27,6 +30,7 @@ echo -e "extracting please wait ... "
 
 #extract source
 tar -zxf $filename
+#enter source directory
 cd $sourcedir
 
 #build software
@@ -48,6 +52,7 @@ cd $sourcedir
 # toolchainname
 # $_toolchainname
 
+#build software
 make CC="$tcdir/$_toolchainname/bin/$_compiler""gcc" 2>&1 |grep --line-buffered -v "^make" |awk -F "CC" '{print "compile -> " "\033[32m" $NF "\033[0m" }'
 [ -d bin ] && cd bin
 
