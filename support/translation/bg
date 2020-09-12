@@ -26,6 +26,7 @@ txt_found='открити'
 txt_create='създай'
 txt_conf='конфигурация'
 txt_extracting='извличане ' #10 chars
+txt_checking='checking';
 txt_wait='изчакайте...  '
 txt_existing='съществува'
 txt_profiles='профили'
@@ -39,6 +40,9 @@ txt_tc="Toolchain"
 txt_tpl="Шаблон"
 txt_lib="Библиотека"
 txt_ssh_profiles="SSH $txt_profiles"
+txt_repo="Repository"
+txt_branch="Branch"
+txt_proto="Protocol"
 
 # menu txt
 txt_start_menu='Главно меню'
@@ -125,6 +129,15 @@ txt_s3tup_menu_command_label_edit="Редактиране"
 txt_s3tup_menu_command_label_yes="Да"
 txt_s3tup_menu_command_label_no="Не"
 
+txt_s3tup_msg_update_hint="is being updated..."
+txt_s3tup_msg_update_restart="Restarting"
+txt_s3tup_msg_update_current="is up to date"
+txt_s3tup_msg_update_s3update_required="Please update your simplebuild3 installation first!"
+txt_s3tup_msg_update_directory_unversioned="Update not possible because the installation directory is not SVN or GIT versioned!"
+txt_s3tup_msg_update_pending="update pending"
+txt_s3tup_msg_update_not_required="no update required"
+txt_s3tup_msg_update_finished="Update completed to version:"
+txt_s3tup_msg_update_log="updating plugin log"
 txt_s3tup_msg_syscheck1="Моля изчакайте докато се извършат проверките на необходимите инструменти и зависимости..."
 txt_s3tup_msg_syscheck2="Нужно е ръчно да инсталираш следните пакети, за да може да ползваш съответно плъгина:"
 txt_s3tup_msg_reset_config1="Премествам съществуващия конфиг файл..."
