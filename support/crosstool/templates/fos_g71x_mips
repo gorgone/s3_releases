@@ -1,5 +1,8 @@
 #toolchain template: FRITZ!Box 7582|7581 7.1x
-#toolchain template version: 1
+#toolchain template version: 2
+#toolchain template updated: 2020-09-13 13:20:41
+# Automatically generated file; DO NOT EDIT.
+# crosstool-NG  Configuration
 CT_CONFIGURE_has_static_link=y
 CT_CONFIGURE_has_cxx11=y
 CT_CONFIGURE_has_wget=y
@@ -15,6 +18,7 @@ CT_CONFIGURE_has_gnu_m4_1_4_12_or_newer=y
 CT_CONFIGURE_has_python_3_4_or_newer=y
 CT_CONFIGURE_has_bison_2_7_or_newer=y
 CT_CONFIGURE_has_python=y
+CT_CONFIGURE_has_cvs=y
 CT_CONFIGURE_has_svn=y
 CT_CONFIGURE_has_git=y
 CT_CONFIGURE_has_md5sum=y
@@ -25,9 +29,12 @@ CT_CONFIGURE_has_install_with_strip_program=y
 CT_CONFIG_VERSION_CURRENT="3"
 CT_CONFIG_VERSION="3"
 CT_MODULES=y
+# Paths and misc options
+# crosstool-NG behavior
 # CT_OBSOLETE is not set
 # CT_EXPERIMENTAL is not set
 # CT_DEBUG_CT is not set
+# Paths
 CT_LOCAL_TARBALLS_DIR="${HOME}/src"
 CT_SAVE_TARBALLS=y
 # CT_TARBALLS_BUILDROOT_LAYOUT is not set
@@ -41,6 +48,7 @@ CT_INSTALL_LICENSES=y
 # CT_PREFIX_DIR_RO is not set
 CT_STRIP_HOST_TOOLCHAIN_EXECUTABLES=y
 # CT_STRIP_TARGET_TOOLCHAIN_EXECUTABLES is not set
+# Downloading
 CT_DOWNLOAD_AGENT_WGET=y
 # CT_DOWNLOAD_AGENT_CURL is not set
 # CT_DOWNLOAD_AGENT_NONE is not set
@@ -57,12 +65,14 @@ CT_VERIFY_DOWNLOAD_DIGEST_SHA512=y
 # CT_VERIFY_DOWNLOAD_DIGEST_MD5 is not set
 CT_VERIFY_DOWNLOAD_DIGEST_ALG="sha512"
 # CT_VERIFY_DOWNLOAD_SIGNATURE is not set
+# Extracting
 # CT_FORCE_EXTRACT is not set
 CT_OVERRIDE_CONFIG_GUESS_SUB=y
 # CT_ONLY_EXTRACT is not set
 CT_PATCH_BUNDLED=y
 # CT_PATCH_BUNDLED_LOCAL is not set
 CT_PATCH_ORDER="bundled"
+# Build behavior
 CT_PARALLEL_JOBS=0
 CT_LOAD=""
 CT_USE_PIPES=y
@@ -75,6 +85,7 @@ CT_EXTRA_LDFLAGS_FOR_HOST=""
 CT_CONFIG_SHELL_BASH=y
 # CT_CONFIG_SHELL_CUSTOM is not set
 CT_CONFIG_SHELL="${bash}"
+# Logging
 # CT_LOG_ERROR is not set
 # CT_LOG_WARN is not set
 # CT_LOG_INFO is not set
@@ -86,6 +97,7 @@ CT_LOG_LEVEL_MAX="EXTRA"
 CT_LOG_PROGRESS_BAR=y
 CT_LOG_TO_FILE=y
 CT_LOG_FILE_COMPRESS=y
+# Target options
 # CT_ARCH_ALPHA is not set
 # CT_ARCH_ARC is not set
 # CT_ARCH_ARM is not set
@@ -103,12 +115,14 @@ CT_ARCH="mips"
 CT_ARCH_CHOICE_KSYM="MIPS"
 CT_ARCH_TUNE=""
 CT_ARCH_MIPS_SHOW=y
+# Options for mips
 CT_ARCH_MIPS_PKG_KSYM=""
 CT_ARCH_mips_o32=y
 CT_ARCH_mips_ABI="32"
 CT_ALL_ARCH_CHOICES="ALPHA ARC ARM AVR M68K MICROBLAZE MIPS MOXIE MSP430 NIOS2 POWERPC RISCV S390 SH SPARC X86 XTENSA"
 CT_ARCH_SUFFIX=""
 # CT_OMIT_TARGET_VENDOR is not set
+# Generic target options
 # CT_MULTILIB is not set
 CT_DEMULTILIB=y
 CT_ARCH_USE_MMU=y
@@ -123,6 +137,7 @@ CT_ARCH_DEFAULT_32=y
 CT_ARCH_BITNESS=32
 CT_ARCH_32=y
 # CT_ARCH_64 is not set
+# Target optimisations
 CT_ARCH_SUPPORTS_WITH_ARCH=y
 CT_ARCH_SUPPORTS_WITH_TUNE=y
 CT_ARCH_SUPPORTS_WITH_FLOAT=y
@@ -133,6 +148,8 @@ CT_ARCH_FLOAT_SW=y
 CT_TARGET_CFLAGS=""
 CT_TARGET_LDFLAGS=""
 CT_ARCH_FLOAT="soft"
+# Toolchain options
+# General toolchain options
 CT_FORCE_SYSROOT=y
 CT_USE_SYSROOT=y
 CT_SYSROOT_NAME="sysroot"
@@ -143,22 +160,28 @@ CT_WANTS_STATIC_LINK_CXX=y
 CT_SHOW_CT_VERSION=y
 CT_TOOLCHAIN_PKGVERSION=""
 CT_TOOLCHAIN_BUGURL=""
+# Tuple completion and aliasing
 CT_TARGET_VENDOR="fritzos"
 CT_TARGET_ALIAS_SED_EXPR=""
 CT_TARGET_ALIAS=""
+# Toolchain type
 CT_CROSS=y
 # CT_CANADIAN is not set
 CT_TOOLCHAIN_TYPE="cross"
+# Build system
 CT_BUILD=""
 CT_BUILD_PREFIX=""
 CT_BUILD_SUFFIX=""
+# Misc options
 # CT_TOOLCHAIN_ENABLE_NLS is not set
+# Operating System
 CT_KERNEL_SUPPORTS_SHARED_LIBS=y
 # CT_KERNEL_BARE_METAL is not set
 CT_KERNEL_LINUX=y
 CT_KERNEL="linux"
 CT_KERNEL_CHOICE_KSYM="LINUX"
 CT_KERNEL_LINUX_SHOW=y
+# Options for linux
 CT_KERNEL_LINUX_PKG_KSYM="LINUX"
 CT_LINUX_DIR_NAME="linux"
 CT_LINUX_PKG_NAME="linux"
@@ -210,12 +233,15 @@ CT_KERNEL_LINUX_VERBOSITY_0=y
 CT_KERNEL_LINUX_VERBOSE_LEVEL=0
 CT_KERNEL_LINUX_INSTALL_CHECK=y
 CT_ALL_KERNEL_CHOICES="BARE_METAL LINUX WINDOWS"
+# Common kernel options
 CT_SHARED_LIBS=y
+# Binary utilities
 CT_ARCH_BINFMT_ELF=y
 CT_BINUTILS_BINUTILS=y
 CT_BINUTILS="binutils"
 CT_BINUTILS_CHOICE_KSYM="BINUTILS"
 CT_BINUTILS_BINUTILS_SHOW=y
+# Options for binutils
 CT_BINUTILS_BINUTILS_PKG_KSYM="BINUTILS"
 CT_BINUTILS_DIR_NAME="binutils"
 CT_BINUTILS_USE_GNU=y
@@ -223,8 +249,9 @@ CT_BINUTILS_USE="BINUTILS"
 CT_BINUTILS_PKG_NAME="binutils"
 CT_BINUTILS_SRC_RELEASE=y
 CT_BINUTILS_PATCH_ORDER="global"
+CT_BINUTILS_V_2_35=y
 # CT_BINUTILS_V_2_34 is not set
-CT_BINUTILS_V_2_33=y
+# CT_BINUTILS_V_2_33 is not set
 # CT_BINUTILS_V_2_32 is not set
 # CT_BINUTILS_V_2_31 is not set
 # CT_BINUTILS_V_2_30 is not set
@@ -233,7 +260,7 @@ CT_BINUTILS_V_2_33=y
 # CT_BINUTILS_V_2_27 is not set
 # CT_BINUTILS_V_2_26 is not set
 # CT_BINUTILS_NO_VERSIONS is not set
-CT_BINUTILS_VERSION="2.33.1"
+CT_BINUTILS_VERSION="2.35"
 CT_BINUTILS_MIRRORS="$(CT_Mirrors GNU binutils) $(CT_Mirrors sourceware binutils/releases)"
 CT_BINUTILS_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_BINUTILS_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
@@ -247,6 +274,7 @@ CT_BINUTILS_later_than_2_25=y
 CT_BINUTILS_2_25_or_later=y
 CT_BINUTILS_later_than_2_23=y
 CT_BINUTILS_2_23_or_later=y
+# GNU binutils
 CT_BINUTILS_HAS_HASH_STYLE=y
 CT_BINUTILS_HAS_GOLD=y
 CT_BINUTILS_HAS_PLUGINS=y
@@ -263,12 +291,14 @@ CT_BINUTILS_FOR_TARGET=y
 CT_BINUTILS_FOR_TARGET_IBERTY=y
 CT_BINUTILS_FOR_TARGET_BFD=y
 CT_ALL_BINUTILS_CHOICES="BINUTILS"
+# C-library
 CT_LIBC_GLIBC=y
 # CT_LIBC_UCLIBC is not set
 CT_LIBC="glibc"
 CT_LIBC_CHOICE_KSYM="GLIBC"
 CT_THREADS="nptl"
 CT_LIBC_GLIBC_SHOW=y
+# Options for glibc
 CT_LIBC_GLIBC_PKG_KSYM="GLIBC"
 CT_GLIBC_DIR_NAME="glibc"
 CT_GLIBC_USE_GNU=y
@@ -276,6 +306,7 @@ CT_GLIBC_USE="GLIBC"
 CT_GLIBC_PKG_NAME="glibc"
 CT_GLIBC_SRC_RELEASE=y
 CT_GLIBC_PATCH_ORDER="global"
+# CT_GLIBC_V_2_32 is not set
 # CT_GLIBC_V_2_31 is not set
 # CT_GLIBC_V_2_30 is not set
 # CT_GLIBC_V_2_29 is not set
@@ -295,6 +326,8 @@ CT_GLIBC_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_GLIBC_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_GLIBC_ARCHIVE_FORMATS=".tar.xz .tar.bz2 .tar.gz"
 CT_GLIBC_SIGNATURE_FORMAT="packed/.sig"
+CT_GLIBC_2_32_or_older=y
+CT_GLIBC_older_than_2_32=y
 CT_GLIBC_2_30_or_older=y
 CT_GLIBC_older_than_2_30=y
 CT_GLIBC_2_29_or_older=y
@@ -338,12 +371,14 @@ CT_GLIBC_FORCE_UNWIND=y
 CT_GLIBC_KERNEL_VERSION_AS_HEADERS=y
 # CT_GLIBC_KERNEL_VERSION_CHOSEN is not set
 CT_GLIBC_MIN_KERNEL="5.5.5"
-CT_ALL_LIBC_CHOICES="AVR_LIBC BIONIC GLIBC MINGW_W64 MOXIEBOX MUSL NEWLIB NONE UCLIBC"
+CT_ALL_LIBC_CHOICES="AVR_LIBC BIONIC GLIBC MINGW_W64 MOXIEBOX MUSL NEWLIB NONE PICOLIBC UCLIBC"
 CT_LIBC_SUPPORT_THREADS_ANY=y
 CT_LIBC_SUPPORT_THREADS_NATIVE=y
+# Common C library options
 CT_THREADS_NATIVE=y
 # CT_CREATE_LDSO_CONF is not set
 CT_LIBC_XLDD=y
+# C compiler
 CT_CC_CORE_PASSES_NEEDED=y
 CT_CC_CORE_PASS_1_NEEDED=y
 CT_CC_CORE_PASS_2_NEEDED=y
@@ -357,6 +392,7 @@ CT_CC_GCC=y
 CT_CC="gcc"
 CT_CC_CHOICE_KSYM="GCC"
 CT_CC_GCC_SHOW=y
+# Options for gcc
 CT_CC_GCC_PKG_KSYM="GCC"
 CT_GCC_DIR_NAME="gcc"
 CT_GCC_USE_GNU=y
@@ -364,14 +400,15 @@ CT_GCC_USE="GCC"
 CT_GCC_PKG_NAME="gcc"
 CT_GCC_SRC_RELEASE=y
 CT_GCC_PATCH_ORDER="global"
-CT_GCC_V_9=y
+CT_GCC_V_10=y
+# CT_GCC_V_9 is not set
 # CT_GCC_V_8 is not set
 # CT_GCC_V_7 is not set
 # CT_GCC_V_6 is not set
 # CT_GCC_V_5 is not set
 # CT_GCC_V_4_9 is not set
 # CT_GCC_NO_VERSIONS is not set
-CT_GCC_VERSION="9.2.0"
+CT_GCC_VERSION="10.2.0"
 CT_GCC_MIRRORS="$(CT_Mirrors GNU gcc/gcc-${CT_GCC_VERSION}) $(CT_Mirrors sourceware gcc/releases/gcc-${CT_GCC_VERSION})"
 CT_GCC_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_GCC_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
@@ -397,14 +434,17 @@ CT_CC_GCC_EXTRA_CONFIG_ARRAY=""
 CT_CC_GCC_STATIC_LIBSTDCXX=y
 # CT_CC_GCC_SYSTEM_ZLIB is not set
 CT_CC_GCC_CONFIG_TLS=m
+# Optimisation features
 CT_CC_GCC_USE_GRAPHITE=y
 CT_CC_GCC_USE_LTO=y
+# Settings for libraries running on target
 CT_CC_GCC_ENABLE_TARGET_OPTSPACE=y
 # CT_CC_GCC_LIBMUDFLAP is not set
 # CT_CC_GCC_LIBGOMP is not set
 # CT_CC_GCC_LIBSSP is not set
 # CT_CC_GCC_LIBQUADMATH is not set
 # CT_CC_GCC_LIBSANITIZER is not set
+# Misc. obscure options.
 CT_CC_CXA_ATEXIT=y
 # CT_CC_GCC_DISABLE_PCH is not set
 CT_CC_GCC_SJLJ_EXCEPTIONS=m
@@ -420,17 +460,21 @@ CT_CC_GCC_DEC_FLOAT_AUTO=y
 # CT_CC_GCC_DEC_FLOAT_DPD is not set
 # CT_CC_GCC_DEC_FLOATS_NO is not set
 CT_CC_GCC_HAS_ARCH_OPTIONS=y
+# archictecture-specific options
 CT_CC_GCC_mips_llsc=m
 CT_CC_GCC_mips_synci=m
 CT_CC_GCC_mips_plt=y
 CT_ALL_CC_CHOICES="GCC"
+# Additional supported languages:
 CT_CC_LANG_CXX=y
 # CT_CC_LANG_FORTRAN is not set
+# Debug facilities
 # CT_DEBUG_DUMA is not set
 # CT_DEBUG_GDB is not set
 # CT_DEBUG_LTRACE is not set
 # CT_DEBUG_STRACE is not set
 CT_ALL_DEBUG_CHOICES="DUMA GDB LTRACE STRACE"
+# Companion libraries
 # CT_COMPLIBS_CHECK is not set
 # CT_COMP_LIBS_CLOOG is not set
 CT_COMP_LIBS_EXPAT=y
@@ -442,7 +486,7 @@ CT_EXPAT_PATCH_ORDER="global"
 CT_EXPAT_V_2_2=y
 # CT_EXPAT_NO_VERSIONS is not set
 CT_EXPAT_VERSION="2.2.9"
-CT_EXPAT_MIRRORS="http://downloads.sourceforge.net/project/expat/expat/${CT_EXPAT_VERSION}"
+CT_EXPAT_MIRRORS="http://downloads.sourceforge.net/project/expat/expat/${CT_EXPAT_VERSION} https://github.com/libexpat/libexpat/releases/download/R_${CT_EXPAT_VERSION//./_}"
 CT_EXPAT_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_EXPAT_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_EXPAT_ARCHIVE_FORMATS=".tar.xz .tar.lz .tar.bz2 .tar.gz"
@@ -525,7 +569,7 @@ CT_LIBELF_PATCH_ORDER="global"
 CT_LIBELF_V_0_8=y
 # CT_LIBELF_NO_VERSIONS is not set
 CT_LIBELF_VERSION="0.8.13"
-CT_LIBELF_MIRRORS="http://www.mr511.de/software https://fossies.org/linux/misc/old"
+CT_LIBELF_MIRRORS="https://fossies.org/linux/misc/old"
 CT_LIBELF_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_LIBELF_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_LIBELF_ARCHIVE_FORMATS=".tar.gz"
@@ -635,6 +679,7 @@ CT_ISL=y
 CT_MPC=y
 CT_NCURSES=y
 CT_ZLIB=y
+# Companion tools
 # CT_COMP_TOOLS_FOR_HOST is not set
 # CT_COMP_TOOLS_AUTOCONF is not set
 # CT_COMP_TOOLS_AUTOMAKE is not set
