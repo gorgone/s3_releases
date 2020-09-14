@@ -25,18 +25,57 @@ make -j16 -w 2>&1 |grep --line-buffered -v "one.o\|warning\|~\|In\|note\|if\|int
 upx -9 -q zerotier-one |grep zerotier  |awk '{print "compress -> " $1" "$3" "$4 }'
 
 #copy binarys
+[ $1 = "native" ] && _toolchainname=$(uname -m)
 [ -d "$sodir/ZeroTierOne-1.4.6.$_toolchainname" ] && rm -rf "$sodir/ZeroTierOne-1.4.6.$_toolchainname"
 mkdir -p "$sodir/ZeroTierOne-1.4.6.$_toolchainname"
 mv {zerotier-cli,zerotier-idtool,zerotier-one} "$sodir/ZeroTierOne-1.4.6.$_toolchainname"
+}
 
+deb_package() {
+mkdir -p "$sodir/ZeroTierOne-1.4.6.$_toolchainname/DEBIAN"
+mkdir -p "$sodir/ZeroTierOne-1.4.6.$_toolchainname/usr/local/bin"
+cd "$sodir/ZeroTierOne-1.4.6.$_toolchainname"
+mv {zerotier-cli,zerotier-idtool,zerotier-one} "$sodir/ZeroTierOne-1.4.6.$_toolchainname/usr/local/bin"
+printf "\nPackage Info\n============\n"
+echo "Package: zerotierone
+Version: 1.4.6
+Section: custom
+Priority: optional
+Architecture: all
+Essential: no
+Installed-Size: 1024
+Maintainer: https://github.com/zerotier/ZeroTierOne
+Description: virtual network card">"$sodir/ZeroTierOne-1.4.6.$_toolchainname/DEBIAN/control"
+echo "ZeroTierOne-1.4.6.$_toolchainname"
+cat "$sodir/ZeroTierOne-1.4.6.$_toolchainname/DEBIAN/control"
+cd "$sodir"
+printf "\n"
+dpkg-deb --build "ZeroTierOne-1.4.6.$_toolchainname"
+printf "\n"
 }
 
 if [ "$1" = "zerotier" ]; then
   if [ -z $2 ]; then
-    buildtc="native"
+    clear
+    slogo
+    printf "\n  plase add toolchain\n\n"
+    exit
   else
-    buildtc="$2"
+      if [ -f "$tccfgdir/$2" ]; then
+        buildtc="$2"
+      else
+        clear
+        slogo
+        printf "\n  $2 toolchain not installed\n\n"
+        exit
+      fi
   fi
   build_zerotier $buildtc
+fi
+
+if [ "$3" = "makedeb" ]; then
+  deb_package
+  exit
+else
   exit
 fi
