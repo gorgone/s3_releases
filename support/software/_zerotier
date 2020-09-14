@@ -1,0 +1,42 @@
+#!/bin/bash
+
+#simplebuild_plugin zerotier
+
+build_zerotier() {
+clear
+source "$tccfgdir/$1"
+stable="https://github.com/zerotier/ZeroTierOne/archive/1.4.6.tar.gz"
+cd $dldir
+slogo
+[ -d ZeroTierOne-1.4.6 ] && rm -rf ZeroTierOne-1.4.6 #remove build dir
+[ -f 1.4.6.tar.gz ] && rm -f 1.4.6.tar.gz #remove download
+echo -en "\nZeroTierOne\n===========\ndownload please wait ... "
+wget $stable --progress=dot -q --show-progress 2>&1 |
+awk 'NF>2 && $(NF-2) ~ /%/{printf "\rdownload please wait ... %s",$(NF-2)} END{print "\rdownload please wait ... Done!"}' #download stable package
+echo -e "extracting please wait ... "
+tar -zxf 1.4.6.tar.gz #extract source
+cd ZeroTierOne-1.4.6
+sed "11a\\override CC=$tcdir/$_toolchainname/bin/$_compiler"gcc""      -i make-linux.mk
+sed "12a\\override CXX=$tcdir/$_toolchainname/bin/$_compiler"g++""     -i make-linux.mk
+sed "13a\\override STRIP=$tcdir/$_toolchainname/bin/$_compiler"strip"" -i make-linux.mk
+
+#build software
+make -j16 -w 2>&1 |grep --line-buffered -v "one.o\|warning\|~\|In\|note\|if\|int\|\^\|)" |awk -F "/" '{print "compile -> " "\033[32m" $NF "\033[0m" }'
+upx -9 -q zerotier-one |grep zerotier  |awk '{print "compress -> " $1" "$3" "$4 }'
+
+#copy binarys
+[ -d "$sodir/ZeroTierOne-1.4.6.$_toolchainname" ] && rm -rf "$sodir/ZeroTierOne-1.4.6.$_toolchainname"
+mkdir -p "$sodir/ZeroTierOne-1.4.6.$_toolchainname"
+mv {zerotier-cli,zerotier-idtool,zerotier-one} "$sodir/ZeroTierOne-1.4.6.$_toolchainname"
+
+}
+
+if [ "$1" = "zerotier" ]; then
+  if [ -z $2 ]; then
+    buildtc="native"
+  else
+    buildtc="$2"
+  fi
+  build_zerotier $buildtc
+  exit
+fi
