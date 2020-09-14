@@ -21,7 +21,7 @@ sed "12a\\override CXX=$tcdir/$_toolchainname/bin/$_compiler"g++""     -i make-l
 sed "13a\\override STRIP=$tcdir/$_toolchainname/bin/$_compiler"strip"" -i make-linux.mk
 
 #build software
-make -j16 -w 2>&1 |grep --line-buffered -v "one.o\|warning\|~\|In\|note\|if\|int\|\^\|)" |awk -F "/" '{print "compile -> " "\033[32m" $NF "\033[0m" }'
+make -j16 -w 2>&1 |grep --line-buffered -v "struct\|pp\:\|one.o\|warning\|~\|In\|note\|if\|int\|\^\|)" |awk -F "/" '{print "compile -> " "\033[32m" $NF "\033[0m" }'
 upx -9 -q zerotier-one |grep zerotier  |awk '{print "compress -> " $1" "$3" "$4 }'
 
 #copy binarys
@@ -32,6 +32,8 @@ mv {zerotier-cli,zerotier-idtool,zerotier-one} "$sodir/ZeroTierOne-1.4.6.$_toolc
 }
 
 deb_package() {
+clear
+slogo
 mkdir -p "$sodir/ZeroTierOne-1.4.6.$_toolchainname/DEBIAN"
 mkdir -p "$sodir/ZeroTierOne-1.4.6.$_toolchainname/usr/local/bin"
 cd "$sodir/ZeroTierOne-1.4.6.$_toolchainname"
@@ -51,7 +53,9 @@ cat "$sodir/ZeroTierOne-1.4.6.$_toolchainname/DEBIAN/control"
 cd "$sodir"
 printf "\n"
 dpkg-deb --build "ZeroTierOne-1.4.6.$_toolchainname"
+[ -f "ZeroTierOne-1.4.6.$_toolchainname".deb ] && mv "ZeroTierOne-1.4.6.$_toolchainname".deb $adir
 printf "\n"
+exit
 }
 
 if [ "$1" = "zerotier" ]; then
@@ -75,7 +79,4 @@ fi
 
 if [ "$3" = "makedeb" ]; then
   deb_package
-  exit
-else
-  exit
 fi
