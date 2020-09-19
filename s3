@@ -59,6 +59,7 @@ do
 	declare -A $a_n
 done
 
+USE_vars[USE_DIAG]=;
 USE_vars[USE_TARGZ]=;
 USE_vars[USE_PATCH]=;
 USE_vars[USE_STAPI]=;
