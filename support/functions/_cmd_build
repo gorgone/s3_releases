@@ -37,6 +37,9 @@ _cmd_build(){
 			[ "$e" == "$d" ] && USE_vars[${e:0: -2}]=;
 		done
 
+		if [ $e == "USE_DIAG=1" ]; then
+                        codecheck=$(command -v scan-build)
+                fi
 	done
 	cd "$svndir"
 
@@ -185,7 +188,7 @@ printf "$y_l\n |       set : ${cdtag}$w_l"
 	_nl
 	USESTRING=${USE_vars[@]}
 	EXTRA_USE=$extra_use
-	make -j"$cpus" $_verbose \
+	$codecheck make -j"$cpus" $_verbose \
 	"CONF_DIR=$CONFDIR" \
 	"OSCAM_BIN=$bdir/$oscam_name" \
 	"CC_OPTS=$co $cc_opts $extra_cc" \
