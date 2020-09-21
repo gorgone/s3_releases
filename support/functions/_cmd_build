@@ -126,20 +126,18 @@ _cmd_build(){
 	done
 
 #change default oscam CONF_DIR
-if [ ! "$CUSTOM_CONFDIR" == "not_set" ]
+if [ "$CUSTOM_CONFDIR" == "not_set" ] && [ "$_oscamconfdir_custom" == "not_set" ];
 then
-	CONFDIR="$CUSTOM_CONFDIR"
-	cdtag="${r_l}custom CONF_DIR=$CONFDIR (via commandline)"
-else
-	oc_size=${#_oscamconfdir_custom}
-	if [ "$oc_size" -gt "4" ]
-	then
-		CONFDIR="$_oscamconfdir_custom"
-		cdtag="${r_l}custom CONF_DIR=$CONFDIR (via toolchain.cfg)"
-	else
-		CONFDIR="$_oscamconfdir_default"
-		cdtag="CONF_DIR=$CONFDIR"
-	fi
+    CONFDIR="$_oscamconfdir_default"
+    cdtag="CONF_DIR=$CONFDIR"
+elif [ ${#_oscamconfdir_custom} -gt 4 ];
+then
+    CONFDIR="$_oscamconfdir_custom"
+    cdtag="${r_l}custom CONF_DIR=$CONFDIR (via toolchain.cfg)"
+elif [ ${#CUSTOM_CONFDIR} -gt 4 ];
+then
+    CONFDIR="$CUSTOM_CONFDIR"
+    cdtag="${r_l}custom CONF_DIR=$CONFDIR (via commandline)"
 fi
 printf "$y_l\n |       set : ${cdtag}$w_l"
 
