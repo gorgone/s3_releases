@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.21.0";
+	pversion="0.21.1";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -1141,7 +1141,7 @@ _check_lib(){
 _check_pkg(){
 	pkgs=( git patch curl jq gcc g++ gperf bison flex makeinfo help2man make file cmp \
 		  python3-config autoconf automake libtoolize libtool gawk wget bzip2 xz unzip rsync \
-		  composite inkscape pkg-config python gettext ruby );
+		  composite inkscape pkg-config python3 gettext ruby );
 	headers=( ncurses libacl.h sys/capability.h readline.h glib-2.0/glib.h );
 	libs=( libstdc++.so.6 libstdc++.a libc\\.a );
 	echo -e "${y_l}SYSCHECK -> ${txt_s3tup_msg_syscheck1}${re_}";
