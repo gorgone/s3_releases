@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="21";
+S3TUP_CONFIG_VERSION="23";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -33,12 +33,7 @@ CTNG_CONFIG_tasks+=('TPL_SAVE=$($gui --defaultno --output-fd 1 --ok-label "${txt
 CTNG_BUILD_tasks=('./ct-ng show-config | tee -a "@LOGFILE@";'); # build command1
 CTNG_BUILD_tasks+=('./ct-ng build;'); # build command2
 CTNG_SETUP_tasks=('git clone --progress "$CTNG_REPO_URL" "@CTNGSOURCE@";'); # setup command1
-#CTNG_SETUP_tasks+=('echo "Patch 1: Add option to build binary toolchain tarball..." && curl --silent https://github.com/crosstool-ng/crosstool-ng/commit/77c44ad9a01293983e95949a1ece4b1f2270ad9c.diff | git apply -v;'); # setup command2
-#CTNG_SETUP_tasks+=('echo "Patch 2: gcc: Remove nested 8.3.0 directory..."           && curl --silent https://github.com/crosstool-ng/crosstool-ng/commit/1b29292f897f28b3ffc55cb7e254fba040b078cf.diff | git apply -v;'); # setup command3
-#CTNG_SETUP_tasks+=('echo "Patch 3: Update to GCC 9.x to latest release 9.3.0..."    && curl https://github.com/crosstool-ng/crosstool-ng/commit/44ca1ca171f63300869ec1f3f8a18707843ad747.diff | git apply -v;'); # setup command3
-#CTNG_SETUP_tasks+=('echo "Patch 4: Add support for GCC 10.2.0..."                   && curl https://github.com/crosstool-ng/crosstool-ng/commit/9177e805a8ad1342b115d1d4dff7ff6df301672f.diff | git apply -v;'); # setup command5
-#CTNG_SETUP_tasks+=('echo "Patch 5: Add support for binutils 2.35..."                && curl https://github.com/crosstool-ng/crosstool-ng/commit/81a85a721b0d91a43cf6c960e13845dcc0cf31ea.diff | git apply -v;'); # setup command6
-#CTNG_SETUP_tasks+=('echo "Patch 6: Allow glibc 2.12 - 2.20 to work with GCC 10+..." && curl https://github.com/crosstool-ng/crosstool-ng/commit/3a39186a4ba7f549e4297f77ca28d89ae6b615b7.diff | git apply -v;'); # setup command7
+#CTNG_SETUP_tasks+=('echo "Patch 1: Add option to build binary toolchain tarball..." && curl --silent https://github.com/crosstool-ng/crosstool-ng/commit/77c44ad9a01293983e95949a1ece4b1f2270ad9c.diff | git apply -v;'); # setup command3
 CTNG_SETUP_tasks+=('./bootstrap;'); # setup command7
 CTNG_SETUP_tasks+=('./configure --enable-local;'); # setup command8
 CTNG_SETUP_tasks+=('make;'); # setup command9

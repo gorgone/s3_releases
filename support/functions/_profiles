@@ -106,12 +106,21 @@ _create_native_profile(){
 
 	[ ! -d "$tcdir/native/bin" ] && mkdir -p "$tcdir/native/bin"
 	cd "$tcdir/native/bin"
-	g="$(which gcc)"
-	stripvar="$(which strip)"
-	strip_link="$($g -dumpmachine)-strip"
-	compiler_link="$($g -dumpmachine)-gcc"
-	[ -L "$compiler_link" ] || ln -sf "$g"     "$compiler_link"
-	[ -L "$strip_link" ]    || ln -sf "$stripvar" "$strip_link"
+	g="$(type -pf gcc)"
+	gpp="$(type -pf g++)"
+	stripvar="$(type -pf strip)"
+	if [ -f $g ]; then
+		compiler_link="$($g -dumpmachine)-gcc"
+		[ -L "$compiler_link" ] || ln -sf "$g" "$compiler_link"
+	fi
+	if [ -f $gpp ]; then
+		gpp_link="$($g -dumpmachine)-g++"
+		[ -L "$gpp_link" ]      || ln -sf "$gpp" "$gpp_link"
+	fi
+	if [ -f $stripvar ]; then
+		strip_link="$($g -dumpmachine)-strip"
+		[ -L "$strip_link" ]    || ln -sf "$stripvar" "$strip_link"
+	fi
 	cd "$tccfgdir"
 
 

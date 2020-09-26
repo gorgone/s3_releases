@@ -26,6 +26,7 @@ txt_found='found'
 txt_create='create'
 txt_conf='configuration'
 txt_extracting='extracting' #10 chars
+txt_checking='checking'
 txt_wait='please wait...'
 txt_existing='exists'
 txt_profiles='profiles'
@@ -38,6 +39,9 @@ txt_update='now updating'
 txt_tc="Toolchain"
 txt_tpl="Template"
 txt_lib="Library"
+txt_repo="Repository"
+txt_branch="Branch"
+txt_proto="Protocol"
 txt_ssh_profiles="SSH $txt_profiles"
 
 # menu txt
@@ -125,6 +129,15 @@ txt_s3tup_menu_command_label_edit="Edit"
 txt_s3tup_menu_command_label_yes="Yes"
 txt_s3tup_menu_command_label_no="No"
 
+txt_s3tup_msg_update_hint="is being updated..."
+txt_s3tup_msg_update_restart="Restarting"
+txt_s3tup_msg_update_current="is up to date"
+txt_s3tup_msg_update_s3update_required="Please update your simplebuild3 installation first!"
+txt_s3tup_msg_update_directory_unversioned="Update not possible because the installation directory is not SVN or GIT versioned!"
+txt_s3tup_msg_update_pending="update pending"
+txt_s3tup_msg_update_not_required="no update required"
+txt_s3tup_msg_update_finished="Update completed to version:"
+txt_s3tup_msg_update_log="updating plugin log"
 txt_s3tup_msg_syscheck1="Please wait while performing checks of required tools and dependencies..."
 txt_s3tup_msg_syscheck2="You need to manually install the following packages to use this plugin properly:"
 txt_s3tup_msg_reset_config1="Moving existing config file..."

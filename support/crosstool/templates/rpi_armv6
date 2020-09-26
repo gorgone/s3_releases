@@ -1,5 +1,6 @@
 #toolchain template: Raspberry Pi Zero W|WH, 1 Model A|A+|B|B+
-#toolchain template version: 3
+#toolchain template version: 4
+#toolchain template updated: 2020-09-13 13:12:20
 # Automatically generated file; DO NOT EDIT.
 # crosstool-NG  Configuration
 CT_CONFIGURE_has_static_link=y
@@ -261,7 +262,8 @@ CT_BINUTILS_USE="BINUTILS"
 CT_BINUTILS_PKG_NAME="binutils"
 CT_BINUTILS_SRC_RELEASE=y
 CT_BINUTILS_PATCH_ORDER="global"
-CT_BINUTILS_V_2_34=y
+CT_BINUTILS_V_2_35=y
+# CT_BINUTILS_V_2_34 is not set
 # CT_BINUTILS_V_2_33 is not set
 # CT_BINUTILS_V_2_32 is not set
 # CT_BINUTILS_V_2_31 is not set
@@ -271,7 +273,7 @@ CT_BINUTILS_V_2_34=y
 # CT_BINUTILS_V_2_27 is not set
 # CT_BINUTILS_V_2_26 is not set
 # CT_BINUTILS_NO_VERSIONS is not set
-CT_BINUTILS_VERSION="2.34"
+CT_BINUTILS_VERSION="2.35"
 CT_BINUTILS_MIRRORS="$(CT_Mirrors GNU binutils) $(CT_Mirrors sourceware binutils/releases)"
 CT_BINUTILS_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_BINUTILS_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
@@ -323,6 +325,7 @@ CT_GLIBC_USE="GLIBC"
 CT_GLIBC_PKG_NAME="glibc"
 CT_GLIBC_SRC_RELEASE=y
 CT_GLIBC_PATCH_ORDER="global"
+# CT_GLIBC_V_2_32 is not set
 CT_GLIBC_V_2_31=y
 # CT_GLIBC_V_2_30 is not set
 # CT_GLIBC_V_2_29 is not set
@@ -342,6 +345,8 @@ CT_GLIBC_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_GLIBC_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_GLIBC_ARCHIVE_FORMATS=".tar.xz .tar.bz2 .tar.gz"
 CT_GLIBC_SIGNATURE_FORMAT="packed/.sig"
+CT_GLIBC_2_32_or_older=y
+CT_GLIBC_older_than_2_32=y
 CT_GLIBC_later_than_2_30=y
 CT_GLIBC_2_30_or_later=y
 CT_GLIBC_later_than_2_29=y
@@ -392,7 +397,7 @@ CT_GLIBC_SSP_DEFAULT=y
 # CT_GLIBC_SSP_ALL is not set
 # CT_GLIBC_SSP_STRONG is not set
 # CT_GLIBC_ENABLE_WERROR is not set
-CT_ALL_LIBC_CHOICES="AVR_LIBC BIONIC GLIBC MINGW_W64 MOXIEBOX MUSL NEWLIB NONE UCLIBC"
+CT_ALL_LIBC_CHOICES="AVR_LIBC BIONIC GLIBC MINGW_W64 MOXIEBOX MUSL NEWLIB NONE PICOLIBC UCLIBC"
 CT_LIBC_SUPPORT_THREADS_ANY=y
 CT_LIBC_SUPPORT_THREADS_NATIVE=y
 # Common C library options
@@ -421,12 +426,13 @@ CT_GCC_USE="GCC"
 CT_GCC_PKG_NAME="gcc"
 CT_GCC_SRC_RELEASE=y
 CT_GCC_PATCH_ORDER="global"
-CT_GCC_V_9=y
+CT_GCC_V_10=y
+# CT_GCC_V_9 is not set
 # CT_GCC_V_8 is not set
 # CT_GCC_V_7 is not set
 # CT_GCC_V_6 is not set
 # CT_GCC_NO_VERSIONS is not set
-CT_GCC_VERSION="9.2.0"
+CT_GCC_VERSION="10.2.0"
 CT_GCC_MIRRORS="$(CT_Mirrors GNU gcc/gcc-${CT_GCC_VERSION}) $(CT_Mirrors sourceware gcc/releases/gcc-${CT_GCC_VERSION})"
 CT_GCC_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_GCC_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
@@ -503,7 +509,7 @@ CT_EXPAT_PATCH_ORDER="global"
 CT_EXPAT_V_2_2=y
 # CT_EXPAT_NO_VERSIONS is not set
 CT_EXPAT_VERSION="2.2.9"
-CT_EXPAT_MIRRORS="http://downloads.sourceforge.net/project/expat/expat/${CT_EXPAT_VERSION}"
+CT_EXPAT_MIRRORS="http://downloads.sourceforge.net/project/expat/expat/${CT_EXPAT_VERSION} https://github.com/libexpat/libexpat/releases/download/R_${CT_EXPAT_VERSION//./_}"
 CT_EXPAT_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_EXPAT_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_EXPAT_ARCHIVE_FORMATS=".tar.xz .tar.lz .tar.bz2 .tar.gz"
@@ -586,7 +592,7 @@ CT_LIBELF_PATCH_ORDER="global"
 CT_LIBELF_V_0_8=y
 # CT_LIBELF_NO_VERSIONS is not set
 CT_LIBELF_VERSION="0.8.13"
-CT_LIBELF_MIRRORS="http://www.mr511.de/software https://fossies.org/linux/misc/old"
+CT_LIBELF_MIRRORS="https://fossies.org/linux/misc/old"
 CT_LIBELF_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_LIBELF_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_LIBELF_ARCHIVE_FORMATS=".tar.gz"

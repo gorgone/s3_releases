@@ -13,7 +13,7 @@ prerequisites(){
 	do
 		if hash "$e" 2>/dev/null
 		then
-			einfo=$(which "$e")
+			einfo=$(type -pf "$e")
 			printf -v pad %40s
 			e=$e$pad
 			e=${e:0:15}
