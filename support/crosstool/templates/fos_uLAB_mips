@@ -1,6 +1,6 @@
 #toolchain template: FRITZ!Box 7490 Labor
-#toolchain template version: 2
-#toolchain template updated: 2020-09-13 13:16:11
+#toolchain template version: 3
+#toolchain template updated: 2020-09-27 21:36:11
 # Automatically generated file; DO NOT EDIT.
 # crosstool-NG  Configuration
 CT_CONFIGURE_has_static_link=y
@@ -187,7 +187,8 @@ CT_LINUX_DIR_NAME="linux"
 CT_LINUX_PKG_NAME="linux"
 CT_LINUX_SRC_RELEASE=y
 CT_LINUX_PATCH_ORDER="global"
-CT_LINUX_V_5_5=y
+CT_LINUX_V_5_8=y
+# CT_LINUX_V_5_7 is not set
 # CT_LINUX_V_5_4 is not set
 # CT_LINUX_V_5_3 is not set
 # CT_LINUX_V_5_2 is not set
@@ -215,7 +216,7 @@ CT_LINUX_V_5_5=y
 # CT_LINUX_V_3_2 is not set
 # CT_LINUX_V_2_6_32 is not set
 # CT_LINUX_NO_VERSIONS is not set
-CT_LINUX_VERSION="5.5.5"
+CT_LINUX_VERSION="5.8.9"
 CT_LINUX_MIRRORS="$(CT_Mirrors kernel.org linux ${CT_LINUX_VERSION})"
 CT_LINUX_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_LINUX_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
@@ -552,27 +553,29 @@ CT_MPC_DIR_NAME="mpc"
 CT_MPC_PKG_NAME="mpc"
 CT_MPC_SRC_RELEASE=y
 CT_MPC_PATCH_ORDER="global"
-CT_MPC_V_1_1=y
+CT_MPC_V_1_2=y
+# CT_MPC_V_1_1 is not set
 # CT_MPC_V_1_0 is not set
 # CT_MPC_NO_VERSIONS is not set
-CT_MPC_VERSION="1.1.0"
+CT_MPC_VERSION="1.2.0"
 CT_MPC_MIRRORS="http://www.multiprecision.org/downloads $(CT_Mirrors GNU mpc)"
 CT_MPC_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_MPC_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_MPC_ARCHIVE_FORMATS=".tar.gz"
 CT_MPC_SIGNATURE_FORMAT="packed/.sig"
+CT_MPC_later_than_1_1_0=y
 CT_MPC_1_1_0_or_later=y
-CT_MPC_1_1_0_or_older=y
 CT_COMP_LIBS_MPFR=y
 CT_COMP_LIBS_MPFR_PKG_KSYM="MPFR"
 CT_MPFR_DIR_NAME="mpfr"
 CT_MPFR_PKG_NAME="mpfr"
 CT_MPFR_SRC_RELEASE=y
 CT_MPFR_PATCH_ORDER="global"
-CT_MPFR_V_4_0=y
+CT_MPFR_V_4_1=y
+# CT_MPFR_V_4_0 is not set
 # CT_MPFR_V_3_1 is not set
 # CT_MPFR_NO_VERSIONS is not set
-CT_MPFR_VERSION="4.0.2"
+CT_MPFR_VERSION="4.1.0"
 CT_MPFR_MIRRORS="http://www.mpfr.org/mpfr-${CT_MPFR_VERSION} $(CT_Mirrors GNU mpfr)"
 CT_MPFR_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_MPFR_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
