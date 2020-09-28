@@ -110,7 +110,7 @@ loadprofile="no"
 s3cfg="$configdir/simplebuild.config"
 
 # Compiler settings
-cc_warn="-W -Wall -Wshadow -Wredundant-decls -Wstrict-prototypes -Wold-style-definition -Wl,dead_strip"
+cc_warn="-W -Wall -Wshadow -Wredundant-decls -Wstrict-prototypes -Wold-style-definition"
 cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections -o nodeadcode"
 
 #default url
