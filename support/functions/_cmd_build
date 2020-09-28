@@ -134,7 +134,8 @@ elif [ ${#_oscamconfdir_custom} -gt 4 ];
 then
     CONFDIR="$_oscamconfdir_custom"
     cdtag="${r_l}custom CONF_DIR=$CONFDIR (via toolchain.cfg)"
-elif [ ${#CUSTOM_CONFDIR} -gt 4 ];
+fi
+if [ ${#CUSTOM_CONFDIR} -gt 4 ];
 then
     CONFDIR="$CUSTOM_CONFDIR"
     cdtag="${r_l}custom CONF_DIR=$CONFDIR (via commandline)"
