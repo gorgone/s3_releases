@@ -5,6 +5,7 @@ SIMPLEVERSION="-NEXT-"
 OIFS=$IFS
 export NCURSES_NO_UTF8_ACS=1
 
+here_=$(pwd)
 realdir=$(readlink -f $0)
 cd "$(dirname $realdir)"
 
