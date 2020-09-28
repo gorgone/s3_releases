@@ -250,6 +250,12 @@ printf "$y_l\n |       set : ${cdtag}$w_l"
 #link lastlog
 	ln -sf "$ldir/$log_name" "$workdir/lastbuild.log"
 
+#EXTRA_COPY_DIR
+	if [ $EXTRA_COPY_DIR -eq 1 ]; then
+		cd $bdir
+		cp $oscam_name $here_
+	fi
+
 #build error message
 	error_on_build=$(grep -c1 error "$ldir/$log_name")
 	[ "$error_on_build" -gt "0" ] && printf "$r_l\terrors on build found$w_l"
