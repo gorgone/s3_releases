@@ -115,7 +115,6 @@ cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections -o nodeadcode"
 
 #default url
 trunkurl="https://svn.streamboard.tv/oscam/trunk"
-#trunkurl="https://svn.streamboard.tv/oscam-addons/modern"
 
 [ -f "$workdir/oscamsource.url" ] && source "$workdir/oscamsource.url"
 
