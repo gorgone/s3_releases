@@ -325,6 +325,8 @@ else
 
 		if [ "$t" == "$1" ]
 		then
+		
+			[ "${2:0:4}" == "here" ] && EXTRA_COPY_DIR=1 || EXTRA_COPY_DIR=0
 
 			if [ "${2:0:3}" == "-p=" ] || [ "${2:0:3}" == "-P=" ]
 			then
