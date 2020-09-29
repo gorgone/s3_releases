@@ -111,9 +111,9 @@ s3cfg="$configdir/simplebuild.config"
 
 # Compiler settings
 cc_warn="-W -Wall -Wshadow -Wredundant-decls -Wstrict-prototypes -Wold-style-definition"
-cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections -o nodeadcode"
+cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections -o nodeadcode --no-inline"
 #optimized compiling options
-#cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections -o nodeadcode -ffast-math -fomit-frame-pointer -finline-small-functions -fthread-jumps -foptimize-strlen -finline-functions"
+#cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections -o nodeadcode -ffast-math -fomit-frame-pointer -fthread-jumps -foptimize-strlen --no-inline"
 
 #default url
 trunkurl="https://svn.streamboard.tv/oscam/trunk"
