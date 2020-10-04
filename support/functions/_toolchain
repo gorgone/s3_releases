@@ -213,8 +213,9 @@ _toolchain_check(){
 		machine=$("./$compilername" -dumpmachine)
 		sr=$("./$compilername" -print-sysroot 2>/dev/null)
 		sysroot=${sr#"$tcdir/$1/bin/../"}
+		compilerpath=$(realpath ./$compilername)
 		printf "$w_l  GCC Version :$y_l $version\n"
-		printf "$w_l  GCC Binary  :$y_l $machine""-gcc\n"
+		printf "$w_l  GCC Binary  :$y_l $machine""-gcc $([ -L "./$compilername" ] && printf "$p_l(${compilerpath#"$tcdir/$1/"})")\n"
 		printf "$w_l  GCC Sysroot :$y_l $sysroot\n"
 		[ -z "$sysroot" ] && sysroot="$r_l$txt_too_old\n"
 		cd "$sr"
