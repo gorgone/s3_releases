@@ -211,7 +211,7 @@ _toolchain_check(){
 		[ ${#_realcompiler} -gt 4 ] && compilername="$_realcompiler"
 		version=$("./$compilername" -dumpversion)
 		machine=$("./$compilername" -dumpmachine)
-		sr=$("./$compilername" -print-sysroot 2>/dev/null)
+		[ "$_androidndkdir" == "1" ] && sr="$tcdir/$1/sysroot" || sr=$("./$compilername" -print-sysroot 2>/dev/null)
 		sysroot=${sr#"$tcdir/$1/bin/../"}
 		compilerpath=$(realpath ./$compilername)
 		printf "$w_l  GCC Version :$y_l $version\n"
