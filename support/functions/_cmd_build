@@ -249,7 +249,7 @@ fi
 
 #link lastlog
 	ln -sf "$ldir/$log_name" "$workdir/lastbuild.log"
-	if [ "${USE_vars[USE_DIAG]}" = "USE_DIAG=1" ]; then
+	if [ "${USE_vars[USE_DIAG]}" == "USE_DIAG=1" ]; then
 		grep -v "^CC\||\|LINK\|STRIP\|+\|^HOST\|^GEN\|___" >"$workdir/USE_DIAG.log" -i "$workdir/lastbuild.log"
 	fi
 
