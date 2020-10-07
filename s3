@@ -63,6 +63,7 @@ do
 	declare -A $a_n
 done
 
+
 USE_vars[USE_DIAG]=;
 USE_vars[USE_TARGZ]=;
 USE_vars[USE_PATCH]=;
@@ -70,6 +71,7 @@ USE_vars[USE_STAPI]=;
 USE_vars[USE_STAPI5]=;
 USE_vars[USE_CONFDIR]=;
 USE_vars[USE_COMPRESS]=;
+USE_vars[USE_OSCAMNAME]=;
 
 s3cfg_vars[USE_TARGZ]=0
 s3cfg_vars[DIRECTMENU]=0
@@ -366,6 +368,11 @@ else
 				if [ "${cmd:0:3}" == "-c=" ] || [ "${cmd:0:3}" == "-C=" ]
 				then
 					CUSTOM_CONFDIR="${cmd#*=}"
+				fi
+
+				if [ "${cmd:0:11}" == "-oscamname=" ]
+				then
+					USE_vars[USE_OSCAMNAME]="USE_OSCAMNAME=${cmd#*=}"
 				fi
 
 				if [ "${cmd:0:5}" == "-upx=" ] || [ "${cmd:0:5}" == "-UPX=" ]
