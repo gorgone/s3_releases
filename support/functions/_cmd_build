@@ -175,18 +175,17 @@ printf "$y_l\n |       set : ${cdtag}$w_l"
 
 	[ "${s3cfg_vars[USE_VERBOSE]}" == "1" ] && _verbose="V=1"
 
-#killstapi for nonsh4
-#	if [ ! "$_toolchainname" == "sh4" ] || [ ! "$_toolchainname" == "sh_4" ]
-#	then
-#		silent=$("$svndir/config.sh" --disable CARDREADER_STAPI CARDREADER_STAPI5)
-#	fi
-
 #build
-	timer_start
+if [ ${#USE_vars[USE_OSCAMNAME]} -gt 0 ]
+then
+	oscam_name=$(echo ${USE_vars[USE_OSCAMNAME]} |cut -d "=" -f2)
+else
 	_generate_oscam_name "$_toolchainname"
+fi
 	_nl
 	USESTRING=${USE_vars[@]}
 	EXTRA_USE=$extra_use
+	timer_start
 	$codecheck make -j"$cpus" $_verbose \
 	"CONF_DIR=$CONFDIR" \
 	"OSCAM_BIN=$bdir/$oscam_name" \
