@@ -110,7 +110,7 @@ _gui_build(){
 			mv -f "$lsmn" "$bdir/oscam-svn$(REVISION)-$(hostname)-list_smargo"
 			printf "oscam-svn$(REVISION)-$(hostname)-list_smargo" >"$targztmp"
 		else
-			printf -e "SAVE\t$lsmn $txt_as oscam-svn$(REVISION)-$_toolchainname-list_smargo"|tee -a "$ldir/$log_name"
+			printf "SAVE\t$lsmn $txt_as oscam-svn$(REVISION)-$_toolchainname-list_smargo"|tee -a "$ldir/$log_name"
 			mv -f "$lsmn" "$bdir/oscam-svn$(REVISION)-$_toolchainname-list_smargo"
 			printf "oscam-svn$(REVISION)-$_toolchainname-list_smargo" >"$targztmp\n"
 		fi
