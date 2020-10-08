@@ -80,7 +80,7 @@ tar_cam(){
 		fi
 
 	else
-		printf -e "$r_l\nerror\n no $1.tar.gz\n created$rs_\n"
+		printf "$r_l\nerror\n no $1.tar.gz\n created$rs_\n"
 	fi
 }
 
