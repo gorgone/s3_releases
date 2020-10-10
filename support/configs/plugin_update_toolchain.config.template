@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="23";
+S3TUP_CONFIG_VERSION="24";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -162,7 +162,7 @@ SSL_100_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 SSL_100_tasks+=('export CC=@CC@;');
 SSL_100_tasks+=('export RANLIB=@RANLIB@;');
 SSL_100_tasks+=('FLAGS="linux-generic32 shared";');
-SSL_100_tasks+=('[[ "@CC@" =~ "musl" ]] && echo "Apply the musl libc patch to avoid OpenSSL build errors due to missing termio.h..." && curl --silent "https://raw.githubusercontent.com/beagleboard/buildroot/master/package/openssl/openssl-004-musl-termios.patch" | patch -p1;');
+SSL_100_tasks+=('[[ "@CC@" =~ "uclibc"|"musl" ]] && echo "Apply the musl libc patch to avoid OpenSSL build errors due to missing termio.h..." && curl --silent "https://raw.githubusercontent.com/beagleboard/buildroot/master/package/openssl/openssl-004-musl-termios.patch" | patch -p1;');
 SSL_100_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_100_tasks+=('make -j@CPUS@;');
 SSL_100_tasks+=('make install;');
@@ -180,7 +180,7 @@ SSL_098_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 SSL_098_tasks+=('export CC=@CC@;');
 SSL_098_tasks+=('export RANLIB=@RANLIB@;');
 SSL_098_tasks+=('FLAGS="linux-generic32 shared";');
-SSL_098_tasks+=('[[ "@CC@" =~ "musl" ]] && echo "Apply the musl libc patch to avoid OpenSSL build errors due to missing termio.h..." && curl --silent "https://raw.githubusercontent.com/beagleboard/buildroot/master/package/openssl/openssl-004-musl-termios.patch" | patch -p1;');
+SSL_098_tasks+=('[[ "@CC@" =~ "uclibc"|"musl" ]] && echo "Apply the musl libc patch to avoid OpenSSL build errors due to missing termio.h..." && curl --silent "https://raw.githubusercontent.com/beagleboard/buildroot/master/package/openssl/openssl-004-musl-termios.patch" | patch -p1;');
 SSL_098_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_098_tasks+=('make -j@CPUS@;');
 SSL_098_tasks+=('make install;');
