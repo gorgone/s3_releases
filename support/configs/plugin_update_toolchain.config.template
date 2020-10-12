@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="24";
+S3TUP_CONFIG_VERSION="25";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -66,7 +66,7 @@ ANDK_SETUP_tasks+=('mv --force "$(basename "$ANDK_PKG_URL" | cut -d "-" -f 1-3)"
 ANDK_SETUP_tasks+=('chmod -R 755 "@ANDKSOURCE@";'); # setup command3
 
 # Library build settings
-LIBS=(SSL_300 SSL_111 SSL_110 SSL_102 SSL_100 SSL_098 LIB_USB LIB_USB0 LIB_PCSC LIB_CCID LIB_ZLIB); # List of ordered libraries. Only libraries in this list are available
+LIBS=(SSL_300 SSL_111 SSL_110 SSL_102 SSL_102B SSL_100 SSL_098 LIB_USB LIB_USB0 LIB_PCSC LIB_CCID LIB_ZLIB); # List of ordered libraries. Only libraries in this list are available
 LIBS_LIST_BETA="0"; # In(Ex)clude libraries defined as beta
 LIBS_AUTO_INTEGRATE="1"; # Automatically reintegrate libraries when rebuilding toolchains
 
@@ -149,6 +149,25 @@ SSL_102_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_102_tasks+=('make -j@CPUS@;');
 SSL_102_tasks+=('make install SHLIB_VERSION_NUMBER=1.0.2 SHLIB_MINOR=0.2;');
 
+# OpenSSL 1.0.2 as 1.0.0
+SSL_102B_hint="OpenSSL 1.0.2 variant to create binaries\n\t\twith version 1.0.0 in its filename.\n\t\tUse it e.g. for fritzbox toolchains!";
+SSL_102B="1";
+SSL_102B_beta="0";
+SSL_102B_name="OpenSSL";
+SSL_102B_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
+SSL_102B_desc="OpenSSL $SSL_102B_version (1.0.0)";
+SSL_102B_check="openssl.pc $(printf "$SSL_102_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
+SSL_102B_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
+SSL_102B_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
+SSL_102B_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
+SSL_102B_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
+SSL_102B_tasks+=('export CC=@CC@;');
+SSL_102B_tasks+=('export RANLIB=@RANLIB@;');
+SSL_102B_tasks+=('FLAGS="linux-generic32 shared";');
+SSL_102B_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
+SSL_102B_tasks+=('make -j@CPUS@;');
+SSL_102B_tasks+=('make install;');
+
 # OpenSSL 1.0.0
 SSL_100="1";
 SSL_100_beta="0";
@@ -162,7 +181,7 @@ SSL_100_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 SSL_100_tasks+=('export CC=@CC@;');
 SSL_100_tasks+=('export RANLIB=@RANLIB@;');
 SSL_100_tasks+=('FLAGS="linux-generic32 shared";');
-SSL_100_tasks+=('[[ "@CC@" =~ "uclibc"|"musl" ]] && echo "Apply the musl libc patch to avoid OpenSSL build errors due to missing termio.h..." && curl --silent "https://raw.githubusercontent.com/beagleboard/buildroot/master/package/openssl/openssl-004-musl-termios.patch" | patch -p1;');
+SSL_100_tasks+=('[[ "@CC@" =~ "musl" ]] && echo "Apply the musl libc patch to avoid OpenSSL build errors due to missing termio.h..." && curl --silent "https://raw.githubusercontent.com/beagleboard/buildroot/master/package/openssl/openssl-004-musl-termios.patch" | patch -p1;');
 SSL_100_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_100_tasks+=('make -j@CPUS@;');
 SSL_100_tasks+=('make install;');
@@ -180,7 +199,7 @@ SSL_098_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 SSL_098_tasks+=('export CC=@CC@;');
 SSL_098_tasks+=('export RANLIB=@RANLIB@;');
 SSL_098_tasks+=('FLAGS="linux-generic32 shared";');
-SSL_098_tasks+=('[[ "@CC@" =~ "uclibc"|"musl" ]] && echo "Apply the musl libc patch to avoid OpenSSL build errors due to missing termio.h..." && curl --silent "https://raw.githubusercontent.com/beagleboard/buildroot/master/package/openssl/openssl-004-musl-termios.patch" | patch -p1;');
+SSL_098_tasks+=('[[ "@CC@" =~ "musl" ]] && echo "Apply the musl libc patch to avoid OpenSSL build errors due to missing termio.h..." && curl --silent "https://raw.githubusercontent.com/beagleboard/buildroot/master/package/openssl/openssl-004-musl-termios.patch" | patch -p1;');
 SSL_098_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_098_tasks+=('make -j@CPUS@;');
 SSL_098_tasks+=('make install;');
