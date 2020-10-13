@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="25";
+S3TUP_CONFIG_VERSION="26";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -138,6 +138,7 @@ SSL_102_beta="0";
 SSL_102_name="OpenSSL";
 SSL_102_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
 SSL_102_check="openssl.pc $(printf "$SSL_102_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
+SSL_102_checklib="libcrypto.so.1.0.2";
 SSL_102_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
 SSL_102_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 SSL_102_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
@@ -157,6 +158,7 @@ SSL_102B_name="OpenSSL";
 SSL_102B_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
 SSL_102B_desc="OpenSSL $SSL_102B_version (1.0.0)";
 SSL_102B_check="openssl.pc $(printf "$SSL_102_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
+SSL_102B_checklib="libcrypto.so.1.0.0";
 SSL_102B_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
 SSL_102B_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 SSL_102B_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
