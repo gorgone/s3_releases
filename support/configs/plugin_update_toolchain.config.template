@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="26";
+S3TUP_CONFIG_VERSION="27";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -211,7 +211,7 @@ LIB_USB="1";
 LIB_USB_beta="0";
 LIB_USB_name="libusb";
 LIB_USB_version="$(curl --silent "https://api.github.com/repos/libusb/libusb/releases/latest" | jq -r '.tag_name' | cut -c 2-)";
-LIB_USB_check="libusb-1.0.pc $(printf "$LIB_USB_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
+LIB_USB_check="libusb-1.0.pc";
 LIB_USB_url="$(curl --silent "https://api.github.com/repos/libusb/libusb/releases/latest" | jq -r '.assets[1].browser_download_url')";
 LIB_USB_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_USB_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
@@ -230,7 +230,7 @@ LIB_USB0="1";
 LIB_USB0_beta="0";
 LIB_USB0_name="libusb";
 LIB_USB0_version="0.1.12";
-LIB_USB0_check="libusb.pc $(printf "$LIB_USB0_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
+LIB_USB0_check="libusb.pc";
 LIB_USB0_url="http://downloads.sourceforge.net/libusb/libusb-0.1.12.tar.gz";
 LIB_USB0_tasks=('echo "Patch 1: Handle compile failures with GCC 7+..." && curl --silent https://sources.debian.org/data/main/libu/libusb/2:0.1.12-32/debian/patches/12_ENAMETOOLONG.diff | git apply -v;');
 LIB_USB0_tasks+=('export TOOLCHAIN=@TOOLCHAIN@;');
@@ -246,7 +246,7 @@ LIB_PCSC="1";
 LIB_PCSC_beta="0";
 LIB_PCSC_name="PCSC-Lite";
 LIB_PCSC_version="$(curl --silent "https://pcsclite.apdu.fr/files/" | grep -m1 'href="pcsc-lite' | awk -F '"' '{printf $4}' | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
-LIB_PCSC_check="libpcsclite.pc $(printf "$LIB_PCSC_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
+LIB_PCSC_check="libpcsclite.pc";
 LIB_PCSC_url="$(printf 'https://pcsclite.apdu.fr/files/'$(curl --silent "https://pcsclite.apdu.fr/files/" | grep -m1 'href="pcsc-lite' | awk -F '"' '{printf $4}'))";
 LIB_PCSC_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_PCSC_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
@@ -267,7 +267,7 @@ LIB_CCID="1";
 LIB_CCID_beta="0";
 LIB_CCID_name="CCID";
 LIB_CCID_version="$(curl --silent "https://ccid.apdu.fr/files/" | grep -m1 'href="ccid' | awk -F '"' '{printf $4}' | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
-LIB_CCID_check="libccid.pc $(printf "$LIB_CCID_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
+LIB_CCID_check="libccid.pc";
 LIB_CCID_url="$(printf 'https://ccid.apdu.fr/files/'$(curl --silent "https://ccid.apdu.fr/files/" | grep -m1 'href="ccid' | awk -F '"' '{printf $4}'))";
 LIB_CCID_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_CCID_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
@@ -290,7 +290,7 @@ LIB_ZLIB="1";
 LIB_ZLIB_beta="0";
 LIB_ZLIB_name="zlib";
 LIB_ZLIB_version="$(curl --silent https://api.github.com/repos/madler/zlib/tags | jq -r '.[0].name' | cut -c 2-)";
-LIB_ZLIB_check="zlib.pc $(printf "$LIB_ZLIB_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
+LIB_ZLIB_check="zlib.pc";
 LIB_ZLIB_url="$(curl --silent "https://api.github.com/repos/madler/zlib/tags" | jq -r '.[0].tarball_url')";
 LIB_ZLIB_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_ZLIB_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');

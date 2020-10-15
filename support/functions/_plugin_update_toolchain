@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.21.2";
+	pversion="0.22.0";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -22,7 +22,6 @@ tcupdate(){
 	OPTION2="$3";
 	[ -z "$4" ] && FLAG="0" || FLAG="$4"; #0 - tcupdate call from s3.TUP itself, 1 - tcupdate call from s3 main menu, 2 - tcupdate call from s3 toolchain menu;
 	tc="$CMDTC";
-	clear;
 
 	#check/install prerequisites
 	[[ -z "$4" || "$FLAG" -gt 0 ]] && [ -z "$disable_syscheck" ] && _check_pkg;
@@ -90,9 +89,16 @@ tcupdate(){
 		CTNG_ROOT_BUILD_CMD="$sp""./s3 tcupdate --config \"CTNG_BUILD_AS_ROOT\" \"1\"\n";
 	fi;
 
+	#process commandline arguments
 	if [ "$CMDTC" == "-c" ] || [ "$CMDTC" == "--create" ];then	#start toolchain builder menu
 		_create_tc "$OPTION1" "" "$FLAG";
 		[ "$FLAG" == "1" ] && return || bye;
+	elif [ "$CMDTC" == "-l" ] || [ "$CMDTC" == "--libs" ];then	#list toolchain integrated libraries
+		_list_toolchain_libkeys "$OPTION1";
+		exit;
+	elif [ "$CMDTC" == "-lv" ] || [ "$CMDTC" == "--libs-version" ];then	#list toolchain integrated libraries including version numbers
+		_list_toolchain_libkeys "$OPTION1" "$CMDTC";
+		exit;
 	elif [ "$CMDTC" == "-s" ] || [ "$CMDTC" == "--setup" ];then	#setup crosstool-NG
 		_create_tc "" "$CMDTC" "$FLAG";
 		bye;
@@ -114,6 +120,7 @@ tcupdate(){
 		_tpl_editor "$(_get_template_type "$cttpldir/$OPTION1" | awk -F';' '{print $1}' | xargs)" "$OPTION1";
 		bye;
 	elif [ -z "$CMDTC" ];then #show toolchain menu
+		clear;
 		unset menu_close;
 		while [ ! $menu_close ]
 		do
@@ -188,7 +195,7 @@ _integrate_libs(){
 		pkgconfigdir=$(_get_toolchain_pkgconfig "$prefixdir");
 
 		#get current toolchain libs
-		tc_libs=$(_get_toolchain_libs "$pkgconfigdir"); #semicolon separeted "pkgname|version|key|compare|libname"
+		tc_libs=$(_get_toolchain_libs "$pkgconfigdir"); #semicolon separeted "pkgname|version|key|version|compare|libname"
 
 		#LIBRARY UPDATE MENU
 		unset MENU_OPTIONS;COUNT=0;unset libs;unset libversioncurrent;unset libversioncompare;
@@ -208,12 +215,12 @@ _integrate_libs(){
 			libtasks="$libkey"_tasks[@];libtasks=("${!libtasks}");
 
 			# check match of existing lib
-			for l in $(echo "$tc_libs" | tr ";" "\n") #semicolon separeted "pkgname|version|key|compare|libname"
+			for l in $(echo "$tc_libs" | tr ";" "\n") #semicolon separeted "pkgname|version|key|version|compare|libname"
 			do
 				key=$(echo "$l" | awk -F'|' '{print $3}' | xargs);
 				if [ "$key" == "$libkey" ];then
 					libversioncurrent=$(echo "$l" | awk -F'|' '{print $2}' | xargs);
-					libversioncompare=$(echo "$l" | awk -F'|' '{print $4}' | xargs);
+					libversioncompare=$(echo "$l" | awk -F'|' '{print $5}' | xargs);
 					break;
 				else
 					libversioncurrent="";
@@ -318,7 +325,7 @@ _create_tc(){
 		if [ "${#2}" -gt 0 ];then #Force setup call
 			ret="1";
 		elif [ "${#1}" -gt 0 ];then #Force build toolchain call
-			opts="$1";
+			opts="$(echo "$1" | tr ',' '\n')";
 			ret="0";
 		else #Show Template Menu
 			tplempty=0;
@@ -377,7 +384,7 @@ _create_tc(){
 							pkgconfigdir=$(echo "$props" | awk -F';' '{print $6}' | xargs);
 
 							#get current toolchain libs
-							tc_libs=$(_get_toolchain_libs "$pkgconfigdir"); #semicolon separeted "pkgname|version|key|compare|libname"
+							tc_libs=$(_get_toolchain_libs "$pkgconfigdir"); #semicolon separeted "pkgname|version|key|version|compare|libname"
 							for l in $(echo "$tc_libs" | tr ";" "\n")
 							do
 								key=$(echo "$l" | awk -F'|' '{print $3}' | xargs);
@@ -961,7 +968,7 @@ _get_toolchain_libs(){
 				libversioncompare=$(_compare_version $libversion $version);
 				if [[ "$pkg $version" =~ ^${libcheck}.* ]];then #regex match, don't quote the right side
 					if [ -n "$libchecklib" -a -f "$pkgconfigdir/../$libchecklib" -o -z "$libchecklib" ];then
-						libs+="$pkg\|$version\|$key\|$libversioncompare\|$name;";
+						libs+="$pkg\|$version\|$key\|$libversion\|$libversioncompare\|$name;";
 						break;
 					fi;
 				fi;
@@ -973,6 +980,74 @@ _get_toolchain_libs(){
 	echo "${libs%?}" | xargs;
 	[ -n "$libs" ] && exit 0 || exit 1;
 };
+_list_toolchain_libkeys(){
+	local tc tcs props pkgconfigdir version key compare libkey libkeys fmt CUR G P R updatable downgradable ADD=11;
+	
+	#get toolchain list from parameter or from installed ones
+	[ -z "$1" ] && tcs="${INST_TCLIST[@]}" || tcs="$(echo "$1" | tr ',' '\n' | sort -h)";
+	for tc in $tcs;
+	do
+		if [ -d "$tcdir/$tc" ];then
+			#print out table header
+			[ -z "$props" -a -z "$2" ] && printf "\n%-30s %-45s %-30s %s\n" "${txt_tc}" "${txt_s3tup_msg_table_header_libs_col_key}" "${txt_s3tup_msg_table_header_libs_col_update}" "${txt_s3tup_msg_table_header_libs_col_downgrade}"
+			[ -z "$props" -a -n "$2" ] && printf "\n%-30s %-11s %21s %3s %-12s %-10s %s\n" "${txt_tc}" "${txt_s3tup_msg_table_header_libsversion_col_key}" "${txt_s3tup_msg_table_header_libsversion_col_curversion}" "" "${txt_s3tup_msg_table_header_libsversion_col_newversion}" "${txt_s3tup_msg_table_header_libsversion_col_update}" "${txt_s3tup_msg_table_header_libsversion_col_downgrade}"
+			
+			#get toolchain properties
+			props=$(_get_toolchain_properties "$tc");
+			pkgconfigdir=$(echo "$props" | awk -F';' '{print $6}' | xargs);
+
+			#get toolchain libraries
+			tc_libs=$(_get_toolchain_libs "$pkgconfigdir"); #semicolon separeted "pkgname|version|key|version|compare|libname"
+
+			#reset some variables before loop
+			unset libkey libkeys updatable downgradable; CUR=0; G=0; P=0; R=0;
+			for l in $(echo "$tc_libs" | tr ';' '\n' | sort -hr)
+			do
+				curversion=$(echo "$l" | awk -F'|' '{print $2}' | xargs);
+				key=$(echo "$l" | awk -F'|' '{print $3}' | xargs);
+				newversion=$(echo "$l" | awk -F'|' '{print $4}' | xargs);
+				compare=$(echo "$l" | awk -F'|' '{print $5}' | xargs);
+				libname=$(echo "$l" | awk -F'|' '{print $6}' | xargs);
+
+				#initialize color formatting variables
+				unset comp update downgrade; P2=0;
+				[ "$compare" == "=" ] && comp="=" && fmt="${g_l}" && ((G++)); #up-to-date
+				[ "$compare" == ">" ] && comp="<" && fmt="${p_l}" && update="${fmt}x${re_}" && updatable+="${fmt}${key}${re_}," && ((P++)); #updatable
+				[ "$compare" == "<" ] && comp=">" && fmt="${r_l}" && downgrade="${fmt}x${re_}" && downgradable+="${fmt}${key}${re_}," && ((R++)); #downgradable
+
+				#generate comma seperated library key list (if second function parameter is empty)
+				[ -n "$key" -a -z "$2" ] && libkeys+="${fmt}${key}${re_}," && ((CUR++));
+				
+				#print out line for each toolchain library (if second function parameter exists)
+				if [ -n "$key" -a -n "$2" ];then
+					[ $(($G+$P+$R)) -gt 1 ] && tc="";
+					libkey="${fmt}${key::11}${re_}";
+					curversion="${libname} ${curversion}"
+					curversion="${fmt}${curversion::21}${re_}";
+					compare="${fmt} ${comp} ${re_}";
+					newversion="${fmt}${newversion::16}${re_}";
+					[ -z "$update" ] && update="-" || P2=1;
+					[ -z "$downgrade" ] && downgrade="-";
+					fmt="%-30s %-$((11+$ADD))b %$((21+$ADD))b %-$((1+$ADD))b %-$((16+$ADD))b %-$((11+$ADD*$P2))b %b\n";
+					printf "$fmt" "${tc::30}" "$libkey" "$curversion" "$compare" "$newversion" "$update" "$downgrade";
+				fi;
+			done;
+
+			#print out line with libraries for each toolchain  (if second function parameter is empty)
+			if [ -z "$2" ];then
+				[ "$CUR" -eq 0 ] && libkeys="--";
+				[ "$P" -eq 0 ] && updatable="-";
+				[ "$P" -gt 0 ] && updatable="${updatable%?}";
+				[ "$R" -gt 0 ] && downgradable="${downgradable%?}";
+				[ -z "$downgradable" ] && downgradable="-";
+
+				fmt="%-30s %-$((45+$ADD*$CUR))b %-$((30+$ADD*$P))b %b\n";
+				printf "$fmt" "${tc::30}" "${libkeys%?}" "$updatable" "$downgradable";
+			fi;
+		fi;
+	done;
+	printf "\n";
+};						
 _get_toolchain_date(){
 	local tc_date;
 	[ -f "$tcdir/$1/build.log.bz2" ] && tc_date="ct-ng.$(date -r "$tcdir/$1/build.log.bz2" "+%F %T")";
