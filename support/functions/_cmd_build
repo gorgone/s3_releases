@@ -234,6 +234,13 @@ fi
 #show build time
 	printf "$g_n""\n TIME -------> $bt$re_\n\n"
 
+#patchelf
+	if [ -n "$_patchelf" ]
+	then
+		printf "$w_l"" ENABLE -----> PATCHELF:$y_l $_patchelf...\n"
+		eval "patchelf "$_patchelf" "$bdir/$oscam_name""
+	fi;
+
 #compress cam
 	if [ "${s3cfg_vars[COMPRESS]}" == "1" ]
 	then

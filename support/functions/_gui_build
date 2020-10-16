@@ -126,8 +126,16 @@ _gui_build(){
 	then
 		rm "$bdir/$oscam_name.debug"
 		printf "\n $txt_delete $oscam_name.debug\n"|tee -a "$ldir/$log_name"
-	fi;) | "$gui" "$st_" --colors --title " -[ Build ]- " "$pb_" "$_lines" "$_cols"
+	fi;
 	sleep 2
+
+#patchelf
+	if [ -n "$_patchelf" ]
+	then
+		printf "\n patchelf $_patchelf\n"|tee -a "$ldir/$log_name"
+		eval "patchelf "$_patchelf" "$bdir/$oscam_name""
+	fi;) | "$gui" "$st_" --colors --title " -[ Build ]- " "$pb_" "$_lines" "$_cols"
+	sleep 1
 
 #COMPRESS
 	if [ ! "$stapi_allowed" == "1" ]
