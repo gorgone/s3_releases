@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.22.0";
+	pversion="0.22.1";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -188,6 +188,7 @@ _integrate_libs(){
 	api=$(echo "$props" | awk -F';' '{print $11}' | xargs);
 	ssl_target=$(echo "$props" | awk -F';' '{print $12}' | xargs);
 	cflags=$(echo "$props" | awk -F';' '{print $13}' | xargs);
+	ldflags=$(echo "$props" | awk -F';' '{print $14}' | xargs);
 
 	while [ ! $menu_close ]
 	do
@@ -345,8 +346,8 @@ _create_tc(){
 					props=$(_get_template_properties "$t");
 					desc=$(echo "$props" | awk -F'^' '{print $1}' | xargs);
 					version=$(echo "$props" | awk -F'^' '{print $2}' | xargs); [ -z "$version" ] && version="0";
-					changed=$(echo "$props" | awk -F'^' '{print $5}' | xargs);[ -n "$changed" ] && changed=", changed:$changed";
-					copyof=$(echo "$props" | awk -F'^' '{print $6}' | xargs);[ -n "$copyof" ] && copyof=", copy of:$copyof";
+					changed=$(echo "$props" | awk -F'^' '{print $6}' | xargs);[ -n "$changed" ] && changed=", changed:$changed";
+					copyof=$(echo "$props" | awk -F'^' '{print $7}' | xargs);[ -n "$copyof" ] && copyof=", copy of:$copyof";
 					version_tc=$(echo $(_get_template_properties "$tcdir/$t/.config") | awk -F'^' '{print $2}' | xargs); [ -z "$version_tc" ] && version_tc="0";
 					if [[ -d "$tcdir/$t" && -f "$tccfgdir/$t" ]];then
 						[ "$version" -gt "$version_tc" ] && color="\Z1" || color="\Zb\Z1";
@@ -532,7 +533,8 @@ _create_tc(){
 								props=$(_get_template_properties "$cttpldir/$tpl");
 								desc=$(echo "$props" | awk -F'^' '{print $1}' | xargs);
 								cflags=$(echo "$props" | awk -F'^' '{print $3}' | xargs);
-								_create_toolchaincfg "$tcdir/$tpl" "$tpl" "$target" "$sysroot" "" "$desc" "" "$dldir/$(decode "$_t1e")$tpl.tar.xz" "yes" "$tpl_type_name" "$use" "$cflags" "$tpl_type";
+								ldflags=$(echo "$props" | awk -F'^' '{print $4}' | xargs);
+								_create_toolchaincfg "$tcdir/$tpl" "$tpl" "$target" "$sysroot" "" "$desc" "" "$dldir/$(decode "$_t1e")$tpl.tar.xz" "yes" "$tpl_type_name" "$use" "$cflags" "$ldflags" "$tpl_type";
 							else
 								_paktc_timer 10;
 							fi;
@@ -577,7 +579,7 @@ _migrations(){
 			for tpl in "${TPL_LIST[@]}";do
 				props=$(_get_template_properties "$cttpldir/$tpl"); #get template properties
 				desc=$(echo "$props" | awk -F'^' '{print $1}' | xargs); #extract description
-				tc_migrate=$(echo "$props" | awk -F'^' '{print $4}' | xargs); #extract template name to migrate
+				tc_migrate=$(echo "$props" | awk -F'^' '{print $5}' | xargs); #extract template name to migrate
 				if [[ -n "$tc_migrate" && -d "$tcdir/$tc_migrate" ]];then
 					mig_list+="\n${txt_tc} ${y_l}${tc_migrate}${re_}\n\t${txt_tpl} ${y_l}${tc_migrate}${re_} ${txt_s3tup_msg_cross_migrations_renamed} ${p_l}${tpl}\n${re_}";
 					rm_list+="\n${txt_s3tup_msg_cross_migrations_remove} ${y_l}${tc_migrate}${re_}\n\trm -r \"${tcdir}/${y_l}${tc_migrate}${re_}\"\n\trm -f \"${tccfgdir}/${y_l}${tc_migrate}${re_}\"\n";
@@ -634,8 +636,8 @@ _backup(){
 	template_type="$(_get_template_type "$cttpldir/$src")";
 	tpl_type="$(echo "$template_type" | awk -F';' '{print $1}' | xargs)";
 	tpl_type_name="$(echo "$template_type" | awk -F';' '{print $2}' | xargs)";
-	source "$tccfgdir/$src" && target="${_compiler%?}" && sysroot="$_sysroot" && lsd="$_libsearchdir" && desc="$_description" && info="$_tc_info" && sb="$_self_build" && eu="$extra_use" && ec="$extra_cc";
-	_create_toolchaincfg "$tcdir/$src" "$dest" "$target" "$sysroot" "$lsd" "$desc" "$info" "$xzfile" "$sb" "tpl_type_name" "$eu" "$ec" "$tpl_type";
+	source "$tccfgdir/$src" && target="${_compiler%?}" && sysroot="$_sysroot" && lsd="$_libsearchdir" && desc="$_description" && info="$_tc_info" && sb="$_self_build" && eu="$extra_use" && ec="$extra_cc" && el="$extra_ld";
+	_create_toolchaincfg "$tcdir/$src" "$dest" "$target" "$sysroot" "$lsd" "$desc" "$info" "$xzfile" "$sb" "tpl_type_name" "$eu" "$ec" "$el" "$tpl_type";
 	) | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_backup_title} ${src} ${txt_to} $(basename "$xzfile") ]- " "$pb_" "$_lines" "$_cols";
 	[ -f "$newtccfgfile" ] && echo "$dest";
 };
@@ -677,7 +679,8 @@ _tpl_editor(){
 	version=$(echo "$props" | awk -F'^' '{print $2}' | xargs);[ -z "$version" ] && version=0;
 	[ -z "$disable_template_versioning" ] &&  ((version+=1));
 	cflags=$(echo "$props" | awk -F'^' '{print $3}' | xargs);
-	copyof=$(echo "$props" | awk -F'^' '{print $6}' | xargs);
+	ldflags=$(echo "$props" | awk -F'^' '{print $4}' | xargs);
+	copyof=$(echo "$props" | awk -F'^' '{print $7}' | xargs);
 
 	editordir="${1,,}srcdir";editordir="${!editordir}";
 
@@ -706,6 +709,7 @@ _tpl_editor(){
 			((i+=1)); sed -i "${i}i #toolchain template: $desc" "$TPL_SAVE"; #add toolchain template description line
 			((i+=1)); sed -i "${i}i #toolchain template version: $version" "$TPL_SAVE"; #add toolchain template version property
 			[ -n "$cflags" ] && ((i+=1)) && sed -i "${i}i #toolchain template cflags: $cflags" "$TPL_SAVE"; #add toolchain template cflags property
+			[ -n "$ldflags" ] && ((i+=1)) && sed -i "${i}i #toolchain template ldflags: $ldflags" "$TPL_SAVE"; #add toolchain template ldflags property
 			((i+=1)); sed -i "${i}i #toolchain template updated: $(date -r "$TPL_SAVE" "+%F %T")" "$TPL_SAVE"; #add toolchain template updated property
 			[ "$TPL_SAVE" != "$cttpldir/$tpl" ] && copyof="$tpl";
 			[ -n "$copyof" ] && ((i+=1)) &&	sed -i "${i}i #toolchain template copyof: $copyof" "$TPL_SAVE"; #add toolchain template copyof property
@@ -874,6 +878,7 @@ _replace_tokens(){
 						s#@API@#$api#g; \
 						s#@SSL_TARGET@#$ssl_target#g; \
 						s#@CFLAGS@#$cflags#g; \
+						s#@LDFLAGS@#$ldflags#g; \
 						s#@CPUS@#$cpus#g; \
 						s#@CC@#$compilername#g; \
 						s#@RANLIB@#$ranlibname#g; \
@@ -925,6 +930,7 @@ _get_toolchain_properties(){
 	#get specific properties from .config
 	if [ -f "$tcdir/$tc/.config" ];then
 		cflags=$(_get_template_properties "$tcdir/$tc/.config" | awk -F'^' '{print $3}' | xargs);
+		ldflags=$(_get_template_properties "$tcdir/$tc/.config" | awk -F'^' '{print $4}' | xargs);
 	fi;
 
 	#get android specific properties from .config
@@ -937,7 +943,7 @@ _get_toolchain_properties(){
 		arch=""; bitness=""; api="";
 	fi;
 
-	props="$compilername;$ranlibname;$includedir;$sysrootdir;$prefixdir;$pkgconfigdir;$hostname;$tc_type;$arch;$bitness;$api;$ssl_target;$cflags"
+	props="$compilername;$ranlibname;$includedir;$sysrootdir;$prefixdir;$pkgconfigdir;$hostname;$tc_type;$arch;$bitness;$api;$ssl_target;$cflags;$ldflags"
 	echo "$props" | xargs;
 	[ -n "$props" ] && exit 0 || exit 1;
 };
@@ -1062,14 +1068,16 @@ _get_template_properties(){
 			desc="$(awk -F': ' '/^#toolchain template:./{print $NF}' "$1" | xargs)";
 			version="$(awk -F': ' '/^#toolchain template version:./{print $NF}' "$1" | xargs)";
 			cflags="$(awk -F': ' '/^#toolchain template cflags:./{print $NF}' "$1" | xargs)";
+			ldflags="$(awk -F': ' '/^#toolchain template ldflags:./{print $NF}' "$1" | xargs)";
 			migrate="$(awk -F': ' '/^#toolchain template migrate:./{print $NF}' "$1" | xargs)";
 			updated="$(awk -F': ' '/^#toolchain template updated:./{print $NF}' "$1" | xargs)";
 			copyof="$(awk -F': ' '/^#toolchain template copyof:./{print $NF}' "$1" | xargs)";
-			[ -n "$version" ] && props="^$version"  || props="^0";
-			[ -n "$cflags" ]  && props+="^$cflags"  || props+="^";
-			[ -n "$migrate" ] && props+="^$migrate" || props+="^";
-			[ -n "$updated" ] && props+="^$updated" || props+="^";
-			[ -n "$copyof" ]  && props+="^$copyof"  || props+="^";
+			[ -n "$version" ] && props="^$version"    || props="^0";
+			[ -n "$cflags" ]  && props+="^$cflags"    || props+="^";
+			[ -n "$ldflags" ] && props+="^$ldflags"   || props+="^";
+			[ -n "$migrate" ] && props+="^$migrate"   || props+="^";
+			[ -n "$updated" ] && props+="^$updated"   || props+="^";
+			[ -n "$copyof" ]  && props+="^$copyof"    || props+="^";
 		else
 			desc="$2";
 		fi;
@@ -1397,7 +1405,7 @@ _create_toolchaincfg(){
 		sysroot="${sr#"$1/"}";
 	fi;
 
-	[ "${13}" == "ANDK" ] && andk_vars='_oscamconfdir_custom="/data/plugin/oscam";
+	[ "${14}" == "ANDK" ] && andk_vars='_oscamconfdir_custom="/data/plugin/oscam";
 _androidndkdir="1";
 stapi_lib_custom="libwi.a";
 stapi_allowed="1";' || andk_vars='_oscamconfdir_custom="";';
@@ -1416,6 +1424,7 @@ _toolchainname="$2";
 default_use="USE_UTF8 USE_LIBCRYPTO";
 extra_use="${11}";
 extra_cc="${12}";
+extra_ld="${13}";
 _description="$(echo "$6" | awk -F'[()]' '{print $1}' | xargs)";
 _oscamconfdir_default="/etc/tuxbox/config";
 $andk_vars

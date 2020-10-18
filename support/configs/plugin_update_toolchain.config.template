@@ -19,6 +19,7 @@ S3TUP_CONFIG_VERSION="27";
 # @API@				Android API level of the toolchain (see https://source.android.com/setup/start/build-numbers)
 # @SSL_TARGET@		Android specific build target for OpenSSL (android-arm, android-arm64, android-x86, android-x86)
 # @CFLAGS@			individuell flags for the C compiler
+# @LDFLAGS@			individuell flags for the C linker
 # @CPUS@			CPU number of the build system
 # @VALIDATE@		Special validation function for some libraries (@VALIDATE@ "PCSC")
 
