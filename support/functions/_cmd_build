@@ -256,8 +256,8 @@ fi
 #link lastlog
 	ln -sf "$ldir/$log_name" "$workdir/lastbuild.log"
 	if [ "${USE_vars[USE_DIAG]}" == "USE_DIAG=1" ]; then
-		grep -v "^scan-build: R\|^scan-build: U\|^BUILD\|^CONF\|^CC\||\|LINK\|STRIP\|^+\|^HOST\|^GEN\|___" -i "$workdir/lastbuild.log" \
-		|sed $'s/ generated./ generated.\\\n\\\n/g' >"$workdir/USE_DIAG.log"
+		grep -v "^CC\|^GEN\|^CONF\|^BUILD\|STRIP\|LINK\|^+\|^scan-build: R\|^scan-build: U\|HOSTCC\|^|" -i "$workdir/lastbuild.log" \
+		|sed $'s/ generated./ generated.\\\n\\\n\\\n/g' >"$workdir/USE_DIAG.log"
 	fi
 
 #EXTRA_COPY_DIR
