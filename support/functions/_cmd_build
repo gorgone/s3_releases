@@ -141,7 +141,7 @@ fi
 
 if [ ! "$CUSTOM_CONFDIR" == "not_set" ];
 then
-    CONFDIR="$_oscamconfdir_custom"
+    CONFDIR="$CUSTOM_CONFDIR"
     cdtag="${r_l}custom CONF_DIR=$CUSTOM_CONFDIR (via CUSTOM_CONFDIR)"
 fi
 
