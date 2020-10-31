@@ -1,7 +1,6 @@
-#toolchain template: FRITZ!Box 7590 and other GRX models 7.2x
-#toolchain template version: 4
-#toolchain template updated: 2020-10-18 21:25:17
-#toolchain template ldflags: -Wl,-dynamic-linker,/usr/lib/freetz/ld-uClibc.so.0
+#toolchain template: FRITZ!Box 7590|7490 7.2x
+#toolchain template version: 5
+#toolchain template updated: 2020-10-30 22:25:17
 FREETZ_USER_LEVEL_EXPERT=y
 FREETZ_SHOW_ADVANCED=y
 FREETZ_SHOW_EXPERT=y

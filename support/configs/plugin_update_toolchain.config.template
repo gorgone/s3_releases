@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="27";
+S3TUP_CONFIG_VERSION="28";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -41,6 +41,7 @@ CTNG_SETUP_tasks+=('make;'); # setup command9
 
 # freetz-NG toolchain build settings
 FNG_REPO_URL="https://github.com/Freetz-NG/freetz-ng.git"; # Repository to load freetz-ng from
+FNG_SEPARATE_DYNAMIC_LINKER="/usr/lib/freetz/ld-uClibc.so.0";
 FNG_CONFIG_tasks=('make menuconfig;'); # config command1
 FNG_CONFIG_tasks+=('TPL_SAVE=$($gui --defaultno --output-fd 1 --ok-label "${txt_s3tup_menu_command_label_yes}" --cancel-label "${txt_s3tup_menu_command_label_no}" --colors $bt_ "$title_ - \Z0$pdesc\Zn" --title "-[ ${txt_s3tup_menu_edit_title} ]-" --inputbox "\n${txt_s3tup_menu_edit_text}" 10 55 "@TEMPLATE@") && cp ".config" "$TPL_SAVE";'); # config command2
 FNG_BUILD_tasks=('make olddefconfig | tee -a "@LOGFILE@";'); # build command1
