@@ -116,11 +116,13 @@ untarsvn(){
 			tar -xf "$bsvn/$1.tar.gz"
 			cd $bsvn
 			ln -sf "$bsvn/$("$svndir/config.sh" -r).tar.gz" "last.tar.gz"
+			printf "\e[1A $w_l SVN Revision  : $c_l$(basename $(readlink -f $bsvn/last.tar.gz) .tar.gz)$w_l\n"
 		else
 
 			if [ -f "$bsvn/last.tar.gz" ]
 			then
 				tar -xf "$bsvn/last.tar.gz"
+				printf "\e[1A $w_l SVN Revision  : $c_l$(basename $(readlink -f $bsvn/last.tar.gz) .tar.gz)$w_l\n"
 			else
 				printf "$w_l  SVN Backup    :$r_l $txt_not_found\n"
 				sleep 3
