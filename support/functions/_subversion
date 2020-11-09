@@ -92,6 +92,7 @@ svnrestore(){
 }
 
 quicksvnrestore(){
+	printf "$1 \n"
 	untarsvn $1
 }
 
