@@ -108,7 +108,6 @@ untarsvn(){
 	if [ -z "$1" ]
 	then
 		[ -f "$bsvn/last.tar.gz" ] && tar -xf "$bsvn/last.tar.gz"
-		echo -e "\e[1A $w_l SVN Revision  : $c_l$(basename $(readlink -f $bsvn/last.tar.gz) .tar.gz)$w_l"
 	else
 
 		if [ -f "$bsvn/$1.tar.gz" ]

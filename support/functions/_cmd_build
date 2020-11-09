@@ -1,4 +1,4 @@
-######!/bin/bash
+#!/bin/bash
 
 _cmd_build(){
 	[ ! -d "$svndir" ] || [ -f "$workdir/NEED-CHECKOUT" ] && checkout
