@@ -47,7 +47,7 @@ enable_emu(){
 		printf "  Fail Count : $fcount\n\n"
 		# todo ask for restore svn yes / no / show log
 else
-	printf "\n$WH  Patch Staus :$G CLEAN \n"
+	printf "\n$WH  Patch Status :$G CLEAN \n"
 	touch "$workdir/EMU_ON"
 fi
 	
