@@ -1,6 +1,6 @@
-#toolchain template: Marvell 628x devices, Synology DS112x, QNAP TS-119x
-#toolchain template version: 5
-#toolchain template updated: 2020-12-04 18:45:15
+#toolchain template: Igel VIA VX855, x86 devices
+#toolchain template version: 1
+#toolchain template updated: 2020-12-04 17:46:41
 # Automatically generated file; DO NOT EDIT.
 # crosstool-NG  Configuration
 CT_CONFIGURE_has_static_link=y
@@ -31,7 +31,7 @@ CT_CONFIG_VERSION="3"
 CT_MODULES=y
 # Paths and misc options
 # crosstool-NG behavior
-# CT_OBSOLETE is not set
+CT_OBSOLETE=y
 # CT_EXPERIMENTAL is not set
 # CT_DEBUG_CT is not set
 # Paths
@@ -100,7 +100,7 @@ CT_LOG_FILE_COMPRESS=y
 # Target options
 # CT_ARCH_ALPHA is not set
 # CT_ARCH_ARC is not set
-CT_ARCH_ARM=y
+# CT_ARCH_ARM is not set
 # CT_ARCH_AVR is not set
 # CT_ARCH_M68K is not set
 # CT_ARCH_MIPS is not set
@@ -109,62 +109,38 @@ CT_ARCH_ARM=y
 # CT_ARCH_S390 is not set
 # CT_ARCH_SH is not set
 # CT_ARCH_SPARC is not set
-# CT_ARCH_X86 is not set
+CT_ARCH_X86=y
 # CT_ARCH_XTENSA is not set
-CT_ARCH="arm"
-CT_ARCH_CHOICE_KSYM="ARM"
+CT_ARCH="x86"
+CT_ARCH_CHOICE_KSYM="X86"
 CT_ARCH_CPU=""
 CT_ARCH_TUNE=""
-CT_ARCH_ARM_SHOW=y
-# Options for arm
-CT_ARCH_ARM_PKG_KSYM=""
-CT_ARCH_ARM_MODE="arm"
-CT_ARCH_ARM_MODE_ARM=y
-# CT_ARCH_ARM_MODE_THUMB is not set
-# CT_ARCH_ARM_INTERWORKING is not set
-CT_ARCH_ARM_EABI_FORCE=y
-CT_ARCH_ARM_EABI=y
+CT_ARCH_X86_SHOW=y
+# Options for x86
+CT_ARCH_X86_PKG_KSYM=""
 CT_ALL_ARCH_CHOICES="ALPHA ARC ARM AVR M68K MICROBLAZE MIPS MOXIE MSP430 NIOS2 POWERPC RISCV S390 SH SPARC X86 XTENSA"
 CT_ARCH_SUFFIX=""
 # CT_OMIT_TARGET_VENDOR is not set
 # Generic target options
 # CT_MULTILIB is not set
 CT_DEMULTILIB=y
-CT_ARCH_SUPPORTS_BOTH_MMU=y
-CT_ARCH_DEFAULT_HAS_MMU=y
 CT_ARCH_USE_MMU=y
-CT_ARCH_SUPPORTS_FLAT_FORMAT=y
-CT_ARCH_SUPPORTS_EITHER_ENDIAN=y
-CT_ARCH_DEFAULT_LE=y
-# CT_ARCH_BE is not set
-CT_ARCH_LE=y
-CT_ARCH_ENDIAN="little"
 CT_ARCH_SUPPORTS_32=y
 CT_ARCH_SUPPORTS_64=y
 CT_ARCH_DEFAULT_32=y
 CT_ARCH_BITNESS=32
 CT_ARCH_32=y
 # CT_ARCH_64 is not set
+CT_ARCH_SUPPORTS_WITH_32_64=y
 # Target optimisations
 CT_ARCH_SUPPORTS_WITH_ARCH=y
 CT_ARCH_SUPPORTS_WITH_CPU=y
 CT_ARCH_SUPPORTS_WITH_TUNE=y
-CT_ARCH_SUPPORTS_WITH_FLOAT=y
-CT_ARCH_SUPPORTS_WITH_FPU=y
-CT_ARCH_SUPPORTS_SOFTFP=y
-CT_ARCH_EXCLUSIVE_WITH_CPU=y
-CT_ARCH_ARCH="armv5te"
-CT_ARCH_FPU=""
-# CT_ARCH_FLOAT_AUTO is not set
-# CT_ARCH_FLOAT_HW is not set
-CT_ARCH_FLOAT_SOFTFP=y
-# CT_ARCH_FLOAT_SW is not set
+CT_ARCH_ARCH="i686"
 CT_TARGET_CFLAGS=""
 CT_TARGET_LDFLAGS=""
-CT_ARCH_FLOAT="softfp"
 # Toolchain options
 # General toolchain options
-CT_FORCE_SYSROOT=y
 CT_USE_SYSROOT=y
 CT_SYSROOT_NAME="sysroot"
 CT_SYSROOT_DIR_PREFIX=""
@@ -175,7 +151,7 @@ CT_SHOW_CT_VERSION=y
 CT_TOOLCHAIN_PKGVERSION=""
 CT_TOOLCHAIN_BUGURL=""
 # Tuple completion and aliasing
-CT_TARGET_VENDOR="marvell"
+CT_TARGET_VENDOR="igel"
 CT_TARGET_ALIAS_SED_EXPR=""
 CT_TARGET_ALIAS=""
 # Toolchain type
@@ -203,6 +179,7 @@ CT_LINUX_SRC_RELEASE=y
 CT_LINUX_PATCH_ORDER="global"
 CT_LINUX_V_5_8=y
 # CT_LINUX_V_5_7 is not set
+# CT_LINUX_V_5_5 is not set
 # CT_LINUX_V_5_4 is not set
 # CT_LINUX_V_5_3 is not set
 # CT_LINUX_V_5_2 is not set
@@ -220,14 +197,43 @@ CT_LINUX_V_5_8=y
 # CT_LINUX_V_4_11 is not set
 # CT_LINUX_V_4_10 is not set
 # CT_LINUX_V_4_9 is not set
+# CT_LINUX_V_4_8 is not set
+# CT_LINUX_V_4_7 is not set
+# CT_LINUX_V_4_6 is not set
+# CT_LINUX_V_4_5 is not set
 # CT_LINUX_V_4_4 is not set
+# CT_LINUX_V_4_3 is not set
+# CT_LINUX_V_4_2 is not set
 # CT_LINUX_V_4_1 is not set
+# CT_LINUX_V_4_0 is not set
+# CT_LINUX_V_3_19 is not set
+# CT_LINUX_V_3_18 is not set
+# CT_LINUX_V_3_17 is not set
 # CT_LINUX_V_3_16 is not set
+# CT_LINUX_V_3_15 is not set
+# CT_LINUX_V_3_14 is not set
 # CT_LINUX_V_3_13 is not set
 # CT_LINUX_V_3_12 is not set
+# CT_LINUX_V_3_11 is not set
 # CT_LINUX_V_3_10 is not set
+# CT_LINUX_V_3_9 is not set
+# CT_LINUX_V_3_8 is not set
+# CT_LINUX_V_3_7 is not set
+# CT_LINUX_V_3_6 is not set
+# CT_LINUX_V_3_5 is not set
 # CT_LINUX_V_3_4 is not set
+# CT_LINUX_V_3_3 is not set
 # CT_LINUX_V_3_2 is not set
+# CT_LINUX_V_3_1 is not set
+# CT_LINUX_V_3_0 is not set
+# CT_LINUX_V_2_6_39 is not set
+# CT_LINUX_V_2_6_38 is not set
+# CT_LINUX_V_2_6_37 is not set
+# CT_LINUX_V_2_6_36 is not set
+# CT_LINUX_V_2_6_35 is not set
+# CT_LINUX_V_2_6_34 is not set
+# CT_LINUX_V_2_6_33 is not set
+# CT_LINUX_V_2_6_32 is not set
 # CT_LINUX_NO_VERSIONS is not set
 CT_LINUX_VERSION="5.8.9"
 CT_LINUX_MIRRORS="$(CT_Mirrors kernel.org linux ${CT_LINUX_VERSION})"
@@ -241,7 +247,6 @@ CT_LINUX_later_than_3_7=y
 CT_LINUX_3_7_or_later=y
 CT_LINUX_later_than_3_2=y
 CT_LINUX_3_2_or_later=y
-CT_LINUX_REQUIRE_3_2_or_later=y
 CT_KERNEL_LINUX_VERBOSITY_0=y
 # CT_KERNEL_LINUX_VERBOSITY_1 is not set
 # CT_KERNEL_LINUX_VERBOSITY_2 is not set
@@ -274,6 +279,9 @@ CT_BINUTILS_V_2_35=y
 # CT_BINUTILS_V_2_28 is not set
 # CT_BINUTILS_V_2_27 is not set
 # CT_BINUTILS_V_2_26 is not set
+# CT_BINUTILS_V_2_25 is not set
+# CT_BINUTILS_V_2_24 is not set
+# CT_BINUTILS_V_2_23 is not set
 # CT_BINUTILS_NO_VERSIONS is not set
 CT_BINUTILS_VERSION="2.35.1"
 CT_BINUTILS_MIRRORS="$(CT_Mirrors GNU binutils) $(CT_Mirrors sourceware binutils/releases)"
@@ -287,7 +295,6 @@ CT_BINUTILS_later_than_2_27=y
 CT_BINUTILS_2_27_or_later=y
 CT_BINUTILS_later_than_2_25=y
 CT_BINUTILS_2_25_or_later=y
-CT_BINUTILS_REQUIRE_2_25_or_later=y
 CT_BINUTILS_later_than_2_23=y
 CT_BINUTILS_2_23_or_later=y
 # GNU binutils
@@ -298,13 +305,9 @@ CT_BINUTILS_HAS_PKGVERSION_BUGURL=y
 CT_BINUTILS_GOLD_SUPPORTS_ARCH=y
 CT_BINUTILS_GOLD_SUPPORT=y
 CT_BINUTILS_FORCE_LD_BFD_DEFAULT=y
-# CT_BINUTILS_LINKER_LD is not set
-CT_BINUTILS_LINKER_LD_GOLD=y
-CT_BINUTILS_GOLD_INSTALLED=y
-CT_BINUTILS_GOLD_THREADS=y
-CT_BINUTILS_LINKER_BOTH=y
-CT_BINUTILS_LINKERS_LIST="ld,gold"
-CT_BINUTILS_LD_WRAPPER=y
+CT_BINUTILS_LINKER_LD=y
+# CT_BINUTILS_LINKER_LD_GOLD is not set
+CT_BINUTILS_LINKERS_LIST="ld"
 CT_BINUTILS_LINKER_DEFAULT="bfd"
 CT_BINUTILS_PLUGINS=y
 CT_BINUTILS_RELRO=m
@@ -328,7 +331,7 @@ CT_GLIBC_PKG_NAME="glibc"
 CT_GLIBC_SRC_RELEASE=y
 CT_GLIBC_PATCH_ORDER="global"
 # CT_GLIBC_V_2_32 is not set
-CT_GLIBC_V_2_31=y
+# CT_GLIBC_V_2_31 is not set
 # CT_GLIBC_V_2_30 is not set
 # CT_GLIBC_V_2_29 is not set
 # CT_GLIBC_V_2_28 is not set
@@ -337,11 +340,20 @@ CT_GLIBC_V_2_31=y
 # CT_GLIBC_V_2_25 is not set
 # CT_GLIBC_V_2_24 is not set
 # CT_GLIBC_V_2_23 is not set
+# CT_GLIBC_V_2_22 is not set
+# CT_GLIBC_V_2_21 is not set
+# CT_GLIBC_V_2_20 is not set
 # CT_GLIBC_V_2_19 is not set
+# CT_GLIBC_V_2_18 is not set
 # CT_GLIBC_V_2_17 is not set
+# CT_GLIBC_V_2_16_0 is not set
+# CT_GLIBC_V_2_15 is not set
+# CT_GLIBC_V_2_14_1 is not set
+# CT_GLIBC_V_2_13 is not set
+CT_GLIBC_V_2_12_2=y
 # CT_GLIBC_V_2_12_1 is not set
 # CT_GLIBC_NO_VERSIONS is not set
-CT_GLIBC_VERSION="2.31"
+CT_GLIBC_VERSION="2.12.2"
 CT_GLIBC_MIRRORS="$(CT_Mirrors GNU glibc)"
 CT_GLIBC_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_GLIBC_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
@@ -349,41 +361,42 @@ CT_GLIBC_ARCHIVE_FORMATS=".tar.xz .tar.bz2 .tar.gz"
 CT_GLIBC_SIGNATURE_FORMAT="packed/.sig"
 CT_GLIBC_2_32_or_older=y
 CT_GLIBC_older_than_2_32=y
-CT_GLIBC_later_than_2_30=y
-CT_GLIBC_2_30_or_later=y
-CT_GLIBC_later_than_2_29=y
-CT_GLIBC_2_29_or_later=y
-CT_GLIBC_later_than_2_28=y
-CT_GLIBC_2_28_or_later=y
-CT_GLIBC_later_than_2_27=y
-CT_GLIBC_2_27_or_later=y
-CT_GLIBC_later_than_2_26=y
-CT_GLIBC_2_26_or_later=y
-CT_GLIBC_later_than_2_25=y
-CT_GLIBC_2_25_or_later=y
-CT_GLIBC_later_than_2_24=y
-CT_GLIBC_2_24_or_later=y
-CT_GLIBC_later_than_2_23=y
-CT_GLIBC_2_23_or_later=y
-CT_GLIBC_later_than_2_20=y
-CT_GLIBC_2_20_or_later=y
-CT_GLIBC_later_than_2_17=y
-CT_GLIBC_2_17_or_later=y
-CT_GLIBC_later_than_2_14=y
-CT_GLIBC_2_14_or_later=y
+CT_GLIBC_2_30_or_older=y
+CT_GLIBC_older_than_2_30=y
+CT_GLIBC_2_29_or_older=y
+CT_GLIBC_older_than_2_29=y
+CT_GLIBC_2_28_or_older=y
+CT_GLIBC_older_than_2_28=y
+CT_GLIBC_2_27_or_older=y
+CT_GLIBC_older_than_2_27=y
+CT_GLIBC_2_26_or_older=y
+CT_GLIBC_older_than_2_26=y
+CT_GLIBC_2_25_or_older=y
+CT_GLIBC_older_than_2_25=y
+CT_GLIBC_2_24_or_older=y
+CT_GLIBC_older_than_2_24=y
+CT_GLIBC_2_23_or_older=y
+CT_GLIBC_older_than_2_23=y
+CT_GLIBC_2_20_or_older=y
+CT_GLIBC_older_than_2_20=y
+CT_GLIBC_2_17_or_older=y
+CT_GLIBC_older_than_2_17=y
+CT_GLIBC_2_14_or_older=y
+CT_GLIBC_older_than_2_14=y
 CT_GLIBC_DEP_KERNEL_HEADERS_VERSION=y
 CT_GLIBC_DEP_BINUTILS=y
 CT_GLIBC_DEP_GCC=y
 CT_GLIBC_DEP_PYTHON=y
-CT_GLIBC_BUILD_SSP=y
+CT_GLIBC_SPARC_ALLOW_V7=y
+CT_GLIBC_HAS_NPTL_ADDON=y
+CT_GLIBC_HAS_PORTS_ADDON=y
+CT_GLIBC_HAS_PORTS_ADDON_EXTERNAL=y
 CT_GLIBC_HAS_LIBIDN_ADDON=y
+CT_GLIBC_USE_NPTL_ADDON=y
 # CT_GLIBC_USE_LIBIDN_ADDON is not set
-CT_GLIBC_NO_SPARC_V8=y
-CT_GLIBC_HAS_OBSOLETE_RPC=y
 CT_GLIBC_EXTRA_CONFIG_ARRAY=""
 CT_GLIBC_CONFIGPARMS=""
 CT_GLIBC_EXTRA_CFLAGS=""
-CT_GLIBC_ENABLE_OBSOLETE_RPC=y
 # CT_GLIBC_DISABLE_VERSIONING is not set
 CT_GLIBC_OLDEST_ABI=""
 CT_GLIBC_FORCE_UNWIND=y
@@ -392,12 +405,6 @@ CT_GLIBC_FORCE_UNWIND=y
 CT_GLIBC_KERNEL_VERSION_AS_HEADERS=y
 # CT_GLIBC_KERNEL_VERSION_CHOSEN is not set
 CT_GLIBC_MIN_KERNEL="5.8.9"
-CT_GLIBC_SSP_DEFAULT=y
-# CT_GLIBC_SSP_NO is not set
-# CT_GLIBC_SSP_YES is not set
-# CT_GLIBC_SSP_ALL is not set
-# CT_GLIBC_SSP_STRONG is not set
-# CT_GLIBC_ENABLE_WERROR is not set
 CT_ALL_LIBC_CHOICES="AVR_LIBC BIONIC GLIBC MINGW_W64 MOXIEBOX MUSL NEWLIB NONE PICOLIBC UCLIBC"
 CT_LIBC_SUPPORT_THREADS_ANY=y
 CT_LIBC_SUPPORT_THREADS_NATIVE=y
@@ -432,6 +439,9 @@ CT_GCC_V_10=y
 # CT_GCC_V_8 is not set
 # CT_GCC_V_7 is not set
 # CT_GCC_V_6 is not set
+# CT_GCC_V_5 is not set
+# CT_GCC_V_4_9 is not set
+# CT_GCC_V_4_8 is not set
 # CT_GCC_NO_VERSIONS is not set
 CT_GCC_VERSION="10.2.0"
 CT_GCC_MIRRORS="$(CT_Mirrors GNU gcc/gcc-${CT_GCC_VERSION}) $(CT_Mirrors sourceware gcc/releases/gcc-${CT_GCC_VERSION})"
@@ -445,17 +455,13 @@ CT_GCC_later_than_7=y
 CT_GCC_7_or_later=y
 CT_GCC_later_than_6=y
 CT_GCC_6_or_later=y
-CT_GCC_REQUIRE_6_or_later=y
 CT_GCC_later_than_5=y
 CT_GCC_5_or_later=y
-CT_GCC_REQUIRE_5_or_later=y
 CT_GCC_later_than_4_9=y
 CT_GCC_4_9_or_later=y
-CT_GCC_REQUIRE_4_9_or_later=y
 CT_GCC_later_than_4_8=y
 CT_GCC_4_8_or_later=y
 CT_CC_GCC_ENABLE_PLUGINS=y
-CT_CC_GCC_GOLD=y
 CT_CC_GCC_HAS_LIBMPX=y
 CT_CC_GCC_ENABLE_CXX_FLAGS=""
 CT_CC_GCC_CORE_EXTRA_CONFIG_ARRAY=""
@@ -473,10 +479,11 @@ CT_CC_GCC_ENABLE_TARGET_OPTSPACE=y
 # CT_CC_GCC_LIBSSP is not set
 # CT_CC_GCC_LIBQUADMATH is not set
 # CT_CC_GCC_LIBSANITIZER is not set
+CT_CC_GCC_LIBMPX=y
 # Misc. obscure options.
 CT_CC_CXA_ATEXIT=y
 # CT_CC_GCC_DISABLE_PCH is not set
-# CT_CC_GCC_SJLJ_EXCEPTIONS is not set
+CT_CC_GCC_SJLJ_EXCEPTIONS=m
 CT_CC_GCC_LDBL_128=m
 # CT_CC_GCC_BUILD_ID is not set
 CT_CC_GCC_LNK_HASH_STYLE_DEFAULT=y
@@ -508,6 +515,7 @@ CT_EXPAT_PKG_NAME="expat"
 CT_EXPAT_SRC_RELEASE=y
 CT_EXPAT_PATCH_ORDER="global"
 CT_EXPAT_V_2_2=y
+# CT_EXPAT_V_2_1 is not set
 # CT_EXPAT_NO_VERSIONS is not set
 CT_EXPAT_VERSION="2.2.9"
 CT_EXPAT_MIRRORS="http://downloads.sourceforge.net/project/expat/expat/${CT_EXPAT_VERSION} https://github.com/libexpat/libexpat/releases/download/R_${CT_EXPAT_VERSION//./_}"
@@ -523,6 +531,7 @@ CT_GETTEXT_SRC_RELEASE=y
 CT_GETTEXT_PATCH_ORDER="global"
 CT_GETTEXT_V_0_20_1=y
 # CT_GETTEXT_V_0_19_8_1 is not set
+# CT_GETTEXT_V_0_19_7 is not set
 # CT_GETTEXT_NO_VERSIONS is not set
 CT_GETTEXT_VERSION="0.20.1"
 CT_GETTEXT_MIRRORS="$(CT_Mirrors GNU gettext)"
@@ -538,6 +547,9 @@ CT_GMP_SRC_RELEASE=y
 CT_GMP_PATCH_ORDER="global"
 CT_GMP_V_6_2=y
 # CT_GMP_V_6_1 is not set
+# CT_GMP_V_6_0 is not set
+# CT_GMP_V_5_1 is not set
+# CT_GMP_V_5_0 is not set
 # CT_GMP_NO_VERSIONS is not set
 CT_GMP_VERSION="6.2.0"
 CT_GMP_MIRRORS="https://gmplib.org/download/gmp https://gmplib.org/download/gmp/archive $(CT_Mirrors GNU gmp)"
@@ -606,6 +618,7 @@ CT_LIBICONV_SRC_RELEASE=y
 CT_LIBICONV_PATCH_ORDER="global"
 CT_LIBICONV_V_1_16=y
 # CT_LIBICONV_V_1_15 is not set
+# CT_LIBICONV_V_1_14 is not set
 # CT_LIBICONV_NO_VERSIONS is not set
 CT_LIBICONV_VERSION="1.16"
 CT_LIBICONV_MIRRORS="$(CT_Mirrors GNU libiconv)"
@@ -622,6 +635,9 @@ CT_MPC_PATCH_ORDER="global"
 CT_MPC_V_1_2=y
 # CT_MPC_V_1_1 is not set
 # CT_MPC_V_1_0 is not set
+# CT_MPC_V_0_9 is not set
+# CT_MPC_V_0_8 is not set
+# CT_MPC_V_0_7 is not set
 # CT_MPC_NO_VERSIONS is not set
 CT_MPC_VERSION="1.2.0"
 CT_MPC_MIRRORS="http://www.multiprecision.org/downloads $(CT_Mirrors GNU mpc)"
@@ -640,6 +656,7 @@ CT_MPFR_PATCH_ORDER="global"
 CT_MPFR_V_4_1=y
 # CT_MPFR_V_4_0 is not set
 # CT_MPFR_V_3_1 is not set
+# CT_MPFR_V_3_0 is not set
 # CT_MPFR_NO_VERSIONS is not set
 CT_MPFR_VERSION="4.1.0"
 CT_MPFR_MIRRORS="http://www.mpfr.org/mpfr-${CT_MPFR_VERSION} $(CT_Mirrors GNU mpfr)"
