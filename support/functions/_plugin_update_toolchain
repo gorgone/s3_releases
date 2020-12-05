@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.22.3";
+	pversion="0.22.4";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -1138,7 +1138,7 @@ _get_template_properties(){
 						bitness=$(grep '^ANDK_ARCH_BITNESS=' "$1" | awk -F'"' '{print $2}');
 						endianness="LE";
 						libc="libc++" && libcv="API $(grep '^ANDK_API=' "$1" | awk -F'"' '{print $2}')";
-						cc="clang" && ccv=" $($andksrcdir/toolchains/llvm/prebuilt/linux-x86_64/bin/clang -dumpversion)";
+						cc="clang" && ccv=" $($andksrcdir/toolchains/llvm/prebuilt/linux-x86_64/bin/clang 2>/dev/null -dumpversion || echo "not supported on $(uname -i) hosts")";
 						kernel="Linux" && kernelv="4.9.0";
 					else
 						setup=0;
