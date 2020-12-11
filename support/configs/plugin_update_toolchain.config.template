@@ -214,7 +214,7 @@ LIB_USB_beta="0";
 LIB_USB_name="libusb";
 LIB_USB_version="$(curl --silent "https://api.github.com/repos/libusb/libusb/releases/latest" | jq -r '.tag_name' | cut -c 2-)";
 LIB_USB_check="libusb-1.0.pc";
-LIB_USB_url="$(curl --silent "https://api.github.com/repos/libusb/libusb/releases/latest" | jq -r '.assets[1].browser_download_url')";
+LIB_USB_url="$(curl --silent "https://api.github.com/repos/libusb/libusb/releases/latest" | jq -r '.assets[2].browser_download_url')";
 LIB_USB_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_USB_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_USB_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
