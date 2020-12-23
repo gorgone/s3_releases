@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.22.4";
+	pversion="0.22.5";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -971,7 +971,7 @@ _get_toolchain_libs(){
 				libchecklib="$key"_checklib;libchecklib="${!libchecklib}";
 				libversion="$key"_version;libversion="${!libversion}";
 				libversioncompare=$(_compare_version $libversion $version);
-				if [[ "$pkg $version" =~ ^${libcheck}.* ]];then #regex match, don't quote the right side
+				if [[ "$pkg $version" =~ ^${libcheck}.* ]] || [[ "$pkg $version" =~ ^${libcheck::-2}.* ]];then #regex match, don't quote the right side
 					if [ -n "$libchecklib" -a -f "$pkgconfigdir/../$libchecklib" -o -z "$libchecklib" ];then
 						libs+="$pkg\|$version\|$key\|$libversion\|$libversioncompare\|$name;";
 						break;
