@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="30";
+S3TUP_CONFIG_VERSION="31";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -231,7 +231,7 @@ LIB_USB_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth
 LIB_USBB="1";
 LIB_USBB_beta="0";
 LIB_USBB_name="libusb";
-LIB_USBB_version="$(curl --silent "https://api.github.com/repos/libusb/libusb/releases" | jq '[.[] | select(.tag_name|test("v1.0.23"))][0] | .tag_name' | sed -e 's#v##g')";
+LIB_USBB_version="$(curl --silent "https://api.github.com/repos/libusb/libusb/releases" | jq '[.[] | select(.tag_name|test("v1.0.23"))][0] | .tag_name' | sed -e 's#v##g; s#\"##g')";
 LIB_USBB_desc="$LIB_USBB_name $LIB_USBB_version (no C11)";
 LIB_USBB_check="libusb-1.0.pc $(printf "$LIB_USBB_version")";
 LIB_USBB_url="$(curl --silent "https://api.github.com/repos/libusb/libusb/releases" | jq '[.[] | select(.tag_name|test("v1.0.23"))][0] | .assets[1].browser_download_url' | sed -e 's#\"##g')";

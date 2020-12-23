@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.22.5";
+	pversion="0.22.6";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -218,6 +218,7 @@ _integrate_libs(){
 			do
 				key=$(echo "$l" | awk -F'|' '{print $3}' | xargs);
 				if [ "$key" == "$libkey" ];then
+					libcheckfile=$(echo "$l" | awk -F'|' '{print $1}' | xargs);
 					libversioncurrent=$(echo "$l" | awk -F'|' '{print $2}' | xargs);
 					libversioncompare=$(echo "$l" | awk -F'|' '{print $5}' | xargs);
 					break;
@@ -231,6 +232,8 @@ _integrate_libs(){
 			[ "$libversioncompare" == "=" ] && libtxtfmt="\Z2" || libtxtfmt="";
 			[ "$libversioncompare" == "<" ] && libtxtfmt="\Z1";
 			[ "$libversioncompare" == ">" ] && [ "${#libversioncurrent}" -gt 0 ] && libselected="on" && libtxtfmt="\Z5" || libselected="off";
+			[ "$libcheckfile" == "$libselectedflag" ] && libselected="off";
+			libselectedflag="$libcheckfile";
 
 			MENU_OPTIONS+=("$libkey"     "${libdesc}$(printf '%*s' $((24-${#libdesc})))${libtxtfmt}$([ $libversioncurrent ] && echo $libversioncompare)	$(echo $libversioncurrent | sed -e 's/^$/ ---/g')\Zn"     "$(echo $libselected)"     "$([ $libname ] && echo "${libdesc}: ${liburl}")");counter;
 
@@ -971,10 +974,9 @@ _get_toolchain_libs(){
 				libchecklib="$key"_checklib;libchecklib="${!libchecklib}";
 				libversion="$key"_version;libversion="${!libversion}";
 				libversioncompare=$(_compare_version $libversion $version);
-				if [[ "$pkg $version" =~ ^${libcheck}.* ]] || [[ "$pkg $version" =~ ^${libcheck::-2}.* ]];then #regex match, don't quote the right side
+				if [[ "$pkg $version" =~ ^${libcheck}.* ]];then #regex match, don't quote the right side
 					if [ -n "$libchecklib" -a -f "$pkgconfigdir/../$libchecklib" -o -z "$libchecklib" ];then
 						libs+="$pkg\|$version\|$key\|$libversion\|$libversioncompare\|$name;";
-						break;
 					fi;
 				fi;
 			done;
