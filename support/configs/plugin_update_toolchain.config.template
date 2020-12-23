@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="29";
+S3TUP_CONFIG_VERSION="30";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -68,7 +68,7 @@ ANDK_SETUP_tasks+=('mv --force "$(basename "$ANDK_PKG_URL" | cut -d "-" -f 1-3)"
 ANDK_SETUP_tasks+=('chmod -R 755 "@ANDKSOURCE@";'); # setup command3
 
 # Library build settings
-LIBS=(SSL_300 SSL_111 SSL_110 SSL_102 SSL_102B SSL_100 SSL_098 LIB_USB LIB_USB0 LIB_PCSC LIB_CCID LIB_ZLIB); # List of ordered libraries. Only libraries in this list are available
+LIBS=(SSL_300 SSL_111 SSL_110 SSL_102 SSL_102B SSL_100 SSL_098 LIB_USB LIB_USBB LIB_USB0 LIB_PCSC LIB_CCID LIB_ZLIB); # List of ordered libraries. Only libraries in this list are available
 LIBS_LIST_BETA="0"; # In(Ex)clude libraries defined as beta
 LIBS_AUTO_INTEGRATE="1"; # Automatically reintegrate libraries when rebuilding toolchains
 
@@ -213,7 +213,7 @@ LIB_USB="1";
 LIB_USB_beta="0";
 LIB_USB_name="libusb";
 LIB_USB_version="$(curl --silent "https://api.github.com/repos/libusb/libusb/releases/latest" | jq -r '.tag_name' | cut -c 2-)";
-LIB_USB_check="libusb-1.0.pc";
+LIB_USB_check="libusb-1.0.pc $(printf "$LIB_USB_version")";
 LIB_USB_url="$(curl --silent "https://api.github.com/repos/libusb/libusb/releases/latest" | jq -r '.assets[2].browser_download_url')";
 LIB_USB_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_USB_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
@@ -226,6 +226,26 @@ LIB_USB_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS;');
 LIB_USB_tasks+=('make -j@CPUS@;');
 LIB_USB_tasks+=('make install;');
 LIB_USB_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 -name "libusb-1.0.*" -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
+
+# libusb 1.0.23
+LIB_USBB="1";
+LIB_USBB_beta="0";
+LIB_USBB_name="libusb";
+LIB_USBB_version="$(curl --silent "https://api.github.com/repos/libusb/libusb/releases" | jq '[.[] | select(.tag_name|test("v1.0.23"))][0] | .tag_name' | sed -e 's#v##g')";
+LIB_USBB_desc="$LIB_USBB_name $LIB_USBB_version (no C11)";
+LIB_USBB_check="libusb-1.0.pc $(printf "$LIB_USBB_version")";
+LIB_USBB_url="$(curl --silent "https://api.github.com/repos/libusb/libusb/releases" | jq '[.[] | select(.tag_name|test("v1.0.23"))][0] | .assets[1].browser_download_url' | sed -e 's#\"##g')";
+LIB_USBB_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
+LIB_USBB_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
+LIB_USBB_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
+LIB_USBB_tasks+=('export CC=@CC@;');
+LIB_USBB_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
+LIB_USBB_tasks+=('[ "@TYPE@" == "android-ndk" ] && cp -f "android/config.h" "./config.h";');
+LIB_USBB_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="--enable-static --disable-shared --disable-udev" || FLAGS="--disable-udev";');
+LIB_USBB_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS;');
+LIB_USBB_tasks+=('make -j@CPUS@;');
+LIB_USBB_tasks+=('make install;');
+LIB_USBB_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 -name "libusb-1.0.*" -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
 
 # libusb 0.1.12
 LIB_USB0="1";
