@@ -198,7 +198,7 @@ txt_s3tup_menu_toolchain_config="archivo config:"
 txt_s3tup_menu_library_title="${txt_lib} Menu Actualización"
 txt_s3tup_menu_library_text1="Escoge todas las librerías a actualizar en la carpeta SYSROOT de ${txt_tc,,}:"
 txt_s3tup_menu_library_text2="         ${txt_lib,,}   versión NUEVA                   ACTUAL" #56 chars
-txt_s3tup_menu_library_notsupported="${txt_lib} is not supported due to missing compiler capabilities!"
+txt_s3tup_menu_library_notsupported="${txt_lib} is not supported by this ${txt_tc,,} due to lack of compiler capabilities!"
 txt_s3tup_menu_library_notfound="no se han encontrado librerías"
 txt_s3tup_menu_library_wrong_selection="No integres la misma librería en diferentes versiones!"
 
