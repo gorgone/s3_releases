@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.22.6";
+	pversion="0.23.0";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -210,6 +210,7 @@ _integrate_libs(){
 			libcheck="$libkey"_check;libcheck="${!libcheck}";
 			libversioncheck=$(echo "$libcheck" | awk '{printf $2}')
 			libcheck=$(echo "$libcheck" | awk '{printf $1}')
+			libcheckcc="$libkey"_checkcc;libcheckcc="${!libcheckcc}";
 			liburl="$libkey"_url;liburl="${!liburl}";
 			libtasks="$libkey"_tasks[@];libtasks=("${!libtasks}");
 
@@ -229,13 +230,15 @@ _integrate_libs(){
 			done;
 
 			#Preselection and formatting
+			[ -n "$libcheckcc" ] && ! _check_compiler_capability "$libcheckcc" && libdescfmt="\Zr\Z1" || libdescfmt=""; #check compiler capabilities
+			[ ${#libdescfmt} -gt 0 ] && txthint="\n\Zr\Z1${txt_s3tup_menu_library_notsupported}\Zn";
 			[ "$libversioncompare" == "=" ] && libtxtfmt="\Z2" || libtxtfmt="";
 			[ "$libversioncompare" == "<" ] && libtxtfmt="\Z1";
 			[ "$libversioncompare" == ">" ] && [ "${#libversioncurrent}" -gt 0 ] && libselected="on" && libtxtfmt="\Z5" || libselected="off";
 			[ "$libcheckfile" == "$libselectedflag" ] && libselected="off";
 			libselectedflag="$libcheckfile";
 
-			MENU_OPTIONS+=("$libkey"     "${libdesc}$(printf '%*s' $((24-${#libdesc})))${libtxtfmt}$([ $libversioncurrent ] && echo $libversioncompare)	$(echo $libversioncurrent | sed -e 's/^$/ ---/g')\Zn"     "$(echo $libselected)"     "$([ $libname ] && echo "${libdesc}: ${liburl}")");counter;
+			MENU_OPTIONS+=("$libkey"     "${libdescfmt}${libdesc}\Zn$(printf '%*s' $((24-${#libdesc})))${libtxtfmt}$([ $libversioncurrent ] && echo $libversioncompare)	$(echo $libversioncurrent | sed -e 's/^$/ ---/g')\Zn"     "$(echo $libselected)"     "$([ $libname ] && echo "${libdesc}: ${liburl}")");counter;
 
 			#     0 key     1 desc     2 version     3 checkversion     4 checkfile 5 current version    6 url      7 tasks array
 			lib=("$libkey" "$libname" "$libversion" "$libversioncheck" "$libcheck" "$libversioncurrent" "$liburl" "($(printf " %q" "${libtasks[@]}"))");
@@ -249,7 +252,7 @@ _integrate_libs(){
 		else
 			clear;clear;
 			opts=$("$gui" "--item-help" "--help-tags" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--default-item" "$lkey" "--ok-label" "${txt_s3tup_menu_command_label_start}" "--help-button" "--help-label" "${txt_s3tup_menu_command_label_info}" "--cancel-label" "$([ ! "$3" -gt 0 ] && echo "${txt_s3tup_menu_command_label_exit}" || echo "${txt_s3tup_menu_command_label_back}")" "--title" "-[ ${txt_s3tup_menu_library_title} - \Z2$tc\Zn ]-" "$cl_"\
-				"\n${txt_s3tup_menu_library_text1}\n$prefixdir\n\n${txt_s3tup_menu_library_text2}" \
+				"\n${txt_s3tup_menu_library_text1}\n\Z2$prefixdir\Zn${txthint}\n\n${txt_s3tup_menu_library_text2}" \
 				0 0 "$COUNT" "${MENU_OPTIONS[@]}");
 			ret="$?"
 		fi;
@@ -972,11 +975,15 @@ _get_toolchain_libs(){
 				[ "${!key}" == "0" ] && continue;
 				libcheck="$key"_check;libcheck="${!libcheck}";
 				libchecklib="$key"_checklib;libchecklib="${!libchecklib}";
+				libcheckcc="$key"_checkcc;libcheckcc="${!libcheckcc}";
 				libversion="$key"_version;libversion="${!libversion}";
 				libversioncompare=$(_compare_version $libversion $version);
 				if [[ "$pkg $version" =~ ^${libcheck}.* ]];then #regex match, don't quote the right side
-					if [ -n "$libchecklib" -a -f "$pkgconfigdir/../$libchecklib" -o -z "$libchecklib" ];then
-						libs+="$pkg\|$version\|$key\|$libversion\|$libversioncompare\|$name;";
+					if [ -n "$libchecklib" -a -f "$pkgconfigdir/../$libchecklib" -o -z "$libchecklib" ];then #check existance of special libs
+						if [ -n "$libcheckcc" ] && _check_compiler_capability "$libcheckcc" || [ -z "$libcheckcc" ];then #check compiler capabilities
+							libs+="$pkg\|$version\|$key\|$libversion\|$libversioncompare\|$name;";
+							break;
+						fi;
 					fi;
 				fi;
 			done;
@@ -1287,6 +1294,18 @@ _check_config(){
 		_paktc_timer 20;
 		return 1;
 	fi;
+};
+_check_compiler_capability(){
+	case "$1" in
+		"c11") #checking if $CC supports -std=c11
+			CFLAGS="-std=c11";
+			echo "_Thread_local int x; int main(){x = 42; ; return 0;}" | "$compilername" -x c -o "/tmp/cc_cap_c11.chk" - >/dev/null 2>&1;
+			ret=$?;
+			[ -f "/tmp/cc_cap_c11.chk" ] && rm "/tmp/cc_cap_c11.chk";
+			unset CFLAGS;;
+		*)  ret=1;
+	esac;
+	return $ret;
 };
 _change_config(){
 	nok=1;

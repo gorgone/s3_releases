@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="31";
+S3TUP_CONFIG_VERSION="32";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -214,6 +214,7 @@ LIB_USB_beta="0";
 LIB_USB_name="libusb";
 LIB_USB_version="$(curl --silent "https://api.github.com/repos/libusb/libusb/releases/latest" | jq -r '.tag_name' | cut -c 2-)";
 LIB_USB_check="libusb-1.0.pc $(printf "$LIB_USB_version")";
+LIB_USB_checkcc="c11";
 LIB_USB_url="$(curl --silent "https://api.github.com/repos/libusb/libusb/releases/latest" | jq -r '.assets[2].browser_download_url')";
 LIB_USB_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_USB_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
