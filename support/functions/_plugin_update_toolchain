@@ -462,7 +462,7 @@ _create_tc(){
 											buildtasks+=("$task");
 										done;;
 								"FNG")  
-										echo -e "${g_l}\n$(tools/freetz-revision 2>&1 | tail -1)\n${re_}" | _log "$logfile";
+										echo -e "${g_l}\n$([ -f "tools/freetz-revision" ] && tools/freetz-revision || tools/freetz_revision 2>&1 | tail -1)\n${re_}" | _log "$logfile";
 										[[ ! $(umask) == 0022 ]] && umask 0022;
 										for task in "${FNG_BUILD_tasks[@]}";do
 											task=$(_replace_tokens "$task");	#replace tokens
