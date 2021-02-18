@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.23.2";
+	pversion="0.23.3";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -995,7 +995,7 @@ _get_toolchain_libs(){
 	[ -n "$libs" ] && exit 0 || exit 1;
 };
 _list_toolchain_libkeys(){
-	local tc tcs props pkgconfigdir version key compare libkey libkeys fmt CUR G P R updatable downgradable ADD=11;
+	local tc tcs props compilername pkgconfigdir version key compare libkey libkeys fmt CUR G P R updatable downgradable ADD=11;
 
 	#get toolchain list from parameter or from installed ones
 	[ -z "$1" ] && tcs="${INST_TCLIST[@]}" || tcs="$(echo "$1" | tr ',' '\n' | sort -h)";
@@ -1008,6 +1008,7 @@ _list_toolchain_libkeys(){
 
 			#get toolchain properties
 			props=$(_get_toolchain_properties "$tc");
+			compilername=$(echo "$props" | awk -F';' '{print $1}' | xargs);
 			pkgconfigdir=$(echo "$props" | awk -F';' '{print $6}' | xargs);
 
 			#get toolchain libraries
