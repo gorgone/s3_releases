@@ -1,9 +1,8 @@
 #toolchain template: QNAP Marvell 628x devices, QNAP TS-119P II
-#toolchain template version: 1
-#toolchain template updated: 2021-03-19 21:33:48
-#toolchain template migrate: marvell2_armv5
+#toolchain template version: 2
+#toolchain template updated: 2021-06-28 21:06:18
 # Automatically generated file; DO NOT EDIT.
-# crosstool-NG 1.24.0.291_0e0fd3c Configuration
+# crosstool-NG 1.24.0.388_94b98a4 Configuration
 CT_CONFIGURE_has_static_link=y
 CT_CONFIGURE_has_cxx11=y
 CT_CONFIGURE_has_wget=y
@@ -19,7 +18,6 @@ CT_CONFIGURE_has_gnu_m4_1_4_12_or_newer=y
 CT_CONFIGURE_has_python_3_4_or_newer=y
 CT_CONFIGURE_has_bison_2_7_or_newer=y
 CT_CONFIGURE_has_python=y
-CT_CONFIGURE_has_cvs=y
 CT_CONFIGURE_has_svn=y
 CT_CONFIGURE_has_git=y
 CT_CONFIGURE_has_md5sum=y
@@ -27,7 +25,7 @@ CT_CONFIGURE_has_sha1sum=y
 CT_CONFIGURE_has_sha256sum=y
 CT_CONFIGURE_has_sha512sum=y
 CT_CONFIGURE_has_install_with_strip_program=y
-CT_VERSION="1.24.0.291_0e0fd3c"
+CT_VERSION="1.24.0.388_94b98a4"
 CT_VCHECK=""
 CT_CONFIG_VERSION_ENV="3"
 CT_CONFIG_VERSION_CURRENT="3"
@@ -213,7 +211,9 @@ CT_LINUX_PKG_NAME="linux"
 CT_LINUX_SRC_RELEASE=y
 # CT_LINUX_SRC_DEVEL is not set
 CT_LINUX_PATCH_ORDER="global"
-CT_LINUX_V_5_10=y
+CT_LINUX_V_5_12=y
+# CT_LINUX_V_5_11 is not set
+# CT_LINUX_V_5_10 is not set
 # CT_LINUX_V_5_9 is not set
 # CT_LINUX_V_5_8 is not set
 # CT_LINUX_V_5_7 is not set
@@ -243,7 +243,7 @@ CT_LINUX_V_5_10=y
 # CT_LINUX_V_3_4 is not set
 # CT_LINUX_V_3_2 is not set
 # CT_LINUX_V_2_6_32 is not set
-CT_LINUX_VERSION="5.10.7"
+CT_LINUX_VERSION="5.12.12"
 CT_LINUX_MIRRORS="$(CT_Mirrors kernel.org linux ${CT_LINUX_VERSION})"
 CT_LINUX_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_LINUX_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
@@ -424,7 +424,8 @@ CT_GLIBC_FORCE_UNWIND=y
 # CT_GLIBC_KERNEL_VERSION_NONE is not set
 CT_GLIBC_KERNEL_VERSION_AS_HEADERS=y
 # CT_GLIBC_KERNEL_VERSION_CHOSEN is not set
-CT_GLIBC_MIN_KERNEL="5.10.7"
+CT_GLIBC_MIN_KERNEL="5.12.12"
+CT_GLIBC_ENABLE_COMMON_FLAG=y
 CT_ALL_LIBC_CHOICES="AVR_LIBC BIONIC GLIBC MINGW_W64 MOXIEBOX MUSL NEWLIB NONE UCLIBC"
 CT_LIBC_SUPPORT_THREADS_ANY=y
 CT_LIBC_SUPPORT_THREADS_NATIVE=y
@@ -457,19 +458,26 @@ CT_GCC_PKG_NAME="gcc"
 CT_GCC_SRC_RELEASE=y
 # CT_GCC_SRC_DEVEL is not set
 CT_GCC_PATCH_ORDER="global"
-CT_GCC_V_10=y
+CT_GCC_V_11=y
+# CT_GCC_V_10 is not set
 # CT_GCC_V_9 is not set
 # CT_GCC_V_8 is not set
 # CT_GCC_V_7 is not set
 # CT_GCC_V_6 is not set
 # CT_GCC_V_5 is not set
 # CT_GCC_V_4_9 is not set
-CT_GCC_VERSION="10.2.0"
+CT_GCC_VERSION="11.1.0"
 CT_GCC_MIRRORS="$(CT_Mirrors GNU gcc/gcc-${CT_GCC_VERSION}) $(CT_Mirrors sourceware gcc/releases/gcc-${CT_GCC_VERSION})"
 CT_GCC_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_GCC_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_GCC_ARCHIVE_FORMATS=".tar.xz .tar.gz"
 CT_GCC_SIGNATURE_FORMAT=""
+CT_GCC_later_than_11=y
+CT_GCC_11_or_later=y
+CT_GCC_later_than_10=y
+CT_GCC_10_or_later=y
+CT_GCC_later_than_9=y
+CT_GCC_9_or_later=y
 CT_GCC_later_than_8=y
 CT_GCC_8_or_later=y
 CT_GCC_later_than_7=y
@@ -503,6 +511,7 @@ CT_CC_GCC_ENABLE_TARGET_OPTSPACE=y
 # CT_CC_GCC_LIBSANITIZER is not set
 # Misc. obscure options.
 CT_CC_CXA_ATEXIT=y
+CT_CC_GCC_TM_CLONE_REGISTRY=m
 # CT_CC_GCC_DISABLE_PCH is not set
 # CT_CC_GCC_SJLJ_EXCEPTIONS is not set
 CT_CC_GCC_LDBL_128=m
@@ -539,8 +548,8 @@ CT_EXPAT_PKG_NAME="expat"
 CT_EXPAT_SRC_RELEASE=y
 # CT_EXPAT_SRC_DEVEL is not set
 CT_EXPAT_PATCH_ORDER="global"
-CT_EXPAT_V_2_2=y
-CT_EXPAT_VERSION="2.2.9"
+CT_EXPAT_V_2_4=y
+CT_EXPAT_VERSION="2.4.1"
 CT_EXPAT_MIRRORS="http://downloads.sourceforge.net/project/expat/expat/${CT_EXPAT_VERSION} https://github.com/libexpat/libexpat/releases/download/R_${CT_EXPAT_VERSION//./_}"
 CT_EXPAT_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_EXPAT_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
@@ -588,7 +597,8 @@ CT_ISL_PKG_NAME="isl"
 CT_ISL_SRC_RELEASE=y
 # CT_ISL_SRC_DEVEL is not set
 CT_ISL_PATCH_ORDER="global"
-CT_ISL_V_0_22=y
+CT_ISL_V_0_24=y
+# CT_ISL_V_0_22 is not set
 # CT_ISL_V_0_21 is not set
 # CT_ISL_V_0_20 is not set
 # CT_ISL_V_0_19 is not set
@@ -596,7 +606,7 @@ CT_ISL_V_0_22=y
 # CT_ISL_V_0_17 is not set
 # CT_ISL_V_0_16 is not set
 # CT_ISL_V_0_15 is not set
-CT_ISL_VERSION="0.22"
+CT_ISL_VERSION="0.24"
 CT_ISL_MIRRORS="http://isl.gforge.inria.fr"
 CT_ISL_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_ISL_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
@@ -624,7 +634,7 @@ CT_LIBELF_SRC_RELEASE=y
 CT_LIBELF_PATCH_ORDER="global"
 CT_LIBELF_V_0_8=y
 CT_LIBELF_VERSION="0.8.13"
-CT_LIBELF_MIRRORS="https://fossies.org/linux/misc/old"
+CT_LIBELF_MIRRORS="https://fossies.org/linux/misc/old http://oe-lite.org/mirror/libelf/ http://ftp.osuosl.org/pub/blfs/conglomeration/libelf/"
 CT_LIBELF_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_LIBELF_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_LIBELF_ARCHIVE_FORMATS=".tar.gz"
