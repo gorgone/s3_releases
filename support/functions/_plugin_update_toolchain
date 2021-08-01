@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.23.3";
+	pversion="0.23.4";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -324,7 +324,7 @@ _integrate_libs(){
 _create_tc(){
 	_sz; # Prepare DIALOG settings
 	unset TPL_LIST;
-	local menu_close libkeys use ldf;
+	local menu_close compilername libkeys use ldf;
 	while [ ! $menu_close ]
 	do
 		if [ "${#2}" -gt 0 ];then #Force setup call
@@ -385,6 +385,7 @@ _create_tc(){
 
 						if [ -d "$tcdir/$tpl" ];then
 							props=$(_get_toolchain_properties "$tpl");
+							compilername=$(echo "$props" | awk -F';' '{print $1}' | xargs);
 							prefixdir=$(echo "$props" | awk -F';' '{print $5}' | xargs);
 							pkgconfigdir=$(echo "$props" | awk -F';' '{print $6}' | xargs);
 
