@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="34";
+S3TUP_CONFIG_VERSION="35";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -51,8 +51,8 @@ FNG_SETUP_tasks=('git clone --progress "$FNG_REPO_URL" "@FNGSOURCE@";'); # setup
 FNG_SETUP_tasks+=('ln -s "../../downloads" "@FNGSOURCE@/dl";'); # setup command2
 
 # android-NDK toolchain build settings
-ANDK_PKG_URL="https://dl.google.com/android/repository/$(curl --silent https://developer.android.com/ndk/downloads | grep -A1 -E -m1 'ndk_linux64_download' | tail -n1 | awk -F'>|<' '{print $2}' | xargs)"; # Location to load Android Native Development Kit (NDK) from freetz-ng from
-ANDK_PKG_SHA1="$(curl --silent https://developer.android.com/ndk/downloads | grep -A4 -E -m1 'ndk_linux64_download' | tail -n1 | awk -F'>|</' '{print $2}' | xargs)";
+ANDK_PKG_URL="https://dl.google.com/android/repository/$(curl --silent https://developer.android.com/ndk/downloads | grep -A1 -m1 'ndk_lts_linux64_download' | tail -n1 | awk -F'>|<' '{print $2}' | xargs)"; # Location to load Android Native Development Kit (NDK) from freetz-ng from
+ANDK_PKG_SHA1="$(curl --silent https://developer.android.com/ndk/downloads | grep -A4 -m1 'ndk_lts_linux64_download' | tail -n1 | awk -F'>|</' '{print $2}' | xargs)";
 ANDK_CONFIG_tasks=('editor ".config";'); # config command1
 ANDK_CONFIG_tasks+=('TPL_SAVE=$($gui --defaultno --output-fd 1 --ok-label "${txt_s3tup_menu_command_label_yes}" --cancel-label "${txt_s3tup_menu_command_label_no}" --colors $bt_ "$title_ - \Z0$pdesc\Zn" --title "-[ ${txt_s3tup_menu_edit_title} ]-" --inputbox "\n${txt_s3tup_menu_edit_text}" 10 55 "@TEMPLATE@") && cp ".config" "$TPL_SAVE";'); # config command2
 ANDK_BUILD_tasks=('TOOLCHAIN="@TOOLCHAIN@";'); # build command1
