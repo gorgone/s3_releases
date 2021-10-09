@@ -1,6 +1,6 @@
 #toolchain template: OpenWrt 19.07|21.02 kirkwood, Pogoplug V2 LE devices
-#toolchain template version: 1
-#toolchain template updated: 2021-10-06 11:10:28
+#toolchain template version: 3
+#toolchain template updated: 2021-10-09 19:33:27
 # Automatically generated file; DO NOT EDIT.
 # crosstool-NG 1.24.0.479_aa52493 Configuration
 CT_CONFIGURE_has_static_link=y
@@ -577,9 +577,19 @@ CT_COMP_LIBS_ISL=y
 CT_COMP_LIBS_ISL_PKG_KSYM="ISL"
 CT_ISL_DIR_NAME="isl"
 CT_ISL_PKG_NAME="isl"
-CT_ISL_SRC_RELEASE=y
-# CT_ISL_SRC_DEVEL is not set
+# CT_ISL_SRC_RELEASE is not set
+CT_ISL_SRC_DEVEL=y
 # CT_ISL_SRC_CUSTOM is not set
+CT_ISL_DEVEL_VCS_git=y
+# CT_ISL_DEVEL_VCS_svn is not set
+# CT_ISL_DEVEL_VCS_hg is not set
+# CT_ISL_DEVEL_VCS_cvs is not set
+CT_ISL_DEVEL_VCS="git"
+CT_ISL_DEVEL_URL="git://repo.or.cz/isl.git"
+CT_ISL_DEVEL_BRANCH=""
+CT_ISL_DEVEL_REVISION=""
+CT_ISL_DEVEL_SUBDIR=""
+CT_ISL_DEVEL_BOOTSTRAP="./autogen.sh"
 CT_ISL_PATCH_GLOBAL=y
 # CT_ISL_PATCH_BUNDLED is not set
 # CT_ISL_PATCH_LOCAL is not set
@@ -587,6 +597,7 @@ CT_ISL_PATCH_GLOBAL=y
 # CT_ISL_PATCH_LOCAL_BUNDLED is not set
 # CT_ISL_PATCH_NONE is not set
 CT_ISL_PATCH_ORDER="global"
+# CT_ISL_VERY_NEW is not set
 CT_ISL_V_0_24=y
 # CT_ISL_V_0_22 is not set
 # CT_ISL_V_0_21 is not set
