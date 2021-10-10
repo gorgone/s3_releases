@@ -1,8 +1,8 @@
 #toolchain template: OpenWrt 19.07|21.02 ath79, mips_24kc BE devices
 #toolchain template version: 8
-#toolchain template updated: 2021-10-09 19:44:49
+#toolchain template updated: 2021-10-10 12:57:02
 # Automatically generated file; DO NOT EDIT.
-# crosstool-NG 1.24.0.479_aa52493 Configuration
+# crosstool-NG 1.24.0.481_bf890ce Configuration
 CT_CONFIGURE_has_static_link=y
 CT_CONFIGURE_has_cxx11=y
 CT_CONFIGURE_has_wget=y
@@ -25,7 +25,7 @@ CT_CONFIGURE_has_sha1sum=y
 CT_CONFIGURE_has_sha256sum=y
 CT_CONFIGURE_has_sha512sum=y
 CT_CONFIGURE_has_install_with_strip_program=y
-CT_VERSION="1.24.0.479_aa52493"
+CT_VERSION="1.24.0.481_bf890ce"
 CT_VCHECK=""
 CT_CONFIG_VERSION_ENV="3"
 CT_CONFIG_VERSION_CURRENT="3"
@@ -584,19 +584,9 @@ CT_COMP_LIBS_ISL=y
 CT_COMP_LIBS_ISL_PKG_KSYM="ISL"
 CT_ISL_DIR_NAME="isl"
 CT_ISL_PKG_NAME="isl"
-# CT_ISL_SRC_RELEASE is not set
-CT_ISL_SRC_DEVEL=y
+CT_ISL_SRC_RELEASE=y
+# CT_ISL_SRC_DEVEL is not set
 # CT_ISL_SRC_CUSTOM is not set
-CT_ISL_DEVEL_VCS_git=y
-# CT_ISL_DEVEL_VCS_svn is not set
-# CT_ISL_DEVEL_VCS_hg is not set
-# CT_ISL_DEVEL_VCS_cvs is not set
-CT_ISL_DEVEL_VCS="git"
-CT_ISL_DEVEL_URL="git://repo.or.cz/isl.git"
-CT_ISL_DEVEL_BRANCH=""
-CT_ISL_DEVEL_REVISION=""
-CT_ISL_DEVEL_SUBDIR=""
-CT_ISL_DEVEL_BOOTSTRAP="./autogen.sh"
 CT_ISL_PATCH_GLOBAL=y
 # CT_ISL_PATCH_BUNDLED is not set
 # CT_ISL_PATCH_LOCAL is not set
@@ -604,7 +594,6 @@ CT_ISL_PATCH_GLOBAL=y
 # CT_ISL_PATCH_LOCAL_BUNDLED is not set
 # CT_ISL_PATCH_NONE is not set
 CT_ISL_PATCH_ORDER="global"
-# CT_ISL_VERY_NEW is not set
 CT_ISL_V_0_24=y
 # CT_ISL_V_0_22 is not set
 # CT_ISL_V_0_21 is not set
@@ -615,7 +604,7 @@ CT_ISL_V_0_24=y
 # CT_ISL_V_0_16 is not set
 # CT_ISL_V_0_15 is not set
 CT_ISL_VERSION="0.24"
-CT_ISL_MIRRORS="http://isl.gforge.inria.fr"
+CT_ISL_MIRRORS="https://libisl.sourceforge.io"
 CT_ISL_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_ISL_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_ISL_ARCHIVE_FORMATS=".tar.xz .tar.bz2 .tar.gz"
