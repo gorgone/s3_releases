@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="37";
+S3TUP_CONFIG_VERSION="38";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -120,9 +120,9 @@ SSL_111_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth
 # OpenSSL 1.1.0
 SSL_110="1";
 SSL_110_name="OpenSSL";
-SSL_110_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_0[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
+SSL_110_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_0[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
 SSL_110_check="openssl.pc $(printf "$SSL_110_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
-SSL_110_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_0[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
+SSL_110_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_0[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
 SSL_110_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 SSL_110_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_110_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
@@ -139,10 +139,10 @@ SSL_110_tasks+=('make install_sw;');
 SSL_102="1";
 SSL_102_beta="0";
 SSL_102_name="OpenSSL";
-SSL_102_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
+SSL_102_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
 SSL_102_check="openssl.pc $(printf "$SSL_102_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
 SSL_102_checklib="libcrypto.so.1.0.2";
-SSL_102_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
+SSL_102_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
 SSL_102_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 SSL_102_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_102_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
@@ -158,11 +158,11 @@ SSL_102B_hint="OpenSSL 1.0.2 variant to create binaries\n\t\twith version 1.0.0 
 SSL_102B="1";
 SSL_102B_beta="0";
 SSL_102B_name="OpenSSL";
-SSL_102B_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
+SSL_102B_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
 SSL_102B_desc="OpenSSL $SSL_102B_version (1.0.0)";
 SSL_102B_check="openssl.pc $(printf "$SSL_102_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
 SSL_102B_checklib="libcrypto.so.1.0.0";
-SSL_102B_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
+SSL_102B_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
 SSL_102B_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 SSL_102B_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_102B_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
@@ -195,9 +195,9 @@ SSL_100_tasks+=('make install;');
 SSL_098="1";
 SSL_098_beta="0";
 SSL_098_name="OpenSSL";
-SSL_098_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_0_9_8[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
+SSL_098_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=3&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_0_9_8[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
 SSL_098_check="openssl.pc $(printf "$SSL_098_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
-SSL_098_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_0_9_8[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
+SSL_098_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=3&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_0_9_8[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
 SSL_098_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 SSL_098_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_098_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
