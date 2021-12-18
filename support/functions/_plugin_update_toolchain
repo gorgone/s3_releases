@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.23.4";
+	pversion="0.23.5";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -300,7 +300,7 @@ _integrate_libs(){
 					sleep 2;
 				done;
 
-				[ -d "$tmpdir" ] && rm -r "$tmpdir";;
+				[ -d "$tmpdir" ] && rm -rf "$tmpdir";;
 			1) #Exit/Back
 				unset MENU_OPTIONS;
 				menu_close="1";
