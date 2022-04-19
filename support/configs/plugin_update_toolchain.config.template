@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="39";
+S3TUP_CONFIG_VERSION="40";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -318,7 +318,7 @@ LIB_ZLIB_check="zlib.pc";
 LIB_ZLIB_url="$(curl --silent "https://api.github.com/repos/madler/zlib/tags" | jq -r '.[0].tarball_url')";
 LIB_ZLIB_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_ZLIB_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
-LIB_ZLIB_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
+LIB_ZLIB_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@" || export CFLAGS="-fPIC";');
 LIB_ZLIB_tasks+=('export CC=@CC@;');
 LIB_ZLIB_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
 LIB_ZLIB_tasks+=('./configure --prefix=@PREFIX@;');
