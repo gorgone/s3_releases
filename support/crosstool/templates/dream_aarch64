@@ -1,12 +1,13 @@
 #toolchain template: Dreambox ONE|TWO
-#toolchain template version: 9
-#toolchain template updated: 2021-10-10 12:59:49
+#toolchain template version: 10
+#toolchain template updated: 2022-04-19 19:04:38
 # Automatically generated file; DO NOT EDIT.
-# crosstool-NG 1.24.0.481_bf890ce Configuration
+# crosstool-NG 1.25.0_rc1 Configuration
 CT_CONFIGURE_has_static_link=y
 CT_CONFIGURE_has_cxx11=y
 CT_CONFIGURE_has_wget=y
 CT_CONFIGURE_has_curl=y
+CT_CONFIGURE_has_rsync=y
 CT_CONFIGURE_has_make_3_81_or_newer=y
 CT_CONFIGURE_has_make_4_0_or_newer=y
 CT_CONFIGURE_has_libtool_2_4_or_newer=y
@@ -25,11 +26,11 @@ CT_CONFIGURE_has_sha1sum=y
 CT_CONFIGURE_has_sha256sum=y
 CT_CONFIGURE_has_sha512sum=y
 CT_CONFIGURE_has_install_with_strip_program=y
-CT_VERSION="1.24.0.481_bf890ce"
+CT_VERSION="1.25.0_rc1"
 CT_VCHECK=""
-CT_CONFIG_VERSION_ENV="3"
-CT_CONFIG_VERSION_CURRENT="3"
-CT_CONFIG_VERSION="3"
+CT_CONFIG_VERSION_ENV="4"
+CT_CONFIG_VERSION_CURRENT="4"
+CT_CONFIG_VERSION="4"
 CT_MODULES=y
 # Paths and misc options
 # crosstool-NG behavior
@@ -197,7 +198,9 @@ CT_LINUX_PKG_NAME="linux"
 CT_LINUX_SRC_RELEASE=y
 # CT_LINUX_SRC_DEVEL is not set
 CT_LINUX_PATCH_ORDER="global"
-CT_LINUX_V_5_14=y
+CT_LINUX_V_5_16=y
+# CT_LINUX_V_5_15 is not set
+# CT_LINUX_V_5_14 is not set
 # CT_LINUX_V_5_13 is not set
 # CT_LINUX_V_5_12 is not set
 # CT_LINUX_V_5_11 is not set
@@ -228,12 +231,16 @@ CT_LINUX_V_5_14=y
 # CT_LINUX_V_3_13 is not set
 # CT_LINUX_V_3_12 is not set
 # CT_LINUX_V_3_10 is not set
-CT_LINUX_VERSION="5.14.1"
+CT_LINUX_VERSION="5.16.9"
 CT_LINUX_MIRRORS="$(CT_Mirrors kernel.org linux ${CT_LINUX_VERSION})"
 CT_LINUX_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_LINUX_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_LINUX_ARCHIVE_FORMATS=".tar.xz .tar.gz"
 CT_LINUX_SIGNATURE_FORMAT="unpacked/.sign"
+CT_LINUX_later_than_5_12=y
+CT_LINUX_5_12_or_later=y
+CT_LINUX_later_than_5_3=y
+CT_LINUX_5_3_or_later=y
 CT_LINUX_later_than_4_8=y
 CT_LINUX_4_8_or_later=y
 CT_LINUX_later_than_3_7=y
@@ -242,6 +249,7 @@ CT_LINUX_REQUIRE_3_7_or_later=y
 CT_LINUX_later_than_3_2=y
 CT_LINUX_3_2_or_later=y
 CT_LINUX_REQUIRE_3_2_or_later=y
+CT_KERNEL_DEP_RSYNC=y
 CT_KERNEL_LINUX_VERBOSITY_0=y
 # CT_KERNEL_LINUX_VERBOSITY_1 is not set
 # CT_KERNEL_LINUX_VERBOSITY_2 is not set
@@ -298,13 +306,14 @@ CT_BINUTILS_LD_WRAPPER=y
 CT_BINUTILS_LINKER_DEFAULT="bfd"
 CT_BINUTILS_PLUGINS=y
 CT_BINUTILS_RELRO=m
+CT_BINUTILS_DETERMINISTIC_ARCHIVES=y
 CT_BINUTILS_EXTRA_CONFIG_ARRAY=""
 # CT_BINUTILS_FOR_TARGET is not set
 CT_ALL_BINUTILS_CHOICES="BINUTILS"
 # end of Binary utilities
 # C-library
 CT_LIBC_GLIBC=y
-# CT_LIBC_UCLIBC is not set
+# CT_LIBC_UCLIBC_NG is not set
 CT_LIBC="glibc"
 CT_LIBC_CHOICE_KSYM="GLIBC"
 CT_THREADS="nptl"
@@ -319,6 +328,7 @@ CT_GLIBC_PKG_NAME="glibc"
 CT_GLIBC_SRC_RELEASE=y
 # CT_GLIBC_SRC_DEVEL is not set
 CT_GLIBC_PATCH_ORDER="global"
+# CT_GLIBC_V_2_35 is not set
 # CT_GLIBC_V_2_34 is not set
 # CT_GLIBC_V_2_33 is not set
 # CT_GLIBC_V_2_32 is not set
@@ -333,7 +343,6 @@ CT_GLIBC_V_2_25=y
 # CT_GLIBC_V_2_23 is not set
 # CT_GLIBC_V_2_19 is not set
 # CT_GLIBC_V_2_17 is not set
-# CT_GLIBC_V_2_12_1 is not set
 CT_GLIBC_VERSION="2.25"
 CT_GLIBC_MIRRORS="$(CT_Mirrors GNU glibc)"
 CT_GLIBC_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
@@ -385,7 +394,7 @@ CT_GLIBC_FORCE_UNWIND=y
 # CT_GLIBC_KERNEL_VERSION_NONE is not set
 CT_GLIBC_KERNEL_VERSION_AS_HEADERS=y
 # CT_GLIBC_KERNEL_VERSION_CHOSEN is not set
-CT_GLIBC_MIN_KERNEL="5.14.1"
+CT_GLIBC_MIN_KERNEL="5.16.9"
 CT_GLIBC_SSP_DEFAULT=y
 # CT_GLIBC_SSP_NO is not set
 # CT_GLIBC_SSP_YES is not set
@@ -393,7 +402,7 @@ CT_GLIBC_SSP_DEFAULT=y
 # CT_GLIBC_SSP_STRONG is not set
 # CT_GLIBC_ENABLE_WERROR is not set
 CT_GLIBC_ENABLE_COMMON_FLAG=y
-CT_ALL_LIBC_CHOICES="AVR_LIBC BIONIC GLIBC MINGW_W64 MOXIEBOX MUSL NEWLIB NONE UCLIBC"
+CT_ALL_LIBC_CHOICES="AVR_LIBC BIONIC GLIBC MINGW_W64 MOXIEBOX MUSL NEWLIB NONE UCLIBC_NG"
 CT_LIBC_SUPPORT_THREADS_ANY=y
 CT_LIBC_SUPPORT_THREADS_NATIVE=y
 # Common C library options
@@ -402,9 +411,7 @@ CT_THREADS_NATIVE=y
 CT_LIBC_XLDD=y
 # end of C-library
 # C compiler
-CT_CC_CORE_PASSES_NEEDED=y
-CT_CC_CORE_PASS_1_NEEDED=y
-CT_CC_CORE_PASS_2_NEEDED=y
+CT_CC_CORE_NEEDED=y
 CT_CC_SUPPORT_CXX=y
 CT_CC_SUPPORT_FORTRAN=y
 CT_CC_SUPPORT_ADA=y
@@ -419,7 +426,6 @@ CT_CC_GCC_SHOW=y
 CT_CC_GCC_PKG_KSYM="GCC"
 CT_GCC_DIR_NAME="gcc"
 CT_GCC_USE_GNU=y
-# CT_GCC_USE_ORACLE is not set
 CT_GCC_USE="GCC"
 CT_GCC_PKG_NAME="gcc"
 CT_GCC_SRC_RELEASE=y
@@ -455,8 +461,6 @@ CT_GCC_later_than_5=y
 CT_GCC_5_or_later=y
 CT_GCC_later_than_4_9=y
 CT_GCC_4_9_or_later=y
-CT_GCC_later_than_4_8=y
-CT_GCC_4_8_or_later=y
 CT_CC_GCC_ENABLE_PLUGINS=y
 CT_CC_GCC_GOLD=y
 CT_CC_GCC_HAS_LIBMPX=y
@@ -530,14 +534,21 @@ CT_GETTEXT_PKG_NAME="gettext"
 CT_GETTEXT_SRC_RELEASE=y
 # CT_GETTEXT_SRC_DEVEL is not set
 CT_GETTEXT_PATCH_ORDER="global"
-CT_GETTEXT_V_0_20_1=y
+CT_GETTEXT_V_0_21=y
+# CT_GETTEXT_V_0_20_1 is not set
 # CT_GETTEXT_V_0_19_8_1 is not set
-CT_GETTEXT_VERSION="0.20.1"
+CT_GETTEXT_VERSION="0.21"
 CT_GETTEXT_MIRRORS="$(CT_Mirrors GNU gettext)"
 CT_GETTEXT_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_GETTEXT_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_GETTEXT_ARCHIVE_FORMATS=".tar.xz .tar.gz"
 CT_GETTEXT_SIGNATURE_FORMAT="packed/.sig"
+CT_GETTEXT_0_21_or_later=y
+CT_GETTEXT_0_21_or_older=y
+CT_GETTEXT_INCOMPATIBLE_WITH_UCLIBC_NG=y
+# This version of gettext is not compatible with uClibc-NG. Select
+# a different version if uClibc-NG is used on the target or (in a
+# Canadian cross build) on the host.
 CT_COMP_LIBS_GMP=y
 CT_COMP_LIBS_GMP_PKG_KSYM="GMP"
 CT_GMP_DIR_NAME="gmp"
@@ -553,11 +564,6 @@ CT_GMP_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_GMP_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_GMP_ARCHIVE_FORMATS=".tar.xz .tar.lz .tar.bz2"
 CT_GMP_SIGNATURE_FORMAT="packed/.sig"
-CT_GMP_later_than_5_1_0=y
-CT_GMP_5_1_0_or_later=y
-CT_GMP_later_than_5_0_0=y
-CT_GMP_5_0_0_or_later=y
-CT_GMP_REQUIRE_5_0_0_or_later=y
 CT_COMP_LIBS_ISL=y
 CT_COMP_LIBS_ISL_PKG_KSYM="ISL"
 CT_ISL_DIR_NAME="isl"
@@ -566,6 +572,7 @@ CT_ISL_SRC_RELEASE=y
 # CT_ISL_SRC_DEVEL is not set
 CT_ISL_PATCH_ORDER="global"
 CT_ISL_V_0_24=y
+# CT_ISL_V_0_23 is not set
 # CT_ISL_V_0_22 is not set
 # CT_ISL_V_0_21 is not set
 # CT_ISL_V_0_20 is not set
@@ -584,15 +591,6 @@ CT_ISL_later_than_0_18=y
 CT_ISL_0_18_or_later=y
 CT_ISL_later_than_0_15=y
 CT_ISL_0_15_or_later=y
-CT_ISL_REQUIRE_0_15_or_later=y
-CT_ISL_later_than_0_14=y
-CT_ISL_0_14_or_later=y
-CT_ISL_REQUIRE_0_14_or_later=y
-CT_ISL_later_than_0_13=y
-CT_ISL_0_13_or_later=y
-CT_ISL_later_than_0_12=y
-CT_ISL_0_12_or_later=y
-CT_ISL_REQUIRE_0_12_or_later=y
 CT_COMP_LIBS_LIBELF=y
 CT_COMP_LIBS_LIBELF_PKG_KSYM="LIBELF"
 CT_LIBELF_DIR_NAME="libelf"
@@ -632,7 +630,7 @@ CT_MPC_PATCH_ORDER="global"
 CT_MPC_V_1_2=y
 # CT_MPC_V_1_1 is not set
 # CT_MPC_V_1_0 is not set
-CT_MPC_VERSION="1.2.0"
+CT_MPC_VERSION="1.2.1"
 CT_MPC_MIRRORS="http://www.multiprecision.org/downloads $(CT_Mirrors GNU mpc)"
 CT_MPC_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_MPC_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
@@ -658,9 +656,6 @@ CT_MPFR_ARCHIVE_FORMATS=".tar.xz .tar.bz2 .tar.gz .zip"
 CT_MPFR_SIGNATURE_FORMAT="packed/.asc"
 CT_MPFR_later_than_4_0_0=y
 CT_MPFR_4_0_0_or_later=y
-CT_MPFR_later_than_3_0_0=y
-CT_MPFR_3_0_0_or_later=y
-CT_MPFR_REQUIRE_3_0_0_or_later=y
 CT_COMP_LIBS_NCURSES=y
 CT_COMP_LIBS_NCURSES_PKG_KSYM="NCURSES"
 CT_NCURSES_DIR_NAME="ncurses"
@@ -677,6 +672,7 @@ CT_NCURSES_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_NCURSES_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_NCURSES_ARCHIVE_FORMATS=".tar.gz"
 CT_NCURSES_SIGNATURE_FORMAT="packed/.sig"
+CT_NCURSES_NEW_ABI=y
 CT_NCURSES_HOST_CONFIG_ARGS=""
 CT_NCURSES_HOST_DISABLE_DB=y
 CT_NCURSES_HOST_FALLBACKS="linux,xterm,xterm-color,xterm-256color,vt100"

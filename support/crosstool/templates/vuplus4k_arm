@@ -368,7 +368,6 @@ CT_GLIBC_PATCH_ORDER="global"
 CT_GLIBC_V_2_23=y
 # CT_GLIBC_V_2_19 is not set
 # CT_GLIBC_V_2_17 is not set
-							  
 CT_GLIBC_VERSION="2.23"
 CT_GLIBC_MIRRORS="$(CT_Mirrors GNU glibc)"
 CT_GLIBC_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
@@ -431,8 +430,6 @@ CT_LIBC_XLDD=y
 # end of C-library
 # C compiler
 CT_CC_CORE_NEEDED=y
-						  
-						  
 CT_CC_SUPPORT_CXX=y
 CT_CC_SUPPORT_FORTRAN=y
 CT_CC_SUPPORT_ADA=y
@@ -447,7 +444,6 @@ CT_CC_GCC_SHOW=y
 CT_CC_GCC_PKG_KSYM="GCC"
 CT_GCC_DIR_NAME="gcc"
 CT_GCC_USE_GNU=y
-							  
 CT_GCC_USE="GCC"
 CT_GCC_PKG_NAME="gcc"
 CT_GCC_SRC_RELEASE=y
@@ -483,8 +479,6 @@ CT_GCC_later_than_5=y
 CT_GCC_5_or_later=y
 CT_GCC_later_than_4_9=y
 CT_GCC_4_9_or_later=y
-					   
-					 
 CT_CC_GCC_ENABLE_PLUGINS=y
 CT_CC_GCC_GOLD=y
 CT_CC_GCC_HAS_LIBMPX=y
@@ -588,11 +582,6 @@ CT_GMP_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_GMP_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_GMP_ARCHIVE_FORMATS=".tar.xz .tar.lz .tar.bz2"
 CT_GMP_SIGNATURE_FORMAT="packed/.sig"
-						 
-					   
-						 
-					   
-							   
 CT_COMP_LIBS_ISL=y
 CT_COMP_LIBS_ISL_PKG_KSYM="ISL"
 CT_ISL_DIR_NAME="isl"
@@ -620,15 +609,6 @@ CT_ISL_later_than_0_18=y
 CT_ISL_0_18_or_later=y
 CT_ISL_later_than_0_15=y
 CT_ISL_0_15_or_later=y
-							  
-						
-					  
-							  
-						
-					  
-						
-					  
-							  
 CT_COMP_LIBS_LIBELF=y
 CT_COMP_LIBS_LIBELF_PKG_KSYM="LIBELF"
 CT_LIBELF_DIR_NAME="libelf"
@@ -694,9 +674,6 @@ CT_MPFR_ARCHIVE_FORMATS=".tar.xz .tar.bz2 .tar.gz .zip"
 CT_MPFR_SIGNATURE_FORMAT="packed/.asc"
 CT_MPFR_later_than_4_0_0=y
 CT_MPFR_4_0_0_or_later=y
-						  
-						
-								
 CT_COMP_LIBS_NCURSES=y
 CT_COMP_LIBS_NCURSES_PKG_KSYM="NCURSES"
 CT_NCURSES_DIR_NAME="ncurses"
