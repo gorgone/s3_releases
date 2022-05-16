@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.23.5";
+	pversion="0.23.6";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -1221,7 +1221,7 @@ _check_lib(){
 		"PCSC")	#Create symlink to the PCSC header files, if the last include path of the compiler don't point to it
 				echo -e "\n${txt_s3tup_msg_check_library_info1}";
 				if [ "${#includedir}" -gt 0 ] && [ ! -d "$includedir/PCSC" ];then
-					headerdir="$(dirname $(find "$prefixdir" -type f -name "pcsclite.h" | head -n 1))";
+					headerdir="$(dirname $(find "${prefixdir%/}/" -type f -name "pcsclite.h" | head -n 1))";
 					[ "${#headerdir}" -gt 0 ] && ln -frs "$headerdir" "$includedir/PCSC";
 					[ "${#headerdir}" -gt 0 ] && echo "$includedir/PCSC -> ${txt_s3tup_msg_check_library_info2a}" || "${txt_s3tup_msg_check_library_info2b} $prefixdir";
 				else
