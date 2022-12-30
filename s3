@@ -1,9 +1,13 @@
 #!/bin/bash
 
-VERSIONCOUNTER=310
+VERSIONCOUNTER=313
 SIMPLEVERSION="-NEXT-"
 OIFS=$IFS
 export NCURSES_NO_UTF8_ACS=1
+
+here_=$(pwd)
+realdir=$(readlink -f $0)
+cd "$(dirname $realdir)"
 
 #set dir_vars
 workdir="$(pwd)"
@@ -59,6 +63,7 @@ do
 	declare -A $a_n
 done
 
+
 USE_vars[USE_DIAG]=;
 USE_vars[USE_TARGZ]=;
 USE_vars[USE_PATCH]=;
@@ -66,6 +71,7 @@ USE_vars[USE_STAPI]=;
 USE_vars[USE_STAPI5]=;
 USE_vars[USE_CONFDIR]=;
 USE_vars[USE_COMPRESS]=;
+USE_vars[USE_OSCAMNAME]=;
 
 s3cfg_vars[USE_TARGZ]=0
 s3cfg_vars[DIRECTMENU]=0
@@ -91,7 +97,7 @@ UPX="not_set"
 OPENBOX=0
 UFS916003=0
 _t1e="VG9vbGNoYWluLQ=="
-_u1e="aHR0cHM6Ly9maWxlcy5zdHJlYW1ib2FyZC50di90b29sY2hhaW5z"
+_u1e="aHR0cHM6Ly9maWxlcy5zdHJlYW1ib2FyZC50di90b29sY2hhaW5zLw=="
 
 run="0"
 cposx=0
@@ -107,7 +113,9 @@ s3cfg="$configdir/simplebuild.config"
 
 # Compiler settings
 cc_warn="-W -Wall -Wshadow -Wredundant-decls -Wstrict-prototypes -Wold-style-definition"
-cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections"
+cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections -o nodeadcode"
+#optimized compiling options
+#cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections -o nodeadcode -ffast-math -fomit-frame-pointer -fthread-jumps -foptimize-strlen --no-inline"
 
 #default url
 trunkurl="https://github.com/oe-alliance/oscam-smod.git";
@@ -323,6 +331,8 @@ else
 
 		if [ "$t" == "$1" ]
 		then
+		
+			[ "${2:0:4}" == "here" ] && EXTRA_COPY_DIR=1 || EXTRA_COPY_DIR=0
 
 			if [ "${2:0:3}" == "-p=" ] || [ "${2:0:3}" == "-P=" ]
 			then
@@ -360,6 +370,11 @@ else
 				if [ "${cmd:0:3}" == "-c=" ] || [ "${cmd:0:3}" == "-C=" ]
 				then
 					CUSTOM_CONFDIR="${cmd#*=}"
+				fi
+
+				if [ "${cmd:0:11}" == "-oscamname=" ]
+				then
+					USE_vars[USE_OSCAMNAME]="USE_OSCAMNAME=${cmd#*=}"
 				fi
 
 				if [ "${cmd:0:5}" == "-upx=" ] || [ "${cmd:0:5}" == "-UPX=" ]

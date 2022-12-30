@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="23";
+S3TUP_CONFIG_VERSION="40";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -19,6 +19,7 @@ S3TUP_CONFIG_VERSION="23";
 # @API@				Android API level of the toolchain (see https://source.android.com/setup/start/build-numbers)
 # @SSL_TARGET@		Android specific build target for OpenSSL (android-arm, android-arm64, android-x86, android-x86)
 # @CFLAGS@			individuell flags for the C compiler
+# @LDFLAGS@			individuell flags for the C linker
 # @CPUS@			CPU number of the build system
 # @VALIDATE@		Special validation function for some libraries (@VALIDATE@ "PCSC")
 
@@ -40,6 +41,7 @@ CTNG_SETUP_tasks+=('make;'); # setup command9
 
 # freetz-NG toolchain build settings
 FNG_REPO_URL="https://github.com/Freetz-NG/freetz-ng.git"; # Repository to load freetz-ng from
+FNG_SEPARATE_DYNAMIC_LINKER="/usr/lib/freetz/ld-uClibc.so.0";
 FNG_CONFIG_tasks=('make menuconfig;'); # config command1
 FNG_CONFIG_tasks+=('TPL_SAVE=$($gui --defaultno --output-fd 1 --ok-label "${txt_s3tup_menu_command_label_yes}" --cancel-label "${txt_s3tup_menu_command_label_no}" --colors $bt_ "$title_ - \Z0$pdesc\Zn" --title "-[ ${txt_s3tup_menu_edit_title} ]-" --inputbox "\n${txt_s3tup_menu_edit_text}" 10 55 "@TEMPLATE@") && cp ".config" "$TPL_SAVE";'); # config command2
 FNG_BUILD_tasks=('make olddefconfig | tee -a "@LOGFILE@";'); # build command1
@@ -49,8 +51,8 @@ FNG_SETUP_tasks=('git clone --progress "$FNG_REPO_URL" "@FNGSOURCE@";'); # setup
 FNG_SETUP_tasks+=('ln -s "../../downloads" "@FNGSOURCE@/dl";'); # setup command2
 
 # android-NDK toolchain build settings
-ANDK_PKG_URL="https://dl.google.com/android/repository/android-ndk-r21d-linux-x86_64.zip"; # Location to load Android Native Development Kit (NDK) from freetz-ng from
-ANDK_PKG_SHA1="bcf4023eb8cb6976a4c7cff0a8a8f145f162bf4d";
+ANDK_PKG_URL="https://dl.google.com/android/repository/$(curl --silent https://developer.android.com/ndk/downloads | grep -A1 -m1 'ndk_lts_linux64_download' | tail -n1 | awk -F'>|<' '{print $2}' | xargs)"; # Location to load Android Native Development Kit (NDK) from freetz-ng from
+ANDK_PKG_SHA1="$(curl --silent https://developer.android.com/ndk/downloads | grep -A4 -m1 'ndk_lts_linux64_download' | tail -n1 | awk -F'>|</' '{print $2}' | xargs)";
 ANDK_CONFIG_tasks=('editor ".config";'); # config command1
 ANDK_CONFIG_tasks+=('TPL_SAVE=$($gui --defaultno --output-fd 1 --ok-label "${txt_s3tup_menu_command_label_yes}" --cancel-label "${txt_s3tup_menu_command_label_no}" --colors $bt_ "$title_ - \Z0$pdesc\Zn" --title "-[ ${txt_s3tup_menu_edit_title} ]-" --inputbox "\n${txt_s3tup_menu_edit_text}" 10 55 "@TEMPLATE@") && cp ".config" "$TPL_SAVE";'); # config command2
 ANDK_BUILD_tasks=('TOOLCHAIN="@TOOLCHAIN@";'); # build command1
@@ -66,26 +68,27 @@ ANDK_SETUP_tasks+=('mv --force "$(basename "$ANDK_PKG_URL" | cut -d "-" -f 1-3)"
 ANDK_SETUP_tasks+=('chmod -R 755 "@ANDKSOURCE@";'); # setup command3
 
 # Library build settings
-LIBS=(SSL_300 SSL_111 SSL_110 SSL_102 SSL_100 SSL_098 LIB_USB LIB_USB0 LIB_PCSC LIB_CCID LIB_ZLIB); # List of ordered libraries. Only libraries in this list are available
+LIBS=(SSL_300 SSL_111 SSL_110 SSL_102 SSL_102B SSL_100 SSL_098 LIB_USB LIB_USBB LIB_USB0 LIB_PCSC LIB_CCID LIB_ZLIB); # List of ordered libraries. Only libraries in this list are available
 LIBS_LIST_BETA="0"; # In(Ex)clude libraries defined as beta
 LIBS_AUTO_INTEGRATE="1"; # Automatically reintegrate libraries when rebuilding toolchains
 
 # OpenSSL 3.0.0
 SSL_300="1";
-SSL_300_beta="1";
+SSL_300_beta="0";
 SSL_300_name="OpenSSL";
-SSL_300_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("openssl-3.0.0\\S.*"))][0] | .name' | sed -e 's#openssl-##g; s#_#.#g; s#\"##g')";
+SSL_300_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("openssl-3.*"))][0] | .name' | sed -e 's#openssl-##g; s#_#.#g; s#\"##g')";
 SSL_300_check="openssl.pc $(printf "$SSL_300_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
-SSL_300_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("openssl-3.0.0\\S.*"))][0] | .tarball_url' | sed -e 's#\"##g')";
+SSL_300_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("openssl-3.*"))][0] | .tarball_url' | sed -e 's#\"##g')";
 SSL_300_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 SSL_300_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_300_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
+SSL_300_tasks+=('export LDFLAGS="@LDFLAGS@ -latomic";');
 SSL_300_tasks+=('[ "@TYPE@" == "android-ndk" ] && export CC="gcc" || export CC=@CC@;');
 SSL_300_tasks+=('[ "@TYPE@" == "android-ndk" ] && export RANLIB=ranlib || export RANLIB=@RANLIB@;');
 SSL_300_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
-SSL_300_tasks+=('FLAGS="linux-generic32 shared";');
-SSL_300_tasks+=('[[ "@CC@" =~ "uclibc"|"musl" ]] && FLAGS+=" -DOPENSSL_NO_ASYNC";');
-SSL_300_tasks+=('[[ "@CC@" =~ "atom" ]] && FLAGS+=" no-threads";');
+SSL_300_tasks+=('FLAGS="linux-generic32 shared no-tests";');
+SSL_300_tasks+=('[[ "@CC@" =~ "uclibc"|"musl" ]] && FLAGS+=" -DOPENSSL_NO_ASYNC no-threads no-tests";');
+SSL_300_tasks+=('[[ "@CC@" =~ "atom" ]] && FLAGS+=" no-threads no-tests";');
 SSL_300_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="@SSL_TARGET@ --api=0.9.8 -D__ANDROID_API__=@API@ no-shared no-afalgeng no-aria no-asan no-asm no-async no-autoalginit no-autoerrinit no-autoload-config no-bf no-blake2 no-camellia no-capieng no-cast no-chacha no-cmac no-cms no-comp no-crypto-mdebug no-crypto-mdebug-backtrace no-ct no-devcryptoeng no-dgram no-dh no-dsa no-dso no-dynamic-engine no-ec no-ec2m no-ecdh no-ecdsa no-ec_nistp_64_gcc_128 no-egd no-engine no-err no-external-tests no-filenames no-fuzz-libfuzzer no-fuzz-afl no-gost no-idea no-makedepend no-md2 no-mdc2 no-md4 no-multiblock no-nextprotoneg no-ocb no-ocsp no-pic no-poly1305 no-posix-io no-psk no-rc2 no-rc4 no-rc5 no-rdrand no-rfc3779 no-rmd160 no-scrypt no-sctp no-seed no-siphash no-sm2 no-sm3 no-sm4 no-srp no-srtp no-sse2 no-ssl-trace no-tests no-threads no-ts no-ubsan no-ui-console no-unit-test no-whirlpool no-weak-ssl-ciphers no-zlib no-zlib-dynamic no-heartbeats no-msan no-dtls no-dtls1 no-dtls1-method no-dtls1_2 no-dtls1_2-method";');
 SSL_300_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_300_tasks+=('make -j@CPUS@;');
@@ -117,9 +120,9 @@ SSL_111_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth
 # OpenSSL 1.1.0
 SSL_110="1";
 SSL_110_name="OpenSSL";
-SSL_110_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_0[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
+SSL_110_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_0[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
 SSL_110_check="openssl.pc $(printf "$SSL_110_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
-SSL_110_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_0[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
+SSL_110_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_0[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
 SSL_110_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 SSL_110_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_110_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
@@ -136,9 +139,10 @@ SSL_110_tasks+=('make install_sw;');
 SSL_102="1";
 SSL_102_beta="0";
 SSL_102_name="OpenSSL";
-SSL_102_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
+SSL_102_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
 SSL_102_check="openssl.pc $(printf "$SSL_102_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
-SSL_102_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
+SSL_102_checklib="libcrypto.so.1.0.2";
+SSL_102_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
 SSL_102_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 SSL_102_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_102_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
@@ -148,6 +152,26 @@ SSL_102_tasks+=('FLAGS="linux-generic32 shared";');
 SSL_102_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_102_tasks+=('make -j@CPUS@;');
 SSL_102_tasks+=('make install SHLIB_VERSION_NUMBER=1.0.2 SHLIB_MINOR=0.2;');
+
+# OpenSSL 1.0.2 as 1.0.0
+SSL_102B_hint="OpenSSL 1.0.2 variant to create binaries\n\t\twith version 1.0.0 in its filename.\n\t\tUse it e.g. for fritzbox toolchains!";
+SSL_102B="1";
+SSL_102B_beta="0";
+SSL_102B_name="OpenSSL";
+SSL_102B_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
+SSL_102B_desc="OpenSSL $SSL_102B_version (1.0.0)";
+SSL_102B_check="openssl.pc $(printf "$SSL_102_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
+SSL_102B_checklib="libcrypto.so.1.0.0";
+SSL_102B_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
+SSL_102B_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
+SSL_102B_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
+SSL_102B_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
+SSL_102B_tasks+=('export CC=@CC@;');
+SSL_102B_tasks+=('export RANLIB=@RANLIB@;');
+SSL_102B_tasks+=('FLAGS="linux-generic32 shared";');
+SSL_102B_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
+SSL_102B_tasks+=('make -j@CPUS@;');
+SSL_102B_tasks+=('make install;');
 
 # OpenSSL 1.0.0
 SSL_100="1";
@@ -171,9 +195,9 @@ SSL_100_tasks+=('make install;');
 SSL_098="1";
 SSL_098_beta="0";
 SSL_098_name="OpenSSL";
-SSL_098_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_0_9_8[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
+SSL_098_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=3&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_0_9_8[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
 SSL_098_check="openssl.pc $(printf "$SSL_098_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
-SSL_098_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_0_9_8[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
+SSL_098_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=3&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_0_9_8[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
 SSL_098_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 SSL_098_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_098_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
@@ -190,8 +214,10 @@ LIB_USB="1";
 LIB_USB_beta="0";
 LIB_USB_name="libusb";
 LIB_USB_version="$(curl --silent "https://api.github.com/repos/libusb/libusb/releases/latest" | jq -r '.tag_name' | cut -c 2-)";
-LIB_USB_check="libusb-1.0.pc $(printf "$LIB_USB_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
-LIB_USB_url="$(curl --silent "https://api.github.com/repos/libusb/libusb/releases/latest" | jq -r '.assets[1].browser_download_url')";
+LIB_USB_check="libusb-1.0.pc $(printf "$LIB_USB_version")";
+LIB_USB_checkcc="c11";
+LIB_USB_desc="$LIB_USB_name $LIB_USB_version (gcc $LIB_USB_checkcc)";
+LIB_USB_url="$(curl --silent "https://api.github.com/repos/libusb/libusb/releases/latest" | jq -r '.assets[3].browser_download_url')";
 LIB_USB_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_USB_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_USB_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
@@ -204,12 +230,31 @@ LIB_USB_tasks+=('make -j@CPUS@;');
 LIB_USB_tasks+=('make install;');
 LIB_USB_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 -name "libusb-1.0.*" -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
 
+# libusb 1.0.23
+LIB_USBB="1";
+LIB_USBB_beta="0";
+LIB_USBB_name="libusb";
+LIB_USBB_version="$(curl --silent "https://api.github.com/repos/libusb/libusb/releases" | jq '[.[] | select(.tag_name|test("v1.0.23"))][0] | .tag_name' | sed -e 's#v##g; s#\"##g')";
+LIB_USBB_check="libusb-1.0.pc $(printf "$LIB_USBB_version")";
+LIB_USBB_url="$(curl --silent "https://api.github.com/repos/libusb/libusb/releases" | jq '[.[] | select(.tag_name|test("v1.0.23"))][0] | .assets[1].browser_download_url' | sed -e 's#\"##g')";
+LIB_USBB_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
+LIB_USBB_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
+LIB_USBB_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
+LIB_USBB_tasks+=('export CC=@CC@;');
+LIB_USBB_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
+LIB_USBB_tasks+=('[ "@TYPE@" == "android-ndk" ] && cp -f "android/config.h" "./config.h";');
+LIB_USBB_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="--enable-static --disable-shared --disable-udev" || FLAGS="--disable-udev";');
+LIB_USBB_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS;');
+LIB_USBB_tasks+=('make -j@CPUS@;');
+LIB_USBB_tasks+=('make install;');
+LIB_USBB_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 -name "libusb-1.0.*" -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
+
 # libusb 0.1.12
 LIB_USB0="1";
 LIB_USB0_beta="0";
 LIB_USB0_name="libusb";
 LIB_USB0_version="0.1.12";
-LIB_USB0_check="libusb.pc $(printf "$LIB_USB0_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
+LIB_USB0_check="libusb.pc";
 LIB_USB0_url="http://downloads.sourceforge.net/libusb/libusb-0.1.12.tar.gz";
 LIB_USB0_tasks=('echo "Patch 1: Handle compile failures with GCC 7+..." && curl --silent https://sources.debian.org/data/main/libu/libusb/2:0.1.12-32/debian/patches/12_ENAMETOOLONG.diff | git apply -v;');
 LIB_USB0_tasks+=('export TOOLCHAIN=@TOOLCHAIN@;');
@@ -225,7 +270,7 @@ LIB_PCSC="1";
 LIB_PCSC_beta="0";
 LIB_PCSC_name="PCSC-Lite";
 LIB_PCSC_version="$(curl --silent "https://pcsclite.apdu.fr/files/" | grep -m1 'href="pcsc-lite' | awk -F '"' '{printf $4}' | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
-LIB_PCSC_check="libpcsclite.pc $(printf "$LIB_PCSC_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
+LIB_PCSC_check="libpcsclite.pc";
 LIB_PCSC_url="$(printf 'https://pcsclite.apdu.fr/files/'$(curl --silent "https://pcsclite.apdu.fr/files/" | grep -m1 'href="pcsc-lite' | awk -F '"' '{printf $4}'))";
 LIB_PCSC_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_PCSC_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
@@ -246,7 +291,7 @@ LIB_CCID="1";
 LIB_CCID_beta="0";
 LIB_CCID_name="CCID";
 LIB_CCID_version="$(curl --silent "https://ccid.apdu.fr/files/" | grep -m1 'href="ccid' | awk -F '"' '{printf $4}' | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
-LIB_CCID_check="libccid.pc $(printf "$LIB_CCID_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
+LIB_CCID_check="libccid.pc";
 LIB_CCID_url="$(printf 'https://ccid.apdu.fr/files/'$(curl --silent "https://ccid.apdu.fr/files/" | grep -m1 'href="ccid' | awk -F '"' '{printf $4}'))";
 LIB_CCID_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_CCID_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
@@ -269,11 +314,11 @@ LIB_ZLIB="1";
 LIB_ZLIB_beta="0";
 LIB_ZLIB_name="zlib";
 LIB_ZLIB_version="$(curl --silent https://api.github.com/repos/madler/zlib/tags | jq -r '.[0].name' | cut -c 2-)";
-LIB_ZLIB_check="zlib.pc $(printf "$LIB_ZLIB_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
+LIB_ZLIB_check="zlib.pc";
 LIB_ZLIB_url="$(curl --silent "https://api.github.com/repos/madler/zlib/tags" | jq -r '.[0].tarball_url')";
 LIB_ZLIB_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_ZLIB_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
-LIB_ZLIB_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
+LIB_ZLIB_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@" || export CFLAGS="-fPIC";');
 LIB_ZLIB_tasks+=('export CC=@CC@;');
 LIB_ZLIB_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
 LIB_ZLIB_tasks+=('./configure --prefix=@PREFIX@;');

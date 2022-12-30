@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.21.1";
+	pversion="0.23.6";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -22,7 +22,6 @@ tcupdate(){
 	OPTION2="$3";
 	[ -z "$4" ] && FLAG="0" || FLAG="$4"; #0 - tcupdate call from s3.TUP itself, 1 - tcupdate call from s3 main menu, 2 - tcupdate call from s3 toolchain menu;
 	tc="$CMDTC";
-	clear;
 
 	#check/install prerequisites
 	[[ -z "$4" || "$FLAG" -gt 0 ]] && [ -z "$disable_syscheck" ] && _check_pkg;
@@ -74,7 +73,7 @@ tcupdate(){
 		[ "$FLAG" == "1" ] && return || bye;
 	fi;
 
-	#load config	
+	#load config
 	source "$configname";
 
 	#check config
@@ -90,9 +89,16 @@ tcupdate(){
 		CTNG_ROOT_BUILD_CMD="$sp""./s3 tcupdate --config \"CTNG_BUILD_AS_ROOT\" \"1\"\n";
 	fi;
 
+	#process commandline arguments
 	if [ "$CMDTC" == "-c" ] || [ "$CMDTC" == "--create" ];then	#start toolchain builder menu
 		_create_tc "$OPTION1" "" "$FLAG";
 		[ "$FLAG" == "1" ] && return || bye;
+	elif [ "$CMDTC" == "-l" ] || [ "$CMDTC" == "--libs" ];then	#list toolchain integrated libraries
+		_list_toolchain_libkeys "$OPTION1";
+		exit;
+	elif [ "$CMDTC" == "-lv" ] || [ "$CMDTC" == "--libs-version" ];then	#list toolchain integrated libraries including version numbers
+		_list_toolchain_libkeys "$OPTION1" "$CMDTC";
+		exit;
 	elif [ "$CMDTC" == "-s" ] || [ "$CMDTC" == "--setup" ];then	#setup crosstool-NG
 		_create_tc "" "$CMDTC" "$FLAG";
 		bye;
@@ -114,25 +120,24 @@ tcupdate(){
 		_tpl_editor "$(_get_template_type "$cttpldir/$OPTION1" | awk -F';' '{print $1}' | xargs)" "$OPTION1";
 		bye;
 	elif [ -z "$CMDTC" ];then #show toolchain menu
+		clear;
 		unset menu_close;
 		while [ ! $menu_close ]
 		do
 			#TOOLCHAIN MENU
 			_fill_tc_array;
 			unset MENU_OPTIONS;COUNT=0
-			if [ "$systype" == "ok" ];then
-				if [ "$tcempty" == "0" ];then
-					for i in "${INST_TCLIST[@]}";do
-						if [ ! "$i" == "native" ];then
-							source "$tccfgdir/$i" && tcdate="";
-							tcdate=" $(_get_toolchain_date "$i")" && [ "${#tcdate}" -eq 1 ] && tcdate="";
-							MENU_OPTIONS+=("$_toolchainname" "$_description\Z2$tcdate\Zn" "${txt_s3tup_menu_toolchain_folder}$tcdir/$i | ${txt_s3tup_menu_toolchain_config}$tccfgdir/$i");
-							counter;
-						fi;
-					done;
-				fi;
-				[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "$txt_s3tup_menu_toolchain_notfound" "$txt_s3tup_menu_toolchain_notfound");
+			if [ "$tcempty" == "0" ];then
+				for i in "${INST_TCLIST[@]}";do
+					if [ ! "$i" == "native" ];then
+						source "$tccfgdir/$i" && tcdate="";
+						tcdate=" $(_get_toolchain_date "$i")" && [ "${#tcdate}" -eq 1 ] && tcdate="";
+						MENU_OPTIONS+=("$_toolchainname" "$_description\Z2$tcdate\Zn" "${txt_s3tup_menu_toolchain_folder}$tcdir/$i | ${txt_s3tup_menu_toolchain_config}$tccfgdir/$i");
+						counter;
+					fi;
+				done;
 			fi;
+			[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "$txt_s3tup_menu_toolchain_notfound" "$txt_s3tup_menu_toolchain_notfound");
 			clear;clear;
 			out=$("$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--item-help" "--help-tags" "--default-item" "$tc" "--ok-label" "${txt_s3tup_menu_command_label_update}" "--cancel-label" "${txt_s3tup_menu_command_label_create}" "--help-button" "--help-label" "${txt_s3tup_menu_command_label_backup}" "--extra-button" "--extra-label" "$([ ! "$FLAG" == "1" ] && echo "${txt_s3tup_menu_command_label_exit}" || echo "${txt_s3tup_menu_command_label_back}")" "--title" "-[ ${txt_s3tup_menu_toolchain_title} ]-" \
 				--menu "\n${txt_s3tup_menu_toolchain_text1} $COUNT ${txt_s3tup_menu_toolchain_text2}\n " \
@@ -160,12 +165,12 @@ tcupdate(){
 };
 _integrate_libs(){
 	local tc="$1" libkeys="$2" menu_close props i icount;
-	
+
 	#toolchain native not supported and exists check
 	if ! _check_toolchain "$tc";then
 		_nl && sleep 2 && return;
 	fi;
-	
+
 	#get toolchain properties
 	props=$(_get_toolchain_properties "$tc");
 	compilername=$(echo "$props" | awk -F';' '{print $1}' | xargs);
@@ -181,15 +186,16 @@ _integrate_libs(){
 	api=$(echo "$props" | awk -F';' '{print $11}' | xargs);
 	ssl_target=$(echo "$props" | awk -F';' '{print $12}' | xargs);
 	cflags=$(echo "$props" | awk -F';' '{print $13}' | xargs);
+	ldflags=$(echo "$props" | awk -F';' '{print $14}' | xargs);
 
 	while [ ! $menu_close ]
 	do
 		#update current toolchain pkgconfig
 		pkgconfigdir=$(_get_toolchain_pkgconfig "$prefixdir");
-		
+
 		#get current toolchain libs
-		tc_libs=$(_get_toolchain_libs "$pkgconfigdir"); #semicolon separeted "pkgname|version|key|compare|libname"
-		
+		tc_libs=$(_get_toolchain_libs "$pkgconfigdir"); #semicolon separeted "pkgname|version|key|version|compare|libname"
+
 		#LIBRARY UPDATE MENU
 		unset MENU_OPTIONS;COUNT=0;unset libs;unset libversioncurrent;unset libversioncompare;
 		for libkey in "${LIBS[@]}"
@@ -204,16 +210,18 @@ _integrate_libs(){
 			libcheck="$libkey"_check;libcheck="${!libcheck}";
 			libversioncheck=$(echo "$libcheck" | awk '{printf $2}')
 			libcheck=$(echo "$libcheck" | awk '{printf $1}')
+			libcheckcc="$libkey"_checkcc;libcheckcc="${!libcheckcc}";
 			liburl="$libkey"_url;liburl="${!liburl}";
 			libtasks="$libkey"_tasks[@];libtasks=("${!libtasks}");
-			
+
 			# check match of existing lib
-			for l in $(echo "$tc_libs" | tr ";" "\n") #semicolon separeted "pkgname|version|key|compare|libname"
+			for l in $(echo "$tc_libs" | tr ";" "\n") #semicolon separeted "pkgname|version|key|version|compare|libname"
 			do
 				key=$(echo "$l" | awk -F'|' '{print $3}' | xargs);
 				if [ "$key" == "$libkey" ];then
+					libcheckfile=$(echo "$l" | awk -F'|' '{print $1}' | xargs);
 					libversioncurrent=$(echo "$l" | awk -F'|' '{print $2}' | xargs);
-					libversioncompare=$(echo "$l" | awk -F'|' '{print $4}' | xargs);
+					libversioncompare=$(echo "$l" | awk -F'|' '{print $5}' | xargs);
 					break;
 				else
 					libversioncurrent="";
@@ -222,11 +230,15 @@ _integrate_libs(){
 			done;
 
 			#Preselection and formatting
+			[ -n "$libcheckcc" ] && ! _check_compiler_capability "$libcheckcc" && libdescfmt="\Zr\Z1" || libdescfmt=""; #check compiler capabilities
+			[ ${#libdescfmt} -gt 0 ] && txthint="\n\Zr\Z1${txt_s3tup_menu_library_notsupported}\Zn";
 			[ "$libversioncompare" == "=" ] && libtxtfmt="\Z2" || libtxtfmt="";
 			[ "$libversioncompare" == "<" ] && libtxtfmt="\Z1";
 			[ "$libversioncompare" == ">" ] && [ "${#libversioncurrent}" -gt 0 ] && libselected="on" && libtxtfmt="\Z5" || libselected="off";
+			[ "$libcheckfile" == "$libselectedflag" ] && libselected="off";
+			libselectedflag="$libcheckfile";
 
-			MENU_OPTIONS+=("$libkey"     "${libdesc}$(printf '%*s' $((24-${#libdesc})))${libtxtfmt}$([ $libversioncurrent ] && echo $libversioncompare)	$(echo $libversioncurrent | sed -e 's/^$/ ---/g')\Zn"     "$(echo $libselected)"     "$([ $libname ] && echo "${libdesc}: ${liburl}")");counter;
+			MENU_OPTIONS+=("$libkey"     "${libdescfmt}${libdesc}\Zn$(printf '%*s' $((24-${#libdesc})))${libtxtfmt}$([ $libversioncurrent ] && echo $libversioncompare)	$(echo $libversioncurrent | sed -e 's/^$/ ---/g')\Zn"     "$(echo $libselected)"     "$([ $libname ] && echo "${libdesc}: ${liburl}")");counter;
 
 			#     0 key     1 desc     2 version     3 checkversion     4 checkfile 5 current version    6 url      7 tasks array
 			lib=("$libkey" "$libname" "$libversion" "$libversioncheck" "$libcheck" "$libversioncurrent" "$liburl" "($(printf " %q" "${libtasks[@]}"))");
@@ -240,7 +252,7 @@ _integrate_libs(){
 		else
 			clear;clear;
 			opts=$("$gui" "--item-help" "--help-tags" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--default-item" "$lkey" "--ok-label" "${txt_s3tup_menu_command_label_start}" "--help-button" "--help-label" "${txt_s3tup_menu_command_label_info}" "--cancel-label" "$([ ! "$3" -gt 0 ] && echo "${txt_s3tup_menu_command_label_exit}" || echo "${txt_s3tup_menu_command_label_back}")" "--title" "-[ ${txt_s3tup_menu_library_title} - \Z2$tc\Zn ]-" "$cl_"\
-				"\n${txt_s3tup_menu_library_text1}\n$prefixdir\n\n${txt_s3tup_menu_library_text2}" \
+				"\n${txt_s3tup_menu_library_text1}\n\Z2$prefixdir\Zn${txthint}\n\n${txt_s3tup_menu_library_text2}" \
 				0 0 "$COUNT" "${MENU_OPTIONS[@]}");
 			ret="$?"
 		fi;
@@ -248,7 +260,7 @@ _integrate_libs(){
 		#extract first command and option for Info Menu before modifying $opts
 		first=$(echo "$opts" | awk '{printf $1}');
 		lkey=$(echo "$opts" | awk '{printf $2}');
-		
+
 		#sort opts descending to ensure LIB_USB is build before LIB_PCSC
 		opts=$(echo "$opts" | tr ' ' '\n' | sort -hr);
 
@@ -287,8 +299,8 @@ _integrate_libs(){
 					[ "${#buildtasks[@]}" == "0" ] && echo -e "${r_l}  ${txt_error}:${y_l} ${o} ${w_l}${txt_s3tup_msg_library_not_found}${rs_}";
 					sleep 2;
 				done;
-				
-				[ -d "$tmpdir" ] && rm -r "$tmpdir";;
+
+				[ -d "$tmpdir" ] && rm -rf "$tmpdir";;
 			1) #Exit/Back
 				unset MENU_OPTIONS;
 				menu_close="1";
@@ -304,21 +316,21 @@ _integrate_libs(){
 					rm "$tempfile" 2>/dev/null;
 				fi;;
 		esac;
-		
+
 		#Exit loop if build library is forced
 		[ "${#libkeys}" -gt 0 ] && menu_close=1;
 	done;
 };
 _create_tc(){
-	_sz;					# Prepare DIALOG settings
+	_sz; # Prepare DIALOG settings
 	unset TPL_LIST;
-	local menu_close libkeys use;
+	local menu_close compilername libkeys use ldf;
 	while [ ! $menu_close ]
 	do
 		if [ "${#2}" -gt 0 ];then #Force setup call
 			ret="1";
 		elif [ "${#1}" -gt 0 ];then #Force build toolchain call
-			opts="$1";
+			opts="$(echo "$1" | tr ',' '\n')";
 			ret="0";
 		else #Show Template Menu
 			tplempty=0;
@@ -338,8 +350,8 @@ _create_tc(){
 					props=$(_get_template_properties "$t");
 					desc=$(echo "$props" | awk -F'^' '{print $1}' | xargs);
 					version=$(echo "$props" | awk -F'^' '{print $2}' | xargs); [ -z "$version" ] && version="0";
-					changed=$(echo "$props" | awk -F'^' '{print $5}' | xargs);[ -n "$changed" ] && changed=", changed:$changed";
-					copyof=$(echo "$props" | awk -F'^' '{print $6}' | xargs);[ -n "$copyof" ] && copyof=", copy of:$copyof";
+					changed=$(echo "$props" | awk -F'^' '{print $6}' | xargs);[ -n "$changed" ] && changed=", changed:$changed";
+					copyof=$(echo "$props" | awk -F'^' '{print $7}' | xargs);[ -n "$copyof" ] && copyof=", copy of:$copyof";
 					version_tc=$(echo $(_get_template_properties "$tcdir/$t/.config") | awk -F'^' '{print $2}' | xargs); [ -z "$version_tc" ] && version_tc="0";
 					if [[ -d "$tcdir/$t" && -f "$tccfgdir/$t" ]];then
 						[ "$version" -gt "$version_tc" ] && color="\Z1" || color="\Zb\Z1";
@@ -373,20 +385,21 @@ _create_tc(){
 
 						if [ -d "$tcdir/$tpl" ];then
 							props=$(_get_toolchain_properties "$tpl");
+							compilername=$(echo "$props" | awk -F';' '{print $1}' | xargs);
 							prefixdir=$(echo "$props" | awk -F';' '{print $5}' | xargs);
 							pkgconfigdir=$(echo "$props" | awk -F';' '{print $6}' | xargs);
 
 							#get current toolchain libs
-							tc_libs=$(_get_toolchain_libs "$pkgconfigdir"); #semicolon separeted "pkgname|version|key|compare|libname"
+							tc_libs=$(_get_toolchain_libs "$pkgconfigdir"); #semicolon separeted "pkgname|version|key|version|compare|libname"
 							for l in $(echo "$tc_libs" | tr ";" "\n")
 							do
 								key=$(echo "$l" | awk -F'|' '{print $3}' | xargs);
 								[ -n "$key" ] && libkeys+="${key},";
 							done;
-							
+
 							libkeys="$(echo "${libkeys%?}" | xargs)";
 						fi;
-						
+
 						logfile="$ldir/$(date +%F.%H%M%S)_tup_crosstoolchain_"$tpl".log"; ((i++)); 
 
 						clear;
@@ -395,17 +408,17 @@ _create_tc(){
 						echo -e "$pdesc - ${txt_s3tup_msg_cross_toolchain_log} - $(date +"%F %T")";
 						echo -e "${y_l}$sp\n${txt_b2} ($i/$icount): ${txt_s3tup_msg_cross_toolchain_commandlist} $tpl:\n$sp";
 						) | _log "$logfile";
-						
+
 						#set ctsrcdir based on template type
 						template_type="$(_get_template_type "$cttpldir/$tpl")";
 						tpl_type="$(echo "$template_type" | awk -F';' '{print $1}' | xargs)";
 						tpl_type_name="$(echo "$template_type" | awk -F';' '{print $2}' | xargs)";
 						ctsrcdir="${tpl_type,,}srcdir";ctsrcdir="${!ctsrcdir}";
-						
+
 						#copy template
 						echo "rm \"$ctsrcdir/.config\"* 2>/dev/null;cp -f \"$cttpldir/$tpl\" \"$ctsrcdir/.config\";" | _log "$logfile";
 						rm "$ctsrcdir/.config"* 2>/dev/null;cp -f "$cttpldir/$tpl" "$ctsrcdir/.config";
-						
+
 						#prepare template and build
 						case "$tpl_type" in
 							"CTNG") #CT_LOCAL_TARBALLS_DIR aka cache folder for downloads
@@ -433,10 +446,10 @@ _create_tc(){
 
 						echo -e "cd \"${ctsrcdir}\";\n$(_replace_tokens "$bcl")\n$sp${re_}" | _log "$logfile";
 						sleep 2;
-						
+
 						if [ "$CT_START_BUILD" -eq 1 ];then
 							cd "$ctsrcdir";
-							
+
 							#print out detected libs in current toolchain
 							[ "${#libkeys}" -gt 0 -a "$LIBS_AUTO_INTEGRATE" -eq 1 ] && echo -e "${y_l}\n${txt_s3tup_msg_cross_toolchain_library_detection}\n${b_l}$(echo "$libkeys" | tr ',' '\n' | sort -hr)${re_}" | _log "$logfile";
 
@@ -450,7 +463,7 @@ _create_tc(){
 											buildtasks+=("$task");
 										done;;
 								"FNG")  
-										echo -e "${g_l}\n$(tools/freetz-revision 2>&1 | tail -1)\n${re_}" | _log "$logfile";
+										echo -e "${g_l}\n$([ -f "tools/freetz-revision" ] && tools/freetz-revision || tools/freetz_revision 2>&1 | tail -1)\n${re_}" | _log "$logfile";
 										[[ ! $(umask) == 0022 ]] && umask 0022;
 										for task in "${FNG_BUILD_tasks[@]}";do
 											task=$(_replace_tokens "$task");	#replace tokens
@@ -464,7 +477,7 @@ _create_tc(){
 											buildtasks+=("echo "$echo_task";");buildtasks+=("$task");
 										done;;
 							esac;
-							
+
 							#run build and save error
 							( eval "${buildtasks[@]}" ) 2>&1;
 
@@ -473,7 +486,7 @@ _create_tc(){
 								"FNG")  err=$(grep 'Error .*' "$logfile" | grep -vc '(ignored)');;
 								"ANDK") err=$?;;
 							esac;
-							
+
 							#save build.log in logs
 							[ "$tpl_type" == "CTNG" ] && cat "$ctsrcdir/build.log" >>"$logfile";
 							(
@@ -481,7 +494,6 @@ _create_tc(){
 								case "$tpl_type" in
 									"CTNG") #get target from build.log
 											target=$(sed -n -e '/target = / s/.*\= *//p' "$ctsrcdir/build.log");
-											use="";
 
 											#get CT_BUILD_TOP_DIR aka temporary toolchain build directory from build.log and delete it to save disk space
 											buildtopdir=$(sed -n -e '/CT_BUILD_TOP_DIR=\// s/.*\= *//p' "$ctsrcdir/build.log");
@@ -490,12 +502,13 @@ _create_tc(){
 											btcbindir=$(grep -i '{ PATH=.*kernel.*' "$logfile" | head -n 1 | awk -F':|"' '{print $2}');
 											btcdir=$(realpath "$btcbindir/../");
 											target=$(basename "$btcdir");
-											use="";
-									
+											#autodetect LDFLAGS depending on the freetz-ng configuration options
+											[ $(grep -i '^FREETZ_AVM_PROP_UCLIBC_SEPARATE=y' "$ctsrcdir/.config") ] && ldf="-Wl,-dynamic-linker,${FNG_SEPARATE_DYNAMIC_LINKER}";
+
 											#copy toolchain folder
 											rm -rf "$tcdir/$tpl";
 											cp -rf "$btcdir" "$tcdir/$tpl";
-											
+
 											#compress log file
 											cp -f "$logfile" "$tcdir/$tpl/freetz-ng.log";
 											bzip2 -zf9 "$tcdir/$tpl/freetz-ng.log";;
@@ -503,29 +516,31 @@ _create_tc(){
 											target="$ANDK_HOST";
 											sysroot="sysroot";
 											use="LIB_RT= LIB_PTHREAD=";
-											
+
 											#compress log file
 											cp -f "$logfile" "$tcdir/$tpl/android-ndk.log";
 											bzip2 -zf9 "$tcdir/$tpl/android-ndk.log";;
 								esac;
-								
+
 								#save config in target toolchain folder
 								cp -f "$cttpldir/$tpl" "$tcdir/$tpl/.config";
-								
+
 								#auto integrate libs
 								if [ "${#libkeys}" -gt 0 -a "$LIBS_AUTO_INTEGRATE" -eq 1 ];then
 									echo -e "${y_l}\n${txt_s3tup_msg_cross_toolchain_library_integration}\n${b_l}$(echo "$libkeys" | tr ',' '\n' | sort -hr)${re_}";
 									_integrate_libs "$tpl" "$libkeys" "$FLAG";
 								fi;
-								
+
 								#compress toolchain
 								_compress "$dldir/$(decode "$_t1e")$tpl.tar.xz" "$tcdir/$tpl" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_compress_title} $tpl ${txt_to} $(decode "$_t1e")$tpl.tar.xz ]- " "$pb_" "$_lines" "$_cols";
-								
+
 								#create toolchain.cfg
 								props=$(_get_template_properties "$cttpldir/$tpl");
 								desc=$(echo "$props" | awk -F'^' '{print $1}' | xargs);
 								cflags=$(echo "$props" | awk -F'^' '{print $3}' | xargs);
-								_create_toolchaincfg "$tcdir/$tpl" "$tpl" "$target" "$sysroot" "" "$desc" "" "$dldir/$(decode "$_t1e")$tpl.tar.xz" "yes" "$tpl_type_name" "$use" "$cflags" "$tpl_type";
+								[ -z "$ldf" ] && ldf=$(echo "$props" | awk -F'^' '{print $4}' | xargs);
+
+								_create_toolchaincfg "$tcdir/$tpl" "$tpl" "$target" "$sysroot" "" "$desc" "" "$dldir/$(decode "$_t1e")$tpl.tar.xz" "yes" "$tpl_type_name" "$use" "$cflags" "$ldf" "$tpl_type";
 							else
 								_paktc_timer 10;
 							fi;
@@ -554,7 +569,7 @@ _create_tc(){
 
 		#Exit loop if setup or build toolchain are forced
 		[ "${#2}" -gt 0 ] || [ "${#1}" -gt 0 ] && menu_close=1;
-		
+
 	done;
 };
 _migrations(){
@@ -570,7 +585,7 @@ _migrations(){
 			for tpl in "${TPL_LIST[@]}";do
 				props=$(_get_template_properties "$cttpldir/$tpl"); #get template properties
 				desc=$(echo "$props" | awk -F'^' '{print $1}' | xargs); #extract description
-				tc_migrate=$(echo "$props" | awk -F'^' '{print $4}' | xargs); #extract template name to migrate
+				tc_migrate=$(echo "$props" | awk -F'^' '{print $5}' | xargs); #extract template name to migrate
 				if [[ -n "$tc_migrate" && -d "$tcdir/$tc_migrate" ]];then
 					mig_list+="\n${txt_tc} ${y_l}${tc_migrate}${re_}\n\t${txt_tpl} ${y_l}${tc_migrate}${re_} ${txt_s3tup_msg_cross_migrations_renamed} ${p_l}${tpl}\n${re_}";
 					rm_list+="\n${txt_s3tup_msg_cross_migrations_remove} ${y_l}${tc_migrate}${re_}\n\trm -r \"${tcdir}/${y_l}${tc_migrate}${re_}\"\n\trm -f \"${tccfgdir}/${y_l}${tc_migrate}${re_}\"\n";
@@ -613,34 +628,34 @@ _migrations(){
 
 };
 _backup(){
-	_sz;					# Prepare DIALOG settings
+	_sz; # Prepare DIALOG settings
 	src=$1;
 	dest=$2;
 	newtccfgfile="$tccfgdir/$dest";
 	xzfile="$dldir/$(decode "$_t1e")$dest.tar.xz";
-	
+
 	(
 	#compress toolchain
 	_compress "$xzfile" "$tcdir/$src"
-	
+
 	#create toolchain.cfg
 	template_type="$(_get_template_type "$cttpldir/$src")";
 	tpl_type="$(echo "$template_type" | awk -F';' '{print $1}' | xargs)";
 	tpl_type_name="$(echo "$template_type" | awk -F';' '{print $2}' | xargs)";
-	source "$tccfgdir/$src" && target="${_compiler%?}" && sysroot="$_sysroot" && lsd="$_libsearchdir" && desc="$_description" && info="$_tc_info" && sb="$_self_build" && eu="$extra_use" && ec="$extra_cc";
-	_create_toolchaincfg "$tcdir/$src" "$dest" "$target" "$sysroot" "$lsd" "$desc" "$info" "$xzfile" "$sb" "tpl_type_name" "$eu" "$ec" "$tpl_type";
+	source "$tccfgdir/$src" && target="${_compiler%?}" && sysroot="$_sysroot" && lsd="$_libsearchdir" && desc="$_description" && info="$_tc_info" && sb="$_self_build" && eu="$extra_use" && ec="$extra_cc" && el="$extra_ld";
+	_create_toolchaincfg "$tcdir/$src" "$dest" "$target" "$sysroot" "$lsd" "$desc" "$info" "$xzfile" "$sb" "tpl_type_name" "$eu" "$ec" "$el" "$tpl_type";
 	) | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_backup_title} ${src} ${txt_to} $(basename "$xzfile") ]- " "$pb_" "$_lines" "$_cols";
 	[ -f "$newtccfgfile" ] && echo "$dest";
 };
 _build_library(){
-	_sz;					# Prepare DIALOG settings
+	_sz; # Prepare DIALOG settings
 	local desc="$1" libsrcdir="$2" lf="$3";	# Save the first 3 arguments in variables
 	shift 3;				# Shift all 3 arguments to the left (original $1,$2,$3 gets lost)
 	local tasks=("$@"); 	# Rebuild the array with rest of arguments
-	
-	(	
+
+	(
 		bcl=$(printf '%s\n' "${tasks[@]}");
-		
+
 		sp=$(printf '%*s' 80 | tr ' ' '=')
 		(
 			echo -e "$pdesc - ${txt_s3tup_msg_build_library_log} - $(date +"%F %T")";
@@ -650,7 +665,7 @@ _build_library(){
 			( eval "${tasks[@]}" ) 2>&1
 		) | _log "$lf"
 	) | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_build_library_title} $desc ]- " "$pb_" "$_lines" "$_cols";sleep 2;
-	
+
 	#build error message
 	error_on_build=$(grep -cw1 Error "$lf");
 	if [ "$error_on_build" -gt 0 ];then
@@ -658,19 +673,20 @@ _build_library(){
 		_paktc_timer 10;
 		echo -e "${re_}${w_l}";
 	fi;
-	
+
 };
 _tpl_editor(){
 	tc="$2";tpl="$tc";unset TASKS;unset configtasks;local i=0;
-	
+
 	_check_crosstool_setup;
-	
+
 	props=$(_get_template_properties "$cttpldir/$tpl");
 	desc=$(echo "$props" | awk -F'(' '{print $1}' | xargs);
 	version=$(echo "$props" | awk -F'^' '{print $2}' | xargs);[ -z "$version" ] && version=0;
 	[ -z "$disable_template_versioning" ] &&  ((version+=1));
 	cflags=$(echo "$props" | awk -F'^' '{print $3}' | xargs);
-	copyof=$(echo "$props" | awk -F'^' '{print $6}' | xargs);
+	ldflags=$(echo "$props" | awk -F'^' '{print $4}' | xargs);
+	copyof=$(echo "$props" | awk -F'^' '{print $7}' | xargs);
 
 	editordir="${1,,}srcdir";editordir="${!editordir}";
 
@@ -699,6 +715,7 @@ _tpl_editor(){
 			((i+=1)); sed -i "${i}i #toolchain template: $desc" "$TPL_SAVE"; #add toolchain template description line
 			((i+=1)); sed -i "${i}i #toolchain template version: $version" "$TPL_SAVE"; #add toolchain template version property
 			[ -n "$cflags" ] && ((i+=1)) && sed -i "${i}i #toolchain template cflags: $cflags" "$TPL_SAVE"; #add toolchain template cflags property
+			[ -n "$ldflags" ] && ((i+=1)) && sed -i "${i}i #toolchain template ldflags: $ldflags" "$TPL_SAVE"; #add toolchain template ldflags property
 			((i+=1)); sed -i "${i}i #toolchain template updated: $(date -r "$TPL_SAVE" "+%F %T")" "$TPL_SAVE"; #add toolchain template updated property
 			[ "$TPL_SAVE" != "$cttpldir/$tpl" ] && copyof="$tpl";
 			[ -n "$copyof" ] && ((i+=1)) &&	sed -i "${i}i #toolchain template copyof: $copyof" "$TPL_SAVE"; #add toolchain template copyof property
@@ -706,7 +723,7 @@ _tpl_editor(){
 	) 2>&1;
 };
 _ctng_setup(){
-	_sz;					# Prepare DIALOG settings
+	_sz; # Prepare DIALOG settings
 	logfile="$ldir/$(date +%F.%H%M%S)_tup_ctng_setup.log";
 	unset setuptasks;
 	(
@@ -715,7 +732,7 @@ _ctng_setup(){
 	echo -e "$pdesc - ${txt_s3tup_msg_ctng_setup_log} - $(date +"%F %T")";
 	echo -e "$sp\n${txt_s3tup_msg_ctng_setup_commandlist} crosstool-NG:\n$sp\ncd "$ctngsrcdir"\n$(_replace_tokens "$bcl")\n$sp";
 	sleep 2;
-	
+
 	if [ "$1" -eq 1 ];then
 		# setup crosstool wc
 		echo "${txt_s3tup_msg_ctng_setup_cleanup} "$ctngsrcdir/"..."
@@ -735,7 +752,7 @@ _ctng_setup(){
 	) | _log "$logfile" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_ctng_setup_title} crosstool-NG ]- " "$pb_" "$_lines" "$_cols";
 };
 _fng_setup(){
-	_sz;					# Prepare DIALOG settings
+	_sz; # Prepare DIALOG settings
 	logfile="$ldir/$(date +%F.%H%M%S)_tup_fng_setup.log";
 	unset setuptasks;
 	(
@@ -744,7 +761,7 @@ _fng_setup(){
 	echo -e "$pdesc - ${txt_s3tup_msg_fng_setup_log} - $(date +"%F %T")";
 	echo -e "$sp\n${txt_s3tup_msg_fng_setup_commandlist} Freetz-NG:\n$sp\ncd "$fngsrcdir"\n$(_replace_tokens "$bcl")\n$sp";
 	sleep 2;
-	
+
 	if [ "$1" -eq 1 ];then
 		# setup freetz-ng wc
 		echo "${txt_s3tup_msg_fng_setup_cleanup} "$fngsrcdir/"..."
@@ -765,7 +782,7 @@ _fng_setup(){
 	) | _log "$logfile" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_fng_setup_title} Freetz-NG ]- " "$pb_" "$_lines" "$_cols";
 };
 _andk_setup(){
-	_sz;					# Prepare DIALOG settings
+	_sz; # Prepare DIALOG settings
 	logfile="$ldir/$(date +%F.%H%M%S)_tup_andk_setup.log";
 	unset setuptasks;
 	(
@@ -816,20 +833,20 @@ _extract(){
     local c e i;
 
     (($#)) || return;
-	
+
 	edir="$2";
 	[ -d "$edir" ] && rm -r "$edir";
 	mkdir --parents "$edir";
-	
+
     for i; do
         c='';
         e=1;
-		
+
         if [[ ! -r $i ]];then
             echo "$0: ${txt_s3tup_msg_extract_file_unreadable} \`$i'" >&2;
             continue;
         fi
-		
+
         case $i in
 			*.tgz|*.tlz|*.txz|*.tb2|*.tbz|*.tbz2|*.taz|*.tar|*.tar.Z|*.tar.bz|*.tar.bz2|*.tar.gz|*.tar.lzma|*.tar.xz)
 				   c=(tar -xvf);;
@@ -846,10 +863,10 @@ _extract(){
         esac
 		cd "$edir";
 		BEFORE=(.*/ */);
-		
+
 		command "${c[@]}" "$i" |"$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ $txt_extracting $i ]- " "$pb_" 20 74;
         ((e = e || $?));
-		
+
 		AFTER=(.*/ */);
 		for (( j = 0; j < "${#BEFORE[@]}"; j++ )); do
 			[ "${BEFORE[j]}" == "${AFTER[j]}" ] || break;
@@ -867,6 +884,7 @@ _replace_tokens(){
 						s#@API@#$api#g; \
 						s#@SSL_TARGET@#$ssl_target#g; \
 						s#@CFLAGS@#$cflags#g; \
+						s#@LDFLAGS@#$ldflags#g; \
 						s#@CPUS@#$cpus#g; \
 						s#@CC@#$compilername#g; \
 						s#@RANLIB@#$ranlibname#g; \
@@ -889,10 +907,10 @@ _tidy_tasks(){
 _get_toolchain_properties(){
 	local tc="$1" props tc_type;
 	unset _target;
-	
+
 	#load toolchain config
 	[ -f "$tccfgdir/$tc" ] && source "$tccfgdir/$tc";
-	
+
 	#jump into toolchains bin folder
 	cd "$tcdir/$tc/bin"
 
@@ -904,7 +922,7 @@ _get_toolchain_properties(){
 	includedir=$(realpath -s $(echo | "$compilername" -Wp,-v -xc - -fsyntax-only 2>&1 | grep include$ | tail -n 1 | xargs))
 	sysrootdir="$("$compilername" -print-sysroot 2>/dev/null)";[ -z "$sysrootdir" ] && sysrootdir="$tcdir/$tc/$_sysroot";
 	sysrootdir="$(realpath -sm "$sysrootdir")";
-	
+
 	if [ "${#sysrootdir}" -gt "${#tcdir}" ];then
 		[ -d "$sysrootdir/include" ] && cd "$sysrootdir"
 		[ -d "$sysrootdir/usr/include" ] && [ ! "$(realpath $(readlink -- "$PWD") 2>/dev/null)" == "$(realpath "$sysrootdir/usr")" ] && cd "$sysrootdir/usr" #Ignore symlinks to the same directory
@@ -912,14 +930,15 @@ _get_toolchain_properties(){
 		cd "$tcdir/$tc/$_sysroot"
 	fi;
 	prefixdir="$PWD"
-	
+
 	pkgconfigdir="$(_get_toolchain_pkgconfig "$prefixdir")";
-		
+
 	#get specific properties from .config
 	if [ -f "$tcdir/$tc/.config" ];then
 		cflags=$(_get_template_properties "$tcdir/$tc/.config" | awk -F'^' '{print $3}' | xargs);
+		ldflags=$(_get_template_properties "$tcdir/$tc/.config" | awk -F'^' '{print $4}' | xargs);
 	fi;
-	
+
 	#get android specific properties from .config
 	if [ -f "$tcdir/$tc/.config" -a "$tc_type" == "android-ndk" ];then
 		arch=$(grep '^ANDK_ARCH=' "$tcdir/$tc/.config" | awk -F'"' '{print $2}' | xargs);
@@ -929,8 +948,8 @@ _get_toolchain_properties(){
 	else
 		arch=""; bitness=""; api="";
 	fi;
-	
-	props="$compilername;$ranlibname;$includedir;$sysrootdir;$prefixdir;$pkgconfigdir;$hostname;$tc_type;$arch;$bitness;$api;$ssl_target;$cflags"
+
+	props="$compilername;$ranlibname;$includedir;$sysrootdir;$prefixdir;$pkgconfigdir;$hostname;$tc_type;$arch;$bitness;$api;$ssl_target;$cflags;$ldflags"
 	echo "$props" | xargs;
 	[ -n "$props" ] && exit 0 || exit 1;
 };
@@ -944,7 +963,7 @@ _get_toolchain_pkgconfig(){
 _get_toolchain_libs(){
 	local pkgconfigdir="$1" key libs;
 	cd "$pkgconfigdir"
-	
+
 	#looking for existing libraries
 	for pkg in *.pc
 	do
@@ -952,28 +971,99 @@ _get_toolchain_libs(){
 
 		if [ ! -z "$pkg" -a ! -z "$name" -a ! -z "$version" ];then
 			#try match with library from config
-			for l in "${LIBS[@]}"
+			for key in "${LIBS[@]}"
 			do
-				[ "${!l}" == "0" ] && continue;
-				libcheck="$l"_check;libcheck="${!libcheck}";
-				libversion="$l"_version;libversion="${!libversion}";
+				[ "${!key}" == "0" ] && continue;
+				libcheck="$key"_check;libcheck="${!libcheck}";
+				libchecklib="$key"_checklib;libchecklib="${!libchecklib}";
+				libcheckcc="$key"_checkcc;libcheckcc="${!libcheckcc}";
+				libversion="$key"_version;libversion="${!libversion}";
 				libversioncompare=$(_compare_version $libversion $version);
 				if [[ "$pkg $version" =~ ^${libcheck}.* ]];then #regex match, don't quote the right side
-					key="$l";
-					compare="$libversioncompare";
-					break;
-				else
-					unset key && unset compare;
+					if [ -n "$libchecklib" -a -f "$pkgconfigdir/../$libchecklib" -o -z "$libchecklib" ];then #check existance of special libs
+						if [ -n "$libcheckcc" ] && _check_compiler_capability "$libcheckcc" || [ -z "$libcheckcc" ];then #check compiler capabilities
+							libs+="$pkg\|$version\|$key\|$libversion\|$libversioncompare\|$name;";
+							break;
+						fi;
+					fi;
 				fi;
 			done;
-			
-			[ -n "$key" ] && libs+="$pkg\|$version\|$key\|$compare\|$name;";
 		fi;
-		
+
 	done;
-	
+
 	echo "${libs%?}" | xargs;
 	[ -n "$libs" ] && exit 0 || exit 1;
+};
+_list_toolchain_libkeys(){
+	local tc tcs props compilername pkgconfigdir version key compare libkey libkeys fmt CUR G P R updatable downgradable ADD=11;
+
+	#get toolchain list from parameter or from installed ones
+	[ -z "$1" ] && tcs="${INST_TCLIST[@]}" || tcs="$(echo "$1" | tr ',' '\n' | sort -h)";
+	for tc in $tcs;
+	do
+		if [ -d "$tcdir/$tc" ];then
+			#print out table header
+			[ -z "$props" -a -z "$2" ] && printf "${bk_n}${lg_lb}\n%-30s %-45s %-30s %s${re_}" "${txt_tc}" "${txt_s3tup_msg_table_header_libs_col_key}" "${txt_s3tup_msg_table_header_libs_col_update}" "${txt_s3tup_msg_table_header_libs_col_downgrade}"
+			[ -z "$props" -a -n "$2" ] && printf "${bk_n}${lg_lb}\n%-30s %-11s %21s %3s %-12s %-10s %s${re_}" "${txt_tc}" "${txt_s3tup_msg_table_header_libsversion_col_key}" "${txt_s3tup_msg_table_header_libsversion_col_curversion}" "" "${txt_s3tup_msg_table_header_libsversion_col_newversion}" "${txt_s3tup_msg_table_header_libsversion_col_update}" "${txt_s3tup_msg_table_header_libsversion_col_downgrade}"
+
+			#get toolchain properties
+			props=$(_get_toolchain_properties "$tc");
+			compilername=$(echo "$props" | awk -F';' '{print $1}' | xargs);
+			pkgconfigdir=$(echo "$props" | awk -F';' '{print $6}' | xargs);
+
+			#get toolchain libraries
+			tc_libs=$(_get_toolchain_libs "$pkgconfigdir"); #semicolon separeted "pkgname|version|key|version|compare|libname"
+
+			#reset some variables before loop
+			unset libkey libkeys updatable downgradable; CUR=0; G=0; P=0; R=0;
+			for l in $(echo "$tc_libs" | tr ';' '\n' | sort -hr)
+			do
+				curversion=$(echo "$l" | awk -F'|' '{print $2}' | xargs);
+				key=$(echo "$l" | awk -F'|' '{print $3}' | xargs);
+				newversion=$(echo "$l" | awk -F'|' '{print $4}' | xargs);
+				compare=$(echo "$l" | awk -F'|' '{print $5}' | xargs);
+				libname=$(echo "$l" | awk -F'|' '{print $6}' | xargs);
+
+				#initialize color formatting variables
+				unset comp update downgrade; P2=0;
+				[ "$compare" == "=" ] && comp="=" && fmt="${g_l}" && ((G++)); #up-to-date
+				[ "$compare" == ">" ] && comp="<" && fmt="${p_l}" && update="${fmt}x${re_}" && updatable+="${fmt}${key}${re_}," && ((P++)); #updatable
+				[ "$compare" == "<" ] && comp=">" && fmt="${r_l}" && downgrade="${fmt}x${re_}" && downgradable+="${fmt}${key}${re_}," && ((R++)); #downgradable
+
+				#generate comma seperated library key list (if second function parameter is empty)
+				[ -n "$key" -a -z "$2" ] && libkeys+="${fmt}${key}${re_}," && ((CUR++));
+
+				#print out line for each toolchain library (if second function parameter exists)
+				if [ -n "$key" -a -n "$2" ];then
+					[ $(($G+$P+$R)) -gt 1 ] && tc="";
+					libkey="${fmt}${key::11}${re_}";
+					curversion="${libname} ${curversion}"
+					curversion="${fmt}${curversion::21}${re_}";
+					compare="${fmt} ${comp} ${re_}";
+					newversion="${fmt}${newversion::16}${re_}";
+					[ -z "$update" ] && update="-" || P2=1;
+					[ -z "$downgrade" ] && downgrade="-";
+					[ -n "$tc" ] && fmt="\n"
+					fmt="${fmt}%-30s %-$((11+$ADD))b %$((21+$ADD))b %-$((1+$ADD))b %-$((16+$ADD))b %-$((11+$ADD*$P2))b %b\n";
+					printf "$fmt" "$NL${tc::30}" "$libkey" "$curversion" "$compare" "$newversion" "$update" "$downgrade";
+				fi;
+			done;
+
+			#print out line with libraries for each toolchain  (if second function parameter is empty)
+			if [ -z "$2" ];then
+				[ "$CUR" -eq 0 ] && libkeys="--";
+				[ "$P" -eq 0 ] && updatable="-";
+				[ "$P" -gt 0 ] && updatable="${updatable%?}";
+				[ "$R" -gt 0 ] && downgradable="${downgradable%?}";
+				[ -z "$downgradable" ] && downgradable="-";
+
+				fmt="\n%-30s %-$((45+$ADD*$CUR))b %-$((30+$ADD*$P))b %b";
+				printf "$fmt" "${tc::30}" "${libkeys%?}" "$updatable" "$downgradable";
+			fi;
+		fi;
+	done;
+	printf "\n";
 };
 _get_toolchain_date(){
 	local tc_date;
@@ -989,14 +1079,16 @@ _get_template_properties(){
 			desc="$(awk -F': ' '/^#toolchain template:./{print $NF}' "$1" | xargs)";
 			version="$(awk -F': ' '/^#toolchain template version:./{print $NF}' "$1" | xargs)";
 			cflags="$(awk -F': ' '/^#toolchain template cflags:./{print $NF}' "$1" | xargs)";
+			ldflags="$(awk -F': ' '/^#toolchain template ldflags:./{print $NF}' "$1" | xargs)";
 			migrate="$(awk -F': ' '/^#toolchain template migrate:./{print $NF}' "$1" | xargs)";
 			updated="$(awk -F': ' '/^#toolchain template updated:./{print $NF}' "$1" | xargs)";
 			copyof="$(awk -F': ' '/^#toolchain template copyof:./{print $NF}' "$1" | xargs)";
-			[ -n "$version" ] && props="^$version"  || props="^0";
-			[ -n "$cflags" ]  && props+="^$cflags"  || props+="^";
-			[ -n "$migrate" ] && props+="^$migrate" || props+="^";
-			[ -n "$updated" ] && props+="^$updated" || props+="^";
-			[ -n "$copyof" ]  && props+="^$copyof"  || props+="^";
+			[ -n "$version" ] && props="^$version"    || props="^0";
+			[ -n "$cflags" ]  && props+="^$cflags"    || props+="^";
+			[ -n "$ldflags" ] && props+="^$ldflags"   || props+="^";
+			[ -n "$migrate" ] && props+="^$migrate"   || props+="^";
+			[ -n "$updated" ] && props+="^$updated"   || props+="^";
+			[ -n "$copyof" ]  && props+="^$copyof"    || props+="^";
 		else
 			desc="$2";
 		fi;
@@ -1048,7 +1140,7 @@ _get_template_properties(){
 						rm -f "$fngsrcdir/.config";
 					else
 						setup=0;
-						desc="$desc (${txt_s3tup_msg_gtp_info})";
+						desc="$desc ($(printf '%q' "${txt_s3tup_msg_gtp_info}"))";
 					fi;;
 			"ANDK")
 					if [ -d "$andksrcdir" ];then
@@ -1057,18 +1149,18 @@ _get_template_properties(){
 						bitness=$(grep '^ANDK_ARCH_BITNESS=' "$1" | awk -F'"' '{print $2}');
 						endianness="LE";
 						libc="libc++" && libcv="API $(grep '^ANDK_API=' "$1" | awk -F'"' '{print $2}')";
-						cc="clang" && ccv=" $($andksrcdir/toolchains/llvm/prebuilt/linux-x86_64/bin/clang -dumpversion)";
+						cc="clang" && ccv=" $($andksrcdir/toolchains/llvm/prebuilt/linux-x86_64/bin/clang 2>/dev/null -dumpversion || echo "not supported on $(uname -i) hosts")";
 						kernel="Linux" && kernelv="4.9.0";
 					else
 						setup=0;
-						desc="$desc (${txt_s3tup_msg_gtp_info})";
+						desc="$desc ($(printf '%q' "${txt_s3tup_msg_gtp_info}"))";
 					fi;;
 		esac;
 
 		#build template property string
 		[ -z $setup ] && desc="$desc ($arch$cpu$aarch $bitness-bit $endianness, $libc $libcmv$libcv, $cc $ccv, $kernel $kernelv)$props";
 	fi;
-	echo "$desc" | xargs;
+	echo "$desc";
 	[ -n "$desc" ] && exit 0 || exit 1;
 };
 _get_template_type(){
@@ -1084,7 +1176,7 @@ _compare_version(){
 
 	min=$(printf "$1\n$2\n" | sort -V | head -n1);
 	max=$(printf "$1\n$2\n" | sort -V | tail -n1);
-	
+
 	[ $min == $max ] && printf '=' && return;
 	[ $1 == $max ] && printf '>' && return;
 	[ $1 == $min ] && printf '<' && return;
@@ -1107,7 +1199,7 @@ fi;
 [ "${#2}" -eq 0 ] && printf "\033[2K\r"; #remove characters from console
 };
 _check_toolchain(){
-	
+
 	if [ -z "$1" ];then	#toolchain parameter empty
 		echo -e "\n\n${r_l}  ${txt_error}:${y_l} ${txt_s3tup_msg_check_toolchain_empty}${rs_}";
 		return 1;
@@ -1129,7 +1221,7 @@ _check_lib(){
 		"PCSC")	#Create symlink to the PCSC header files, if the last include path of the compiler don't point to it
 				echo -e "\n${txt_s3tup_msg_check_library_info1}";
 				if [ "${#includedir}" -gt 0 ] && [ ! -d "$includedir/PCSC" ];then
-					headerdir="$(dirname $(find "$prefixdir" -type f -name "pcsclite.h" | head -n 1))";
+					headerdir="$(dirname $(find "${prefixdir%/}/" -type f -name "pcsclite.h" | head -n 1))";
 					[ "${#headerdir}" -gt 0 ] && ln -frs "$headerdir" "$includedir/PCSC";
 					[ "${#headerdir}" -gt 0 ] && echo "$includedir/PCSC -> ${txt_s3tup_msg_check_library_info2a}" || "${txt_s3tup_msg_check_library_info2b} $prefixdir";
 				else
@@ -1148,14 +1240,27 @@ _check_pkg(){
 	if syscheck "" "" "${pkgs[*]}" "${headers[*]}" "${libs[*]}";then
 		echo -e "${r_l}\nSYSCHECK -> ${txt_s3tup_msg_syscheck2}\n${y_l}${prefix} install${packages}\n${re_}" && _paktc_timer 10;
 	fi;
+
+	dialog_ver="$(dialog --version | awk -F' |-' '{printf $2}')" && [ -z $dialog_ver ] && dialog_ver="0"
+	if [ $(_compare_version "$dialog_ver" "1.3") == "<" ];then
+		dialog_compile="DIALOG_BIN=\$(which dialog) \
+						\n\$DIALOG_BIN --version \
+						\ncd /tmp && wget https://invisible-island.net/datafiles/release/dialog.tar.gz \
+						\ntar -xf dialog.tar.gz \
+						\npushd \$(find . -mindepth 1 -maxdepth 1 -type d -printf '%f\\\n' | grep dialog-) \
+						\n./configure && make \
+						\nsudo cp \$DIALOG_BIN \$DIALOG_BIN.old && sudo mv dialog \$DIALOG_BIN \
+						\npopd && \$DIALOG_BIN --version"
+		echo -e "${r_l}\nSYSCHECK -> ${txt_s3tup_msg_syscheck3}\n${y_l}${dialog_compile}\n${re_}" && _paktc_timer 10;
+	fi;
 };
 _check_github_api_limits(){
-	
+
 	limit=$(curl --silent "https://api.github.com/rate_limit" | jq -r '.resources.core.limit');
 	remaining=$(curl --silent "https://api.github.com/rate_limit" | jq -r '.resources.core.remaining');
 	reset=$(curl --silent "https://api.github.com/rate_limit" | jq -r '.resources.core.reset');
 	reset_time=$(date -d @$reset);
-	
+
 	if [ "$remaining" -lt "$1" ];then
 		echo -e "${y_l}INFO -> ${txt_s3tup_msg_github_api_limits_info1} ${g_l}${reset_time}${y_l}\n${txt_s3tup_msg_github_api_limits_info2}\n${re_}";
 		return 0;
@@ -1183,7 +1288,7 @@ _check_crosstool_setup(){
 			_fng_setup "$CT_START_BUILD";
 		fi;
 	fi;
-	
+
 	#Setup Android Native Development Kit automatically if not installed
 	if [ "$1" == "ANDK" ] || [ -z "$1" ];then
 		if [ ! -f "$andksrcdir/toolchains/llvm/prebuilt/linux-x86_64/AndroidVersion.txt" ];then
@@ -1199,15 +1304,28 @@ _check_config(){
 	[ -z "$S3TUP_CONFIG_VERSION" ] && S3TUP_CONFIG_VERSION=0;
 	if [ $tpl_version -gt $S3TUP_CONFIG_VERSION ];then
 		clear;
+		conf="         $(basename $configname) version: $S3TUP_CONFIG_VERSION\n$(basename $configtemplate) version: $tpl_version\n";
 		echo -e "${r_l}\nCHECK -> ${txt_s3tup_msg_check_config_info1}\n${y_l}${conf}\n${r_l}${txt_s3tup_msg_check_config_info2}\n${y_l}./s3 tcupdate --reset\n${re_}";
 		_paktc_timer 20;
 		return 1;
 	fi;
-};	
+};
+_check_compiler_capability(){
+	case "$1" in
+		"c11") #checking if $CC supports -std=c11
+			CFLAGS="-std=c11";
+			echo "_Thread_local int x; int main(){x = 42; ; return 0;}" | "$compilername" -x c -o "/tmp/cc_cap_c11.chk" - >/dev/null 2>&1;
+			ret=$?;
+			[ -f "/tmp/cc_cap_c11.chk" ] && rm "/tmp/cc_cap_c11.chk";
+			unset CFLAGS;;
+		*)  ret=1;
+	esac;
+	return $ret;
+};
 _change_config(){
 	nok=1;
 	[[ ! $2 =~ "(" ]] && [[ ! $2 =~ ")" ]] && qte="\"" || qte=""; #no quotes if value contains parentheses
-	
+
 	if ! grep -Eq "^$1=.*" "$configname";then
 		echo -e "${r_l}\nCHECK -> ${y_l}${1}${r_l} ${txt_s3tup_msg_change_config_error}\n${re_}";
 		_paktc_timer 10;
@@ -1239,7 +1357,7 @@ _create_config(){
 
 	#get list of library keys from config template file
 	libs="$(awk -F'(' '/^LIBS=./{print $NF}' "$configname" | awk -F ')' '{printf $1}' | xargs)";
-	
+
 	#update dynamic library properties in configfile
 	props='version check url';
 	for lib in $libs;
@@ -1250,7 +1368,7 @@ _create_config(){
 			_change_config "$prop" "${!prop}" "1"; 
 		done;
 	done;
-	
+
 	return 0;
 };
 _s3tup_update(){
@@ -1261,17 +1379,17 @@ _s3tup_update(){
 					 support/translation \
 					";
 	echo -e "$pdesc - ${txt_s3tup_msg_update_log} - $(date +"%F %T")" > "$logfile";
-	
+
 	(
 		#break if simplebuild3 update is required
 		[ "$s3_update_required" -eq 1 ] && printf "${r_l}\n${txt_s3tup_msg_update_s3update_required}${re_}" && return;
-		
+
 		#get the working copy type and exit if unknown
 		cd "$workdir";
 		[ "$(git status 2>/dev/null | wc -l)" -gt 0 ] && wctype="GIT" && git remote update >/dev/null;
 		[ "$(svn info 2>/dev/null | wc -l)" -gt 0 ] && wctype="SVN";
 		[ "${#wctype}" -eq 0 ] && printf "${r_l}\n${txt_s3tup_msg_update_directory_unversioned}${re_}" && return;
-		
+
 		#prepare commands for GIT and SVN and output some working copy properties
 		if [ "$wctype" == "GIT" ];then
 			repo="$(git config --get remote.origin.url)"; #get remote url of GIT working copy
@@ -1290,7 +1408,7 @@ _s3tup_update(){
 		for ff in $s3tup_ffs;do
 			printf "${y_l}\n ${txt_checking}: ${b_l}${ff}${re_}";
 			diff_count=$(eval "$diff_cmd" | wc -l); #get the number of diff lines
-			
+
 			if [ "$diff_count" -gt 0 ];then
 					printf "${p_l} -> ${txt_s3tup_msg_update_pending}\n${re_}" && nl="\n";
 					eval "$diff_cmd"; #output summarized diff of changes
@@ -1306,7 +1424,7 @@ _s3tup_update(){
 
 		[ "$dc" -gt 0 ] && printf "${g_l}${nl}${txt_s3tup_msg_update_finished} ${p_l}${ver}${g_l}\n";
 	) | _log "$logfile";
-	
+
 	return $dc; #return number of diff lines
 };
 _log(){
@@ -1323,7 +1441,7 @@ _create_toolchaincfg(){
 		sysroot="${sr#"$1/"}";
 	fi;
 
-	[ "${13}" == "ANDK" ] && andk_vars='_oscamconfdir_custom="/data/plugin/oscam";
+	[ "${14}" == "ANDK" ] && andk_vars='_oscamconfdir_custom="/data/plugin/oscam";
 _androidndkdir="1";
 stapi_lib_custom="libwi.a";
 stapi_allowed="1";' || andk_vars='_oscamconfdir_custom="";';
@@ -1335,13 +1453,14 @@ stapi_allowed="1";' || andk_vars='_oscamconfdir_custom="";';
 \\\n
 $(echo "$6" | awk -F'[()]' '{print $1}' | xargs)\\\n
 $(echo "$6" | awk -F'[()]' '{print $2}' | xargs)\\\n")";
-	
+
 	cd "$tccfgdir";
 	cat << EOF > $2
 _toolchainname="$2";
 default_use="USE_UTF8 USE_LIBCRYPTO";
 extra_use="${11}";
 extra_cc="${12}";
+extra_ld="${13}";
 _description="$(echo "$6" | awk -F'[()]' '{print $1}' | xargs)";
 _oscamconfdir_default="/etc/tuxbox/config";
 $andk_vars

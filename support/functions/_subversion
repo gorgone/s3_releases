@@ -94,9 +94,10 @@ svnrestore(){
 	else
 		printf "$p_l\n  $txt_no oscam-svn $txt_found\n$re_"
 	fi
-
+	_nl
 	untarsvn $1
-	[ -f "$svndir/config.h" ]&& printf "$w_l""  $(REPO) Revision  : $y_l""$("$svndir/config.sh" -r) restored\n\n$re_"
+	#[ -f "$svndir/config.h" ]&& printf "$w_l""  $(REPO) Revision  : $y_l""$("$svndir/config.sh" -r) restored\n\n$re_"
+	printf "\e[1A\t\t\t$y_l""restored\n\n$re_"
 	[ -L "$workdir/lastbuild.log" ]&& rm "$workdir/lastbuild.log";
 	[ -L "$workdir/lastpatch.log" ]&& rm "$workdir/lastpatch.log";
 	[ -f "$workdir/SVN-IS-PATCHED" ] && rm -f "$workdir/SVN-IS-PATCHED";
@@ -104,6 +105,7 @@ svnrestore(){
 }
 
 quicksvnrestore(){
+	printf "$1 \n"
 	untarsvn $1
 }
 
@@ -157,7 +159,7 @@ svnpatch(){
 				else
 					SKIPPATHS=-p1
 				fi
-				sleep 1
+				sleep .5
 				patch -d$svndir/ $SKIPPATHS < "$pdir/$p" |sed -e "s/^patching file/$G patching > $WH/g;s/^Hunk/$P Hunk     > $Y/g;s/FAILED/$R FAILED/g; ;s/-- saving/$Y -- saving/g;"
 			done
 		else

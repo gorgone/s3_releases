@@ -26,6 +26,7 @@ enable_emu(){
 		fi
 	fi
 
+	_nl
 	printf $re_
 	cd $svndir
 	printf $(date)>"$workdir/patch.log"
@@ -46,8 +47,10 @@ enable_emu(){
 		printf "  Fail Count : $fcount\n\n"
 		# todo ask for restore svn yes / no / show log
 else
-	printf "\n$WH  Patch Staus :$G CLEAN "
+	printf "\n$WH  Patch Status :$G CLEAN \n"
 	touch "$workdir/EMU_ON"
 fi
+	
 	printf $re_
+	_nl
 }

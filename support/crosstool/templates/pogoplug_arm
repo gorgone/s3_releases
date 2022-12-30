@@ -1,6 +1,6 @@
-#toolchain template: Raspberry Pi 2 Model B
-#toolchain template version: 9
-#toolchain template updated: 2022-04-19 19:19:47
+#toolchain template: Marvell Kirkwood devices, Pogoplug V2
+#toolchain template version: 5
+#toolchain template updated: 2022-04-19 19:17:41
 # Automatically generated file; DO NOT EDIT.
 # crosstool-NG 1.25.0_rc1 Configuration
 CT_CONFIGURE_has_static_link=y
@@ -119,7 +119,8 @@ CT_ARCH_ARM=y
 # CT_ARCH_XTENSA is not set
 CT_ARCH="arm"
 CT_ARCH_CHOICE_KSYM="ARM"
-CT_ARCH_CPU="cortex-a7"
+CT_ARCH_CPU=""
+CT_ARCH_TUNE=""
 CT_ARCH_ARM_SHOW=y
 # Options for arm
 CT_ARCH_ARM_PKG_KSYM=""
@@ -129,9 +130,8 @@ CT_ARCH_ARM_MODE_ARM=y
 # CT_ARCH_ARM_INTERWORKING is not set
 CT_ARCH_ARM_EABI_FORCE=y
 CT_ARCH_ARM_EABI=y
-CT_ARCH_ARM_TUPLE_USE_EABIHF=y
 CT_ALL_ARCH_CHOICES="ALPHA ARC ARM AVR C6X M68K MICROBLAZE MIPS MOXIE MSP430 NIOS2 POWERPC PRU RISCV S390 SH SPARC X86 XTENSA"
-CT_ARCH_SUFFIX="v7"
+CT_ARCH_SUFFIX=""
 # CT_OMIT_TARGET_VENDOR is not set
 # Generic target options
 # CT_MULTILIB is not set
@@ -159,14 +159,15 @@ CT_ARCH_SUPPORTS_WITH_FLOAT=y
 CT_ARCH_SUPPORTS_WITH_FPU=y
 CT_ARCH_SUPPORTS_SOFTFP=y
 CT_ARCH_EXCLUSIVE_WITH_CPU=y
-CT_ARCH_FPU="neon-vfpv4"
+CT_ARCH_ARCH="armv5te"
+CT_ARCH_FPU=""
 # CT_ARCH_FLOAT_AUTO is not set
-CT_ARCH_FLOAT_HW=y
-# CT_ARCH_FLOAT_SOFTFP is not set
+# CT_ARCH_FLOAT_HW is not set
+CT_ARCH_FLOAT_SOFTFP=y
 # CT_ARCH_FLOAT_SW is not set
 CT_TARGET_CFLAGS=""
 CT_TARGET_LDFLAGS=""
-CT_ARCH_FLOAT="hard"
+CT_ARCH_FLOAT="softfp"
 # end of Target options
 # Toolchain options
 # General toolchain options
@@ -181,7 +182,7 @@ CT_SHOW_CT_VERSION=y
 CT_TOOLCHAIN_PKGVERSION=""
 CT_TOOLCHAIN_BUGURL=""
 # Tuple completion and aliasing
-CT_TARGET_VENDOR="rpi2"
+CT_TARGET_VENDOR="pogoplug"
 CT_TARGET_ALIAS_SED_EXPR=""
 CT_TARGET_ALIAS=""
 # Toolchain type
@@ -355,18 +356,18 @@ CT_GLIBC_PATCH_ORDER="global"
 # CT_GLIBC_V_2_34 is not set
 # CT_GLIBC_V_2_33 is not set
 # CT_GLIBC_V_2_32 is not set
-CT_GLIBC_V_2_31=y
+# CT_GLIBC_V_2_31 is not set
 # CT_GLIBC_V_2_30 is not set
 # CT_GLIBC_V_2_29 is not set
 # CT_GLIBC_V_2_28 is not set
 # CT_GLIBC_V_2_27 is not set
 # CT_GLIBC_V_2_26 is not set
 # CT_GLIBC_V_2_25 is not set
-# CT_GLIBC_V_2_24 is not set
+CT_GLIBC_V_2_24=y
 # CT_GLIBC_V_2_23 is not set
 # CT_GLIBC_V_2_19 is not set
 # CT_GLIBC_V_2_17 is not set
-CT_GLIBC_VERSION="2.31"
+CT_GLIBC_VERSION="2.24"
 CT_GLIBC_MIRRORS="$(CT_Mirrors GNU glibc)"
 CT_GLIBC_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_GLIBC_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
@@ -374,20 +375,20 @@ CT_GLIBC_ARCHIVE_FORMATS=".tar.xz .tar.bz2 .tar.gz"
 CT_GLIBC_SIGNATURE_FORMAT="packed/.sig"
 CT_GLIBC_2_32_or_older=y
 CT_GLIBC_older_than_2_32=y
-CT_GLIBC_later_than_2_30=y
-CT_GLIBC_2_30_or_later=y
-CT_GLIBC_later_than_2_29=y
-CT_GLIBC_2_29_or_later=y
-CT_GLIBC_later_than_2_28=y
-CT_GLIBC_2_28_or_later=y
-CT_GLIBC_later_than_2_27=y
-CT_GLIBC_2_27_or_later=y
-CT_GLIBC_later_than_2_26=y
-CT_GLIBC_2_26_or_later=y
-CT_GLIBC_later_than_2_25=y
-CT_GLIBC_2_25_or_later=y
-CT_GLIBC_later_than_2_24=y
+CT_GLIBC_2_30_or_older=y
+CT_GLIBC_older_than_2_30=y
+CT_GLIBC_2_29_or_older=y
+CT_GLIBC_older_than_2_29=y
+CT_GLIBC_2_28_or_older=y
+CT_GLIBC_older_than_2_28=y
+CT_GLIBC_2_27_or_older=y
+CT_GLIBC_older_than_2_27=y
+CT_GLIBC_2_26_or_older=y
+CT_GLIBC_older_than_2_26=y
+CT_GLIBC_2_25_or_older=y
+CT_GLIBC_older_than_2_25=y
 CT_GLIBC_2_24_or_later=y
+CT_GLIBC_2_24_or_older=y
 CT_GLIBC_later_than_2_23=y
 CT_GLIBC_2_23_or_later=y
 CT_GLIBC_later_than_2_20=y
@@ -400,7 +401,7 @@ CT_GLIBC_DEP_KERNEL_HEADERS_VERSION=y
 CT_GLIBC_DEP_BINUTILS=y
 CT_GLIBC_DEP_GCC=y
 CT_GLIBC_DEP_PYTHON=y
-CT_GLIBC_BUILD_SSP=y
+CT_GLIBC_SPARC_ALLOW_V7=y
 CT_GLIBC_HAS_LIBIDN_ADDON=y
 # CT_GLIBC_USE_LIBIDN_ADDON is not set
 CT_GLIBC_NO_SPARC_V8=y
@@ -417,13 +418,7 @@ CT_GLIBC_FORCE_UNWIND=y
 CT_GLIBC_KERNEL_VERSION_AS_HEADERS=y
 # CT_GLIBC_KERNEL_VERSION_CHOSEN is not set
 CT_GLIBC_MIN_KERNEL="5.16.9"
-CT_GLIBC_SSP_DEFAULT=y
-# CT_GLIBC_SSP_NO is not set
-# CT_GLIBC_SSP_YES is not set
-# CT_GLIBC_SSP_ALL is not set
-# CT_GLIBC_SSP_STRONG is not set
-# CT_GLIBC_ENABLE_WERROR is not set
-# CT_GLIBC_ENABLE_COMMON_FLAG is not set
+CT_GLIBC_ENABLE_COMMON_FLAG=y
 CT_ALL_LIBC_CHOICES="AVR_LIBC BIONIC GLIBC MINGW_W64 MOXIEBOX MUSL NEWLIB NONE UCLIBC_NG"
 CT_LIBC_SUPPORT_THREADS_ANY=y
 CT_LIBC_SUPPORT_THREADS_NATIVE=y
@@ -459,6 +454,8 @@ CT_GCC_V_11=y
 # CT_GCC_V_8 is not set
 # CT_GCC_V_7 is not set
 # CT_GCC_V_6 is not set
+# CT_GCC_V_5 is not set
+# CT_GCC_V_4_9 is not set
 CT_GCC_VERSION="11.2.0"
 CT_GCC_MIRRORS="$(CT_Mirrors GNU gcc/gcc-${CT_GCC_VERSION}) $(CT_Mirrors sourceware gcc/releases/gcc-${CT_GCC_VERSION})"
 CT_GCC_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
@@ -477,13 +474,10 @@ CT_GCC_later_than_7=y
 CT_GCC_7_or_later=y
 CT_GCC_later_than_6=y
 CT_GCC_6_or_later=y
-CT_GCC_REQUIRE_6_or_later=y
 CT_GCC_later_than_5=y
 CT_GCC_5_or_later=y
-CT_GCC_REQUIRE_5_or_later=y
 CT_GCC_later_than_4_9=y
 CT_GCC_4_9_or_later=y
-CT_GCC_REQUIRE_4_9_or_later=y
 CT_CC_GCC_ENABLE_PLUGINS=y
 CT_CC_GCC_GOLD=y
 CT_CC_GCC_HAS_LIBMPX=y
@@ -508,7 +502,7 @@ CT_CC_GCC_ENABLE_TARGET_OPTSPACE=y
 CT_CC_CXA_ATEXIT=y
 CT_CC_GCC_TM_CLONE_REGISTRY=m
 # CT_CC_GCC_DISABLE_PCH is not set
-CT_CC_GCC_SJLJ_EXCEPTIONS=m
+# CT_CC_GCC_SJLJ_EXCEPTIONS is not set
 CT_CC_GCC_LDBL_128=m
 # CT_CC_GCC_BUILD_ID is not set
 CT_CC_GCC_LNK_HASH_STYLE_DEFAULT=y

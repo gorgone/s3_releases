@@ -54,6 +54,9 @@ do
 		crypto.h)
 				inst="libssl-dev";
 			;;
+		opensslconf.h)
+				inst="libssl-dev";
+			;;
 		libusb.h)
 				inst="libusb-1.0.0-dev";
 			;;

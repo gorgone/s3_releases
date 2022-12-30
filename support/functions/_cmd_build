@@ -143,19 +143,25 @@ _cmd_build(){
 	done
 
 #change default oscam CONF_DIR
-if [ "$CUSTOM_CONFDIR" == "not_set" ] && [ ${#_oscamconfdir_custom} -lt 4 ];
+
+CONFDIR="$_oscamconfdir_default"
+cdtag="CONF_DIR=$CONFDIR"
+
+if [ ! -z "$_oscamconfdir_custom" ];
 then
-    CONFDIR="$_oscamconfdir_default"
-    cdtag="CONF_DIR=$CONFDIR"
-elif [ ${#_oscamconfdir_custom} -gt 4 ];
-then
-    CONFDIR="$_oscamconfdir_custom"
-    cdtag="${r_l}custom CONF_DIR=$CONFDIR (via toolchain.cfg)"
-elif [ ${#CUSTOM_CONFDIR} -gt 4 ];
+    if [ ! "$_oscamconfdir_custom" == "not_set" ];
+    then
+        CONFDIR="$_oscamconfdir_custom"
+        cdtag="${r_l}custom CONF_DIR=$_oscamconfdir_custom (via toolchain.cfg)"
+    fi
+fi
+
+if [ ! "$CUSTOM_CONFDIR" == "not_set" ];
 then
     CONFDIR="$CUSTOM_CONFDIR"
-    cdtag="${r_l}custom CONF_DIR=$CONFDIR (via commandline)"
+    cdtag="${r_l}custom CONF_DIR=$CUSTOM_CONFDIR (via CUSTOM_CONFDIR)"
 fi
+
 printf "$y_l\n |       set : ${cdtag}$w_l"
 
 #if build with profile
@@ -177,23 +183,23 @@ printf "$y_l\n |       set : ${cdtag}$w_l"
 
 	[ "${s3cfg_vars[USE_VERBOSE]}" == "1" ] && _verbose="V=1"
 
-#killstapi for nonsh4
-#	if [ ! "$_toolchainname" == "sh4" ] || [ ! "$_toolchainname" == "sh_4" ]
-#	then
-#		silent=$("$svndir/config.sh" --disable CARDREADER_STAPI CARDREADER_STAPI5)
-#	fi
-
 #build
-	timer_start
+if [ ${#USE_vars[USE_OSCAMNAME]} -gt 0 ]
+then
+	oscam_name=$(echo ${USE_vars[USE_OSCAMNAME]} |cut -d "=" -f2)
+else
 	_generate_oscam_name "$_toolchainname"
+fi
 	_nl
 	USESTRING=${USE_vars[@]}
 	EXTRA_USE=$extra_use
+	timer_start
 	$codecheck make -j"$cpus" $_verbose \
 	"CONF_DIR=$CONFDIR" \
 	"OSCAM_BIN=$bdir/$oscam_name" \
 	"CC_OPTS=$co $cc_opts $extra_cc" \
 	"CC_WARN=$cc_warn" \
+	"EXTRA_LDFLAGS=$extra_ld" \
 	$EXTRA_USE \
 	"CROSS=$CROSS" $STAPI_LIB $USESTRING 2>&1 \
 	|tee -a "$ldir/$log_name" \
@@ -252,6 +258,16 @@ printf "$y_l\n |       set : ${cdtag}$w_l"
 
 #link lastlog
 	ln -sf "$ldir/$log_name" "$workdir/lastbuild.log"
+	if [ "${USE_vars[USE_DIAG]}" == "USE_DIAG=1" ]; then
+		grep -v "^CC\|^GEN\|^CONF\|^BUILD\|STRIP\|LINK\|^+\|^scan-build: R\|^scan-build: U\|HOSTCC\|^|" -i "$workdir/lastbuild.log" \
+		|sed $'s/ generated./ generated.\\\n\\\n\\\n/g' >"$workdir/USE_DIAG.log"
+	fi
+
+#EXTRA_COPY_DIR
+	if [ $EXTRA_COPY_DIR -eq 1 ]; then
+		cd $bdir
+		cp $oscam_name $here_
+	fi
 
 #build error message
 	error_on_build=$(grep -c1 error "$ldir/$log_name")
