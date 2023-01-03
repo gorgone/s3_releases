@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="40";
+S3TUP_CONFIG_VERSION="41";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -68,17 +68,41 @@ ANDK_SETUP_tasks+=('mv --force "$(basename "$ANDK_PKG_URL" | cut -d "-" -f 1-3)"
 ANDK_SETUP_tasks+=('chmod -R 755 "@ANDKSOURCE@";'); # setup command3
 
 # Library build settings
-LIBS=(SSL_300 SSL_111 SSL_110 SSL_102 SSL_102B SSL_100 SSL_098 LIB_USB LIB_USBB LIB_USB0 LIB_PCSC LIB_CCID LIB_ZLIB); # List of ordered libraries. Only libraries in this list are available
+LIBS=(SSL_310 SSL_300 SSL_111 SSL_110 SSL_102 SSL_102B SSL_100 SSL_098 LIB_CURL LIB_USB LIB_USBB LIB_USB0 LIB_PCSC LIB_CCID LIB_ZLIB); # List of ordered libraries. Only libraries in this list are available
 LIBS_LIST_BETA="0"; # In(Ex)clude libraries defined as beta
 LIBS_AUTO_INTEGRATE="1"; # Automatically reintegrate libraries when rebuilding toolchains
+CURL_GITHUB_TOKEN="" # Token for authenticated curl requests
 
-# OpenSSL 3.0.0
+# OpenSSL 3.1.x
+SSL_310="1";
+SSL_310_beta="1";
+SSL_310_name="OpenSSL";
+SSL_310_version="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("openssl-3.1.*"))][0] | .name' | sed -e 's#openssl-##g; s#_#.#g; s#\"##g')";
+SSL_310_check="openssl.pc $(printf "$SSL_310_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
+SSL_310_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("openssl-3.1.*"))][0] | .tarball_url' | sed -e 's#\"##g')";
+SSL_310_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
+SSL_310_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
+SSL_310_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
+SSL_310_tasks+=('export LDFLAGS="@LDFLAGS@ -latomic";');
+SSL_310_tasks+=('[ "@TYPE@" == "android-ndk" ] && export CC="gcc" || export CC=@CC@;');
+SSL_310_tasks+=('[ "@TYPE@" == "android-ndk" ] && export RANLIB=ranlib || export RANLIB=@RANLIB@;');
+SSL_310_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
+SSL_310_tasks+=('FLAGS="linux-generic32 shared no-tests";');
+SSL_310_tasks+=('[[ "@CC@" =~ "uclibc"|"musl" ]] && FLAGS+=" -DOPENSSL_NO_ASYNC no-threads no-tests";');
+SSL_310_tasks+=('[[ "@CC@" =~ "atom" ]] && FLAGS+=" no-threads no-tests";');
+SSL_310_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="@SSL_TARGET@ --api=0.9.8 -D__ANDROID_API__=@API@ no-shared no-afalgeng no-aria no-asan no-asm no-async no-autoalginit no-autoerrinit no-autoload-config no-bf no-blake2 no-camellia no-capieng no-cast no-chacha no-cmac no-cms no-comp no-crypto-mdebug no-crypto-mdebug-backtrace no-ct no-devcryptoeng no-dgram no-dh no-dsa no-dso no-dynamic-engine no-ec no-ec2m no-ecdh no-ecdsa no-ec_nistp_64_gcc_128 no-egd no-engine no-err no-external-tests no-filenames no-fuzz-libfuzzer no-fuzz-afl no-gost no-idea no-makedepend no-md2 no-mdc2 no-md4 no-multiblock no-nextprotoneg no-ocb no-ocsp no-pic no-poly1305 no-posix-io no-psk no-rc2 no-rc4 no-rc5 no-rdrand no-rfc3779 no-rmd160 no-scrypt no-sctp no-seed no-siphash no-sm2 no-sm3 no-sm4 no-srp no-srtp no-sse2 no-ssl-trace no-tests no-threads no-ts no-ubsan no-ui-console no-unit-test no-whirlpool no-weak-ssl-ciphers no-zlib no-zlib-dynamic no-heartbeats no-msan no-dtls no-dtls1 no-dtls1-method no-dtls1_2 no-dtls1_2-method";');
+SSL_310_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
+SSL_310_tasks+=('make -j@CPUS@;');
+SSL_310_tasks+=('make install_sw;');
+SSL_310_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libcrypto.*" -o -name "libssl.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
+
+# OpenSSL 3.0.x
 SSL_300="1";
 SSL_300_beta="0";
 SSL_300_name="OpenSSL";
-SSL_300_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("openssl-3.*"))][0] | .name' | sed -e 's#openssl-##g; s#_#.#g; s#\"##g')";
+SSL_300_version="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("openssl-3.0.*"))][0] | .name' | sed -e 's#openssl-##g; s#_#.#g; s#\"##g')";
 SSL_300_check="openssl.pc $(printf "$SSL_300_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
-SSL_300_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("openssl-3.*"))][0] | .tarball_url' | sed -e 's#\"##g')";
+SSL_300_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("openssl-3.0.*"))][0] | .tarball_url' | sed -e 's#\"##g')";
 SSL_300_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 SSL_300_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_300_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
@@ -99,9 +123,9 @@ SSL_300_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth
 SSL_111="1";
 SSL_111_beta="0";
 SSL_111_name="OpenSSL";
-SSL_111_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_1[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
+SSL_111_version="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_1[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
 SSL_111_check="openssl.pc $(printf "$SSL_111_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
-SSL_111_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_1[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
+SSL_111_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_1[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
 SSL_111_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 SSL_111_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_111_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
@@ -120,9 +144,9 @@ SSL_111_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth
 # OpenSSL 1.1.0
 SSL_110="1";
 SSL_110_name="OpenSSL";
-SSL_110_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_0[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
+SSL_110_version="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_0[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
 SSL_110_check="openssl.pc $(printf "$SSL_110_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
-SSL_110_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_0[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
+SSL_110_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_1_0[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
 SSL_110_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 SSL_110_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_110_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
@@ -139,10 +163,10 @@ SSL_110_tasks+=('make install_sw;');
 SSL_102="1";
 SSL_102_beta="0";
 SSL_102_name="OpenSSL";
-SSL_102_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
+SSL_102_version="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
 SSL_102_check="openssl.pc $(printf "$SSL_102_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
 SSL_102_checklib="libcrypto.so.1.0.2";
-SSL_102_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
+SSL_102_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
 SSL_102_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 SSL_102_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_102_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
@@ -158,11 +182,11 @@ SSL_102B_hint="OpenSSL 1.0.2 variant to create binaries\n\t\twith version 1.0.0 
 SSL_102B="1";
 SSL_102B_beta="0";
 SSL_102B_name="OpenSSL";
-SSL_102B_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
+SSL_102B_version="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
 SSL_102B_desc="OpenSSL $SSL_102B_version (1.0.0)";
 SSL_102B_check="openssl.pc $(printf "$SSL_102_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
 SSL_102B_checklib="libcrypto.so.1.0.0";
-SSL_102B_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
+SSL_102B_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_2[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
 SSL_102B_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 SSL_102B_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_102B_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
@@ -177,9 +201,9 @@ SSL_102B_tasks+=('make install;');
 SSL_100="1";
 SSL_100_beta="0";
 SSL_100_name="OpenSSL";
-SSL_100_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_0[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
+SSL_100_version="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_0[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
 SSL_100_check="openssl.pc $(printf "$SSL_100_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
-SSL_100_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_0[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
+SSL_100_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_0[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
 SSL_100_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 SSL_100_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_100_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
@@ -195,9 +219,9 @@ SSL_100_tasks+=('make install;');
 SSL_098="1";
 SSL_098_beta="0";
 SSL_098_name="OpenSSL";
-SSL_098_version="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=3&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_0_9_8[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
+SSL_098_version="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/tags?page=3&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_0_9_8[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
 SSL_098_check="openssl.pc $(printf "$SSL_098_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
-SSL_098_url="$(curl --silent "https://api.github.com/repos/openssl/openssl/tags?page=3&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_0_9_8[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
+SSL_098_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/tags?page=3&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_0_9_8[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
 SSL_098_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 SSL_098_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_098_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
@@ -209,15 +233,34 @@ SSL_098_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_098_tasks+=('make -j@CPUS@;');
 SSL_098_tasks+=('make install;');
 
+# libcurl 7.x.x
+LIB_CURL="1";
+LIB_CURL_beta="0";
+LIB_CURL_name="libcurl";
+LIB_CURL_version="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/curl/curl/releases?page=1&per_page=100" | jq '[.[] | select(.tag_name|test("curl-7.*"))][0] | .tag_name' | sed -e 's#curl-##g; s#_#.#g; s#\"##g')";
+LIB_CURL_check="openssl.pc $(printf "$LIB_CURL_version")";
+LIB_CURL_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/curl/curl/releases?page=1&per_page=100" | jq '[.[] | select(.tag_name|test("curl-7.*"))][0] | .assets[0].browser_download_url' | sed -e 's#\"##g')";
+LIB_CURL_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
+LIB_CURL_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
+LIB_CURL_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
+LIB_CURL_tasks+=('export CC=@CC@;');
+LIB_CURL_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
+LIB_CURL_tasks+=('[ "@TYPE@" == "android-ndk" ] && cp -f "android/config.h" "./config.h";');
+LIB_CURL_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="--with-openssl --disable-shared" || FLAGS="--with-openssl";');
+LIB_CURL_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS;');
+LIB_CURL_tasks+=('make -j@CPUS@;');
+LIB_CURL_tasks+=('make install;');
+LIB_CURL_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 -name "libcurl.*" -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
+
 # libusb
 LIB_USB="1";
 LIB_USB_beta="0";
 LIB_USB_name="libusb";
-LIB_USB_version="$(curl --silent "https://api.github.com/repos/libusb/libusb/releases/latest" | jq -r '.tag_name' | cut -c 2-)";
+LIB_USB_version="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/libusb/libusb/releases/latest" | jq -r '.tag_name' | cut -c 2-)";
 LIB_USB_check="libusb-1.0.pc $(printf "$LIB_USB_version")";
 LIB_USB_checkcc="c11";
 LIB_USB_desc="$LIB_USB_name $LIB_USB_version (gcc $LIB_USB_checkcc)";
-LIB_USB_url="$(curl --silent "https://api.github.com/repos/libusb/libusb/releases/latest" | jq -r '.assets[3].browser_download_url')";
+LIB_USB_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/libusb/libusb/releases/latest" | jq -r '.assets[3].browser_download_url')";
 LIB_USB_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_USB_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_USB_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
@@ -234,9 +277,9 @@ LIB_USB_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth
 LIB_USBB="1";
 LIB_USBB_beta="0";
 LIB_USBB_name="libusb";
-LIB_USBB_version="$(curl --silent "https://api.github.com/repos/libusb/libusb/releases" | jq '[.[] | select(.tag_name|test("v1.0.23"))][0] | .tag_name' | sed -e 's#v##g; s#\"##g')";
+LIB_USBB_version="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/libusb/libusb/releases" | jq '[.[] | select(.tag_name|test("v1.0.23"))][0] | .tag_name' | sed -e 's#v##g; s#\"##g')";
 LIB_USBB_check="libusb-1.0.pc $(printf "$LIB_USBB_version")";
-LIB_USBB_url="$(curl --silent "https://api.github.com/repos/libusb/libusb/releases" | jq '[.[] | select(.tag_name|test("v1.0.23"))][0] | .assets[1].browser_download_url' | sed -e 's#\"##g')";
+LIB_USBB_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/libusb/libusb/releases" | jq '[.[] | select(.tag_name|test("v1.0.23"))][0] | .assets[1].browser_download_url' | sed -e 's#\"##g')";
 LIB_USBB_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_USBB_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_USBB_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
@@ -315,7 +358,7 @@ LIB_ZLIB_beta="0";
 LIB_ZLIB_name="zlib";
 LIB_ZLIB_version="$(curl --silent https://api.github.com/repos/madler/zlib/tags | jq -r '.[0].name' | cut -c 2-)";
 LIB_ZLIB_check="zlib.pc";
-LIB_ZLIB_url="$(curl --silent "https://api.github.com/repos/madler/zlib/tags" | jq -r '.[0].tarball_url')";
+LIB_ZLIB_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/madler/zlib/tags" | jq -r '.[0].tarball_url')";
 LIB_ZLIB_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_ZLIB_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_ZLIB_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@" || export CFLAGS="-fPIC";');
