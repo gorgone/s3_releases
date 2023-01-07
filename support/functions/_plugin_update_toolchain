@@ -3,7 +3,7 @@
 #simplebuild_plugin tcupdate
 
 tcupdate(){
-	pversion="0.23.6";
+	pversion="0.23.7";
 	pname="s3.TUP";
 	pdesc="Plugin $pname v$pversion";
 	configname="$configdir/plugin_update_toolchain.config";
@@ -499,8 +499,8 @@ _create_tc(){
 											buildtopdir=$(sed -n -e '/CT_BUILD_TOP_DIR=\// s/.*\= *//p' "$ctsrcdir/build.log");
 											[ -d "$buildtopdir" ] && rm -rf "$buildtopdir" 2>/dev/null;;
 									"FNG")  #get toolchain and target from logfile
-											btcbindir=$(grep -i '{ PATH=.*kernel.*' "$logfile" | head -n 1 | awk -F':|"' '{print $2}');
-											btcdir=$(realpath "$btcbindir/../");
+											btcbindir=$(grep -i '\-\-with-sysroot=.*\\$' "$logfile" | tail -n 1 | awk -F'=| ' '{print $2}' | xargs);
+											btcdir=$(realpath "$btcbindir");
 											target=$(basename "$btcdir");
 											#autodetect LDFLAGS depending on the freetz-ng configuration options
 											[ $(grep -i '^FREETZ_AVM_PROP_UCLIBC_SEPARATE=y' "$ctsrcdir/.config") ] && ldf="-Wl,-dynamic-linker,${FNG_SEPARATE_DYNAMIC_LINKER}";
