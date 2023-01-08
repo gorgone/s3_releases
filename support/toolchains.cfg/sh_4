@@ -8,7 +8,7 @@ stapi_allowed="1"
 _compiler="sh4-streamboard-linux-gnu-"
 _sysroot="sh4-streamboard-linux-gnu/sysroot/usr"
 _libsearchdir="/lib"
-_toolchainfilename="TkVXU0g0LVN0cmVhbWJvYXJkX3NfdV9wLnRhci54eg";
+_toolchainfilename="aHR0cHM6Ly9maWxlcy5zdHJlYW1ib2FyZC50di90b29sY2hhaW5zL1Rvb2xjaGFpbi1ORVdTSDQtU3RyZWFtYm9hcmRfc191X3AudGFyLnh6Cg==";
 _md5sum="f4d44bfa8fb5bec9abacf5c2b0ca45dd  Toolchain-NEWSH4-Streamboard_s_u_p.tar.xz";
 _tc_info="\n
     !!! SH4 New Toolchain !!!\n

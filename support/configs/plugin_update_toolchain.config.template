@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="41";
+S3TUP_CONFIG_VERSION="42";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -343,7 +343,6 @@ LIB_CCID_tasks+=('export CC=@CC@;');
 LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
 LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" ] && LIBUSB_LIBS="@PREFIX@/lib/@HOST@/@API@ -lusb-1.0" || LIBUSB_LIBS="@PREFIX@/lib -lusb-1.0 -lrt";');
 LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="--enable-static" || FLAGS="";');
-LIB_CCID_tasks+=('./bootstrap;');
 LIB_CCID_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS --enable-twinserial --enable-usbdropdir="@PREFIX@/..$(pkg-config libpcsclite --variable=usbdropdir)" --enable-serialconfdir="@PREFIX@$(pkg-config libpcsclite --variable=serialconfdir)" LIBUSB_LIBS="-L${LIBUSB_LIBS}" LIBUSB_CFLAGS="-I@PREFIX@/include/libusb-1.0";');
 LIB_CCID_tasks+=('make -j@CPUS@;');
 LIB_CCID_tasks+=('make install;');

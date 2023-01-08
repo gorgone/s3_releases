@@ -4,7 +4,7 @@ _toolchain_build_menu(){
 	[ "$loadprofile" == "yes" ] && load_config
 
 	selected=$(
-	"$gui" "$st_" "$bt_" "$title_" --no-cancel --title " -[ $txt_bmenu_title ]- " --menu "_________________________________________________________ \n $txt_bmenu_user = $(whoami)\n Toolchain       = $_toolchainname\n $txt_bmenu_comp = $_compiler""gcc\n $txt_bmenu_debu = CPU-Threads($(CPUS)) SVN($(REVISION)) SCRIPT($SIMPLEVERSION)\n $txt_bmenu_use  = $(echo $USESTRING| sed -e 's/^[ \t]*//')\n _________________________________________________________ \n" 22 65 10 BUILD "$txt_bmenu_build" CONFIGURE "$txt_bmenu_config" UPDATE "$txt_bmenu_update" BACKUP "$txt_bmenu_backup" LOAD_PROFILE "$txt_bmenu_profile" SAVE_PROFILE "$txt_bmenus_profile" SHOW_BUILDLOG "$txt_bmenu_log" EDIT_CONF_DIR "Oscam config PATH" BACK "$txt_bmenu_back" EXIT "$txt_firstmenu_exit")
+	"$gui" "$st_" "$bt_" "$title_" --no-cancel --title " -[ $txt_bmenu_title ]- " --menu "_________________________________________________________ \n $txt_bmenu_user = $(whoami)\n Toolchain       = $_toolchainname\n $txt_bmenu_comp = $_compiler""gcc\n $txt_bmenu_debu = CPU-Threads($(CPUS)) SVN($(REVISION)) SCRIPT(${SIMPLEVERSION}.${VERSIONCOUNTER})\n $txt_bmenu_use  = $(echo $USESTRING| sed -e 's/^[ \t]*//')\n _________________________________________________________ \n" 22 65 10 BUILD "$txt_bmenu_build" CONFIGURE "$txt_bmenu_config" UPDATE "$txt_bmenu_update" BACKUP "$txt_bmenu_backup" LOAD_PROFILE "$txt_bmenu_profile" SAVE_PROFILE "$txt_bmenus_profile" SHOW_BUILDLOG "$txt_bmenu_log" EDIT_CONF_DIR "Oscam config PATH" BACK "$txt_bmenu_back" EXIT "$txt_firstmenu_exit")
 	[ $? = 255 ] && _toolchain_build_menu
 
 	case $selected in
@@ -157,7 +157,7 @@ get_toolchain_config(){
 
 _load_toolchain(){
 	[ ! -z "$1" ] && source "$tccfgdir/$1"
-	dln="$(decode "$_t1e")$(decode "$_toolchainfilename")"
+	dln="$(basename $(decode "$_toolchainfilename"))"
 	tc_dl="$dldir/$dln"
 	[ -f "$dln" ] && rm -rf "$dln"
 	clear
@@ -404,20 +404,25 @@ _toolchain_remove_menu(){
 }
 
 _toolchain_gui_install(){
-	[ -d "$tcdir/$first" ] && rm -rf "$tcdir/$first" && printf "$txt_delete $tcdir/$first"
-	mkdir "$tcdir/$first"
-	cd "$tcdir/$first"
 	source "$tccfgdir/$first"
-	tcname="$(decode "$_t1e$_toolchainfilename")"
-	stcname="$(decode "$_toolchainfilename")"
 
+	url="$(decode "$_toolchainfilename")"
+	tcname="$(basename $url)"
+	
+	if [ ! -f "$dldir/$tcname" ] || [ ! -z "$1" ]
+	then
+		cd "$dldir"
+		rm -f "$tcname"
+		wget "$url" 2>&1 | stdbuf -o0 awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | "$gui" "$st_" "$bt_" "$title_" --title " -[ download ]- " --gauge "  $txt_loading $stcname $txt_wait" 6 74
+	fi
+	
 	if [ -f "$dldir/$tcname" ]
 	then
-		(xz -d "$dldir/$tcname" -c| tar -xv) |"$gui" "$st_" --title " -[ $txt_extracting ]- " "$pb_" 20 74
-	else
-		cd "$dldir"
-		wget "$(decode "$_u1e")/$tcname" 2>&1 | stdbuf -o0 awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | "$gui" "$st_" "$bt_" "$title_" --title " -[ download ]- " --gauge "  $txt_loading $stcname $txt_wait" 6 74
+		[ -d "$tcdir/$first" ] && rm -rf "$tcdir/$first" && printf "$txt_delete $tcdir/$first"
+		mkdir "$tcdir/$first"
 		cd "$tcdir/$first"
-		(xz -d "$dldir/$tcname" -c |tar -xv) |"$gui" "$st_" --title " -[ $txt_extracting ]- " "$pb_" 20 74
+		(xz -d "$dldir/$tcname" -c |tar -xv) |"$gui" "$st_" --title " -[ $txt_extracting $tcname ]- " "$pb_" 20 74
+	else
+		printf "$r_l  $txt_error:$y_l $stcname$w_l Toolchain $txt_no_download""$rs_"
 	fi
 }

@@ -1,0 +1,20 @@
+_toolchainname="fos_mLAB_mips";
+default_use="USE_UTF8 USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="";
+_description="FRITZ!Box 7590 Labor";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_self_build="yes";
+_compiler="mips-fritzos-linux-musl-";
+_sysroot="mips-fritzos-linux-musl/sysroot";
+_libsearchdir="/usr/lib";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1mb3NfbUxBQl9taXBzLnRhci54ego=";
+_md5sum="67ab25cf5e1935c1b1c81b398518f13a  Toolchain-fos_mLAB_mips.tar.xz";
+_tc_info="\n
+!!! crosstool-NG Toolchain !!!\n
+\n
+FRITZ!Box 7590 Labor\n
+mips mips1 32-bit BE, musl 1.1.23, gcc 12.2.0, linux 6.1\n";
+_tc_infolines="5";

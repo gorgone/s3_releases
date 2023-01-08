@@ -7,7 +7,7 @@ _compiler="mipsel-unknown-linux-gnu-";
 _sysroot="mipsel-unknown-linux-gnu/sysroot";
 _libsearchdir="/lib";
 _description='Dreambox & Vu+ (OE 2.0)';
-_toolchainfilename="TUlQUy1UdXhib3gtT0UyLjBfc191X3AudGFyLnh6";
+_toolchainfilename="aHR0cHM6Ly9maWxlcy5zdHJlYW1ib2FyZC50di90b29sY2hhaW5zL1Rvb2xjaGFpbi1NSVBTLVR1eGJveC1PRTIuMF9zX3VfcC50YXIueHoK";
 _md5sum="fe5d838d580a400628e6d55b64b674ad  Toolchain-MIPS-Tuxbox-OE2.0_s_u_p.tar.xz";
 _tc_info="\n
     !!! beware the box must have FPU !!!\n

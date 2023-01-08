@@ -8,7 +8,7 @@ stapi_allowed="1"
 _compiler="sh4-linux-"
 _sysroot="sh4-linux/sys-root/usr"
 _libsearchdir="/lib"
-_toolchainfilename="U0g0X3NfdV9wLnRhci54eg==";
+_toolchainfilename="aHR0cHM6Ly9maWxlcy5zdHJlYW1ib2FyZC50di90b29sY2hhaW5zL1Rvb2xjaGFpbi1TSDRfc191X3AudGFyLnh6Cg==";
 _md5sum="9ed4bb3668b648a28331d84e4e09c03c  Toolchain-SH4_s_u_p.tar.xz";
 _tc_info="\n
     !!! SH4 !!!\n

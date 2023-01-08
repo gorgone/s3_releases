@@ -8,7 +8,7 @@ _stagingdir=1
 _compiler="mips-openwrt-linux-uclibc-"
 _sysroot=""
 _libsearchdir="/lib"
-_toolchainfilename="b3BlbndydDE1MDVjYy50YXIueHo=";
+_toolchainfilename="aHR0cHM6Ly9maWxlcy5zdHJlYW1ib2FyZC50di90b29sY2hhaW5zL1Rvb2xjaGFpbi1vcGVud3J0MTUwNWNjLnRhci54ego=";
 _md5sum="1bfdea68ca58574f2db73cfeabdb1d8b  Toolchain-openwrt1505cc.tar.xz";
 _block="USE_PCSC"
 _tc_info="\n

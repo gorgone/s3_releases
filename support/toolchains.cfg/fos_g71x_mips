@@ -1,0 +1,20 @@
+_toolchainname="fos_g71x_mips";
+default_use="USE_UTF8 USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="";
+_description="FRITZ!Box 7582|7581 7.1x";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_self_build="yes";
+_compiler="mips-fritzos-linux-gnu-";
+_sysroot="mips-fritzos-linux-gnu/sysroot";
+_libsearchdir="/usr/lib";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1mb3NfZzcxeF9taXBzLnRhci54ego=";
+_md5sum="40290f82d054b7f49224b97afde9fa38  Toolchain-fos_g71x_mips.tar.xz";
+_tc_info="\n
+!!! crosstool-NG Toolchain !!!\n
+\n
+FRITZ!Box 7582|7581 7.1x\n
+mips mips1 32-bit BE, glibc 2.24, gcc 12.2.0, linux 6.1\n";
+_tc_infolines="5";

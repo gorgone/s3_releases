@@ -7,7 +7,7 @@ _oscamconfdir_custom=""
 _compiler="mipsel-unknown-linux-gnu-";
 _sysroot="mipsel-unknown-linux-gnu/sys-root/usr";
 _libsearchdir="/lib";
-_toolchainfilename="TUlQUy1UdXhib3gtT0UxLjZfc191X3AudGFyLnh6";
+_toolchainfilename="aHR0cHM6Ly9maWxlcy5zdHJlYW1ib2FyZC50di90b29sY2hhaW5zL1Rvb2xjaGFpbi1NSVBTLVR1eGJveC1PRTEuNl9zX3VfcC50YXIueHoK";
 _md5sum="09cfbf19e4f4e7c1a2c033dd12a09b4a  Toolchain-MIPS-Tuxbox-OE1.6_s_u_p.tar.xz";
 _tc_info="\n
     !!! Dreambox & VU+ (OE 1.6) !!!\n

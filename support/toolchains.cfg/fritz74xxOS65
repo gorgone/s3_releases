@@ -7,7 +7,7 @@ _oscamconfdir_custom=""
 _compiler="mips-linux-uclibc-";
 _sysroot="";
 _libsearchdir="/usr/lib/freetz";
-_toolchainfilename="RnJpdHo3NHh4T1M2NVgudGFyLnh6";
+_toolchainfilename="aHR0cHM6Ly9maWxlcy5zdHJlYW1ib2FyZC50di90b29sY2hhaW5zL1Rvb2xjaGFpbi1Gcml0ejc0eHhPUzY1WC50YXIueHoK";
 _md5sum="3f62b2be7e94ad04061ad463cad4b936  Toolchain-Fritz74xxOS65X.tar.xz";
 _tc_info="\n
     !!! Fritzbox74xx OS65 !!!\n

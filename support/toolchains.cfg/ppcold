@@ -7,7 +7,7 @@ _oscamconfdir_custom=""
 _compiler="powerpc-linux-"
 _sysroot=""
 _libsearchdir="/lib"
-_toolchainfilename="UFBDLVR1eGJveC1vbGRfcy50YXIueHo=";
+_toolchainfilename="aHR0cHM6Ly9maWxlcy5zdHJlYW1ib2FyZC50di90b29sY2hhaW5zL1Rvb2xjaGFpbi1QUEMtVHV4Ym94LW9sZF9zLnRhci54ego=";
 _md5sum="d1db3a6b9fb743d0f6753fb72d755924  Toolchain-PPC-Tuxbox-old_s.tar.xz";
 _block="USE_PCSC USE_LIBUSB"
 _tc_info="\n

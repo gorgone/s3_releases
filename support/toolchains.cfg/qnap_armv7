@@ -1,0 +1,20 @@
+_toolchainname="qnap_armv7";
+default_use="USE_UTF8 USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="";
+_description="QNAP ARM-Cortex-A9 devices";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_self_build="yes";
+_compiler="armv7-qnap-linux-gnueabihf-";
+_sysroot="armv7-qnap-linux-gnueabihf/sysroot";
+_libsearchdir="/usr/lib";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1xbmFwX2FybXY3LnRhci54ego=";
+_md5sum="a6f0bc249aa65cba7ea12983e2d82799  Toolchain-qnap_armv7.tar.xz";
+_tc_info="\n
+!!! crosstool-NG Toolchain !!!\n
+\n
+QNAP ARM-Cortex-A9 devices\n
+arm cortex-a7 32-bit LE, glibc 2.17, gcc 12.2.0, linux 6.1\n";
+_tc_infolines="5";

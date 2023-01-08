@@ -7,7 +7,7 @@ _oscamconfdir_custom=""
 _compiler="mipsel-openpli40-linux-gnu-"
 _sysroot="mipsel-openpli40-linux-gnu/sysroot"
 _libsearchdir="/lib"
-_toolchainfilename="T3BlblBMSV80LjAudGFyLnh6";
+_toolchainfilename="aHR0cHM6Ly9maWxlcy5zdHJlYW1ib2FyZC50di90b29sY2hhaW5zL1Rvb2xjaGFpbi1PcGVuUExJXzQuMC50YXIueHoK";
 _md5sum="ceae5af8c66867010845e0e4094265ff  Toolchain-OpenPLI_4.0.tar.xz";
 _tc_info="\n
     !!! beware the box must have FPU !!!\n

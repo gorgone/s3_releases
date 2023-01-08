@@ -7,7 +7,7 @@ _oscamconfdir_custom=""
 _compiler="arm-pnx8400-linux-uclibcgnueabi-";
 _sysroot="arm-pnx8400-linux-uclibcgnueabi/sys-root/usr";
 _libsearchdir="/lib";
-_toolchainfilename="Q29vbDJfc191X3AudGFyLnh6Cg==";
+_toolchainfilename="aHR0cHM6Ly9maWxlcy5zdHJlYW1ib2FyZC50di90b29sY2hhaW5zL1Rvb2xjaGFpbi1Db29sMl9zX3VfcC50YXIueHoK";
 _md5sum="7f09e91ce6e85ed65d8d7bc8bea5d8b0  Toolchain-Cool2_s_u_p.tar.xz";
 _tc_info="\n
     !!! COOLSTREAM HD2 !!!\n

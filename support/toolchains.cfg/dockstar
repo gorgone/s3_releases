@@ -7,7 +7,7 @@ _oscamconfdir_custom=""
 _compiler="arm-none-linux-gnueabi-";
 _sysroot="arm-none-linux-gnueabi/libc/usr";
 _libsearchdir="/lib";
-_toolchainfilename="RG9ja3N0YXJfc191X3AudGFyLnh6";
+_toolchainfilename="aHR0cHM6Ly9maWxlcy5zdHJlYW1ib2FyZC50di90b29sY2hhaW5zL1Rvb2xjaGFpbi1Eb2Nrc3Rhcl9zX3VfcC50YXIueHoK";
 _md5sum="f259eac25e917a0b9b564d014d171c39  Toolchain-Dockstar_s_u_p.tar.xz";
 _tc_info="\n
     !!! Dockstar !!!\n

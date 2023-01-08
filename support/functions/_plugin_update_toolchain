@@ -1,21 +1,22 @@
 #!/bin/bash
 
 #simplebuild_plugin tcupdate
+pversion="0.24.0";
+pname="s3.TUP";
+pdesc="Plugin $pname v$pversion";
+tc_url="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLw==";
+configname="$configdir/plugin_update_toolchain.config";
+configtemplate="${configname}.template";
+ctdir="$sdir/crosstool";
+cttpldir="$ctdir/templates";
+ctngsrcdir="$ctdir/crosstool-ng";
+fngsrcdir="$ctdir/freetz-ng";
+andksrcdir="$ctdir/android-ndk";
+cpus="$(getconf _NPROCESSORS_ONLN)";
+s3_update_required=1;
 
 tcupdate(){
-	pversion="0.23.7";
-	pname="s3.TUP";
-	pdesc="Plugin $pname v$pversion";
-	configname="$configdir/plugin_update_toolchain.config";
-	configtemplate="${configname}.template";
-	ctdir="$sdir/crosstool";
-	cttpldir="$ctdir/templates";
-	ctngsrcdir="$ctdir/crosstool-ng";
-	fngsrcdir="$ctdir/freetz-ng";
-	andksrcdir="$ctdir/android-ndk";
-	cpus="$(getconf _NPROCESSORS_ONLN)";
 	[ -f "$workdir/DEVELOPMENT" ] && disable_syscheck="1" && disable_template_versioning="1";
-	s3_update_required=0;
 
 	CMDTC="$1";
 	OPTION1="$2";
@@ -39,7 +40,8 @@ tcupdate(){
 	fi;
 
 	#some migrations to upgrade older s3.TUP versions
-	[[ -z "$4" || "$FLAG" -gt 0 ]] && _migrations;
+	# DISABLED, because slow and currently not needed
+	#[[ -z "$4" || "$FLAG" -gt 0 ]] && _migrations;
 
 	#backup config
 	if [ "$CMDTC" == "-r" ] || [ "$CMDTC" == "--reset" ];then
@@ -91,7 +93,14 @@ tcupdate(){
 
 	#process commandline arguments
 	if [ "$CMDTC" == "-c" ] || [ "$CMDTC" == "--create" ];then	#start toolchain builder menu
-		_create_tc "$OPTION1" "" "$FLAG";
+		_create_tc "$OPTION1" "3" "$FLAG";
+		[ "$FLAG" == "1" ] && return || bye;
+	elif [ "$CMDTC" == "-dl" ] || [ "$CMDTC" == "--download" ];then	#start toolchain download
+		if [ ! -z $OPTION1 ]; then
+			_create_tc "$OPTION1" "0" "$FLAG";
+		else
+			_nl && [ "$FLAG" == "1" ] && sleep 2 && return || exit;
+		fi;
 		[ "$FLAG" == "1" ] && return || bye;
 	elif [ "$CMDTC" == "-l" ] || [ "$CMDTC" == "--libs" ];then	#list toolchain integrated libraries
 		_list_toolchain_libkeys "$OPTION1";
@@ -100,7 +109,7 @@ tcupdate(){
 		_list_toolchain_libkeys "$OPTION1" "$CMDTC";
 		exit;
 	elif [ "$CMDTC" == "-s" ] || [ "$CMDTC" == "--setup" ];then	#setup crosstool-NG
-		_create_tc "" "$CMDTC" "$FLAG";
+		_create_tc "" "1" "$FLAG";
 		bye;
 	elif [ "$CMDTC" == "-b" ] || [ "$CMDTC" == "--backup" ];then #backup toolchain
 		if _check_toolchain "$OPTION1";then
@@ -139,11 +148,12 @@ tcupdate(){
 			fi;
 			[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "$txt_s3tup_menu_toolchain_notfound" "$txt_s3tup_menu_toolchain_notfound");
 			clear;clear;
-			out=$("$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--item-help" "--help-tags" "--default-item" "$tc" "--ok-label" "${txt_s3tup_menu_command_label_update}" "--cancel-label" "${txt_s3tup_menu_command_label_create}" "--help-button" "--help-label" "${txt_s3tup_menu_command_label_backup}" "--extra-button" "--extra-label" "$([ ! "$FLAG" == "1" ] && echo "${txt_s3tup_menu_command_label_exit}" || echo "${txt_s3tup_menu_command_label_back}")" "--title" "-[ ${txt_s3tup_menu_toolchain_title} ]-" \
+
+			opts=$("$gui" "$st_" "$bt_" "$title_ \Z0$pdesc\Zn" "--colors" "--item-help" "--help-tags" "--default-item" "$tc" "--ok-label" "${txt_s3tup_menu_command_label_update}" "--cancel-label" "${txt_s3tup_menu_command_label_create}" "--help-button" "--help-label" "${txt_s3tup_menu_command_label_backup}" "--extra-button" "--extra-label" "${txt_s3tup_menu_command_label_repair}" "--title" "-[ ${txt_s3tup_menu_toolchain_title} ]-" \
 				--menu "\n${txt_s3tup_menu_toolchain_text1} $COUNT ${txt_s3tup_menu_toolchain_text2}\n " \
 				0 0 "$COUNT" "${MENU_OPTIONS[@]}");
 			ret="$?";
-			[ $ret -eq 2 ] && tc=$(echo "$out" | awk '{printf $2}') || tc=$(echo "$out" | awk '{printf $1}');
+			[ $ret -eq 2 ] && tc=$(echo "$opts" | awk '{printf $2}') || tc=$(echo "$opts" | awk '{printf $1}');
 
 			case $ret in
 				0) #Update toolchain
@@ -153,7 +163,10 @@ tcupdate(){
 				2) #Backup toolchain
 					_check_toolchain $tc && _backup "$tc" "$tc" >/dev/null || [ -z "$CMDTC" ] && sleep 2 && tcupdate "$CMDTC" "$OPTION1" "$OPTION2" "$FLAG" || _nl && exit;
 					sleep 2;;
-				3) #Exit
+				3) #Repair
+					_check_toolchain "$tc";
+					[ ! -z $tc ] && _toolchain_repair "$tc";;
+				255) #Exit
 					unset MENU_OPTIONS;
 					[ "$FLAG" == "1" ] && return || bye;;
 			esac;
@@ -251,7 +264,7 @@ _integrate_libs(){
 			ret="0";
 		else
 			clear;clear;
-			opts=$("$gui" "--item-help" "--help-tags" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--default-item" "$lkey" "--ok-label" "${txt_s3tup_menu_command_label_start}" "--help-button" "--help-label" "${txt_s3tup_menu_command_label_info}" "--cancel-label" "$([ ! "$3" -gt 0 ] && echo "${txt_s3tup_menu_command_label_exit}" || echo "${txt_s3tup_menu_command_label_back}")" "--title" "-[ ${txt_s3tup_menu_library_title} - \Z2$tc\Zn ]-" "$cl_"\
+			opts=$("$gui" "--item-help" "--help-tags" "$st_" "$bt_" "$title_ \Z0$pdesc\Zn" "--colors" "--default-item" "$lkey" "--ok-label" "${txt_s3tup_menu_command_label_start}" "--help-button" "--help-label" "${txt_s3tup_menu_command_label_info}" "--cancel-label" "$([ ! "$3" -gt 0 ] && echo "${txt_s3tup_menu_command_label_exit}" || echo "${txt_s3tup_menu_command_label_back}")" "--title" "-[ ${txt_s3tup_menu_library_title} - \Z2$tc\Zn ]-" "$cl_"\
 				"\n${txt_s3tup_menu_library_text1}\n\Z2$prefixdir\Zn${txthint}\n\n${txt_s3tup_menu_library_text2}" \
 				0 0 "$COUNT" "${MENU_OPTIONS[@]}");
 			ret="$?"
@@ -294,14 +307,17 @@ _integrate_libs(){
 							task=$(_replace_tokens "$task");	#replace tokens
 							buildtasks+=("$task");
 						done;
-						_build_library "($i/$icount) $tc: ${txt_lib} ${lib[1]} ${lib[2]}" $(_extract $(_dl "${lib[6]}" "${lib[1]} ${lib[2]}") "$tmpdir" 2>/dev/null) "$logfile" "${buildtasks[@]}";
+						_df="$(_dl "${lib[6]}" "${lib[1]} ${lib[2]}")"
+						_ed="$(_extract "$_df" "$tmpdir" 2>/dev/null)"
+						#_paktc_timer 10 "$_ed"
+						_build_library "($i/$icount) $tc: ${txt_lib} ${lib[1]} ${lib[2]}" "$_ed" "$logfile" "${buildtasks[@]}";
 					done;
 					[ "${#buildtasks[@]}" == "0" ] && echo -e "${r_l}  ${txt_error}:${y_l} ${o} ${w_l}${txt_s3tup_msg_library_not_found}${rs_}";
 					sleep 2;
 				done;
 
 				[ -d "$tmpdir" ] && rm -rf "$tmpdir";;
-			1) #Exit/Back
+			1 | 255) #Exit/Back
 				unset MENU_OPTIONS;
 				menu_close="1";
 				return;;
@@ -312,7 +328,7 @@ _integrate_libs(){
 					bcd=$(cat "$configname" | grep ""$lkey"_tasks");
 					txt=$(echo -e "${txt_s3tup_menu_info_toolchain}$tcdir/$tc\n${txt_s3tup_menu_info_compiler}$compilername\n${txt_s3tup_menu_info_sysroot}$sysrootdir\n${txt_s3tup_menu_info_prefix}$prefixdir\n${txt_s3tup_menu_info_include}$includedir\n$sp\n\n${txt_s3tup_menu_info_library}\n$txt\n\n${txt_s3tup_menu_info_build}\n$(_replace_tokens "$(_tidy_tasks "$bcd" "$lkey")")");
 					tempfile=$(mktemp) && echo -e "$txt" > "$tempfile";
-					"$gui" "$st_" "$nc_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--no-ok" "--extra-button" "--extra-label" "${txt_s3tup_menu_command_label_back}" "--textbox" "$tempfile" 30 80;
+					"$gui" "$st_" "$nc_" "$bt_" "$title_ \Z0$pdesc\Zn" "--colors" "--no-ok" "--extra-button" "--extra-label" "${txt_s3tup_menu_command_label_back}" "--textbox" "$tempfile" 30 80;
 					rm "$tempfile" 2>/dev/null;
 				fi;;
 		esac;
@@ -324,14 +340,13 @@ _integrate_libs(){
 _create_tc(){
 	_sz; # Prepare DIALOG settings
 	unset TPL_LIST;
-	local menu_close compilername libkeys use ldf;
+	local menu_close compilername libkeys use ldf first base_url;
+
 	while [ ! $menu_close ]
 	do
-		if [ "${#2}" -gt 0 ];then #Force setup call
-			ret="1";
-		elif [ "${#1}" -gt 0 ];then #Force build toolchain call
+		ret="$2";
+		if [ ! -z $1 ] || [ "$2" == "1" ];then #Force build toolchain call
 			opts="$(echo "$1" | tr ',' '\n')";
-			ret="0";
 		else #Show Template Menu
 			tplempty=0;
 			[ ! -d "$cttpldir" ] && mkdir --parents "$cttpldir";
@@ -364,14 +379,26 @@ _create_tc(){
 			fi;
 			[ $COUNT -eq 0 ] && MENU_OPTIONS+=("" "$txt_s3tup_menu_template_notfound" "off" "$txt_s3tup_menu_template_notfound");
 			clear;clear;
-			opts=$("$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--item-help" "--help-tags" "--default-item" "$tpl" "--ok-label" "${txt_s3tup_menu_command_label_start}" "--extra-button" "--extra-label" "$([ ! "$3" == "1" ] && echo "${txt_s3tup_menu_command_label_exit}" || echo "${txt_s3tup_menu_command_label_back}")" "--cancel-label" "${txt_s3tup_menu_command_label_setup}" "--help-button" "--help-label" "${txt_s3tup_menu_command_label_edit}" "--title" "-[ ${txt_s3tup_menu_template_title} ]-" "$cl_"\
+
+			opts=$("$gui" "$st_" "$bt_" "$title_ \Z0$pdesc\Zn" "--colors" "--item-help" "--help-tags" "--default-item" "$tpl" "--ok-label" "${txt_s3tup_menu_command_label_download}" "--extra-button" "--extra-label" "${txt_s3tup_menu_command_label_start}" "--cancel-label" "${txt_s3tup_menu_command_label_setup}" "--help-button" "--help-label" "${txt_s3tup_menu_command_label_edit}" "--title" "-[ ${txt_s3tup_menu_template_title} ]-" "$cl_"\
 				 "\n${txt_s3tup_menu_template_text1} $COUNT ${txt_s3tup_menu_template_text2}\n\n\Z1${txt_s3tup_menu_template_text3} \Zb${txt_s3tup_menu_template_text4}\ZB ${txt_s3tup_menu_template_text5}\Zn" \
 				 0 0 "$COUNT" "${MENU_OPTIONS[@]}");
 			ret="$?";
 		fi;
 
 		case $ret in
-			0) #Start - Build cross toolchain
+			0) #Download
+				for first in $opts;do
+					_toolchain_gui_install "force download"
+				done;;
+			1) #Setup - Setup crosstool-NG
+				_ctng_setup "$CT_START_BUILD";
+				_fng_setup  "$CT_START_BUILD";
+				_andk_setup "$CT_START_BUILD";;
+			2) #Edit
+				tpl=$(echo "$opts" | awk '{printf $2}';);
+				_tpl_editor "$(_get_template_type "$cttpldir/$tpl" | awk -F';' '{print $1}' | xargs)" "$tpl";;
+			3) #Start - Build cross toolchain
 				#Setup crosstool-NG, Freetz-NG, Android-NDK automatically if not installed
 				_check_crosstool_setup;
 
@@ -532,7 +559,7 @@ _create_tc(){
 								fi;
 
 								#compress toolchain
-								_compress "$dldir/$(decode "$_t1e")$tpl.tar.xz" "$tcdir/$tpl" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_compress_title} $tpl ${txt_to} $(decode "$_t1e")$tpl.tar.xz ]- " "$pb_" "$_lines" "$_cols";
+								_compress "$dldir/$(decode "$_t1e")$tpl.tar.xz" "$tcdir/$tpl" | "$gui" "$st_" "$bt_" "$title_ \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_compress_title} $tpl ${txt_to} $(decode "$_t1e")$tpl.tar.xz ]- " "$pb_" "$_lines" "$_cols";
 
 								#create toolchain.cfg
 								props=$(_get_template_properties "$cttpldir/$tpl");
@@ -554,21 +581,14 @@ _create_tc(){
 						sleep 2;
 					fi;
 				done;;
-			1) #Setup - Setup crosstool-NG
-				_ctng_setup "$CT_START_BUILD";
-				_fng_setup  "$CT_START_BUILD";
-				_andk_setup "$CT_START_BUILD";;
-			2) #Edit
-				tpl=$(echo "$opts" | awk '{printf $2}';);
-				_tpl_editor "$(_get_template_type "$cttpldir/$tpl" | awk -F';' '{print $1}' | xargs)" "$tpl";;
-			3)	#Exit
+			255) #Exit
 				unset MENU_OPTIONS;
 				menu_close="1";
 				return;;
 		esac;
 
 		#Exit loop if setup or build toolchain are forced
-		[ "${#2}" -gt 0 ] || [ "${#1}" -gt 0 ] && menu_close=1;
+		if [ ! -z $1 ] || [ "$2" == "1" ];then menu_close=1; fi
 
 	done;
 };
@@ -611,7 +631,7 @@ _migrations(){
 			tf=$(grep '^_toolchainfilename=' "$tccfgdir/$t");
 			tfn=$(echo "$tf" | awk -F'"' '{print $2}' | xargs);
 			if [[ $(decode "$tfn") =~ ^$(decode "$_t1e").* ]];then
-				new_tfn="$(decode "$tfn")" && new_tfn="$(printf ${new_tfn/$(decode "$_t1e")/} | base64)";
+				new_tfn="$(decode "$tfn")" && new_tfn="$(printf ${new_tfn/$(decode "$_t1e")/} | base64 -w0)";
 				sed -i "s|$tfn|$new_tfn|g" "$tccfgdir/$t";
 				new_tf=$(grep '^_toolchainfilename=' "$tccfgdir/$t");
 				mig_list+="\n${txt_update} ${p_l}${t}${re_} ${txt_tc} ${txt_conf} ${p_l}$tccfgdir/$t${re_}\n${y_l}   - ${tf}${re_}\n${g_l}   + ${new_tf}\n${re_}";
@@ -644,7 +664,7 @@ _backup(){
 	tpl_type_name="$(echo "$template_type" | awk -F';' '{print $2}' | xargs)";
 	source "$tccfgdir/$src" && target="${_compiler%?}" && sysroot="$_sysroot" && lsd="$_libsearchdir" && desc="$_description" && info="$_tc_info" && sb="$_self_build" && eu="$extra_use" && ec="$extra_cc" && el="$extra_ld";
 	_create_toolchaincfg "$tcdir/$src" "$dest" "$target" "$sysroot" "$lsd" "$desc" "$info" "$xzfile" "$sb" "tpl_type_name" "$eu" "$ec" "$el" "$tpl_type";
-	) | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_backup_title} ${src} ${txt_to} $(basename "$xzfile") ]- " "$pb_" "$_lines" "$_cols";
+	) | "$gui" "$st_" "$bt_" "$title_ \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_backup_title} ${src} ${txt_to} $(basename "$xzfile") ]- " "$pb_" "$_lines" "$_cols";
 	[ -f "$newtccfgfile" ] && echo "$dest";
 };
 _build_library(){
@@ -664,11 +684,11 @@ _build_library(){
 			cd "$libsrcdir";
 			( eval "${tasks[@]}" ) 2>&1
 		) | _log "$lf"
-	) | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_build_library_title} $desc ]- " "$pb_" "$_lines" "$_cols";sleep 2;
+	) | "$gui" "$st_" "$bt_" "$title_ \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_build_library_title} $desc ]- " "$pb_" "$_lines" "$_cols";sleep 2;
 
 	#build error message
 	error_on_build=$(grep -cw1 Error "$lf");
-	if [ "$error_on_build" -gt 0 ];then
+	if [ $error_on_build -gt 0 ];then
 		echo -e "${r_l}${txt_s3tup_msg_build_library_error}\n${b_l}  ${lf}\n${y_l}" >$(tty);
 		_paktc_timer 10;
 		echo -e "${re_}${w_l}";
@@ -749,7 +769,7 @@ _ctng_setup(){
 		echo -e "$CTNG_ROOT_BUILD_ERROR$CTNG_ROOT_BUILD_CMD";
 		sleep 5;
 	fi;
-	) | _log "$logfile" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_ctng_setup_title} crosstool-NG ]- " "$pb_" "$_lines" "$_cols";
+	) | _log "$logfile" | "$gui" "$st_" "$bt_" "$title_ \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_ctng_setup_title} crosstool-NG ]- " "$pb_" "$_lines" "$_cols";
 };
 _fng_setup(){
 	_sz; # Prepare DIALOG settings
@@ -779,7 +799,7 @@ _fng_setup(){
 		echo -e "$CTNG_ROOT_BUILD_ERROR$CTNG_ROOT_BUILD_CMD";
 		sleep 5;
 	fi;
-	) | _log "$logfile" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_fng_setup_title} Freetz-NG ]- " "$pb_" "$_lines" "$_cols";
+	) | _log "$logfile" | "$gui" "$st_" "$bt_" "$title_ \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_fng_setup_title} Freetz-NG ]- " "$pb_" "$_lines" "$_cols";
 };
 _andk_setup(){
 	_sz; # Prepare DIALOG settings
@@ -807,13 +827,13 @@ _andk_setup(){
 		echo -e "$CTNG_ROOT_BUILD_ERROR$CTNG_ROOT_BUILD_CMD";
 		sleep 5;
 	fi;
-	) | _log "$logfile" | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_andk_setup_title} Android-NDK ]- " "$pb_" "$_lines" "$_cols";
+	) | _log "$logfile" | "$gui" "$st_" "$bt_" "$title_ \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_andk_setup_title} Android-NDK ]- " "$pb_" "$_lines" "$_cols";
 };
 _dl(){
-	[ -d "$dldir/#tmp" ] && rm --recursive --force "$dldir/#tmp"
+	[ -d "$dldir/#tmp" ] && rm -rf "$dldir/#tmp"
 	mkdir --parents "$dldir/#tmp";
 	cd "$dldir/#tmp";
-	wget --content-disposition "$1" 2>&1 | stdbuf -o0 awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | "$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_download_title} $2 ]- " --gauge "  $txt_loading $txt_wait" 6 74;
+	wget --content-disposition "$1" 2>&1 | stdbuf -o0 awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | "$gui" "$st_" "$bt_" "$title_ \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_download_title} $2 ]- " --gauge "  $txt_loading $txt_wait" 6 74;
 	if [ $? -eq 0 ];then
 		fname="$(ls -t | head -n1)"; md5file="$fname.md5";
 		md5sum "$fname" > "$md5file";
@@ -830,7 +850,7 @@ _compress(){
 	XZ_OPT=-e9 tar -cvJf "$1" -C "$2" .
 };
 _extract(){
-    local c e i;
+    local c e i edir;
 
     (($#)) || return;
 
@@ -861,10 +881,11 @@ _extract(){
             *)     echo "$0: ${txt_s3tup_msg_extract_extension_unknown} \`$i'" >&2;
                    continue;;
         esac
+
 		cd "$edir";
 		BEFORE=(.*/ */);
 
-		command "${c[@]}" "$i" |"$gui" "$st_" "$bt_" "$title_ - \Z0$pdesc\Zn" "--colors" "--title" " -[ $txt_extracting $i ]- " "$pb_" 20 74;
+		command "${c[@]}" "$i" |"$gui" "$st_" "$bt_" "$title_ \Z0$pdesc\Zn" "--colors" "--title" " -[ $txt_extracting $i ]- " "$pb_" 20 74;
         ((e = e || $?));
 
 		AFTER=(.*/ */);
@@ -1083,12 +1104,12 @@ _get_template_properties(){
 			migrate="$(awk -F': ' '/^#toolchain template migrate:./{print $NF}' "$1" | xargs)";
 			updated="$(awk -F': ' '/^#toolchain template updated:./{print $NF}' "$1" | xargs)";
 			copyof="$(awk -F': ' '/^#toolchain template copyof:./{print $NF}' "$1" | xargs)";
-			[ -n "$version" ] && props="^$version"    || props="^0";
-			[ -n "$cflags" ]  && props+="^$cflags"    || props+="^";
-			[ -n "$ldflags" ] && props+="^$ldflags"   || props+="^";
-			[ -n "$migrate" ] && props+="^$migrate"   || props+="^";
-			[ -n "$updated" ] && props+="^$updated"   || props+="^";
-			[ -n "$copyof" ]  && props+="^$copyof"    || props+="^";
+			[ -n "$version" ]   && props="^$version"    || props="^0";
+			[ -n "$cflags" ]    && props+="^$cflags"    || props+="^";
+			[ -n "$ldflags" ]   && props+="^$ldflags"   || props+="^";
+			[ -n "$migrate" ]   && props+="^$migrate"   || props+="^";
+			[ -n "$updated" ]   && props+="^$updated"   || props+="^";
+			[ -n "$copyof" ]    && props+="^$copyof"    || props+="^";
 		else
 			desc="$2";
 		fi;
@@ -1446,7 +1467,7 @@ _androidndkdir="1";
 stapi_lib_custom="libwi.a";
 stapi_allowed="1";' || andk_vars='_oscamconfdir_custom="";';
 
-	tfn="$(basename "${8/$(decode "$_t1e")/}" | base64)"; #remove 'Toolchain-' from filename before encoding
+	tfn=$(echo "$(decode "$tc_url")${pversion}/$(basename "$8")" | base64 -w0)
 	[ "${#5}" -gt 0 ] && lsd="$5" || lsd="/usr/lib";
 	[ "${#7}" -gt 0 ] && info="$7" || info="$(echo -e "\\\n
 !!! ${10} Toolchain !!!\\\n

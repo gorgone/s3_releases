@@ -7,7 +7,7 @@ _oscamconfdir_custom="/var/"
 _compiler="arm-newnigma2-linux-gnueabihf-"
 _sysroot="arm-newnigma2-linux-gnueabihf"
 _libsearchdir="/usr/lib"
-_toolchainfilename="YXJtX2RyZWFtLnRhci54eg==";
+_toolchainfilename="aHR0cHM6Ly9maWxlcy5zdHJlYW1ib2FyZC50di90b29sY2hhaW5zL1Rvb2xjaGFpbi1hcm1fZHJlYW0udGFyLnh6Cg==";
 _md5sum="ba520f3c9ce3d4e6263751f0781e4161  Toolchain-arm_dream.tar.xz";
 _tc_info="\n
     !!! Dreambox ARM Toolchain !!!\n

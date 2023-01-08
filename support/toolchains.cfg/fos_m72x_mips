@@ -1,0 +1,20 @@
+_toolchainname="fos_m72x_mips";
+default_use="USE_UTF8 USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="-Wl,-dynamic-linker,/usr/lib/freetz/ld-uClibc.so.0";
+_description="FRITZ!Box 7590|7490 7.2x";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_self_build="yes";
+_compiler="mips-linux-uclibc-";
+_sysroot="usr";
+_libsearchdir="/usr/lib";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1mb3NfbTcyeF9taXBzLnRhci54ego=";
+_md5sum="aa5c602f7def08bfaa6ce7c4fb6284a7  Toolchain-fos_m72x_mips.tar.xz";
+_tc_info="\n
+!!! freetz-NG Toolchain !!!\n
+\n
+FRITZ!Box 7590|7490 7.2x\n
+mips mips32r2 32-bit BE, uClibc 1.0.42, gcc 8.3.0, linux 4.9.198\n";
+_tc_infolines="5";

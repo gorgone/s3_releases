@@ -7,7 +7,7 @@ _oscamconfdir_custom=""
 _compiler="arm-unknown-linux-gnueabihf-";
 _sysroot="arm-unknown-linux-gnueabihf/sys-root/";
 _libsearchdir="/lib";
-_toolchainfilename="aGQ1MS50YXIueHoK";
+_toolchainfilename="aHR0cHM6Ly9maWxlcy5zdHJlYW1ib2FyZC50di90b29sY2hhaW5zL1Rvb2xjaGFpbi1oZDUxLnRhci54ego=";
 _md5sum="f238272cebc476c2396ed6fa74a93d86  Toolchain-hd51.tar.xz";
 _tc_info="\n
 !!! beware the box must have FPU !!!\n

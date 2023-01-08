@@ -1,0 +1,20 @@
+_toolchainname="oe20_sh_multilib";
+default_use="USE_UTF8 USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="";
+_description="OpenEmbedded 2.0 STBs with multilib support";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_self_build="yes";
+_compiler="sh-oe20-linux-gnu-";
+_sysroot="sh-oe20-linux-gnu/sysroot";
+_libsearchdir="/usr/lib";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1vZTIwX3NoNC50YXIueHoK";
+_md5sum="b135030f900d025627a18ed09370202a  Toolchain-oe20_sh_multilib.tar.xz";
+_tc_info="\n
+!!! crosstool-NG Toolchain !!!\n
+\n
+OpenEmbedded 2.0 STBs with multilib support\n
+sh sh4 32-bit LE+BE, glibc 2.25, gcc 12.2.0, linux 6.1\n";
+_tc_infolines="5";

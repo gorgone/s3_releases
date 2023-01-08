@@ -7,7 +7,7 @@ _oscamconfdir_custom=""
 _compiler="mipsel-simplebuild3-linux-gnu-";
 _sysroot="/";
 _libsearchdir="/lib";
-_toolchainfilename="bWlwc2VsX3MzX3NzbDEwMC50YXIueHoK";
+_toolchainfilename="aHR0cHM6Ly9maWxlcy5zdHJlYW1ib2FyZC50di90b29sY2hhaW5zL1Rvb2xjaGFpbi1taXBzZWxfczNfc3NsMTAwLnRhci54ego=";
 _md5sum="b1ff681eff62b0e639d37e001b97e1e0  Toolchain-mipsel_s3_ssl100.tar.xz";
 _tc_info="\n
     !!! generic mipsel ssl 1.0.0 !!!\n

@@ -7,7 +7,7 @@ _oscamconfdir_custom=""
 _compiler="x86_64-linux-gnu-"
 _sysroot=""
 _libsearchdir="/lib"
-_toolchainfilename="U3luX0F0b20udGFyLnh6";
+_toolchainfilename="aHR0cHM6Ly9maWxlcy5zdHJlYW1ib2FyZC50di90b29sY2hhaW5zL1Rvb2xjaGFpbi1TeW5fQXRvbS50YXIueHoK";
 _md5sum="f9dcb6623f163af10ec2ec761e82f124  Toolchain-Syn_Atom.tar.xz";
 _tc_info="\n
     !!! Synology ATOM !!!\n
