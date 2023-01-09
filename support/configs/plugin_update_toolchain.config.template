@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="42";
+S3TUP_CONFIG_VERSION="43";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -26,6 +26,8 @@ S3TUP_CONFIG_VERSION="42";
 # You normally do *not* need to be root to build a toolchain using crosstool-NG. In fact, it is *VERY* dangerous to run as root, 
 # as crosstool-NG will, as part of the build process, remove a few directories. If anything goes wrong, running as root can ruin your host distribution.
 CTNG_BUILD_AS_ROOT="0"; # Enable/Disable build as root (1|0)
+CURL_GITHUB_TOKEN=""; # Token for authenticated curl requests
+CTNG_BUILD_STATIC_TOOLCHAIN="0"; # Enable/Disable (1|0), if you wish to move the toolchain to another host, and you are not confident that this host has the required versions of system libs, then all the host tools will be linked statically
 
 # crosstool-NG toolchain build settings
 CTNG_REPO_URL="https://github.com/crosstool-ng/crosstool-ng"; # Repository to load ct-ng from
@@ -71,7 +73,6 @@ ANDK_SETUP_tasks+=('chmod -R 755 "@ANDKSOURCE@";'); # setup command3
 LIBS=(SSL_310 SSL_300 SSL_111 SSL_110 SSL_102 SSL_102B SSL_100 SSL_098 LIB_CURL LIB_USB LIB_USBB LIB_USB0 LIB_PCSC LIB_CCID LIB_ZLIB); # List of ordered libraries. Only libraries in this list are available
 LIBS_LIST_BETA="0"; # In(Ex)clude libraries defined as beta
 LIBS_AUTO_INTEGRATE="1"; # Automatically reintegrate libraries when rebuilding toolchains
-CURL_GITHUB_TOKEN="" # Token for authenticated curl requests
 
 # OpenSSL 3.1.x
 SSL_310="1";
