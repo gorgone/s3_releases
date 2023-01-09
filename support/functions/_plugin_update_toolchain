@@ -1467,7 +1467,7 @@ _androidndkdir="1";
 stapi_lib_custom="libwi.a";
 stapi_allowed="1";' || andk_vars='_oscamconfdir_custom="";';
 
-	tfn=$(echo "$(decode "$tc_url")${pversion}/$(basename "$8")" | base64 -w0)
+	tfn=$(echo "$(decode "$tc_url")\${pversion}/$(basename "$8")" | base64 -w0)
 	[ "${#5}" -gt 0 ] && lsd="$5" || lsd="/usr/lib";
 	[ "${#7}" -gt 0 ] && info="$7" || info="$(echo -e "\\\n
 !!! ${10} Toolchain !!!\\\n
