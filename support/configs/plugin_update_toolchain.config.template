@@ -239,7 +239,7 @@ LIB_CURL="1";
 LIB_CURL_beta="0";
 LIB_CURL_name="libcurl";
 LIB_CURL_version="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/curl/curl/releases?page=1&per_page=100" | jq '[.[] | select(.tag_name|test("curl-7.*"))][0] | .tag_name' | sed -e 's#curl-##g; s#_#.#g; s#\"##g')";
-LIB_CURL_check="openssl.pc $(printf "$LIB_CURL_version")";
+LIB_CURL_check="libcurl.pc $(printf "$LIB_CURL_version")";
 LIB_CURL_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/curl/curl/releases?page=1&per_page=100" | jq '[.[] | select(.tag_name|test("curl-7.*"))][0] | .assets[0].browser_download_url' | sed -e 's#\"##g')";
 LIB_CURL_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_CURL_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
