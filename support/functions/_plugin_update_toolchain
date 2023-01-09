@@ -16,7 +16,7 @@ cpus="$(getconf _NPROCESSORS_ONLN)";
 s3_update_required=1;
 
 tcupdate(){
-	[ -f "$workdir/DEVELOPMENT" ] && disable_syscheck="1" && disable_template_versioning="1";
+	[ -f "$workdir/DEVELOPMENT" ] && disable_syscheck="1" && disable_template_versioning="1" && source "$workdir/DEVELOPMENT" ; # DEVELOPMENT should contain a CURL_GITHUB_TOKEN to avoid github rate limiting
 
 	CMDTC="$1";
 	OPTION1="$2";
@@ -1283,9 +1283,9 @@ _check_pkg(){
 };
 _check_github_api_limits(){
 
-	limit=$(curl --silent "https://api.github.com/rate_limit" | jq -r '.resources.core.limit');
-	remaining=$(curl --silent "https://api.github.com/rate_limit" | jq -r '.resources.core.remaining');
-	reset=$(curl --silent "https://api.github.com/rate_limit" | jq -r '.resources.core.reset');
+	limit=$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/rate_limit" | jq -r '.resources.core.limit');
+	remaining=$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/rate_limit" | jq -r '.resources.core.remaining');
+	reset=$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/rate_limit" | jq -r '.resources.core.reset');
 	reset_time=$(date -d @$reset);
 
 	if [ "$remaining" -lt "$1" ];then
