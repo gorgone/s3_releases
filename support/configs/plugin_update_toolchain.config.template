@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="43";
+S3TUP_CONFIG_VERSION="44";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -26,7 +26,6 @@ S3TUP_CONFIG_VERSION="43";
 # You normally do *not* need to be root to build a toolchain using crosstool-NG. In fact, it is *VERY* dangerous to run as root, 
 # as crosstool-NG will, as part of the build process, remove a few directories. If anything goes wrong, running as root can ruin your host distribution.
 CTNG_BUILD_AS_ROOT="0"; # Enable/Disable build as root (1|0)
-CURL_GITHUB_TOKEN=""; # Token for authenticated curl requests
 CTNG_BUILD_STATIC_TOOLCHAIN="0"; # Enable/Disable (1|0), if you wish to move the toolchain to another host, and you are not confident that this host has the required versions of system libs, then all the host tools will be linked statically
 
 # crosstool-NG toolchain build settings
@@ -70,7 +69,7 @@ ANDK_SETUP_tasks+=('mv --force "$(basename "$ANDK_PKG_URL" | cut -d "-" -f 1-3)"
 ANDK_SETUP_tasks+=('chmod -R 755 "@ANDKSOURCE@";'); # setup command3
 
 # Library build settings
-LIBS=(SSL_310 SSL_300 SSL_111 SSL_110 SSL_102 SSL_102B SSL_100 SSL_098 LIB_CURL LIB_USB LIB_USBB LIB_USB0 LIB_PCSC LIB_CCID LIB_ZLIB); # List of ordered libraries. Only libraries in this list are available
+LIBS=(SSL_310 SSL_300 SSL_111 SSL_110 SSL_102 SSL_102B SSL_100 SSL_098 LIB_CURL LIB_USB LIB_USBB LIB_USB0 LIB_PCSC LIB_PCSCB LIB_CCID LIB_ZLIB); # List of ordered libraries. Only libraries in this list are available
 LIBS_LIST_BETA="0"; # In(Ex)clude libraries defined as beta
 LIBS_AUTO_INTEGRATE="1"; # Automatically reintegrate libraries when rebuilding toolchains
 
@@ -315,6 +314,8 @@ LIB_PCSC_beta="0";
 LIB_PCSC_name="PCSC-Lite";
 LIB_PCSC_version="$(curl --silent "https://pcsclite.apdu.fr/files/" | grep -m1 'href="pcsc-lite' | awk -F '"' '{printf $4}' | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
 LIB_PCSC_check="libpcsclite.pc";
+LIB_PCSC_checkcc="c11";
+LIB_PCSC_desc="$LIB_PCSC_name $LIB_PCSC_version (gcc $LIB_PCSC_checkcc)";
 LIB_PCSC_url="$(printf 'https://pcsclite.apdu.fr/files/'$(curl --silent "https://pcsclite.apdu.fr/files/" | grep -m1 'href="pcsc-lite' | awk -F '"' '{printf $4}'))";
 LIB_PCSC_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_PCSC_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
@@ -329,6 +330,27 @@ LIB_PCSC_tasks+=('make install;');
 LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 -name "libpcsc*" -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
 LIB_PCSC_tasks+=('@VALIDATE@ "PCSC";');
 LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" ] && zip -j "$bdir/@HOST@@API@-pcscd.zip" -xi "@PREFIX@/sbin/pcscd";');
+
+# PCSC-Lite 1.9.5
+LIB_PCSCB="1";
+LIB_PCSCB_beta="0";
+LIB_PCSCB_name="PCSC-Lite";
+LIB_PCSCB_version="$(curl --silent "https://pcsclite.apdu.fr/files/" | grep -m1 'href="pcsc-lite-1.9.5' | awk -F '"' '{printf $2}' | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
+LIB_PCSCB_check="libpcsclite.pc";
+LIB_PCSCB_url="$(printf 'https://pcsclite.apdu.fr/files/'$(curl --silent "https://pcsclite.apdu.fr/files/" | grep -m1 "href=\"pcsc-lite-$LIB_PCSCB_version" | awk -F '"' '{printf $2}'))";
+LIB_PCSCB_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
+LIB_PCSCB_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
+LIB_PCSCB_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
+LIB_PCSCB_tasks+=('export CC=@CC@;');
+LIB_PCSCB_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
+LIB_PCSCB_tasks+=('[ "@TYPE@" == "android-ndk" ] && LIBUSB_LIBS="@PREFIX@/lib/@HOST@/@API@ -lusb-1.0" || LIBUSB_LIBS="@PREFIX@/lib -lusb-1.0 -lrt";');
+LIB_PCSCB_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="--enable-static --disable-shared --disable-libudev LIBS=-llog" || FLAGS="--disable-libudev";');
+LIB_PCSCB_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS --disable-libsystemd --with-systemdsystemunitdir=@PREFIX@/lib/systemd/system LIBUSB_LIBS="-L${LIBUSB_LIBS}" LIBUSB_CFLAGS="-I@PREFIX@/include/libusb-1.0";');
+LIB_PCSCB_tasks+=('make -j@CPUS@;');
+LIB_PCSCB_tasks+=('make install;');
+LIB_PCSCB_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 -name "libpcsc*" -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
+LIB_PCSCB_tasks+=('@VALIDATE@ "PCSC";');
+LIB_PCSCB_tasks+=('[ "@TYPE@" == "android-ndk" ] && zip -j "$bdir/@HOST@@API@-pcscd.zip" -xi "@PREFIX@/sbin/pcscd";');
 
 # CCID IFD Handler
 LIB_CCID="1";
@@ -356,7 +378,7 @@ LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" ] && zip -j "$bdir/@HOST@@API@-lib
 LIB_ZLIB="1";
 LIB_ZLIB_beta="0";
 LIB_ZLIB_name="zlib";
-LIB_ZLIB_version="$(curl --silent https://api.github.com/repos/madler/zlib/tags | jq -r '.[0].name' | cut -c 2-)";
+LIB_ZLIB_version="$(curl --silent $CURL_GITHUB_TOKEN https://api.github.com/repos/madler/zlib/tags | jq -r '.[0].name' | cut -c 2-)";
 LIB_ZLIB_check="zlib.pc";
 LIB_ZLIB_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/madler/zlib/tags" | jq -r '.[0].tarball_url')";
 LIB_ZLIB_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
