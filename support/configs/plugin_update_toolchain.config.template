@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="44";
+S3TUP_CONFIG_VERSION="45";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -30,8 +30,7 @@ CTNG_BUILD_STATIC_TOOLCHAIN="0"; # Enable/Disable (1|0), if you wish to move the
 
 # crosstool-NG toolchain build settings
 CTNG_REPO_URL="https://github.com/crosstool-ng/crosstool-ng"; # Repository to load ct-ng from
-CTNG_CONFIG_tasks=('./ct-ng menuconfig;'); # config command1
-CTNG_CONFIG_tasks+=('TPL_SAVE=$($gui --defaultno --output-fd 1 --ok-label "${txt_s3tup_menu_command_label_yes}" --cancel-label "${txt_s3tup_menu_command_label_no}" --colors $bt_ "$title_ - \Z0$pdesc\Zn" --title "-[ ${txt_s3tup_menu_edit_title} ]-" --inputbox "\n${txt_s3tup_menu_edit_text}" 10 55 "@TEMPLATE@") && cp ".config" "$TPL_SAVE";'); # config command2
+CTNG_CONFIG_tasks=('clear; ./ct-ng menuconfig; echo -e "${y_l}${txt_s3tup_menu_edit_text}${re_}";'); # config command1
 CTNG_BUILD_tasks=('./ct-ng show-config | tee -a "@LOGFILE@";'); # build command1
 CTNG_BUILD_tasks+=('./ct-ng build;'); # build command2
 CTNG_SETUP_tasks=('git clone --progress "$CTNG_REPO_URL" "@CTNGSOURCE@";'); # setup command1
@@ -43,8 +42,7 @@ CTNG_SETUP_tasks+=('make;'); # setup command9
 # freetz-NG toolchain build settings
 FNG_REPO_URL="https://github.com/Freetz-NG/freetz-ng.git"; # Repository to load freetz-ng from
 FNG_SEPARATE_DYNAMIC_LINKER="/usr/lib/freetz/ld-uClibc.so.0";
-FNG_CONFIG_tasks=('make menuconfig;'); # config command1
-FNG_CONFIG_tasks+=('TPL_SAVE=$($gui --defaultno --output-fd 1 --ok-label "${txt_s3tup_menu_command_label_yes}" --cancel-label "${txt_s3tup_menu_command_label_no}" --colors $bt_ "$title_ - \Z0$pdesc\Zn" --title "-[ ${txt_s3tup_menu_edit_title} ]-" --inputbox "\n${txt_s3tup_menu_edit_text}" 10 55 "@TEMPLATE@") && cp ".config" "$TPL_SAVE";'); # config command2
+FNG_CONFIG_tasks=('clear; make menuconfig; echo -e "${y_l}${txt_s3tup_menu_edit_text}${re_}";'); # config command1
 FNG_BUILD_tasks=('make olddefconfig | tee -a "@LOGFILE@";'); # build command1
 FNG_BUILD_tasks+=('make toolchain-dirclean | tee -a "@LOGFILE@";'); # build command2
 FNG_BUILD_tasks+=('make toolchain | tee -a "@LOGFILE@";'); # build command3
@@ -54,8 +52,7 @@ FNG_SETUP_tasks+=('ln -s "../../downloads" "@FNGSOURCE@/dl";'); # setup command2
 # android-NDK toolchain build settings
 ANDK_PKG_URL="https://dl.google.com/android/repository/$(curl --silent https://developer.android.com/ndk/downloads | grep -A1 -m1 'ndk_lts_linux64_download' | tail -n1 | awk -F'>|<' '{print $2}' | xargs)"; # Location to load Android Native Development Kit (NDK) from freetz-ng from
 ANDK_PKG_SHA1="$(curl --silent https://developer.android.com/ndk/downloads | grep -A4 -m1 'ndk_lts_linux64_download' | tail -n1 | awk -F'>|</' '{print $2}' | xargs)";
-ANDK_CONFIG_tasks=('editor ".config";'); # config command1
-ANDK_CONFIG_tasks+=('TPL_SAVE=$($gui --defaultno --output-fd 1 --ok-label "${txt_s3tup_menu_command_label_yes}" --cancel-label "${txt_s3tup_menu_command_label_no}" --colors $bt_ "$title_ - \Z0$pdesc\Zn" --title "-[ ${txt_s3tup_menu_edit_title} ]-" --inputbox "\n${txt_s3tup_menu_edit_text}" 10 55 "@TEMPLATE@") && cp ".config" "$TPL_SAVE";'); # config command2
+ANDK_CONFIG_tasks=('clear; editor ".config"; echo -e "${y_l}${txt_s3tup_menu_edit_text}${re_}";'); # config command1
 ANDK_BUILD_tasks=('TOOLCHAIN="@TOOLCHAIN@";'); # build command1
 ANDK_BUILD_tasks+=('echo "Extracting prebuild toolchain "@ANDKSOURCE@/toolchains/llvm/prebuilt/linux-x86_64" from NDK to "@TOOLCHAIN@"..." | tee -a "@LOGFILE@" && rm -rf "@TOOLCHAIN@" | tee -a "@LOGFILE@" && cp -rf "@ANDKSOURCE@/toolchains/llvm/prebuilt/linux-x86_64/" "@TOOLCHAIN@" | tee -a "@LOGFILE@";'); # build command2
 ANDK_BUILD_tasks+=('cleanups="aarch64 arm i686 i386 x86_64 python .py pkgconfig ++ cmake test prebuilt_include bfd-plugins 2to3 share 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30";'); # build command3

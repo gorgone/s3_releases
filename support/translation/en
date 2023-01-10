@@ -235,7 +235,7 @@ txt_s3tup_menu_info_library="Configuration:"
 txt_s3tup_menu_info_build="command list:"
 
 txt_s3tup_menu_edit_title="Save Cross ${txt_tc} ${txt_tpl}"
-txt_s3tup_menu_edit_text="Would you like to \ZrSAVE\ZR this ${txt_tc,,} ${txt_tpl,,} \Zrnow\ZR?"
+txt_s3tup_menu_edit_text="Reloading Cross Toolchain Template Menu..."
 
 txt_s3tup_menu_backup_title="$txt_s3tup_menu_command_label_backup"
 txt_s3tup_menu_build_library_title="Build"

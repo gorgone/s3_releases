@@ -245,7 +245,7 @@ txt_s3tup_menu_info_library="Konfiguration:"
 txt_s3tup_menu_info_build="Befehlszeilen:"
 
 txt_s3tup_menu_edit_title="Speichere Cross ${txt_tc} ${txt_tpl}"
-txt_s3tup_menu_edit_text="Wollen Sie diese ${txt_tc}-${txt_tpl} \Zrjetzt SPEICHERN\ZR?"
+txt_s3tup_menu_edit_text="Aktualisierung des Cross Toolchain Template Menüs..."
 
 txt_s3tup_menu_backup_title="$txt_s3tup_menu_command_label_backup von"
 txt_s3tup_menu_build_library_title="Erstelle"

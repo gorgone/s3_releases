@@ -724,6 +724,7 @@ _tpl_editor(){
 	fi;
 
 	cd "$editordir";
+	md5="$(md5sum .config  | awk '{printf $1}')";
 	TASKS="${1}"_CONFIG_tasks[@];TASKS=("${!TASKS}");
 
 	for task in "${TASKS[@]}";do
@@ -732,16 +733,15 @@ _tpl_editor(){
 	done;
 	(
 		eval "${configtasks[@]}" #run template editor tasks
-		if [ -f "$TPL_SAVE" ];then #edited template was saved
-			sed -i '/^$\|^#$/d' "$TPL_SAVE"; #cleanup template by removing empty and #-lines
-			sed -i '/^#toolchain template.*:.*/d' "$TPL_SAVE"; #remove existing toolchain template description lines
-			((i+=1)); sed -i "${i}i #toolchain template: $desc" "$TPL_SAVE"; #add toolchain template description line
-			((i+=1)); sed -i "${i}i #toolchain template version: $version" "$TPL_SAVE"; #add toolchain template version property
-			[ -n "$cflags" ] && ((i+=1)) && sed -i "${i}i #toolchain template cflags: $cflags" "$TPL_SAVE"; #add toolchain template cflags property
-			[ -n "$ldflags" ] && ((i+=1)) && sed -i "${i}i #toolchain template ldflags: $ldflags" "$TPL_SAVE"; #add toolchain template ldflags property
-			((i+=1)); sed -i "${i}i #toolchain template updated: $(date -r "$TPL_SAVE" "+%F %T")" "$TPL_SAVE"; #add toolchain template updated property
-			[ "$TPL_SAVE" != "$cttpldir/$tpl" ] && copyof="$tpl";
-			[ -n "$copyof" ] && ((i+=1)) &&	sed -i "${i}i #toolchain template copyof: $copyof" "$TPL_SAVE"; #add toolchain template copyof property
+		if [ "$md5" != "$(md5sum .config  | awk '{printf $1}')" ];then #edited template was saved
+			cp -f ".config" "$cttpldir/$tpl"; #copy back edited template
+			sed -i '/^$\|^#$/d' "$cttpldir/$tpl"; #cleanup template by removing empty and #-lines
+			sed -i '/^#toolchain template.*:.*/d' "$cttpldir/$tpl"; #remove existing toolchain template description lines
+			((i+=1)); sed -i "${i}i #toolchain template: $desc" "$cttpldir/$tpl"; #add toolchain template description line
+			((i+=1)); sed -i "${i}i #toolchain template version: $version" "$cttpldir/$tpl"; #add toolchain template version property
+			[ -n "$cflags" ] && ((i+=1)) && sed -i "${i}i #toolchain template cflags: $cflags" "$cttpldir/$tpl"; #add toolchain template cflags property
+			[ -n "$ldflags" ] && ((i+=1)) && sed -i "${i}i #toolchain template ldflags: $ldflags" "$cttpldir/$tpl"; #add toolchain template ldflags property
+			((i+=1)); sed -i "${i}i #toolchain template updated: $(date -r "$cttpldir/$tpl" "+%F %T")" "$cttpldir/$tpl"; #add toolchain template updated property
 		fi;
 	) 2>&1;
 };
