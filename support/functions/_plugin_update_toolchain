@@ -307,10 +307,7 @@ _integrate_libs(){
 							task=$(_replace_tokens "$task");	#replace tokens
 							buildtasks+=("$task");
 						done;
-						_df="$(_dl "${lib[6]}" "${lib[1]} ${lib[2]}")"
-						_ed="$(_extract "$_df" "$tmpdir" 2>/dev/null)"
-						#_paktc_timer 10 "$_ed"
-						_build_library "($i/$icount) $tc: ${txt_lib} ${lib[1]} ${lib[2]}" "$_ed" "$logfile" "${buildtasks[@]}";
+						_build_library "($i/$icount) $tc: ${txt_lib} ${lib[1]} ${lib[2]}" "$(_extract "$(_dl "${lib[6]}" "${lib[1]} ${lib[2]}")" "$tmpdir" 2>/dev/null)" "$logfile" "${buildtasks[@]}";
 					done;
 					[ "${#buildtasks[@]}" == "0" ] && echo -e "${r_l}  ${txt_error}:${y_l} ${o} ${w_l}${txt_s3tup_msg_library_not_found}${rs_}";
 					sleep 2;
@@ -329,7 +326,7 @@ _integrate_libs(){
 					txt=$(echo -e "${txt_s3tup_menu_info_toolchain}$tcdir/$tc\n${txt_s3tup_menu_info_compiler}$compilername\n${txt_s3tup_menu_info_sysroot}$sysrootdir\n${txt_s3tup_menu_info_prefix}$prefixdir\n${txt_s3tup_menu_info_include}$includedir\n$sp\n\n${txt_s3tup_menu_info_library}\n$txt\n\n${txt_s3tup_menu_info_build}\n$(_replace_tokens "$(_tidy_tasks "$bcd" "$lkey")")");
 					tempfile=$(mktemp) && echo -e "$txt" > "$tempfile";
 					"$gui" "$st_" "$nc_" "$bt_" "$title_ \Z0$pdesc\Zn" "--colors" "--no-ok" "--extra-button" "--extra-label" "${txt_s3tup_menu_command_label_back}" "--textbox" "$tempfile" 30 80;
-					rm "$tempfile" 2>/dev/null;
+					rm -f "$tempfile" 2>/dev/null;
 				fi;;
 		esac;
 
@@ -443,8 +440,8 @@ _create_tc(){
 						ctsrcdir="${tpl_type,,}srcdir";ctsrcdir="${!ctsrcdir}";
 
 						#copy template
-						echo "rm \"$ctsrcdir/.config\"* 2>/dev/null;cp -f \"$cttpldir/$tpl\" \"$ctsrcdir/.config\";" | _log "$logfile";
-						rm "$ctsrcdir/.config"* 2>/dev/null;cp -f "$cttpldir/$tpl" "$ctsrcdir/.config";
+						echo "rm -f \"$ctsrcdir/.config\"* 2>/dev/null;cp -f \"$cttpldir/$tpl\" \"$ctsrcdir/.config\";" | _log "$logfile";
+						rm -f "$ctsrcdir/.config"* 2>/dev/null;cp -f "$cttpldir/$tpl" "$ctsrcdir/.config";
 
 						#prepare template and build
 						case "$tpl_type" in
@@ -611,7 +608,7 @@ _migrations(){
 				tc_migrate=$(echo "$props" | awk -F'^' '{print $5}' | xargs); #extract template name to migrate
 				if [[ -n "$tc_migrate" && -d "$tcdir/$tc_migrate" ]];then
 					mig_list+="\n${txt_tc} ${y_l}${tc_migrate}${re_}\n\t${txt_tpl} ${y_l}${tc_migrate}${re_} ${txt_s3tup_msg_cross_migrations_renamed} ${p_l}${tpl}\n${re_}";
-					rm_list+="\n${txt_s3tup_msg_cross_migrations_remove} ${y_l}${tc_migrate}${re_}\n\trm -r \"${tcdir}/${y_l}${tc_migrate}${re_}\"\n\trm -f \"${tccfgdir}/${y_l}${tc_migrate}${re_}\"\n";
+					rm_list+="\n${txt_s3tup_msg_cross_migrations_remove} ${y_l}${tc_migrate}${re_}\n\trm -rf \"${tcdir}/${y_l}${tc_migrate}${re_}\"\n\trm -rf \"${tccfgdir}/${y_l}${tc_migrate}${re_}\"\n";
 				fi;
 			done;
 
@@ -716,7 +713,7 @@ _tpl_editor(){
 	if [ -f "$cttpldir/$tpl" ];then #copy the existing template to edit it
 		cp -f "$cttpldir/$tpl" "$editordir/.config"
 	elif [ -n "$tpl" ];then #create an empty template
-		[ -f "$editordir/.config" ] && rm "$editordir/.config"* 2>/dev/null;
+		[ -f "$editordir/.config" ] && rm -f "$editordir/.config"* 2>/dev/null;
 		touch "$editordir/.config";
 	else #use existing (self copied) template
 		[ ! -f "$editordir/.config" ] && touch "$editordir/.config";
@@ -843,7 +840,7 @@ _dl(){
 		cd "$dldir";
 		answer=$(md5sum -c "$md5file" 2>/dev/null | awk -F: '{printf $2}');
 		[ ! "$answer" == "OK" ] && mv -f "$dldir/#tmp/$fname" "$dldir/$fname";
-		rm --recursive --force "$dldir/#tmp";
+		rm -rf "$dldir/#tmp";
 	fi;
 	[ -f "$dldir/$fname" ] && echo "$dldir/$fname";
 	exit;
@@ -858,7 +855,7 @@ _extract(){
     (($#)) || return;
 
 	edir="$2";
-	[ -d "$edir" ] && rm -r "$edir";
+	[ -d "$edir" ] && rm -rf "$edir";
 	mkdir --parents "$edir";
 
     for i; do
@@ -1340,7 +1337,7 @@ _check_compiler_capability(){
 			CFLAGS="-std=c11";
 			echo "_Thread_local int x; int main(){x = 42; ; return 0;}" | "$compilername" -x c -o "/tmp/cc_cap_c11.chk" - >/dev/null 2>&1;
 			ret=$?;
-			[ -f "/tmp/cc_cap_c11.chk" ] && rm "/tmp/cc_cap_c11.chk";
+			[ -f "/tmp/cc_cap_c11.chk" ] && rm -f "/tmp/cc_cap_c11.chk";
 			unset CFLAGS;;
 		*)  ret=1;
 	esac;
