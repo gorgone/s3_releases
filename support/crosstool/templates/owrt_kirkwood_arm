@@ -1,6 +1,6 @@
 #toolchain template: OpenWrt 19.07|21.02 kirkwood, Pogoplug V2 LE devices
-#toolchain template version: 5
-#toolchain template updated: 2023-01-03 22:11:28
+#toolchain template version: 6
+#toolchain template updated: 2023-01-10 17:41:28
 # Automatically generated file; DO NOT EDIT.
 # crosstool-NG 1.25.0.117_66ac9e6 Configuration
 CT_CONFIGURE_has_static_link=y
@@ -192,7 +192,7 @@ CT_SYSROOT_NAME="sysroot"
 CT_SYSROOT_DIR_PREFIX=""
 CT_WANTS_STATIC_LINK=y
 CT_WANTS_STATIC_LINK_CXX=y
-# CT_STATIC_TOOLCHAIN is not set
+CT_STATIC_TOOLCHAIN=y
 CT_SHOW_CT_VERSION=y
 CT_TOOLCHAIN_PKGVERSION=""
 CT_TOOLCHAIN_BUGURL=""
@@ -361,14 +361,9 @@ CT_BINUTILS_later_than_2_26=y
 CT_BINUTILS_2_26_or_later=y
 # GNU binutils
 CT_BINUTILS_GOLD_SUPPORTS_ARCH=y
-CT_BINUTILS_GOLD_SUPPORT=y
 CT_BINUTILS_LINKER_LD=y
-# CT_BINUTILS_LINKER_GOLD is not set
-# CT_BINUTILS_LINKER_LD_GOLD is not set
-# CT_BINUTILS_LINKER_GOLD_LD is not set
 CT_BINUTILS_LINKERS_LIST="ld"
 CT_BINUTILS_LINKER_DEFAULT="bfd"
-CT_BINUTILS_PLUGINS=y
 CT_BINUTILS_RELRO=m
 CT_BINUTILS_DETERMINISTIC_ARCHIVES=y
 CT_BINUTILS_EXTRA_CONFIG_ARRAY=""
@@ -498,7 +493,6 @@ CT_GCC_later_than_5=y
 CT_GCC_5_or_later=y
 CT_GCC_later_than_4_9=y
 CT_GCC_4_9_or_later=y
-CT_CC_GCC_ENABLE_PLUGINS=y
 CT_CC_GCC_HAS_LIBMPX=y
 CT_CC_GCC_ENABLE_CXX_FLAGS=""
 CT_CC_GCC_CORE_EXTRA_CONFIG_ARRAY=""
@@ -508,8 +502,6 @@ CT_CC_GCC_STATIC_LIBSTDCXX=y
 CT_CC_GCC_CONFIG_TLS=m
 # Optimisation features
 CT_CC_GCC_USE_GRAPHITE=y
-CT_CC_GCC_USE_LTO=y
-CT_CC_GCC_LTO_ZSTD=m
 # Settings for libraries running on target
 CT_CC_GCC_ENABLE_DEFAULT_PIE=y
 CT_CC_GCC_ENABLE_TARGET_OPTSPACE=y

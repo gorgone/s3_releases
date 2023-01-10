@@ -457,9 +457,6 @@ _create_tc(){
 									#CT_TOOLCHAIN_PKGVERSION aka version output extension
 									echo "sed -i \"s#.*CT_TOOLCHAIN_PKGVERSION=.*#CT_TOOLCHAIN_PKGVERSION=\"simplebuild3\"#g\" \"$ctsrcdir/.config\";" | _log "$logfile";
 									sed -i "s#.*CT_TOOLCHAIN_PKGVERSION=.*#CT_TOOLCHAIN_PKGVERSION=\"simplebuild3\"#g" "$ctsrcdir/.config";
-									#CT_STATIC_TOOLCHAIN aka link host tools statically
-									[ "$CTNG_BUILD_STATIC_TOOLCHAIN" == "1" ] && echo "echo -e \"\nCT_STATIC_TOOLCHAIN=y\" >>\"$ctsrcdir/.config\";" | _log "$logfile" \
-																			  && echo -e "\nCT_STATIC_TOOLCHAIN=y" >>"$ctsrcdir/.config";
 									#CT_PARALLEL_JOBS aka parallel task count for building
 									echo "echo -e \"\nCT_PARALLEL_JOBS=$cpus\" >>\"$ctsrcdir/.config\";";
 									echo -e "\nCT_PARALLEL_JOBS=$cpus" >>"$ctsrcdir/.config";

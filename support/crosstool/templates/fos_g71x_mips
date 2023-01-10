@@ -1,6 +1,6 @@
 #toolchain template: FRITZ!Box 7582|7581 7.1x
-#toolchain template version: 8
-#toolchain template updated: 2023-01-03 22:21:10
+#toolchain template version: 9
+#toolchain template updated: 2023-01-10 17:37:05
 # Automatically generated file; DO NOT EDIT.
 # crosstool-NG 1.25.0.117_66ac9e6 Configuration
 CT_CONFIGURE_has_static_link=y
@@ -168,7 +168,7 @@ CT_SYSROOT_NAME="sysroot"
 CT_SYSROOT_DIR_PREFIX=""
 CT_WANTS_STATIC_LINK=y
 CT_WANTS_STATIC_LINK_CXX=y
-# CT_STATIC_TOOLCHAIN is not set
+CT_STATIC_TOOLCHAIN=y
 CT_SHOW_CT_VERSION=y
 CT_TOOLCHAIN_PKGVERSION=""
 CT_TOOLCHAIN_BUGURL=""
@@ -323,7 +323,6 @@ CT_BINUTILS_FORCE_LD_BFD_DEFAULT=y
 CT_BINUTILS_LINKER_LD=y
 CT_BINUTILS_LINKERS_LIST="ld"
 CT_BINUTILS_LINKER_DEFAULT="bfd"
-CT_BINUTILS_PLUGINS=y
 CT_BINUTILS_RELRO=m
 CT_BINUTILS_DETERMINISTIC_ARCHIVES=y
 CT_BINUTILS_EXTRA_CONFIG_ARRAY=""
@@ -490,7 +489,6 @@ CT_GCC_later_than_5=y
 CT_GCC_5_or_later=y
 CT_GCC_later_than_4_9=y
 CT_GCC_4_9_or_later=y
-CT_CC_GCC_ENABLE_PLUGINS=y
 CT_CC_GCC_HAS_LIBMPX=y
 CT_CC_GCC_ENABLE_CXX_FLAGS=""
 CT_CC_GCC_CORE_EXTRA_CONFIG_ARRAY=""
@@ -500,8 +498,6 @@ CT_CC_GCC_STATIC_LIBSTDCXX=y
 CT_CC_GCC_CONFIG_TLS=m
 # Optimisation features
 CT_CC_GCC_USE_GRAPHITE=y
-CT_CC_GCC_USE_LTO=y
-CT_CC_GCC_LTO_ZSTD=m
 # Settings for libraries running on target
 CT_CC_GCC_ENABLE_TARGET_OPTSPACE=y
 # CT_CC_GCC_LIBMUDFLAP is not set
