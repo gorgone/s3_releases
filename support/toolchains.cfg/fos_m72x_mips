@@ -6,7 +6,6 @@ extra_ld="-Wl,-dynamic-linker,/usr/lib/freetz/ld-uClibc.so.0";
 _description="FRITZ!Box 7590|7490 7.2x";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-_self_build="yes";
 _compiler="mips-linux-uclibc-";
 _sysroot="usr";
 _libsearchdir="/usr/lib";

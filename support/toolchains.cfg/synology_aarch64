@@ -6,7 +6,6 @@ extra_ld="";
 _description="Synology DS418";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-_self_build="yes";
 _compiler="aarch64-ds418-linux-gnu-";
 _sysroot="aarch64-ds418-linux-gnu/sysroot";
 _libsearchdir="/usr/lib";

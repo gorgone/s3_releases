@@ -6,7 +6,6 @@ extra_ld="";
 _description="Dreambox DM9x0 UHD";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-
 _compiler="arm-dreambox-linux-gnueabihf-";
 _sysroot="arm-dreambox-linux-gnueabihf/sysroot";
 _libsearchdir="/usr/lib";

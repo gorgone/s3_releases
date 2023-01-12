@@ -6,7 +6,6 @@ extra_ld="";
 _description="OpenWrt 19.07|21.02 mpc85xx, Freescale MPC85xx BE devices";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-_self_build="yes";
 _compiler="powerpc-mpc85xx-linux-musl-";
 _sysroot="powerpc-mpc85xx-linux-musl/sysroot";
 _libsearchdir="/usr/lib";

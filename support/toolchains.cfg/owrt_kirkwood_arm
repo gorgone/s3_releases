@@ -6,7 +6,6 @@ extra_ld="";
 _description="OpenWrt 19.07|21.02 kirkwood, Pogoplug V2 LE devices";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-_self_build="yes";
 _compiler="arm-kirkwood-linux-musleabi-";
 _sysroot="arm-kirkwood-linux-musleabi/sysroot";
 _libsearchdir="/usr/lib";

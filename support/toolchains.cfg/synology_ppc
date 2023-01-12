@@ -6,7 +6,6 @@ extra_ld="";
 _description="Synology DS213+";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-_self_build="yes";
 _compiler="powerpc-ds213+-linux-gnuspe-";
 _sysroot="powerpc-ds213+-linux-gnuspe/sysroot";
 _libsearchdir="/usr/lib";

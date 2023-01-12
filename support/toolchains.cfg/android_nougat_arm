@@ -9,7 +9,6 @@ _oscamconfdir_custom="/data/plugin/oscam";
 _androidndkdir="1";
 stapi_lib_custom="libwi.a";
 stapi_allowed="1";
-_self_build="yes";
 _compiler="arm-linux-androideabi-";
 _sysroot="sysroot";
 _libsearchdir="/usr/lib";

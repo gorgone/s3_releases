@@ -6,7 +6,6 @@ extra_ld="";
 _description="FRITZ!Box 7590|7490 6.9x";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-_self_build="yes";
 _compiler="mips-linux-uclibc-";
 _sysroot="usr";
 _libsearchdir="/usr/lib";

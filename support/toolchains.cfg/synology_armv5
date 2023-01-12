@@ -6,7 +6,6 @@ extra_ld="";
 _description="Synology Marvell 628x devices, Synology DS112x";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-_self_build="yes";
 _compiler="arm-synology-linux-gnueabi-";
 _sysroot="arm-synology-linux-gnueabi/sysroot";
 _libsearchdir="/usr/lib";

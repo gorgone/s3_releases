@@ -6,7 +6,6 @@ extra_ld="";
 _description="OpenWrt 19.07|21.02 ramips, Mediatek/Ralink mips_24kc LE devices";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-_self_build="yes";
 _compiler="mipsel-ramips-linux-musl-";
 _sysroot="mipsel-ramips-linux-musl/sysroot";
 _libsearchdir="/usr/lib";

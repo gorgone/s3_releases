@@ -6,7 +6,6 @@ extra_ld="";
 _description="Dreambox ONE|TWO";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-_self_build="yes";
 _compiler="aarch64-dreambox-linux-gnu-";
 _sysroot="aarch64-dreambox-linux-gnu/sysroot";
 _libsearchdir="/usr/lib";

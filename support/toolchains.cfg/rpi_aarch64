@@ -6,7 +6,6 @@ extra_ld="";
 _description="Raspberry Pi 3 Modell B+, 4 Model B";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-_self_build="yes";
 _compiler="aarch64-rpi3-linux-gnu-";
 _sysroot="aarch64-rpi3-linux-gnu/sysroot";
 _libsearchdir="/usr/lib";

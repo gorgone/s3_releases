@@ -6,7 +6,6 @@ extra_ld="";
 _description="OpenEmbedded 2.0 STBs";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-_self_build="yes";
 _compiler="sh4-oe20-linux-gnu-";
 _sysroot="sh4-oe20-linux-gnu/sysroot";
 _libsearchdir="/usr/lib";

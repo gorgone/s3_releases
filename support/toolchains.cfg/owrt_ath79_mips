@@ -6,7 +6,6 @@ extra_ld="";
 _description="OpenWrt 19.07|21.02 ath79, mips_24kc BE devices";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-_self_build="yes";
 _compiler="mips-ath79-linux-musl-";
 _sysroot="mips-ath79-linux-musl/sysroot";
 _libsearchdir="/usr/lib";

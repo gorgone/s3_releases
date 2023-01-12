@@ -6,7 +6,6 @@ extra_ld="";
 _description="Ubiquiti Networks devices, USG|USG-Pro";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-_self_build="yes";
 _compiler="mips-ubnt-linux-gnu-";
 _sysroot="mips-ubnt-linux-gnu/sysroot";
 _libsearchdir="/usr/lib";

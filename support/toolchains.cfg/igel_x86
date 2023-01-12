@@ -6,7 +6,6 @@ extra_ld="";
 _description="Igel VIA VX855, x86 devices";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-_self_build="yes";
 _compiler="i686-igel-linux-gnu-";
 _sysroot="i686-igel-linux-gnu/sysroot";
 _libsearchdir="/usr/lib";

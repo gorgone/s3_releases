@@ -6,7 +6,6 @@ extra_ld="";
 _description="FRITZ!Box 7582|7581 7.1x";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-_self_build="yes";
 _compiler="mips-fritzos-linux-gnu-";
 _sysroot="mips-fritzos-linux-gnu/sysroot";
 _libsearchdir="/usr/lib";

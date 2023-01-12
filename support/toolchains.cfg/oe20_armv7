@@ -6,7 +6,6 @@ extra_ld="";
 _description="OpenEmbedded 2.0 STBs, ARM-Cortex-A9 devices";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-_self_build="yes";
 _compiler="armv7-oe20-linux-gnueabihf-";
 _sysroot="armv7-oe20-linux-gnueabihf/sysroot";
 _libsearchdir="/usr/lib";

@@ -6,7 +6,6 @@ extra_ld="";
 _description="Raspberry Pi 2 Model B v1.2, 3 Modell A+|B|B+, 4 Model B";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-_self_build="yes";
 _compiler="armv8-rpi3-linux-gnueabihf-";
 _sysroot="armv8-rpi3-linux-gnueabihf/sysroot";
 _libsearchdir="/usr/lib";

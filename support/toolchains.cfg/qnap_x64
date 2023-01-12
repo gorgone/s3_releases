@@ -6,7 +6,6 @@ extra_ld="";
 _description="QNAP x64 devices";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-_self_build="yes";
 _compiler="x86_64-qnap-linux-gnu-";
 _sysroot="x86_64-qnap-linux-gnu/sysroot";
 _libsearchdir="/usr/lib";

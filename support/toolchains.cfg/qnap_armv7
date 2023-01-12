@@ -6,7 +6,6 @@ extra_ld="";
 _description="QNAP ARM-Cortex-A9 devices";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-_self_build="yes";
 _compiler="armv7-qnap-linux-gnueabihf-";
 _sysroot="armv7-qnap-linux-gnueabihf/sysroot";
 _libsearchdir="/usr/lib";

@@ -6,7 +6,6 @@ extra_ld="";
 _description="OpenWrt 18.06 ar71xx, mips_24kc BE devices";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-_self_build="yes";
 _compiler="mips-ar71xx-linux-musl-";
 _sysroot="mips-ar71xx-linux-musl/sysroot";
 _libsearchdir="/usr/lib";

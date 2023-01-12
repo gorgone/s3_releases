@@ -6,7 +6,6 @@ extra_ld="";
 _description="Vu+ Zero|Uno|Duo|Solo|Ultimo 4K";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-_self_build="yes";
 _compiler="arm-vuplus4k-linux-gnueabihf-";
 _sysroot="arm-vuplus4k-linux-gnueabihf/sysroot";
 _libsearchdir="/usr/lib";

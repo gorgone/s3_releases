@@ -6,7 +6,6 @@ extra_ld="";
 _description="Synology Marvell ARMADA 375 devices, Synology DS115";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-_self_build="yes";
 _compiler="arm-marvell-linux-gnueabi-";
 _sysroot="arm-marvell-linux-gnueabi/sysroot";
 _libsearchdir="/usr/lib";

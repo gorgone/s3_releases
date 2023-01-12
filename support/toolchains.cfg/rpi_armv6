@@ -6,7 +6,6 @@ extra_ld="";
 _description="Raspberry Pi Zero W|WH, 1 Model A|A+|B|B+";
 _oscamconfdir_default="/etc/tuxbox/config";
 _oscamconfdir_custom="";
-_self_build="yes";
 _compiler="armv6-rpi1-linux-gnueabihf-";
 _sysroot="armv6-rpi1-linux-gnueabihf/sysroot";
 _libsearchdir="/usr/lib";
