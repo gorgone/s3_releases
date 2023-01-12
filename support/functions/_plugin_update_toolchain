@@ -848,6 +848,7 @@ _dl(){
 _compress(){
 	#generate xz-file
 	XZ_OPT=-e9 tar -cvJf "$1" -C "$2" .
+	[ "$DEV_MODE" == "1" ] && gen_hashes "$1"
 };
 _extract(){
     local c e i edir;
