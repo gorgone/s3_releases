@@ -1,6 +1,6 @@
 #toolchain template: OpenEmbedded 2.0 STBs, ARM-Cortex-A9 devices
-#toolchain template version: 2
-#toolchain template updated: 2023-01-10 20:40:14
+#toolchain template version: 1
+#toolchain template updated: 2023-01-14 17:42:59
 # Automatically generated file; DO NOT EDIT.
 # crosstool-NG 1.25.0.117_66ac9e6 Configuration
 CT_CONFIGURE_has_static_link=y
@@ -123,14 +123,15 @@ CT_ARCH_ARM=y
 # CT_ARCH_XTENSA is not set
 CT_ARCH="arm"
 CT_ARCH_CHOICE_KSYM="ARM"
-CT_ARCH_CPU="cortex-a7"
+CT_ARCH_CPU=""
+CT_ARCH_TUNE="cortex-a9"
 CT_ARCH_ARM_SHOW=y
 # Options for arm
 CT_ARCH_ARM_PKG_KSYM=""
 CT_ARCH_ARM_MODE="arm"
 CT_ARCH_ARM_MODE_ARM=y
 # CT_ARCH_ARM_MODE_THUMB is not set
-# CT_ARCH_ARM_INTERWORKING is not set
+CT_ARCH_ARM_INTERWORKING=y
 CT_ARCH_ARM_EABI_FORCE=y
 CT_ARCH_ARM_EABI=y
 CT_ARCH_ARM_TUPLE_USE_EABIHF=y
@@ -164,6 +165,7 @@ CT_ARCH_SUPPORTS_WITH_FLOAT=y
 CT_ARCH_SUPPORTS_WITH_FPU=y
 CT_ARCH_SUPPORTS_SOFTFP=y
 CT_ARCH_EXCLUSIVE_WITH_CPU=y
+CT_ARCH_ARCH="armv7-a"
 CT_ARCH_FPU="vfpv3-d16"
 # CT_ARCH_FLOAT_AUTO is not set
 CT_ARCH_FLOAT_HW=y
