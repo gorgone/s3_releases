@@ -7,7 +7,7 @@ _oscamconfdir_custom=""
 _compiler="arm-none-linux-gnueabi-";
 _sysroot="51be223df048291e6bd863a7f8ec4ff8  Toolchain-Matrix_s.tar.xz";
 _libsearchdir="/lib";
-_toolchainfilename="aHR0cHM6Ly9maWxlcy5zdHJlYW1ib2FyZC50di90b29sY2hhaW5zL1Rvb2xjaGFpbi1NYXRyaXhfcy50YXIueHoK";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zL2xlZ2FjeS9Ub29sY2hhaW4tTWF0cml4X3MudGFyLnh6Cg==";
 _md5sum="";
 _block="USE_PCSC USE_LIBUSB"
 _tc_info="\n

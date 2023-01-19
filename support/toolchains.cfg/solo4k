@@ -7,7 +7,7 @@ _oscamconfdir_custom=""
 _compiler="arm-linux-gnueabihf-";
 _sysroot="arm-linux-gnueabihf";
 _libsearchdir="/lib";
-_toolchainfilename="aHR0cHM6Ly9maWxlcy5zdHJlYW1ib2FyZC50di90b29sY2hhaW5zL1Rvb2xjaGFpbi1zb2xvNGsudGFyLnh6Cg==";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zL2xlZ2FjeS9Ub29sY2hhaW4tc29sbzRrLnRhci54ego=";
 _md5sum="74d4de6ac2f4812426635cf54e3d85fa  Toolchain-solo4k.tar.xz";
 _tc_info="\n
     !!! beware the box must have FPU !!!\n

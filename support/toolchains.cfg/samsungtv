@@ -7,7 +7,7 @@ _oscamconfdir_custom=""
 _compiler="arm-v7a8v3r1-linux-gnueabi-"
 _sysroot="arm-v7a8v3r1-linux-gnueabi/sys-root/usr"
 _libsearchdir="/lib"
-_toolchainfilename="aHR0cHM6Ly9maWxlcy5zdHJlYW1ib2FyZC50di90b29sY2hhaW5zL1Rvb2xjaGFpbi1TYW1zdW5nVFYudGFyLnh6Cg==";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zL2xlZ2FjeS9Ub29sY2hhaW4tU2Ftc3VuZ1RWLnRhci54ego=";
 _md5sum="47108c32139fcab26a788cf4376c8009  Toolchain-SamsungTV.tar.xz";
 _tc_info="\n
     !!! Samsung TV !!!\n
