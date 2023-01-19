@@ -51,7 +51,7 @@ txt_proto="Protocol"
 txt_start_menu='menu główne';
 txt_remove_menu='usuń Toolchain';
 txt_add_menu='dodaj Toolchain';
-txt_main_revision="\n aktualna SVN REVISION to : r";
+txt_main_revision="\n aktualna $(REPO) REVISION to : r";
 
 # help txt
 txt_help1="zaczać z"
@@ -59,8 +59,8 @@ txt_help2="wiersz poleceń to"
 txt_help3="[ENTER] > dalej ..."
 
 # firstmenu ################################################
-txt_firstmenu_continue="dalej z lokalnym SVN";
-   txt_firstmenu_chose="załaduj inny SVN (od 7000)";
+txt_firstmenu_continue="dalej z lokalnym $(REPO)";
+   txt_firstmenu_chose="załaduj inny $(REPO) (od 7000)";
    txt_firstmenu_cedit="$txt_conf"" - wystartuj edytor";
     txt_firstmenu_lang="opcje językowe";
     txt_firstmenu_exit="zakończ Simplebuild";

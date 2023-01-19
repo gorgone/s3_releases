@@ -106,13 +106,13 @@ _gui_build(){
 
 		if [ "$_toolchainname" == "native" ]
 		then
-			printf "SAVE\t$lsmn $txt_as oscam-svn$(REVISION)-$(hostname)-list_smargo"| tee -a "$ldir/$log_name"
-			mv -f "$lsmn" "$bdir/oscam-svn$(REVISION)-$(hostname)-list_smargo"
-			printf "oscam-svn$(REVISION)-$(hostname)-list_smargo" >"$targztmp"
+			printf "SAVE\t$lsmn $txt_as ${CAM}${VARIANT}-${PREFIX}$(REVISION)-$(hostname)-list_smargo"| tee -a "$ldir/$log_name"
+			mv -f "$lsmn" "$bdir/${CAM}${VARIANT}-${PREFIX}$(REVISION)-$(hostname)-list_smargo"
+			printf "${CAM}${VARIANT}-${PREFIX}$(REVISION)-$(hostname)-list_smargo" >"$targztmp"
 		else
-			printf "SAVE\t$lsmn $txt_as oscam-svn$(REVISION)-$_toolchainname-list_smargo"|tee -a "$ldir/$log_name"
-			mv -f "$lsmn" "$bdir/oscam-svn$(REVISION)-$_toolchainname-list_smargo"
-			printf "oscam-svn$(REVISION)-$_toolchainname-list_smargo" >"$targztmp\n"
+			printf "SAVE\t$lsmn $txt_as ${CAM}${VARIANT}-${PREFIX}$(REVISION)-$_toolchainname-list_smargo"|tee -a "$ldir/$log_name"
+			mv -f "$lsmn" "$bdir/${CAM}${VARIANT}-${PREFIX}$(REVISION)-$_toolchainname-list_smargo"
+			printf "${CAM}${VARIANT}-${PREFIX}$(REVISION)-$_toolchainname-list_smargo" >"$targztmp"
 		fi
 
 	fi

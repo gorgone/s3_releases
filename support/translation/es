@@ -42,7 +42,7 @@ txt_proto="Protocol"
 txt_start_menu='menu principal';
 txt_remove_menu='Eliminar toolchain';
 txt_add_menu='nueva toolchain';
-txt_main_revision="\n la revisión SVN es : r";
+txt_main_revision="\n la revisión $(REPO) es : r";
 
 # help txt
 txt_help1="empieza por"
@@ -50,8 +50,8 @@ txt_help2="Los parametros del commandline son"
 txt_help3="[ENTER] para continuar..."
 
 # firstmenu ################################################
-txt_firstmenu_continue="Continuar con el SVN local";
-   txt_firstmenu_chose="Cargar un SVN diferente (7000+)";
+txt_firstmenu_continue="Continuar con el $(REPO) local";
+   txt_firstmenu_chose="Cargar un $(REPO) diferente (7000+)";
    txt_firstmenu_cedit="Lanzar editor de configuración";
     txt_firstmenu_lang="Selección de idioma";
     txt_firstmenu_exit="Cerrar SimpleBuild ahora";
@@ -90,9 +90,9 @@ txt_menu_back="volver al menu de la toolchain";
 # _dialog_checkout
 txt_verify_syscheck='comprobación del sistema             :';
      txt_verify_svn='comprobación del SVN existente       :';
-     txt_update_svn="$txt_update SVN                      :";
-    txt_prepare_svn="preparación SVN checkout             :";
-         txt_latest="ultimo SVN";
+     txt_update_svn="$txt_update $(REPO)                  :";
+    txt_prepare_svn="preparación $(REPO) checkout         :";
+         txt_latest="ultimo $(REPO)";
 
 # _load_profile ###########################################
   txt_select_profile_title="perfiles disponibles";

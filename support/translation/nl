@@ -52,7 +52,7 @@ txt_proto="Protocol"
 # menu txt
 txt_remove_menu='$txt_tc verwijderen';
 txt_add_menu='$txt_tc toevoegen';
-txt_main_revision="\n De actuele SVN versie is : r";
+txt_main_revision="\n De actuele $(REPO) versie is : r";
 txt_bmenu_title="Buildmenü";
 
 # help txt
@@ -61,8 +61,8 @@ txt_help2="Opdrachtregel parameters zijn"
 txt_help3="Druk op [ENTER] om door te gaan..."
 
 # firstmenu ################################################
-txt_firstmenu_continue="Doorgaan met lokale SVN";
-   txt_firstmenu_chose="Andere SVN versie (7000+) laden";
+txt_firstmenu_continue="Doorgaan met lokale $(REPO)";
+   txt_firstmenu_chose="Andere $(REPO) versie (7000+) laden";
    txt_firstmenu_cedit="$txt_conf""s Editor starten";
     txt_firstmenu_lang="Taal handmatig $txt_sel";
     txt_firstmenu_exit="Afsluiten";
@@ -104,10 +104,10 @@ txt_menu_back="Naar $txt_tc $txt_menu";
 
 # _dialog_checkout
 txt_verify_syscheck='Systeem controleren       :';
-     txt_verify_svn='Huidige SVN controleren   :';
-     txt_update_svn="SVN $txt_update           :";
-    txt_prepare_svn="SVN controle voorbereiden :";
-         txt_latest="Nieuwste SVN";
+     txt_verify_svn='Huidige '$(REPO)' controleren   :';
+     txt_update_svn="$(REPO) $txt_update           :";
+    txt_prepare_svn="$(REPO) controle voorbereiden :";
+         txt_latest="Nieuwste $(REPO)";
 
 # _load_profile ###########################################
   txt_select_profile_title="Beschikbare $txt_profiles";

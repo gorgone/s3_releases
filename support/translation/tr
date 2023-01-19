@@ -48,7 +48,7 @@ txt_ssh_profiles="SSH $txt_profiles"
 txt_start_menu="Ana menü"; 
 txt_remove_menu="$txt_tc kaldır"; 
 txt_add_menu="$txt_tc ekle"; 
-txt_main_revision="\n yerel SVN revizyonu: r"
+txt_main_revision="\n yerel $(REPO) revizyonu: r"
 
 # help txt 
 txt_help1="ile başla"
@@ -56,8 +56,8 @@ txt_help2="komut satırı Parametreleri"
 txt_help3="[ENTER]devam etmek için..."
 
 # firstmenu #############################################
-txt_firstmenu_continue="yerel SVN ile devam et"
-   txt_firstmenu_chose="farklı bir SVN yükle (7000+)"
+txt_firstmenu_continue="yerel $(REPO) ile devam et"
+   txt_firstmenu_chose="farklı bir $(REPO) yükle (7000+)"
    txt_firstmenu_cedit="yapılandırma düzenleyicisini başlat"
 txt_firstmenu_tcupdate="toolchain güncelleyicisini başlat";
     txt_firstmenu_lang="manuel sistem dili seçimi"
@@ -101,7 +101,7 @@ txt_menu_back="$txt_tc menüsüne geri dön";
 
 # _dialog_checkout 
 txt_verify_syscheck="sistemi kontrol edin        :"
-     txt_verify_svn="mevcut SVN'yi kontrol edin  :"
+     txt_verify_svn="mevcut $(REPO)'yi kontrol edin  :"
      txt_update_svn="$txt_update SVN     :"
     txt_prepare_svn="SVN ödemesini hazırla       :"
          txt_latest="güncel SVN"; 

@@ -118,7 +118,9 @@ cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections -o nodeadcode"
 #cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections -o nodeadcode -ffast-math -fomit-frame-pointer -fthread-jumps -foptimize-strlen --no-inline"
 
 #default url
-trunkurl="https://svn.streamboard.tv/oscam/trunk"
+trunkurl="https://github.com/oe-alliance/oscam-smod.git";
+#trunkurl="https://svn.streamboard.tv/oscam/trunk"
+#trunkurl="https://svn.streamboard.tv/oscam-addons/modern"
 
 [ -f "$workdir/oscamsource.url" ] && source "$workdir/oscamsource.url"
 

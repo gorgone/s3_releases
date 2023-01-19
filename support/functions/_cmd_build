@@ -6,13 +6,32 @@ _cmd_build(){
 	if [ "$_toolchainname" == "native" ]
 	then
 		log_name="$(date +%F).$(date +%X).$(hostname).log"
-		
 	else
 		log_name="$(date +%F).$(date +%X).$_toolchainname.log"
 	fi
 
 	source "$tccfgdir/$_toolchainname"
-	_reset_config
+	load_config
+
+#patch if necessary
+	for e in "${!USE_vars[@]}"
+	do
+		uv=${USE_vars[$e]}
+		if [ "$uv" == "USE_PATCH=1" ]; then
+				if [ -f "$workdir/SVN-IS-PATCHED" ]; then
+					printf "$y_l\n |  $r_l WARNING : patch upon patch"
+					printf "$y_l\n |  $r_l UNCLEAN $y_l: restore SVN $G$txt_wait"
+					quicksvnrestore $_toolchainname
+					_apply_consolepatch
+					#reload config as it was lost in restore
+					load_config
+				else
+					_apply_consolepatch
+				fi
+		fi
+
+	done
+
 	printf $WH
 	ologo >"$ldir/$log_name"
 
@@ -106,8 +125,6 @@ _cmd_build(){
 			"USE_PCSC=1")
 					_pcsc_on
 					_pcsc="-pcsc";;			# set pcsc suffix to name
-			"USE_PATCH=1")
-					_do_patch="1";;			# enable patching
 			"USE_TARGZ=1")
 					s3cfg_vars[TARGZ]=1;;	# overwrite global
 			"USE_COMPRESS=1")
@@ -146,20 +163,6 @@ then
 fi
 
 printf "$y_l\n |       set : ${cdtag}$w_l"
-
-#patching
-	if [ "$_do_patch" == "1" ]
-	then
-		if [ -f "$workdir/SVN-IS-PATCHED" ]
-		then
-			printf "$y_l\n |  $r_l WARNING : patch upon patch"
-			printf "$y_l\n |  $r_l UNCLEAN $y_l: restore SVN $G$txt_wait"
-			quicksvnrestore $_toolchainname
-			_apply_consolepatch
-		else
-			_apply_consolepatch
-		fi
-	fi
 
 #if build with profile
 	[ ! "$pf" == "empty" ] && printf "\n$y_l |   PROFILE : $pf_name"
@@ -219,13 +222,13 @@ fi
 
 		if [ "$_toolchainname" == "native" ]
 		then
-			printf "$g_n"" SAVE -------> $w_l$lsmn$g_l $txt_as$y_l oscam-svn$(REVISION)-$(hostname)-list_smargo"
-			mv -f "$lsmn" "$bdir/oscam-svn$(REVISION)-$(hostname)-list_smargo"
-			tartmp="oscam-svn$(REVISION)-$(hostname)-list_smargo"
+			printf "$g_n"" SAVE -------> $w_l$lsmn$g_l $txt_as$y_l ${CAM}${VARIANT}-${PREFIX}$(REVISION)-$(hostname)-list_smargo"
+			mv -f "$lsmn" "$bdir/${CAM}${VARIANT}-${PREFIX}$(REVISION)-$(hostname)-list_smargo"
+			tartmp="${CAM}${VARIANT}-${PREFIX}$(REVISION)-$(hostname)-list_smargo"
 		else
-			printf "$g_n"" SAVE -------> $w_l$lsmn$g_l $txt_as$y_l oscam-svn$(REVISION)-$_toolchainname-list_smargo"
-			mv -f "$lsmn" "$bdir/oscam-svn$(REVISION)-$_toolchainname-list_smargo"
-			tartmp="oscam-svn$(REVISION)-$_toolchainname-list_smargo"
+			printf "$g_n"" SAVE -------> $w_l$lsmn$g_l $txt_as$y_l ${CAM}${VARIANT}_${PREFIX}$(REVISION)-$_toolchainname-list_smargo"
+			mv -f "$lsmn" "$bdir/${CAM}${VARIANT}-${PREFIX}$(REVISION)-$_toolchainname-list_smargo"
+			tartmp="${CAM}${VARIANT}_${PREFIX}$(REVISION)-$_toolchainname-list_smargo"
 		fi
 
 	fi
