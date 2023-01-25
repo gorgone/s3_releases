@@ -21,6 +21,16 @@ _get_patch(){
 	fi
 }
 
+_streamboard_patch(){
+	if [ -e $1 ]; then
+		PATCHEDFILES=$(grep -e '^\(---\|+++\) ' -i $1 | grep -v /dev/null | awk '{print $2}' | sort | uniq)
+		for f in ${PATCHEDFILES[@]}; do
+			[[ -e "$svndir/$f" ]] && return 0
+		done
+	fi
+	return 1
+}
+
 _apply_menupatch(){
 	[ -f "$workdir/SVN-IS-PATCHED" ] && quicksvnrestore $_toolchainname 2>/dev/null
 		cd "$pdir"
@@ -37,8 +47,14 @@ _apply_menupatch(){
 
 					_w="ok"
 					cd "$svndir"
-					printf "PATCH : apply $e"
-					patch -f -p1 < "$pdir/$e" >>"$patchlog" 2>/dev/null
+					if _streamboard_patch "$pdir/$e"; then
+						SKIPPATHS=-p0
+						printf "PATCH : apply streamboard-style patch $e"
+					else
+						SKIPPATHS=-p1
+						printf "PATCH : apply regular patch $e"
+					fi
+					patch -f $SKIPPATHS < "$pdir/$e" >>"$patchlog" 2>/dev/null
 					hunks=$(grep -c1 '^Hunk' "$patchlog")
 					fails=$(grep -c1 'hunks FAILED' "$patchlog")
 
@@ -92,8 +108,14 @@ _apply_consolepatch(){
 
 				_w=0
 				cd "$svndir"
-				printf "$y_l\n |     PATCH : apply $e"
-				patch -F 10 -f -p1 < "$pdir/$e" >>"$patchlog" 2>/dev/null
+				if _streamboard_patch "$pdir/$e"; then
+					SKIPPATHS=-p0
+					printf "$y_l\n |     PATCH : apply streamboard-style patch $e\n"
+				else
+					SKIPPATHS=-p1
+					printf "$y_l\n |     PATCH : apply regular patch $e\n"
+				fi
+				patch -F 10 -f $SKIPPATHS < "$pdir/$e" >>"$patchlog" 2>/dev/null
 				hunks=$(grep -c1 "^Hunk" "$patchlog")
 				fails=$(grep -c1 "hunks FAILED" "$patchlog")
 
