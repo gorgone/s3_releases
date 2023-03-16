@@ -1,0 +1,189 @@
+diff --git a/src/patchelf.cc b/src/patchelf.cc
+index 1a90edb..2696a0d 100644
+--- a/src/patchelf.cc
++++ b/src/patchelf.cc
+@@ -1861,6 +1861,87 @@
+     changed = true;
+ }
+ 
++/* Remove any unused dependency symbol versions from .gnu.version_r */
++template<ElfFileParams>
++void ElfFile<ElfFileParamNames>::cleanDependencySymbolVersions()
++{
++    auto shdrVersym = findSectionHeader(".gnu.version");
++    auto shdrVersymR = findSectionHeader(".gnu.version_r");
++
++    auto versyms = reinterpret_cast<Elf_Versym *>(fileContents->data() + rdi(shdrVersym.sh_offset));
++    checkPointer(fileContents, versyms, sizeof(Elf_Versym));
++    size_t count = rdi(shdrVersym.sh_size) / sizeof(Elf_Versym);
++
++    /* Set of versions actually used. */
++    std::set<Elf_Versym> allVersions;
++
++    for (size_t i = 0; i < count; i++) {
++        allVersions.insert(versyms[i]);
++    }
++
++    /* Strings associated with .gnu_version_r section: used for debug only. */
++    Elf_Shdr & shdrVersionRStrings = shdrs.at(rdi(shdrVersymR.sh_link));
++    char * verStrTab = reinterpret_cast<char *>(fileContents->data() + rdi(shdrVersionRStrings.sh_offset));
++
++    auto ver_r = reinterpret_cast<Elf_Verneed *>(fileContents->data() + rdi(shdrVersymR.sh_offset));
++    checkPointer(fileContents, ver_r, sizeof(Elf_Verneed));
++
++    while (true) {
++        auto prev = (Elf_Vernaux *)nullptr;
++        auto vern_aux = reinterpret_cast<Elf_Vernaux *>((char *)ver_r + rdi(ver_r->vn_aux));
++        checkPointer(fileContents, vern_aux, sizeof(Elf_Vernaux));
++
++        char * file = verStrTab + rdi(ver_r->vn_file);
++        for (size_t j = 0; j < ver_r->vn_cnt ; j++) {
++            char * ver_name = verStrTab + rdi(vern_aux->vna_name);
++            // FIXME: add proper check for null-terminated string
++            checkPointer(fileContents, ver_name, sizeof(char));
++
++            auto next = reinterpret_cast<Elf_Vernaux *>((char *)vern_aux + rdi(vern_aux->vna_next));
++            checkPointer(fileContents, next, sizeof(Elf_Vernaux));
++
++            if (!allVersions.count(rdi(vern_aux->vna_other) & ~0x8000)) {
++                debug("Removing version identifier %d %s@%s\n", rdi(vern_aux->vna_other), file, ver_name);
++                /* Symbol version is no longer used, unlink it. */
++                if (!prev) {
++                    auto next_off = (intptr_t)(vern_aux) + rdi(vern_aux->vna_next) - (intptr_t)(ver_r);
++                    wri(ver_r->vn_aux, next_off);
++                } else {
++                    auto raw_next = rdi(vern_aux->vna_next);
++                    if (raw_next == 0) {
++                        wri(prev->vna_next, 0);
++                    } else {
++                        auto next_off = (intptr_t)(vern_aux) + raw_next - (intptr_t)(prev);
++                        wri(prev->vna_next, next_off);
++                    }
++                }
++                wri(ver_r->vn_cnt, rdi(ver_r->vn_cnt) - 1);
++            } else {
++                prev = vern_aux;
++            }
++
++            if (vern_aux == next) {
++                if (j != rdi(ver_r->vn_cnt)) {
++                    debug("Section missing elements! Ended on element %d, expected %d\n", j, rdi(ver_r->vn_cnt));
++                }
++                break;
++            }
++            vern_aux = next;
++        }
++
++        /* If this was the last entry, we're done. */
++        if (!rdi(ver_r->vn_next)) {
++            break;
++        }
++
++        ver_r = reinterpret_cast<Elf_Verneed *>(((char *) ver_r) + rdi(ver_r->vn_next));
++        checkPointer(fileContents, ver_r, sizeof(Elf_Verneed));
++    }
++
++    changed = true;
++    this->rewriteSections();
++}
++
+ template<ElfFileParams>
+ void ElfFile<ElfFileParamNames>::clearSymbolVersions(const std::set<std::string> & syms)
+ {
+@@ -1886,6 +1967,10 @@
+             wri(versyms[i], 1);
+         }
+     }
++
++    /* Remove entries in the .gnu.versions_r table which are no;-longer required. */
++    cleanDependencySymbolVersions();
++
+     changed = true;
+     this->rewriteSections();
+ }
+@@ -1978,9 +2063,9 @@
+         const std::string & outputFileName2 = outputFileName.empty() ? fileName : outputFileName;
+ 
+         if (getElfType(fileContents).is32Bit)
+-            patchElf2(ElfFile<Elf32_Ehdr, Elf32_Phdr, Elf32_Shdr, Elf32_Addr, Elf32_Off, Elf32_Dyn, Elf32_Sym, Elf32_Verneed, Elf32_Versym>(fileContents), fileContents, outputFileName2);
++            patchElf2(ElfFile<Elf32_Ehdr, Elf32_Phdr, Elf32_Shdr, Elf32_Addr, Elf32_Off, Elf32_Dyn, Elf32_Sym, Elf32_Verneed, Elf32_Vernaux, Elf32_Versym>(fileContents), fileContents, outputFileName2);
+         else
+-            patchElf2(ElfFile<Elf64_Ehdr, Elf64_Phdr, Elf64_Shdr, Elf64_Addr, Elf64_Off, Elf64_Dyn, Elf64_Sym, Elf64_Verneed, Elf64_Versym>(fileContents), fileContents, outputFileName2);
++            patchElf2(ElfFile<Elf64_Ehdr, Elf64_Phdr, Elf64_Shdr, Elf64_Addr, Elf64_Off, Elf64_Dyn, Elf64_Sym, Elf64_Verneed, Elf64_Vernaux, Elf64_Versym>(fileContents), fileContents, outputFileName2);
+     }
+ }
+ 
+diff --git a/src/patchelf.h b/src/patchelf.h
+index 9fab18c..375a285 100644
+--- a/src/patchelf.h
++++ b/src/patchelf.h
+@@ -1,7 +1,7 @@
+ using FileContents = std::shared_ptr<std::vector<unsigned char>>;
+ 
+-#define ElfFileParams class Elf_Ehdr, class Elf_Phdr, class Elf_Shdr, class Elf_Addr, class Elf_Off, class Elf_Dyn, class Elf_Sym, class Elf_Verneed, class Elf_Versym
+-#define ElfFileParamNames Elf_Ehdr, Elf_Phdr, Elf_Shdr, Elf_Addr, Elf_Off, Elf_Dyn, Elf_Sym, Elf_Verneed, Elf_Versym
++#define ElfFileParams class Elf_Ehdr, class Elf_Phdr, class Elf_Shdr, class Elf_Addr, class Elf_Off, class Elf_Dyn, class Elf_Sym, class Elf_Verneed, class Elf_Vernaux, class Elf_Versym
++#define ElfFileParamNames Elf_Ehdr, Elf_Phdr, Elf_Shdr, Elf_Addr, Elf_Off, Elf_Dyn, Elf_Sym, Elf_Verneed, Elf_Vernaux, Elf_Versym
+ 
+ template<ElfFileParams>
+ class ElfFile
+@@ -137,6 +137,8 @@
+ 
+     void addDebugTag();
+ 
++    void cleanDependencySymbolVersions();
++
+     void clearSymbolVersions(const std::set<std::string> & syms);
+ 
+ private:
+diff --git a/tests/Makefile.am b/tests/Makefile.am
+index 0b648f8..66eaf1d 100644
+--- a/tests/Makefile.am
++++ b/tests/Makefile.am
+@@ -43,6 +43,7 @@
+   replace-needed.sh \
+   replace-add-needed.sh \
+   add-debug-tag.sh \
++  clear-symver.sh \
+   empty-note.sh
+ 
+ build_TESTS = \
+diff --git a/tests/clear-symver.sh b/tests/clear-symver.sh
+new file mode 100755
+index 00000000..123a6f90
+--- /dev/null
++++ b/tests/clear-symver.sh
+@@ -0,0 +1,33 @@
++#! /bin/sh -e
++SCRATCH=scratch/$(basename $0 .sh)
++
++rm -rf ${SCRATCH}
++mkdir -p ${SCRATCH}
++
++cp main ${SCRATCH}/
++
++SYMBOL_TO_REMOVE=__libc_start_main
++VERSION_TO_REMOVE=GLIBC_2.34a
++
++readelfData=$(readelf -V ${SCRATCH}/main 2>&1)
++
++if [ $(echo "$readelfData" | grep --count "$VERSION_TO_REMOVE") -lt 2 ]; then
++    # We expect this to appear at least twice: once for the symbol entry,
++    # and once for verneed entry.
++    echo "Warning: Couldn't find expected versioned symbol."
++    echo "This is probably because you're either not using glibc, or"
++    echo "${SYMBOL_TO_REMOVE} is no longer at version ${VERSION_TO_REMOVE}"
++    echo "Reporting a pass anyway, as the test result is invalid."
++    exit 0
++fi
++
++../src/patchelf --clear-symbol-version ${SYMBOL_TO_REMOVE} ${SCRATCH}/main
++
++readelfData=$(readelf -V ${SCRATCH}/main 2>&1)
++
++if [ $(echo "$readelfData" | grep --count "$VERSION_TO_REMOVE") -ne 0 ]; then
++    # We expect this to appear at least twice: once for the symbol entry,
++    # and once for verneed entry.
++    echo "The symbol version ${SYMBOL_TO_REMOVE} remained behind!"
++    exit 1
++fi

@@ -197,7 +197,7 @@ _pre_build(){
 	printf $WH
 	ologo
 	_tcfile=""
-	dln="$(basename $(decode "$_toolchainfilename"))"
+	[ -n "$_toolchainfilename" ] && dln="$(basename $(decode "$_toolchainfilename"))" || dln=""
 	tc_dl="$dldir/$dln"
 	if [ -f "$tcdir/$_toolchainname/bin/$_compiler""gcc" ]
 	then
@@ -289,7 +289,7 @@ _oscam_extra_menu(){
 
 	for e in "${!USE_vars[@]}"
 	do
-		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_COMPRESS" ] && [ ! "$e" == "USE_PATCH" ] && [ ! "$e" == "USE_LIBUSB" ]
+		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_COMPRESS" ] && [ ! "$e" == "USE_GLIBC_SYMBOL_VERSION_CLEAR" ] && [ ! "$e" == "USE_PATCH" ] && [ ! "$e" == "USE_LIBUSB" ]
 		then
 			if [ "${#USE_vars[$e]}" -gt "4" ]
 			then
@@ -305,7 +305,7 @@ _oscam_extra_menu(){
 
 	for e in "${!USE_vars[@]}"
 	do
-		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_COMPRESS" ] && [ ! "$e" == "USE_PATCH" ] && [ ! "$e" == "USE_LIBUSB" ]
+		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_COMPRESS" ] && [ ! "$e" == "USE_GLIBC_SYMBOL_VERSION_CLEAR" ] && [ ! "$e" == "USE_PATCH" ] && [ ! "$e" == "USE_LIBUSB" ]
 		then
 			ok=0
 			for oex in $oextra
@@ -331,15 +331,16 @@ _build_extra_menu(){
 	us=
 	check_smargo
 	unset MENU_OPTIONS
-	for e in USE_COMPRESS USE_TARGZ USE_PATCH
+	for e in USE_COMPRESS USE_TARGZ USE_PATCH USE_GLIBC_SYMBOL_VERSION_CLEAR
 	do
 		[ "${#USE_vars[$e]}" -gt "4" ] && MENU_OPTIONS+=( "$e" "$e=1" on ) || MENU_OPTIONS+=( "$e" "$e=1" off )
 	done
-	bextra=$("$gui" "$st_" "$nc_" "$bt_" "$title_" --title "-[ Build EXTRA ]-" "$cl_" " OPTIONS " 10 40 3 ${MENU_OPTIONS[@]})
+	bextra=$("$gui" "$st_" "$nc_" "$bt_" "$title_" --title "-[ Build EXTRA ]-" "$cl_" " OPTIONS " 12 80 3 ${MENU_OPTIONS[@]})
 	[ $? = 255 ] && _build_extra_menu
 	USE_vars[USE_COMPRESS]=
 	USE_vars[USE_PATCH]=
 	USE_vars[USE_TARGZ]=
+	USE_vars[USE_GLIBC_SYMBOL_VERSION_CLEAR]=
 	for bex in $bextra
 	do
 		b=$(echo "$bex" | tr -d '"')
@@ -623,6 +624,7 @@ load_config(){
 		_reset_config
 		[ "${s3cfg_vars[USE_TARGZ]}" == "1" ] && USE_vars[USE_TARGZ]="USE_TARGZ=1"
 		[ "${s3cfg_vars[USE_COMPRESS]}" == "1" ] && USE_vars[USE_COMPRESS]="USE_COMPRESS=1"
+		[ "${s3cfg_vars[USE_GLIBC_SYMBOL_VERSION_CLEAR]}" == "1" ] && USE_vars[USE_GLIBC_SYMBOL_VERSION_CLEAR]="USE_GLIBC_SYMBOL_VERSION_CLEAR=1"
 		for e in $default_use
 		do
 			USE_vars[$e]="$e=1"

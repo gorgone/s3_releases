@@ -112,6 +112,8 @@ _cmd_build(){
 					s3cfg_vars[TARGZ]=1;;	# overwrite global
 			"USE_COMPRESS=1")
 					s3cfg_vars[COMPRESS]=1;;# overwrite global
+			"USE_GLIBC_SYMBOL_VERSION_CLEAR=1")
+					s3cfg_vars[GLIBC_SYMBOL_VERSION_CLEAR]=1;;# overwrite global
 			"USE_STAPI=1")
 					_stapi="-stapi"
 					[ -z "$stapi_lib_custom" ] && STAPI_LIB="STAPI_LIB=$sdir/stapi/liboscam_stapi.a" || STAPI_LIB="STAPI_LIB=$sdir/stapi/${stapi_lib_custom}"
@@ -239,6 +241,13 @@ fi
 
 #show build time
 	printf "$g_n""\n TIME -------> $bt$re_\n\n"
+
+#remove glibc symbol versions
+	if [ "${s3cfg_vars[GLIBC_SYMBOL_VERSION_CLEAR]}" == "1" ]
+	then
+		printf "$w_l"" ENABLE -----> GLIBC SYMBOL VERSION CLEARING:$y_l $txt_wait"
+		glibc_clear_cam "$oscam_name" "@GLIBC_"
+	fi;
 
 #compress cam
 	if [ "${s3cfg_vars[COMPRESS]}" == "1" ]
