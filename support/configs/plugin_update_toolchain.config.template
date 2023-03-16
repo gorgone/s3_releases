@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="46";
+S3TUP_CONFIG_VERSION="47";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -72,7 +72,7 @@ LIBS_AUTO_INTEGRATE="1"; # Automatically reintegrate libraries when rebuilding t
 
 # OpenSSL 3.1.x
 SSL_310="1";
-SSL_310_beta="1";
+SSL_310_beta="0";
 SSL_310_name="OpenSSL";
 SSL_310_version="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/tags?page=1&per_page=100" | jq '[.[] | select(.name|test("openssl-3.1.*"))][0] | .name' | sed -e 's#openssl-##g; s#_#.#g; s#\"##g')";
 SSL_310_check="openssl.pc $(printf "$SSL_310_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
@@ -198,9 +198,9 @@ SSL_102B_tasks+=('make install;');
 SSL_100="1";
 SSL_100_beta="0";
 SSL_100_name="OpenSSL";
-SSL_100_version="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_0[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
+SSL_100_version="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/tags?page=3&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_0[a-z].*"))][0] | .name' | sed -e 's#OpenSSL_##g; s#_#.#g; s#\"##g')";
 SSL_100_check="openssl.pc $(printf "$SSL_100_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
-SSL_100_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/tags?page=2&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_0[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
+SSL_100_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/tags?page=3&per_page=100" | jq '[.[] | select(.name|test("OpenSSL_1_0_0[a-z].*"))][0] | .tarball_url' | sed -e 's#\"##g')";
 SSL_100_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 SSL_100_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_100_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
