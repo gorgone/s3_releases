@@ -1,0 +1,78 @@
+#!/bin/bash
+
+glibc_clear_cam(){
+	local glibc_entries ge i csv _patchelf
+
+	cd "$bdir"
+	glibc_entries=( $(nm --dynamic --undefined-only --with-symbol-versions $1 | grep "$2" | awk '{print $2}') )
+
+	printf "\n$p_l\r CLEAR ------> "
+
+	for ge in "${glibc_entries[@]}";
+	do
+		let i++; [[ $i > 1 ]] && printf ","
+		printf "$g_n$ge"
+		csv+="--clear-symbol-version "$(echo $ge | cut -d'@' -f1)" "
+	done
+
+	_patchelf="$(make_patchelf)"
+	if [ $? == 0 ]
+	then
+		$_patchelf $csv $1
+		echo -e "\n$y_l\r ATTENTION --> ${y_n}Use this EXPERIMENTAL option very carefully, it may result in an unstable binary!"
+		echo -e "$w_l\r RESULT -----> $c_n${#glibc_entries[@]} glibc symbol versions removed."
+	else
+		echo -e "\n$y_l\r RESULT -----> ${r_n}patchelf binary could not be compiled! Please check logfile in $ldir."
+	fi;
+	echo -e "$rs_"	
+}
+
+glibc_clear_cam_gui(){
+	local glibc_entries ge i csv txt _patchelf
+
+	cd "$bdir"
+	glibc_entries=( $(nm --dynamic --undefined-only --with-symbol-versions $1 | grep "$2" | awk '{print $2}') )
+
+	for ge in "${glibc_entries[@]}";
+	do
+		txt+="$ge\n"
+		csv+="--clear-symbol-version "$(echo $ge | cut -d'@' -f1)" "
+	done
+
+	_patchelf="$(make_patchelf)"
+	if [ $? == 0 ]
+	then
+		$_patchelf $csv $1	
+		echo -en "\n$txt\n${#glibc_entries[@]} glibc symbol versions removed\n\nATTENTION: Use this EXPERIMENTAL option very carefully,\nit may result in an unstable binary!"
+	else
+		echo -en "\n$txt\npatchelf binary could not be compiled!\nPlease check logfile in\n$ldir."
+	fi;
+}
+
+make_patchelf(){
+	pever="0.17.2"
+	peurl="https://github.com/NixOS/patchelf/archive/refs/tags/${pever}.tar.gz"
+	patchfile="$configdir/_patchelf_verneed_fix.patch"
+	pedir="/tmp/patchelf-${pever}"
+	pebin="/tmp/patchelf-${pever}/src/patchelf"
+	
+	if [ ! -x $pebin ]
+	then
+		(
+			[ -d $pedir ] && rm -rf $pedir
+			cd /tmp
+			wget -q -c $peurl -O - | tar -xz
+			cd $pedir
+			cp -f $patchfile $pedir
+			patch -p1 < $patchfile
+			if [ $? == 0 ]
+			then
+				./bootstrap.sh
+				./configure
+				make -j$(nproc)
+			fi;
+		) &>"$ldir/$(date +%F.%H%M%S)_patchelf_compile.log"
+	fi;
+
+	[ -x $pebin ] && printf "$pebin" || return 1
+}

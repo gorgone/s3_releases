@@ -129,6 +129,13 @@ _gui_build(){
 	fi;) | "$gui" "$st_" --colors --title " -[ Build ]- " "$pb_" "$_lines" "$_cols"
 	sleep 2
 
+#remove glibc symbol versions
+	if [ "${s3cfg_vars[GLIBC_SYMBOL_VERSION_CLEAR]}" == "1" ] || [ "${USE_vars[USE_GLIBC_SYMBOL_VERSION_CLEAR]}" == "USE_GLIBC_SYMBOL_VERSION_CLEAR=1" ]
+	then
+		(glibc_clear_cam_gui "$oscam_name" "@GLIBC_") |tee -a "$ldir/$log_name"| "$gui" "$st_" --backtitle "Please wait..." --title " -[ GLIBC SYMBOL VERSION CLEARING ]- " "$pb_" 25 60
+		sleep 10
+	fi;
+
 #COMPRESS
 	if [ ! "$stapi_allowed" == "1" ]
 	then
