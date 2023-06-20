@@ -1,0 +1,19 @@
+_toolchainname="owrt_rpi_armv7";
+default_use="USE_UTF8 USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="";
+_description="OpenWrt 19.07|21.02 Raspberry Pi 2 Model B";
+_oscamconfdir_default="/etc/config/oscam";
+_oscamconfdir_custom="";
+_compiler="armv7-rpi2-linux-musleabihf-";
+_sysroot="armv7-rpi2-linux-musleabihf/sysroot";
+_libsearchdir="/usr/lib";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1vd3J0X3JwaV9hcm12Ny50YXIueHoK";
+_md5sum="e5198caf79e8fb060d4224944fc07d59  Toolchain-owrt_rpi_armv7.tar.xz";
+_tc_info="\n
+!!! crosstool-NG Toolchain !!!\n
+\n
+OpenWrt 19.07|21.02 Raspberry Pi 2 Model B\n
+arm cortex-a7 32-bit LE, musl 1.1.24, gcc 13.1.0, linux 6.3.2\n";
+_tc_infolines="5";
