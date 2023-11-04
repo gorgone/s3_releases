@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #simplebuild_plugin tcupdate
-pversion="0.24.0";
+pversion="0.24.1";
 pname="s3.TUP";
 pdesc="Plugin $pname v$pversion";
 tc_url="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLw==";
@@ -13,7 +13,7 @@ ctngsrcdir="$ctdir/crosstool-ng";
 fngsrcdir="$ctdir/freetz-ng";
 andksrcdir="$ctdir/android-ndk";
 cpus="$(getconf _NPROCESSORS_ONLN)";
-s3_update_required=1;
+s3_update_required=0;
 
 tcupdate(){
 	[ -f "$workdir/DEVELOPMENT" ] && disable_syscheck="1" && disable_template_versioning="1" && source "$workdir/DEVELOPMENT" ; # DEVELOPMENT should contain a CURL_GITHUB_TOKEN to avoid github rate limiting
@@ -1277,7 +1277,7 @@ _check_pkg(){
 	fi;
 };
 _check_github_api_limits(){
-
+	git config --global 'versionsort.suffix' '-' 2>/dev/null
 	limit=$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/rate_limit" | jq -r '.resources.core.limit');
 	remaining=$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/rate_limit" | jq -r '.resources.core.remaining');
 	reset=$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/rate_limit" | jq -r '.resources.core.reset');
@@ -1381,7 +1381,7 @@ _create_config(){
 	libs="$(awk -F'(' '/^LIBS=./{print $NF}' "$configname" | awk -F ')' '{printf $1}' | xargs)";
 
 	#update dynamic library properties in configfile
-	props='version check url';
+	props='tag version check url';
 	for lib in $libs;
 	do
 		for prop in $props;
