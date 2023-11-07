@@ -10,10 +10,10 @@ _compiler="mips-ar71xx-linux-musl-";
 _sysroot="mips-ar71xx-linux-musl/sysroot";
 _libsearchdir="/usr/lib";
 _toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1vd3J0X2FyNzF4eF9taXBzLnRhci54ego=";
-_md5sum="893bb8646f503f9f3c19f5e1c5c42e4f  Toolchain-owrt_ar71xx_mips.tar.xz";
+_md5sum="6db39b16d4cef95f9312e67210a519b8  Toolchain-owrt_ar71xx_mips.tar.xz";
 _tc_info="\n
 !!! crosstool-NG Toolchain !!!\n
 \n
 OpenWrt 18.06 ar71xx, mips_24kc BE devices\n
-mips mips1 32-bit BE, musl 1.1.19, gcc 12.2.0, linux 6.1\n";
+mips mips1 32-bit BE, musl 1.1.19, gcc 13.2.0, linux 6.5.5\n";
 _tc_infolines="5";

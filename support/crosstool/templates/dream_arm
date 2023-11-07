@@ -1,8 +1,8 @@
 #toolchain template: Dreambox DM9x0 UHD
-#toolchain template version: 12
-#toolchain template updated: 2023-01-10 17:36:29
+#toolchain template version: 13
+#toolchain template updated: 2023-11-06 19:31:29
 # Automatically generated file; DO NOT EDIT.
-# crosstool-NG 1.25.0.117_66ac9e6 Configuration
+# crosstool-NG 1.26.0.22_daf19e1 Configuration
 CT_CONFIGURE_has_static_link=y
 CT_CONFIGURE_has_cxx11=y
 CT_CONFIGURE_has_lzip=y
@@ -13,9 +13,9 @@ CT_CONFIGURE_has_make_3_81_or_newer=y
 CT_CONFIGURE_has_make_4_0_or_newer=y
 CT_CONFIGURE_has_libtool_2_4_or_newer=y
 CT_CONFIGURE_has_libtoolize_2_4_or_newer=y
-CT_CONFIGURE_has_autoconf_2_71_or_newer=y
-CT_CONFIGURE_has_autoreconf_2_71_or_newer=y
-CT_CONFIGURE_has_automake_1_16_or_newer=y
+CT_CONFIGURE_has_autoconf_2_65_or_newer=y
+CT_CONFIGURE_has_autoreconf_2_65_or_newer=y
+CT_CONFIGURE_has_automake_1_15_or_newer=y
 CT_CONFIGURE_has_gnu_m4_1_4_12_or_newer=y
 CT_CONFIGURE_has_python_3_4_or_newer=y
 CT_CONFIGURE_has_bison_2_7_or_newer=y
@@ -29,7 +29,7 @@ CT_CONFIGURE_has_sha1sum=y
 CT_CONFIGURE_has_sha256sum=y
 CT_CONFIGURE_has_sha512sum=y
 CT_CONFIGURE_has_install_with_strip_program=y
-CT_VERSION="1.25.0.117_66ac9e6"
+CT_VERSION="1.26.0.22_daf19e1"
 CT_VCHECK=""
 CT_CONFIG_VERSION_ENV="4"
 CT_CONFIG_VERSION_CURRENT="4"
@@ -219,7 +219,11 @@ CT_LINUX_PKG_NAME="linux"
 CT_LINUX_SRC_RELEASE=y
 # CT_LINUX_SRC_DEVEL is not set
 CT_LINUX_PATCH_ORDER="global"
-CT_LINUX_V_6_1=y
+CT_LINUX_V_6_5=y
+# CT_LINUX_V_6_4 is not set
+# CT_LINUX_V_6_3 is not set
+# CT_LINUX_V_6_2 is not set
+# CT_LINUX_V_6_1 is not set
 # CT_LINUX_V_6_0 is not set
 # CT_LINUX_V_5_19 is not set
 # CT_LINUX_V_5_18 is not set
@@ -260,7 +264,7 @@ CT_LINUX_V_6_1=y
 # CT_LINUX_V_3_4 is not set
 # CT_LINUX_V_3_2 is not set
 # CT_LINUX_V_2_6_32 is not set
-CT_LINUX_VERSION="6.1"
+CT_LINUX_VERSION="6.5.5"
 CT_LINUX_MIRRORS="$(CT_Mirrors kernel.org linux ${CT_LINUX_VERSION})"
 CT_LINUX_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_LINUX_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
@@ -305,7 +309,8 @@ CT_BINUTILS_PKG_NAME="binutils"
 CT_BINUTILS_SRC_RELEASE=y
 # CT_BINUTILS_SRC_DEVEL is not set
 CT_BINUTILS_PATCH_ORDER="global"
-CT_BINUTILS_V_2_39=y
+CT_BINUTILS_V_2_40=y
+# CT_BINUTILS_V_2_39 is not set
 # CT_BINUTILS_V_2_38 is not set
 # CT_BINUTILS_V_2_37 is not set
 # CT_BINUTILS_V_2_36 is not set
@@ -319,14 +324,14 @@ CT_BINUTILS_V_2_39=y
 # CT_BINUTILS_V_2_28 is not set
 # CT_BINUTILS_V_2_27 is not set
 # CT_BINUTILS_V_2_26 is not set
-CT_BINUTILS_VERSION="2.39"
+CT_BINUTILS_VERSION="2.40"
 CT_BINUTILS_MIRRORS="$(CT_Mirrors GNU binutils) $(CT_Mirrors sourceware binutils/releases)"
 CT_BINUTILS_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_BINUTILS_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_BINUTILS_ARCHIVE_FORMATS=".tar.xz .tar.bz2 .tar.gz"
 CT_BINUTILS_SIGNATURE_FORMAT="packed/.sig"
+CT_BINUTILS_later_than_2_39=y
 CT_BINUTILS_2_39_or_later=y
-CT_BINUTILS_2_39_or_older=y
 CT_BINUTILS_later_than_2_30=y
 CT_BINUTILS_2_30_or_later=y
 CT_BINUTILS_later_than_2_27=y
@@ -339,6 +344,7 @@ CT_BINUTILS_FORCE_LD_BFD_DEFAULT=y
 CT_BINUTILS_LINKER_LD=y
 CT_BINUTILS_LINKERS_LIST="ld"
 CT_BINUTILS_LINKER_DEFAULT="bfd"
+# CT_BINUTILS_PLUGINS is not set
 CT_BINUTILS_RELRO=m
 CT_BINUTILS_DETERMINISTIC_ARCHIVES=y
 CT_BINUTILS_EXTRA_CONFIG_ARRAY=""
@@ -361,6 +367,8 @@ CT_GLIBC_PKG_NAME="glibc"
 CT_GLIBC_SRC_RELEASE=y
 # CT_GLIBC_SRC_DEVEL is not set
 CT_GLIBC_PATCH_ORDER="global"
+# CT_GLIBC_V_2_38 is not set
+# CT_GLIBC_V_2_37 is not set
 # CT_GLIBC_V_2_36 is not set
 # CT_GLIBC_V_2_35 is not set
 # CT_GLIBC_V_2_34 is not set
@@ -383,6 +391,10 @@ CT_GLIBC_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_GLIBC_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_GLIBC_ARCHIVE_FORMATS=".tar.xz .tar.bz2 .tar.gz"
 CT_GLIBC_SIGNATURE_FORMAT="packed/.sig"
+CT_GLIBC_2_38_or_older=y
+CT_GLIBC_older_than_2_38=y
+CT_GLIBC_2_37_or_older=y
+CT_GLIBC_older_than_2_37=y
 CT_GLIBC_2_36_or_older=y
 CT_GLIBC_older_than_2_36=y
 CT_GLIBC_2_34_or_older=y
@@ -435,9 +447,9 @@ CT_GLIBC_FORCE_UNWIND=y
 # CT_GLIBC_KERNEL_VERSION_NONE is not set
 CT_GLIBC_KERNEL_VERSION_AS_HEADERS=y
 # CT_GLIBC_KERNEL_VERSION_CHOSEN is not set
-CT_GLIBC_MIN_KERNEL="6.1"
+CT_GLIBC_MIN_KERNEL="6.5.5"
 CT_GLIBC_ENABLE_COMMON_FLAG=y
-CT_ALL_LIBC_CHOICES="AVR_LIBC GLIBC MINGW_W64 MOXIEBOX MUSL NEWLIB NONE UCLIBC_NG"
+CT_ALL_LIBC_CHOICES="AVR_LIBC GLIBC MINGW_W64 MOXIEBOX MUSL NEWLIB NONE PICOLIBC UCLIBC_NG"
 CT_LIBC_SUPPORT_THREADS_ANY=y
 CT_LIBC_SUPPORT_THREADS_NATIVE=y
 # Common C library options
@@ -469,7 +481,8 @@ CT_GCC_PKG_NAME="gcc"
 CT_GCC_SRC_RELEASE=y
 # CT_GCC_SRC_DEVEL is not set
 CT_GCC_PATCH_ORDER="global"
-CT_GCC_V_12=y
+CT_GCC_V_13=y
+# CT_GCC_V_12 is not set
 # CT_GCC_V_11 is not set
 # CT_GCC_V_10 is not set
 # CT_GCC_V_9 is not set
@@ -478,12 +491,14 @@ CT_GCC_V_12=y
 # CT_GCC_V_6 is not set
 # CT_GCC_V_5 is not set
 # CT_GCC_V_4_9 is not set
-CT_GCC_VERSION="12.2.0"
+CT_GCC_VERSION="13.2.0"
 CT_GCC_MIRRORS="$(CT_Mirrors GNU gcc/gcc-${CT_GCC_VERSION}) $(CT_Mirrors sourceware gcc/releases/gcc-${CT_GCC_VERSION})"
 CT_GCC_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_GCC_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_GCC_ARCHIVE_FORMATS=".tar.xz .tar.gz"
 CT_GCC_SIGNATURE_FORMAT=""
+CT_GCC_later_than_13=y
+CT_GCC_13_or_later=y
 CT_GCC_later_than_12=y
 CT_GCC_12_or_later=y
 CT_GCC_later_than_11=y
@@ -511,6 +526,8 @@ CT_CC_GCC_STATIC_LIBSTDCXX=y
 CT_CC_GCC_CONFIG_TLS=m
 # Optimisation features
 CT_CC_GCC_USE_GRAPHITE=y
+CT_CC_GCC_USE_LTO=y
+CT_CC_GCC_LTO_ZSTD=m
 # Settings for libraries running on target
 CT_CC_GCC_ENABLE_DEFAULT_PIE=y
 CT_CC_GCC_ENABLE_TARGET_OPTSPACE=y
@@ -551,7 +568,20 @@ CT_ALL_DEBUG_CHOICES="DUMA GDB LTRACE STRACE"
 # end of Debug facilities
 # Companion libraries
 # CT_COMPLIBS_CHECK is not set
-# CT_COMP_LIBS_CLOOG is not set
+CT_COMP_LIBS_CLOOG=y
+CT_COMP_LIBS_CLOOG_PKG_KSYM="CLOOG"
+CT_CLOOG_DIR_NAME="cloog"
+CT_CLOOG_PKG_NAME="cloog"
+CT_CLOOG_SRC_RELEASE=y
+# CT_CLOOG_SRC_DEVEL is not set
+CT_CLOOG_PATCH_ORDER="global"
+CT_CLOOG_V_0_18_4=y
+CT_CLOOG_VERSION="0.18.4"
+CT_CLOOG_MIRRORS="http://www.bastoul.net/cloog/pages/download"
+CT_CLOOG_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
+CT_CLOOG_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
+CT_CLOOG_ARCHIVE_FORMATS=".tar.gz"
+CT_CLOOG_SIGNATURE_FORMAT=""
 CT_COMP_LIBS_EXPAT=y
 CT_COMP_LIBS_EXPAT_PKG_KSYM="EXPAT"
 CT_EXPAT_DIR_NAME="expat"
@@ -610,7 +640,9 @@ CT_ISL_PKG_NAME="isl"
 CT_ISL_SRC_RELEASE=y
 # CT_ISL_SRC_DEVEL is not set
 CT_ISL_PATCH_ORDER="global"
-CT_ISL_V_0_24=y
+CT_ISL_V_0_26=y
+# CT_ISL_V_0_25 is not set
+# CT_ISL_V_0_24 is not set
 # CT_ISL_V_0_23 is not set
 # CT_ISL_V_0_22 is not set
 # CT_ISL_V_0_21 is not set
@@ -620,7 +652,7 @@ CT_ISL_V_0_24=y
 # CT_ISL_V_0_17 is not set
 # CT_ISL_V_0_16 is not set
 # CT_ISL_V_0_15 is not set
-CT_ISL_VERSION="0.24"
+CT_ISL_VERSION="0.26"
 CT_ISL_MIRRORS="https://libisl.sourceforge.io"
 CT_ISL_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_ISL_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
@@ -666,11 +698,9 @@ CT_MPC_PKG_NAME="mpc"
 CT_MPC_SRC_RELEASE=y
 # CT_MPC_SRC_DEVEL is not set
 CT_MPC_PATCH_ORDER="global"
-CT_MPC_V_1_2=y
-# CT_MPC_V_1_1 is not set
-# CT_MPC_V_1_0 is not set
-CT_MPC_VERSION="1.2.1"
-CT_MPC_MIRRORS="http://www.multiprecision.org/downloads $(CT_Mirrors GNU mpc)"
+CT_MPC_V_1_3=y
+CT_MPC_VERSION="1.3.1"
+CT_MPC_MIRRORS="https://www.multiprecision.org/downloads $(CT_Mirrors GNU mpc)"
 CT_MPC_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_MPC_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_MPC_ARCHIVE_FORMATS=".tar.gz"
@@ -684,11 +714,9 @@ CT_MPFR_PKG_NAME="mpfr"
 CT_MPFR_SRC_RELEASE=y
 # CT_MPFR_SRC_DEVEL is not set
 CT_MPFR_PATCH_ORDER="global"
-CT_MPFR_V_4_1=y
-# CT_MPFR_V_4_0 is not set
-# CT_MPFR_V_3_1 is not set
-CT_MPFR_VERSION="4.1.0"
-CT_MPFR_MIRRORS="http://www.mpfr.org/mpfr-${CT_MPFR_VERSION} $(CT_Mirrors GNU mpfr)"
+CT_MPFR_V_4_2=y
+CT_MPFR_VERSION="4.2.1"
+CT_MPFR_MIRRORS="https://www.mpfr.org/mpfr-${CT_MPFR_VERSION} $(CT_Mirrors GNU mpfr)"
 CT_MPFR_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_MPFR_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_MPFR_ARCHIVE_FORMATS=".tar.xz .tar.bz2 .tar.gz .zip"
@@ -702,10 +730,11 @@ CT_NCURSES_PKG_NAME="ncurses"
 CT_NCURSES_SRC_RELEASE=y
 # CT_NCURSES_SRC_DEVEL is not set
 CT_NCURSES_PATCH_ORDER="global"
-CT_NCURSES_V_6_2=y
+CT_NCURSES_V_6_4=y
+# CT_NCURSES_V_6_2 is not set
 # CT_NCURSES_V_6_1 is not set
 # CT_NCURSES_V_6_0 is not set
-CT_NCURSES_VERSION="6.2"
+CT_NCURSES_VERSION="6.4"
 CT_NCURSES_MIRRORS="https://invisible-mirror.net/archives/ncurses $(CT_Mirrors GNU ncurses)"
 CT_NCURSES_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_NCURSES_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
@@ -732,7 +761,22 @@ CT_ZLIB_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
 CT_ZLIB_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
 CT_ZLIB_ARCHIVE_FORMATS=".tar.xz .tar.gz"
 CT_ZLIB_SIGNATURE_FORMAT="packed/.asc"
-CT_ALL_COMP_LIBS_CHOICES="CLOOG EXPAT GETTEXT GMP GNUPRUMCU ISL LIBELF LIBICONV MPC MPFR NCURSES NEWLIB_NANO PICOLIBC ZLIB"
+CT_COMP_LIBS_ZSTD=y
+CT_COMP_LIBS_ZSTD_PKG_KSYM="ZSTD"
+CT_ZSTD_DIR_NAME="zstd"
+CT_ZSTD_PKG_NAME="zstd"
+CT_ZSTD_SRC_RELEASE=y
+# CT_ZSTD_SRC_DEVEL is not set
+CT_ZSTD_PATCH_ORDER="global"
+CT_ZSTD_V_1_5_5=y
+# CT_ZSTD_V_1_5_2 is not set
+CT_ZSTD_VERSION="1.5.5"
+CT_ZSTD_MIRRORS="https://github.com/facebook/zstd/releases/download/v${CT_ZSTD_VERSION} https://www.zstd.net/"
+CT_ZSTD_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
+CT_ZSTD_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
+CT_ZSTD_ARCHIVE_FORMATS=".tar.gz"
+CT_ZSTD_SIGNATURE_FORMAT="packed/.sig"
+CT_ALL_COMP_LIBS_CHOICES="CLOOG EXPAT GETTEXT GMP GNUPRUMCU ISL LIBELF LIBICONV MPC MPFR NCURSES NEWLIB_NANO PICOLIBC ZLIB ZSTD"
 CT_LIBICONV_NEEDED=y
 CT_GETTEXT_NEEDED=y
 CT_GMP_NEEDED=y
@@ -741,6 +785,7 @@ CT_ISL_NEEDED=y
 CT_MPC_NEEDED=y
 CT_NCURSES_NEEDED=y
 CT_ZLIB_NEEDED=y
+CT_ZSTD_NEEDED=y
 CT_LIBICONV=y
 CT_GETTEXT=y
 CT_GMP=y
@@ -749,6 +794,7 @@ CT_ISL=y
 CT_MPC=y
 CT_NCURSES=y
 CT_ZLIB=y
+CT_ZSTD=y
 # end of Companion libraries
 # Companion tools
 # CT_COMP_TOOLS_FOR_HOST is not set

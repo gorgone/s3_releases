@@ -26,7 +26,6 @@ S3TUP_CONFIG_VERSION="48";
 # You normally do *not* need to be root to build a toolchain using crosstool-NG. In fact, it is *VERY* dangerous to run as root, 
 # as crosstool-NG will, as part of the build process, remove a few directories. If anything goes wrong, running as root can ruin your host distribution.
 CTNG_BUILD_AS_ROOT="0"; # Enable/Disable build as root (1|0)
-CTNG_BUILD_STATIC_TOOLCHAIN="0"; # Enable/Disable (1|0), if you wish to move the toolchain to another host, and you are not confident that this host has the required versions of system libs, then all the host tools will be linked statically
 
 # crosstool-NG toolchain build settings
 CTNG_REPO_URL="https://github.com/crosstool-ng/crosstool-ng"; # Repository to load ct-ng from
