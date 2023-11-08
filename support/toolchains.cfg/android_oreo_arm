@@ -13,10 +13,10 @@ _compiler="arm-linux-androideabi-";
 _sysroot="sysroot";
 _libsearchdir="/usr/lib";
 _toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1hbmRyb2lkX29yZW9fYXJtLnRhci54ego=";
-_md5sum="bae0a55a0d9de4af603dc86e25ae17c9  Toolchain-android_oreo_arm.tar.xz";
+_md5sum="9cd193801de9f053a2ed0839abc45e75  Toolchain-android_oreo_arm.tar.xz";
 _tc_info="\n
 !!! Android-NDK Toolchain !!!\n
 \n
 Android 8.x Oreo STBs\n
-arm armeabi-v7a 32-bit LE, libc++ API 26, clang 14.0.6, Linux 4.9.0\n";
+arm armeabi-v7a 32-bit LE, libc++ API 26, clang 17.0.2, Linux 6.3.0\n";
 _tc_infolines="5";

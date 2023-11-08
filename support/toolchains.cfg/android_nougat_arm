@@ -13,10 +13,10 @@ _compiler="arm-linux-androideabi-";
 _sysroot="sysroot";
 _libsearchdir="/usr/lib";
 _toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1hbmRyb2lkX25vdWdhdF9hcm0udGFyLnh6Cg==";
-_md5sum="def74bc3f70765ed894aac88890efaf0  Toolchain-android_nougat_arm.tar.xz";
+_md5sum="9765fbda58003561e39d70efc7af534f  Toolchain-android_nougat_arm.tar.xz";
 _tc_info="\n
 !!! Android-NDK Toolchain !!!\n
 \n
 Android 7.x Nougat STBs\n
-arm armeabi-v7a 32-bit LE, libc++ API 24, clang 14.0.6, Linux 4.9.0\n";
+arm armeabi-v7a 32-bit LE, libc++ API 24, clang 17.0.2, Linux 6.3.0\n";
 _tc_infolines="5";

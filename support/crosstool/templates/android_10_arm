@@ -1,10 +1,9 @@
 #toolchain template: Android 10 STBs
-#toolchain template version: 1
+#toolchain template version: 2
 #toolchain template cflags: -march=armv7-a -mtune=cortex-a9 -mfloat-abi=softfp -mfpu=vfpv3-d16 -DANDROID -D__ANDROID_API__=29 -fpic -fno-addrsig -ffunction-sections -fdata-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wno-invalid-command-line-argument -Wno-unused-command-line-argument
 ANDK_API="29" #https://source.android.com/setup/start/build-numbers?hl=en
 ANDK_ABI="armeabi-v7a"
 ANDK_ARCH="arm"
 ANDK_ARCH_BITNESS="32"
 ANDK_HOST="arm-linux-androideabi"
-ANDK_CLANG="armv7a-linux-androideabi29-clang"
 ANDK_SSL_TARGET="android-arm" #android-arm, android-arm64, android-x86, android-x86
