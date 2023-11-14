@@ -218,23 +218,29 @@ _toolchain_check(){
 		printf "$w_l  GCC Binary  :$y_l $machine""-gcc $([ -L "./$compilername" ] && printf "$p_l(${compilerpath#"$tcdir/$1/"})")\n"
 		printf "$w_l  GCC Sysroot :$y_l $sysroot\n"
 		[ -z "$sysroot" ] && sysroot="$r_l$txt_too_old\n"
-		cd "$sr"
-		for e in "${headervars[@]}"
-		do
-			temp=$(find * |grep -m1 "$e")
-			[ ${#temp} -gt 8 ] && printf "$w_l  Header File :$y_l $e$g_l\t$txt_found\n" || printf "$w_l  Header File :$y_l $e$r_l\t($txt_not_found)\n"
-		done
+#		cd "$sr"
+#		for e in "${headervars[@]}"
+#		do
+#			temp=$(find * |grep -m1 "$e")
+#			[ ${#temp} -gt 8 ] && printf "$w_l  Header File :$y_l $e$g_l\t$txt_found\n" || printf "$w_l  Header File :$y_l $e$r_l\t($txt_not_found)\n"
+#		done
 	fi
 
 	if [ "$1" == "native" ]
 	then
-		printf "$w_l  GCC Version :$y_l $(gcc --version |head -n 1 )"
-		printf "$w_l  GCC Binary  :$y_l $(gcc -dumpmachine )"
+		printf "$w_l  GCC Version :$y_l $(gcc --version |head -n 1 )\n"
+		printf "$w_l  GCC Binary  :$y_l $(gcc -dumpmachine )\n"
 	fi
 
 	printf "\n$w_l  Sysroot config ----> $C$_sysroot$w_l\n  ====================\n"
 
 	[ "$1" == "native" ] && cd "$_sysroot" || cd "$tcdir/$1/$_sysroot"
+
+	vcode=$(find . -name "version.h" -type f -exec grep -m1 "LINUX_VERSION_CODE" {} \; | awk '{print $3}')
+	[ ! -z "$vcode" ] && printf "$w_l  Linux       :$y_l version.h$g_l\t$(_linux_version_code_to_version_number $vcode) ($vcode)\n" || printf "$w_l  Linux       :$y_l version.h$r_l\t(missing linux headers)\n"
+	
+	libc="$(_libc_version)"; libcf="$(echo $libc | awk -F';' '{print $1}')"; libcl="$(echo $libc | awk -F';' '{print $2}')"; libcv="$(echo $libc | awk -F';' '{print $3}')"
+	[ ! -z "$libcl" ] && printf "$w_l  C-Library   :$y_l $libcl$g_l\t\t$libcv ($libcf)\n" || printf "$w_l  C-Library   :$y_l $libcf$r_l\t($txt_not_found)\n"
 
 	for e in "${headervars[@]}"
 	do
@@ -249,7 +255,7 @@ _toolchain_check(){
 		printf "\n$w_l  Library config ----> $C$_sysroot/$pkg$w_l\n  ====================\n"
 		for f in *.pc
 		do
-			content=$(cat "$f") && na=$(echo "$content" | grep 'Name:' | sed -e "s/Name: //g") && ver=$(echo "$content" | grep 'Version:' | sed -e "s/Version: //g")
+			content=$(cat "$f" 2>/dev/null) && na=$(echo "$content" | grep 'Name:' | sed -e "s/Name: //g") && ver=$(echo "$content" | grep 'Version:' | sed -e "s/Version: //g")
 			sp1=$(printf '%*s' $((20-${#f})) | tr ' ' ' ') && sp2=$(printf '%*s' $((20-${#na})) | tr ' ' ' ')
 			[ ${#content} -gt 0 ] && printf "$w_l  Library Config :$y_l "$f"$sp1$g_l$txt_found\t$p_l$na$sp2$ver\n" || printf "$w_l  Library Config :$y_l "$f"$sp1$r_l($txt_not_found)\n"
 		done
@@ -425,4 +431,55 @@ _toolchain_gui_install(){
 	else
 		printf "$r_l  $txt_error:$y_l $stcname$w_l Toolchain $txt_no_download""$rs_"
 	fi
+}
+
+_libc_version(){
+	local libcfile libcname verstr
+	
+	libcfile="$(readlink $(find . -name "libc.so.?") 2>/dev/null | head -n1)"
+	libcname=$(echo $libcfile | sed 's/\.so$//')
+	
+	# glibc
+	if [ "$libcname" != "${libcname#libc-}" ]
+	then
+		verstr="g$libcname"
+
+	# uclibc
+	elif [ "$libcname" != "${libcname#libuClibc-}" ]
+	then
+		verstr="${libcname#lib}"
+		
+	# musl
+	elif [ "$(strings "$(find . -name "libc.so" | head -n1)" 2>/dev/null | grep '^musl')" ]
+	then
+		libcfile="$(basename $(find . -name "libc.so" | head -n1))"
+		verstr="musl-$(strings "$(find . -name "libc.so" | head -n1)" | grep '^[0-1]\.[0-9]\.[0-9][0-9]*$')"
+	
+	# bionic
+	elif [ "$(strings "$(find . -name "libc.so" ! -path "*/x86_64-linux-android/*" | head -n1)" 2>/dev/null | grep 'bionic')" ]
+	then
+		libcfile="$(basename $(find . -name "libc.so" ! -path "*/x86_64-linux-android/*" | head -n1))"
+		verstr="bionic-$(strings "$(find . -name "libc.so" ! -path "*/x86_64-linux-android/*" | head -n1)" | grep '^C[0-2]\.[0-9]*$')"
+	
+	#unknown
+	else
+		libcfile="[g|uc]libc|musl"
+	fi
+	
+	printf "$libcfile;${verstr//-/;}"
+}
+
+_linux_version_code_to_version_number(){
+	# LINUX_VERSION_CODE is X*65536 + Y*256 + Z
+	[ -z $1 ] && return
+	base=$1
+	major=$(( $base / 65536 ))
+	mp=$(( $major * 65536 ))
+	base=$(( $base - mp ))
+
+	patch=$(( $base / 256 ))
+	pp=$(( $patch * 256 ))
+	sub=$(( $base - pp ))
+	
+	printf "$major.$patch.$sub"
 }

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #simplebuild_plugin tcupdate
-pversion="0.24.1";
+pversion="0.24.2";
 pname="s3.TUP";
 pdesc="Plugin $pname v$pversion";
 tc_url="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLw==";
@@ -1121,6 +1121,7 @@ _get_template_properties(){
 		case "$tpl_type" in
 			"CTNG")
 					arch=$(grep '^CT_ARCH=' "$1" | awk -F'"' '{print $2}');
+					endianness="LE";
 					[ $(grep -i '^CT_ARCH_LE=y' "$1") ] && endianness="LE";
 					[ $(grep -i '^CT_ARCH_BE=y' "$1") ] && endianness="BE";
 					[ $(grep -i '^CT_ARCH_LE_BE=y' "$1") ] && endianness="LE+BE";
@@ -1172,7 +1173,9 @@ _get_template_properties(){
 						endianness="LE";
 						libc="libc++" && libcv="API $(grep '^ANDK_API=' "$1" | awk -F'"' '{print $2}')";
 						cc="clang" && ccv=" $($andksrcdir/toolchains/llvm/prebuilt/linux-x86_64/bin/clang 2>/dev/null -dumpversion || echo "not supported on $(uname -i) hosts")";
-						kernel="Linux" && kernelv="4.9.0";
+						kernel="Linux"
+						vcode=$(find $andksrcdir/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/linux/ -name "version.h" -type f -exec grep -m1 "LINUX_VERSION_CODE" {} \; | awk '{print $3}')
+						kernelv=$(_linux_version_code_to_version_number $vcode);
 					else
 						setup=0;
 						desc="$desc ($(printf '%q' "${txt_s3tup_msg_gtp_info}"))";
