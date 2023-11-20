@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="49";
+S3TUP_CONFIG_VERSION="50";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -310,7 +310,7 @@ LIB_USBB_name="libusb";
 LIB_USBB_tag="$(git ls-remote --sort=-version:refname --tags https://github.com/libusb/libusb.git v1.0.23 | grep -v '\^' | awk -F'/' 'NR==1 {print $NF}')";
 LIB_USBB_version="$(printf "$LIB_USBB_tag" | sed -e 's#v##g; s#_#.#g; s#\"##g')";
 LIB_USBB_check="libusb-1.0.pc $(printf "$LIB_USBB_version")";
-LIB_USBB_url="https://api.github.com/repos/libusb/libusb/tarball/refs/tags/$LIB_USBB_tag";
+LIB_USBB_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/libusb/libusb/releases/tags/$LIB_USBB_tag" | jq -r '.assets[1].browser_download_url' | sed -e 's#\"##g')";
 LIB_USBB_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_USBB_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_USBB_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
