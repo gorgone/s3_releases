@@ -193,6 +193,9 @@ _toolchain_check(){
 	s3logo
 	headervars=( crypto.h pcsclite.h libusb.h pthread.h )
 	[ -f "$tccfgdir/$1" ] && source "$tccfgdir/$1"
+	
+	fmtg="  ${w_l}%-16s ${y_l}%-20s ${g_l}%-8s $p_l%-20s %s\n";
+	fmtb="  ${w_l}%-16s ${y_l}%-20s ${r_l}%s\n";
 
 	if [ -d "$tcdir/$1/bin" ]
 	then
@@ -203,7 +206,7 @@ _toolchain_check(){
 		exit
 	fi
 
-	printf "$w_l  Compiler Info -----> $C$1$w_l\n  ====================\n"
+	printf "$w_l  Compiler info -----> $C$1$w_l\n  ====================\n"
 
 	if [ -z "$sysroot" ] && [ ! "$1" == "native" ]
 	then
@@ -212,58 +215,62 @@ _toolchain_check(){
 		version=$("./$compilername" -dumpversion)
 		machine=$("./$compilername" -dumpmachine)
 		[ "$_androidndkdir" == "1" ] && sr="$tcdir/$1/sysroot" || sr=$("./$compilername" -print-sysroot 2>/dev/null)
-		sysroot=${sr#"$tcdir/$1/bin/../"}
-		compilerpath=$(realpath ./$compilername)
-		printf "$w_l  GCC Version :$y_l $version\n"
-		printf "$w_l  GCC Binary  :$y_l $machine""-gcc $([ -L "./$compilername" ] && printf "$p_l(${compilerpath#"$tcdir/$1/"})")\n"
-		printf "$w_l  GCC Sysroot :$y_l $sysroot\n"
+		sysroot=$(realpath -sm "$sr" --relative-to="$tcdir/$1")
+		compilerpath=$(realpath -sm "./$compilername" --relative-to="$tcdir/$1")
+		printf "$fmtg" "GCC Version :" "$version"
+		printf "$fmtg" "GCC Binary  :" "$compilerpath"
+		printf "$fmtg" "GCC Sysroot :" "$sysroot"
 		[ -z "$sysroot" ] && sysroot="$r_l$txt_too_old\n"
-#		cd "$sr"
-#		for e in "${headervars[@]}"
-#		do
-#			temp=$(find * |grep -m1 "$e")
-#			[ ${#temp} -gt 8 ] && printf "$w_l  Header File :$y_l $e$g_l\t$txt_found\n" || printf "$w_l  Header File :$y_l $e$r_l\t($txt_not_found)\n"
-#		done
 	fi
 
 	if [ "$1" == "native" ]
 	then
-		printf "$w_l  GCC Version :$y_l $(gcc --version |head -n 1 )\n"
-		printf "$w_l  GCC Binary  :$y_l $(gcc -dumpmachine )\n"
+		printf "$fmtg" "GCC Version :" "$(gcc --version | head -n 1)"
+		printf "$fmtg" "GCC Binary  :" "$(which $(gcc -dumpmachine)-gcc || which gcc)"
 	fi
 
 	printf "\n$w_l  Sysroot config ----> $C$_sysroot$w_l\n  ====================\n"
 
 	[ "$1" == "native" ] && cd "$_sysroot" || cd "$tcdir/$1/$_sysroot"
 
-	vcode=$(find . -name "version.h" -type f -exec grep -m1 "LINUX_VERSION_CODE" {} \; | awk '{print $3}')
-	[ ! -z "$vcode" ] && printf "$w_l  Linux       :$y_l version.h$g_l\t$(_linux_version_code_to_version_number $vcode) ($vcode)\n" || printf "$w_l  Linux       :$y_l version.h$r_l\t(missing linux headers)\n"
+	linux="$(_linux_version $([ "$1" == "native" ] && printf "/usr/src/linux-headers-$(uname -r)" || printf "."))"; linuxc="$(echo $linux | awk -F';' '{print $1}')"; linuxv="$(echo $linux | awk -F';' '{print $2}')"
+	[ ! -z "$linux" ] && printf "$fmtg" "Linux       :" "version.h" "${linuxv::8}" "($linuxc)" || printf "$fmtb" "Linux       :" "version.h" "(missing linux headers)"
 	
-	libc="$(_libc_version)"; libcf="$(echo $libc | awk -F';' '{print $1}')"; libcl="$(echo $libc | awk -F';' '{print $2}')"; libcv="$(echo $libc | awk -F';' '{print $3}')"
-	[ ! -z "$libcl" ] && printf "$w_l  C-Library   :$y_l $libcl$g_l\t\t$libcv ($libcf)\n" || printf "$w_l  C-Library   :$y_l $libcf$r_l\t($txt_not_found)\n"
+	libc="$(_libc_version $1)"; libcf="$(echo $libc | awk -F';' '{print $1}')"; libcl="$(echo $libc | awk -F';' '{print $2}')"; libcv="$(echo $libc | awk -F';' '{print $3}')"
+	[ ! -z "$libcl" ] && printf "$fmtg" "C-Library   :" "${libcf::20}" "${libcv::8}" "($libcl)" || printf "$fmtb" "C-Library   :" "${libcf::20}" "($txt_not_found)"
 
 	for e in "${headervars[@]}"
 	do
 		temp=$(find * |grep -m1 "$e")
-		[ ${#temp} -gt 8 ] && printf "$w_l  Header File :$y_l $e$g_l\t$txt_found\n" || printf "$w_l  Header File :$y_l $e$r_l\t($txt_not_found)\n"
+		[ ${#temp} -gt 8 ] && printf "$fmtg" "Header File :" "${e::20}" "${txt_found}" || printf "$fmtb" "Header File :" "${e::20}" "($txt_not_found)"
 	done
 
-	pkg=$(find * |grep -m1 "pkgconfig")
-	if [ ${#pkg} -gt 0 ]
+	[ "$1" == "native" ] && pkgs=$(find ../* -name "pkgconfig" -type d) || pkgs=$(find . -name "pkgconfig" -type d)
+	if [ ${#pkgs} -gt 0 ]
 	then
-		[ "$1" == "native" ] && cd "$_sysroot/$pkg" || cd "$tcdir/$1/$_sysroot/$pkg"
-		printf "\n$w_l  Library config ----> $C$_sysroot/$pkg$w_l\n  ====================\n"
-		for f in *.pc
+		for pkg in ${pkgs}
 		do
-			content=$(cat "$f" 2>/dev/null) && na=$(echo "$content" | grep 'Name:' | sed -e "s/Name: //g") && ver=$(echo "$content" | grep 'Version:' | sed -e "s/Version: //g")
-			sp1=$(printf '%*s' $((20-${#f})) | tr ' ' ' ') && sp2=$(printf '%*s' $((20-${#na})) | tr ' ' ' ')
-			[ ${#content} -gt 0 ] && printf "$w_l  Library Config :$y_l "$f"$sp1$g_l$txt_found\t$p_l$na$sp2$ver\n" || printf "$w_l  Library Config :$y_l "$f"$sp1$r_l($txt_not_found)\n"
+			if [ "$1" == "native" ]
+			then
+				cd "$_sysroot/$pkg"
+				printf "\n$w_l  Library config ----> $C$PWD$w_l\n  ====================\n"
+			else
+				cd "$tcdir/$1/$_sysroot/$pkg"
+				printf "\n$w_l  Library config ----> $C$(realpath -sm "$PWD" --relative-to="$tcdir/$1")$w_l\n  ====================\n"
+			fi
+
+			for f in *.pc
+			do
+				content=$(cat "$f" 2>/dev/null) && na=$(echo "$content" | grep 'Name:' | sed -e "s/Name: //g") && ver=$(echo "$content" | grep 'Version:' | sed -e "s/Version: //g")
+				sp1=$(printf '%*s' $((20-${#f})) | tr ' ' ' ') && sp2=$(printf '%*s' $((20-${#na})) | tr ' ' ' ')
+				[ ${#content} -gt 0 ] && printf "$fmtg" "Library Config :" "${f::20}" "$txt_found" "${na::20}" "$ver" || printf "$fmtb" "Library Config :" "${f::20}" "($txt_not_found)"
+			done
 		done
 	else
 		printf "\n$w_l  Library config ----> $C no libraries found in pkgconfig$w_l\n  ====================\n"
 	fi
 
-	printf $re_
+	printf "$re_\n"
 	exit
 }
 
@@ -436,43 +443,52 @@ _toolchain_gui_install(){
 _libc_version(){
 	local libcfile libcname verstr
 	
-	libcfile="$(readlink $(find . -name "libc.so.?") 2>/dev/null | head -n1)"
-	libcname=$(echo $libcfile | sed 's/\.so$//')
-	
-	# glibc
-	if [ "$libcname" != "${libcname#libc-}" ]
+	if [ "$1" == "native" ]
 	then
-		verstr="g$libcname"
-
-	# uclibc
-	elif [ "$libcname" != "${libcname#libuClibc-}" ]
-	then
-		verstr="${libcname#lib}"
-		
-	# musl
-	elif [ "$(strings "$(find . -name "libc.so" | head -n1)" 2>/dev/null | grep '^musl')" ]
-	then
-		libcfile="$(basename $(find . -name "libc.so" | head -n1))"
-		verstr="musl-$(strings "$(find . -name "libc.so" | head -n1)" | grep '^[0-1]\.[0-9]\.[0-9][0-9]*$')"
-	
-	# bionic
-	elif [ "$(strings "$(find . -name "libc.so" ! -path "*/x86_64-linux-android/*" | head -n1)" 2>/dev/null | grep 'bionic')" ]
-	then
-		libcfile="$(basename $(find . -name "libc.so" ! -path "*/x86_64-linux-android/*" | head -n1))"
-		verstr="bionic-$(strings "$(find . -name "libc.so" ! -path "*/x86_64-linux-android/*" | head -n1)" | grep '^C[0-2]\.[0-9]*$')"
-	
-	#unknown
+		libcfile="ldd"
+		verstr="$(ldd --version | head -n1 | awk '{printf $3 "-" $5}')"; verstr="${verstr,,}"
 	else
-		libcfile="[g|uc]libc|musl"
+		libcfile="$(readlink $(find . -name "libc.so.?") 2>/dev/null | head -n1)"
+		libcname=$(echo $libcfile | sed 's/\.so$//')
+		
+		# glibc
+		if [ "$libcname" != "${libcname#libc-}" ]
+		then
+			verstr="g$libcname"
+
+		# uclibc
+		elif [ "$libcname" != "${libcname#libuClibc-}" ]
+		then
+			verstr="${libcname#lib}"
+			
+		# musl
+		elif [ "$(strings "$(find . -name "libc.so" | head -n1)" 2>/dev/null | grep '^musl')" ]
+		then
+			libcfile="$(basename $(find . -name "libc.so" | head -n1))"
+			verstr="musl-$(strings "$(find . -name "libc.so" | head -n1)" | grep '^[0-1]\.[0-9]\.[0-9][0-9]*$')"
+		
+		# bionic
+		elif [ "$(strings "$(find . -name "libc.so" ! -path "*/x86_64-linux-android/*" | head -n1)" 2>/dev/null | grep 'bionic')" ]
+		then
+			libcfile="$(basename $(find . -name "libc.so" ! -path "*/x86_64-linux-android/*" | head -n1))"
+			verstr="bionic-$(strings "$(find . -name "libc.so" ! -path "*/x86_64-linux-android/*" | head -n1)" | grep '^C[0-2]\.[0-9]*$')"
+		
+		#unknown
+		else
+			libcfile="[g|uc]libc|musl"
+		fi
 	fi
 	
 	printf "$libcfile;${verstr//-/;}"
 }
 
-_linux_version_code_to_version_number(){
+_linux_version(){
+	local vcode base major patch sub
+	
+	vcode=$(find "$1" -name "version.h" -type f -exec grep -m1 "LINUX_VERSION_CODE" {} \; | awk '{print $3}')
+	
 	# LINUX_VERSION_CODE is X*65536 + Y*256 + Z
-	[ -z $1 ] && return
-	base=$1
+	[ -z $vcode ] && return || base=$vcode
 	major=$(( $base / 65536 ))
 	mp=$(( $major * 65536 ))
 	base=$(( $base - mp ))
@@ -481,5 +497,5 @@ _linux_version_code_to_version_number(){
 	pp=$(( $patch * 256 ))
 	sub=$(( $base - pp ))
 	
-	printf "$major.$patch.$sub"
+	printf "$vcode;$major.$patch.$sub"
 }

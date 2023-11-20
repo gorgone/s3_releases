@@ -1175,7 +1175,7 @@ _get_template_properties(){
 						cc="clang" && ccv=" $($andksrcdir/toolchains/llvm/prebuilt/linux-x86_64/bin/clang 2>/dev/null -dumpversion || echo "not supported on $(uname -i) hosts")";
 						kernel="Linux"
 						vcode=$(find $andksrcdir/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/linux/ -name "version.h" -type f -exec grep -m1 "LINUX_VERSION_CODE" {} \; | awk '{print $3}')
-						kernelv=$(_linux_version_code_to_version_number $vcode);
+						kernelv=$(_linux_version "$andksrcdir/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/linux/" | awk -F';' '{print $2}');
 					else
 						setup=0;
 						desc="$desc ($(printf '%q' "${txt_s3tup_msg_gtp_info}"))";
