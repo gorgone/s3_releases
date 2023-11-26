@@ -148,11 +148,11 @@ then
 	x=(*)
 	for i in "${x[@]}"
 	do
-	    if [ -f "$i" ]; then
-		source "$i"
-		plugin=$(awk '/^#simplebuild_plugin/ {printf $2}' $i)
-		[ -z "$plugin" ] || s3opts+=($plugin)
-	    fi
+		if [ -f "$i" ]; then
+			source "$i"
+			plugin=$(awk '/^#simplebuild_plugin/ {printf $2}' $i)
+			[ -z "$plugin" ] || s3opts+=($plugin)
+		fi
 	done
 fi
 
@@ -329,7 +329,7 @@ else
 
 		if [ "$t" == "$1" ]
 		then
-		
+
 			[ "${2:0:4}" == "here" ] && EXTRA_COPY_DIR=1 || EXTRA_COPY_DIR=0
 
 			if [ "${2:0:3}" == "-p=" ] || [ "${2:0:3}" == "-P=" ]
