@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="50";
+S3TUP_CONFIG_VERSION="51";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -71,7 +71,7 @@ LIBS_AUTO_INTEGRATE="1"; # Automatically reintegrate libraries when rebuilding t
 
 # OpenSSL 3.2.x
 SSL_320="1";
-SSL_320_beta="1";
+SSL_320_beta="0";
 SSL_320_name="OpenSSL";
 SSL_320_tag="$(git ls-remote --sort=-version:refname --tags https://github.com/openssl/openssl.git openssl-3.2.* | grep -v '\^' | awk -F'/' 'NR==1 {print $NF}')";
 SSL_320_version="$(printf "$SSL_320_tag" | sed -e 's#openssl-##g; s#_#.#g; s#\"##g')";
@@ -357,7 +357,7 @@ LIB_PCSC_tasks+=('export CC=@CC@;');
 LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
 LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" ] && LIBUSB_LIBS="@PREFIX@/lib/@HOST@/@API@ -lusb-1.0" || LIBUSB_LIBS="@PREFIX@/lib -lusb-1.0 -lrt";');
 LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="--enable-static --disable-shared --disable-libudev LIBS=-llog" || FLAGS="--disable-libudev";');
-LIB_PCSC_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS --disable-libsystemd --with-systemdsystemunitdir=@PREFIX@/lib/systemd/system LIBUSB_LIBS="-L${LIBUSB_LIBS}" LIBUSB_CFLAGS="-I@PREFIX@/include/libusb-1.0";');
+LIB_PCSC_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS --disable-polkit --disable-libsystemd --with-systemdsystemunitdir=@PREFIX@/lib/systemd/system LIBUSB_LIBS="-L${LIBUSB_LIBS}" LIBUSB_CFLAGS="-I@PREFIX@/include/libusb-1.0";');
 LIB_PCSC_tasks+=('make -j@CPUS@;');
 LIB_PCSC_tasks+=('make install;');
 LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 -name "libpcsc*" -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
