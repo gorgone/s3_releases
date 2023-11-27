@@ -1,0 +1,20 @@
+_toolchainname="fritz6430_6490_6590_ssl_multi_i686-freetz";
+default_use="USE_UTF8 USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="-Wl,-dynamic-linker,/usr/lib/freetz/ld-uClibc.so.0";
+_description="FRITZ!Box 6430 6490 6590 SSL multi by MasterSaMMy";
+_oscamconfdir_default="/var/media/ftp/addon/oscam";
+_oscamconfdir_custom="";
+_self_build="yes";
+_compiler="i686-linux-uclibc-";
+_sysroot="usr";
+_libsearchdir="/usr/lib";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1mcml0ejY0MzBfNjQ5MF82NTkwX3NzbF9tdWx0aV9pNjg2LWZyZWV0ei50YXIueHoK";
+_md5sum="cd7cfde64ded3be41841035deb53ef26  Toolchain-fritz6430_6490_6590_ssl_multi_i686-freetz.tar.xz";
+_tc_info="\n
+!!! tpl_type_name Toolchain !!!\n
+\n
+FRITZ!Box 6430 6490 6590 SSL multi\n
+\n";
+_tc_infolines="5";

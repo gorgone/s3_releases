@@ -1,0 +1,20 @@
+_toolchainname="fritz3272_7272_7330_7330SL_7390_ssl_multi_mips-freetz";
+default_use="USE_UTF8 USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="";
+_description="FRITZ!Box 3272 7272 7330 7330SL 7390 SSL multi by MasterSaMMy";
+_oscamconfdir_default="/var/media/ftp/addon/oscam";
+_oscamconfdir_custom="";
+_self_build="yes";
+_compiler="mips-linux-uclibc-";
+_sysroot="usr";
+_libsearchdir="/usr/lib";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1mcml0ejMyNzJfNzI3Ml83MzMwXzczMzBTTF83MzkwX3NzbF9tdWx0aV9taXBzLWZyZWV0ei50YXIueHoK";
+_md5sum="14f61a348fa57d68edafa8dc12e34d29  Toolchain-fritz3272_7272_7330_7330SL_7390_ssl_multi_mips-freetz.tar.xz";
+_tc_info="\n
+!!! tpl_type_name Toolchain !!!\n
+\n
+FRITZ!Box 3272 7272 7330 7330SL 7390 SSL multi\n
+\n";
+_tc_infolines="5";

@@ -1,0 +1,20 @@
+_toolchainname="fritz3490_5490_5491_7430_7490_ssl_multi_mips-freetz";
+default_use="USE_UTF8 USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="-Wl,-dynamic-linker,/usr/lib/freetz/ld-uClibc.so.0";
+_description="FRITZ!Box 3490 5490 5491 7430 7490 SSL multi by MasterSaMMy";
+_oscamconfdir_default="/var/media/ftp/addon/oscam";
+_oscamconfdir_custom="";
+_self_build="yes";
+_compiler="mips-linux-uclibc-";
+_sysroot="usr";
+_libsearchdir="/usr/lib";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1mcml0ejM0OTBfNTQ5MF81NDkxXzc0MzBfNzQ5MF9zc2xfbXVsdGlfbWlwcy1mcmVldHoudGFyLnh6Cg==";
+_md5sum="53daaa04dadb2e6edc07473b3bfcf00c  Toolchain-fritz3490_5490_5491_7430_7490_ssl_multi_mips-freetz.tar.xz";
+_tc_info="\n
+!!! tpl_type_name Toolchain !!!\n
+\n
+FRITZ!Box 3490 5490 5491 7430 7490 SSL multi\n
+\n";
+_tc_infolines="5";
