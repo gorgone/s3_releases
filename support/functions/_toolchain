@@ -448,13 +448,20 @@ _libc_version(){
 		libcfile="ldd"
 		verstr="$(ldd --version | head -n1 | awk '{printf $3 "-" $5}')"; verstr="${verstr,,}"
 	else
-		libcfile="$(readlink $(find . -name "libc.so.?") 2>/dev/null | head -n1)"
+		libcfile="$(find . -name "libc.so.?" -o -name "libc-*.so" -o -name "libuClibc-*.so" 2>/dev/null | head -n1)"
+		if [ -L "$libcfile" ] && [ -e "$libcfile" ]
+		then
+			libcfile="$(readlink "$libcfile")"
+		else
+			libcfile="$(basename "$libcfile")"
+		fi
 		libcname=$(echo $libcfile | sed 's/\.so$//')
 		
 		# glibc
-		if [ "$libcname" != "${libcname#libc-}" ]
+		verstr="$(strings "$(find . -name "$libcfile" | head -n1)" 2>/dev/null | grep -Po '^GLIBC_(\d+\.)+\d+' | sort -Vr | head -n1)"
+		if [ -n "$verstr" ]
 		then
-			verstr="g$libcname"
+			verstr="${verstr,,}"; verstr="${verstr//_/-}"
 
 		# uclibc
 		elif [ "$libcname" != "${libcname#libuClibc-}" ]
