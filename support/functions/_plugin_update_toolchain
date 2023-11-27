@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #simplebuild_plugin tcupdate
-pversion="0.24.2";
+pversion="0.24.3";
 pname="s3.TUP";
 pdesc="Plugin $pname v$pversion";
 tc_url="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLw==";
@@ -210,11 +210,10 @@ _integrate_libs(){
 		tc_libs=$(_get_toolchain_libs "$pkgconfigdir"); #semicolon separeted "pkgname|version|key|version|compare|libname"
 
 		#LIBRARY UPDATE MENU
-		unset MENU_OPTIONS;COUNT=0;unset libs;unset libversioncurrent;unset libversioncompare;
+		unset MENU_OPTIONS;COUNT=0;unset libs;unset libversioncurrent;unset libversioncompare;unset txthint;
 		for libkey in "${LIBS[@]}"
 		do
 			[ "${!libkey}" == "0" ] && continue;
-			#libkey=$libkey;
 			libbeta="$libkey"_beta; [ "$LIBS_LIST_BETA" == "0" ] && [ "${!libbeta}" == "1" ] && continue; #skip beta libraries in list
 			libname="$libkey"_name;libname="${!libname}";
 			libversion="$libkey"_version;libversion="${!libversion}";
@@ -251,7 +250,7 @@ _integrate_libs(){
 			[ "$libcheckfile" == "$libselectedflag" ] && libselected="off";
 			libselectedflag="$libcheckfile";
 
-			MENU_OPTIONS+=("$libkey"     "${libdescfmt}${libdesc}\Zn$(printf '%*s' $((24-${#libdesc})))${libtxtfmt}$([ $libversioncurrent ] && echo $libversioncompare)	$(echo $libversioncurrent | sed -e 's/^$/ ---/g')\Zn"     "$(echo $libselected)"     "$([ $libname ] && echo "${libdesc}: ${liburl}")");counter;
+			MENU_OPTIONS+=("$libkey"     "${libdescfmt}${libdesc}\Zn$(printf '%*s' $((26-${#libdesc})))${libtxtfmt}$([ $libversioncurrent ] && echo $libversioncompare)	$(echo $libversioncurrent | sed -e 's/^$/ ---/g')\Zn"     "$(echo $libselected)"     "$([ $libname ] && echo "${libdesc}: ${liburl}")");counter;
 
 			#     0 key     1 desc     2 version     3 checkversion     4 checkfile 5 current version    6 url      7 tasks array
 			lib=("$libkey" "$libname" "$libversion" "$libversioncheck" "$libcheck" "$libversioncurrent" "$liburl" "($(printf " %q" "${libtasks[@]}"))");
@@ -989,29 +988,33 @@ _get_toolchain_libs(){
 	#looking for existing libraries
 	for pkg in *.pc
 	do
-		[ -f "$pkg" ] && content=$(cat "$pkg") && name=$(echo "$content" | grep 'Name:' | sed -e "s/Name: //g") && version=$(echo "$content" | grep 'Version:' | sed -e "s/Version: //g")
-
+		[ -f "$pkg" ] && content=$(cat "$pkg") && name=$(echo "$content" | grep 'Name:' | sed -e "s/Name: //g") && version=$(echo "$content" | grep 'Version:' | sed -e "s/Version: //g"); version="${version//(/ }"; version="${version//)/ }";version="${version//,/ }"
 		if [ ! -z "$pkg" -a ! -z "$name" -a ! -z "$version" ];then
-			#try match with library from config
-			for key in "${LIBS[@]}"
+			#test each version (multilib scenario)
+			for ver in $version
 			do
-				[ "${!key}" == "0" ] && continue;
-				libcheck="$key"_check;libcheck="${!libcheck}";
-				libchecklib="$key"_checklib;libchecklib="${!libchecklib}";
-				libcheckcc="$key"_checkcc;libcheckcc="${!libcheckcc}";
-				libversion="$key"_version;libversion="${!libversion}";
-				libversioncompare=$(_compare_version $libversion $version);
-				if [[ "$pkg $version" =~ ^${libcheck}.* ]];then #regex match, don't quote the right side
-					if [ -n "$libchecklib" -a -f "$pkgconfigdir/../$libchecklib" -o -z "$libchecklib" ];then #check existance of special libs
-						if [ -n "$libcheckcc" ] && _check_compiler_capability "$libcheckcc" || [ -z "$libcheckcc" ];then #check compiler capabilities
-							libs+="$pkg\|$version\|$key\|$libversion\|$libversioncompare\|$name;";
-							break;
+				#try match with library from config
+				for key in "${LIBS[@]}"
+				do
+					[ "${!key}" == "0" ] && continue;
+					libcheck="$key"_check;libcheck="${!libcheck}";
+					libchecklib="$key"_checklib;libchecklib="${!libchecklib}";
+					libcheckcc="$key"_checkcc;libcheckcc="${!libcheckcc}";
+					libversion="$key"_version;libversion="${!libversion}";
+					libversioncompare=$(_compare_version $libversion $ver);
+				
+					if [[ "$pkg $ver" =~ ^${libcheck}.* ]];then #regex match, don't quote the right side
+						if [ -n "$libchecklib" -a -f "$pkgconfigdir/../$libchecklib" -o -z "$libchecklib" ];then #check existance of special libs
+							if [ -n "$libcheckcc" ] && _check_compiler_capability "$libcheckcc" || [ -z "$libcheckcc" ];then #check compiler capabilities
+								libs+="$pkg\|$ver\|$key\|$libversion\|$libversioncompare\|$name;";
+								break;
+							fi;
 						fi;
 					fi;
-				fi;
+					
+				done;
 			done;
 		fi;
-
 	done;
 
 	echo "${libs%?}" | xargs;
