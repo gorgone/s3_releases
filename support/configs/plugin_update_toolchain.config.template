@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="51";
+S3TUP_CONFIG_VERSION="53";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -68,6 +68,7 @@ ANDK_SETUP_tasks+=('chmod -R 755 "@ANDKSOURCE@";'); # setup command3
 LIBS=(SSL_320 SSL_310 SSL_300 SSL_111 SSL_110 SSL_102 SSL_102B SSL_100 SSL_098 LIB_CURL LIB_USB LIB_USBB LIB_USB0 LIB_PCSC LIB_PCSCB LIB_CCID LIB_ZLIB); # List of ordered libraries. Only libraries in this list are available
 LIBS_LIST_BETA="0"; # In(Ex)clude libraries defined as beta
 LIBS_AUTO_INTEGRATE="1"; # Automatically reintegrate libraries when rebuilding toolchains
+LIBS_STATIC_BUILD="0"; #Build static instead of dynamic libraries
 
 # OpenSSL 3.2.x
 SSL_320="1";
@@ -84,7 +85,7 @@ SSL_320_tasks+=('export LDFLAGS="@LDFLAGS@ -latomic";');
 SSL_320_tasks+=('[ "@TYPE@" == "android-ndk" ] && export CC=gcc || export CC=@CC@;');
 SSL_320_tasks+=('[ "@TYPE@" == "android-ndk" ] && export RANLIB=ranlib || export RANLIB=@RANLIB@;');
 SSL_320_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
-SSL_320_tasks+=('FLAGS="linux-generic32 shared no-tests";');
+SSL_320_tasks+=('[ "$LIBS_STATIC_BUILD" == "0" ] && FLAGS="linux-generic32 shared no-tests" || FLAGS="linux-generic32 -static no-shared no-tests";');
 SSL_320_tasks+=('[[ "@CC@" =~ "uclibc"|"musl" ]] && FLAGS+=" -DOPENSSL_NO_ASYNC no-threads no-tests";');
 SSL_320_tasks+=('[[ "@CC@" =~ "atom" ]] && FLAGS+=" no-threads no-tests";');
 SSL_320_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="@SSL_TARGET@ --api=0.9.8 -D__ANDROID_API__=@API@ no-shared no-afalgeng no-aria no-asan no-asm no-async no-autoalginit no-autoerrinit no-autoload-config no-bf no-blake2 no-camellia no-capieng no-cast no-chacha no-cmac no-cms no-comp no-crypto-mdebug no-ct no-devcryptoeng no-dgram no-dh no-dsa no-dso no-dynamic-engine no-ec no-ec2m no-ecdh no-ecdsa no-ec_nistp_64_gcc_128 no-egd no-engine no-err no-external-tests no-filenames no-fuzz-libfuzzer no-fuzz-afl no-gost no-idea no-makedepend no-md2 no-mdc2 no-md4 no-multiblock no-nextprotoneg no-ocb no-ocsp no-pic no-poly1305 no-posix-io no-psk no-rc2 no-rc4 no-rc5 no-rdrand no-rfc3779 no-rmd160 no-scrypt no-sctp no-seed no-siphash no-sm2 no-sm3 no-sm4 no-srp no-srtp no-sse2 no-ssl-trace no-tests no-threads no-ts no-ubsan no-ui-console no-unit-test no-whirlpool no-weak-ssl-ciphers no-zlib no-zlib-dynamic no-msan no-dtls no-dtls1 no-dtls1-method no-dtls1_2 no-dtls1_2-method";');
@@ -108,7 +109,7 @@ SSL_310_tasks+=('export LDFLAGS="@LDFLAGS@ -latomic";');
 SSL_310_tasks+=('[ "@TYPE@" == "android-ndk" ] && export CC=gcc || export CC=@CC@;');
 SSL_310_tasks+=('[ "@TYPE@" == "android-ndk" ] && export RANLIB=ranlib || export RANLIB=@RANLIB@;');
 SSL_310_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
-SSL_310_tasks+=('FLAGS="linux-generic32 shared no-tests";');
+SSL_310_tasks+=('[ "$LIBS_STATIC_BUILD" == "0" ] && FLAGS="linux-generic32 shared no-tests" || FLAGS="linux-generic32 -static no-shared no-tests";');
 SSL_310_tasks+=('[[ "@CC@" =~ "uclibc"|"musl" ]] && FLAGS+=" -DOPENSSL_NO_ASYNC no-threads no-tests";');
 SSL_310_tasks+=('[[ "@CC@" =~ "atom" ]] && FLAGS+=" no-threads no-tests";');
 SSL_310_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="@SSL_TARGET@ --api=0.9.8 -D__ANDROID_API__=@API@ no-shared no-afalgeng no-aria no-asan no-asm no-async no-autoalginit no-autoerrinit no-autoload-config no-bf no-blake2 no-camellia no-capieng no-cast no-chacha no-cmac no-cms no-comp no-crypto-mdebug no-ct no-devcryptoeng no-dgram no-dh no-dsa no-dso no-dynamic-engine no-ec no-ec2m no-ecdh no-ecdsa no-ec_nistp_64_gcc_128 no-egd no-engine no-err no-external-tests no-filenames no-fuzz-libfuzzer no-fuzz-afl no-gost no-idea no-makedepend no-md2 no-mdc2 no-md4 no-multiblock no-nextprotoneg no-ocb no-ocsp no-pic no-poly1305 no-posix-io no-psk no-rc2 no-rc4 no-rc5 no-rdrand no-rfc3779 no-rmd160 no-scrypt no-sctp no-seed no-siphash no-sm2 no-sm3 no-sm4 no-srp no-srtp no-sse2 no-ssl-trace no-tests no-threads no-ts no-ubsan no-ui-console no-unit-test no-whirlpool no-weak-ssl-ciphers no-zlib no-zlib-dynamic no-msan no-dtls no-dtls1 no-dtls1-method no-dtls1_2 no-dtls1_2-method";');
@@ -132,7 +133,7 @@ SSL_300_tasks+=('export LDFLAGS="@LDFLAGS@ -latomic";');
 SSL_300_tasks+=('[ "@TYPE@" == "android-ndk" ] && export CC=gcc || export CC=@CC@;');
 SSL_300_tasks+=('[ "@TYPE@" == "android-ndk" ] && export RANLIB=ranlib || export RANLIB=@RANLIB@;');
 SSL_300_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
-SSL_300_tasks+=('FLAGS="linux-generic32 shared no-tests";');
+SSL_300_tasks+=('[ "$LIBS_STATIC_BUILD" == "0" ] && FLAGS="linux-generic32 shared no-tests" || FLAGS="linux-generic32 -static no-shared no-tests";');
 SSL_300_tasks+=('[[ "@CC@" =~ "uclibc"|"musl" ]] && FLAGS+=" -DOPENSSL_NO_ASYNC no-threads no-tests";');
 SSL_300_tasks+=('[[ "@CC@" =~ "atom" ]] && FLAGS+=" no-threads no-tests";');
 SSL_300_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="@SSL_TARGET@ --api=0.9.8 -D__ANDROID_API__=@API@ no-shared no-afalgeng no-aria no-asan no-asm no-async no-autoalginit no-autoerrinit no-autoload-config no-bf no-blake2 no-camellia no-capieng no-cast no-chacha no-cmac no-cms no-comp no-crypto-mdebug no-ct no-devcryptoeng no-dgram no-dh no-dsa no-dso no-dynamic-engine no-ec no-ec2m no-ecdh no-ecdsa no-ec_nistp_64_gcc_128 no-egd no-engine no-err no-external-tests no-filenames no-fuzz-libfuzzer no-fuzz-afl no-gost no-idea no-makedepend no-md2 no-mdc2 no-md4 no-multiblock no-nextprotoneg no-ocb no-ocsp no-pic no-poly1305 no-posix-io no-psk no-rc2 no-rc4 no-rc5 no-rdrand no-rfc3779 no-rmd160 no-scrypt no-sctp no-seed no-siphash no-sm2 no-sm3 no-sm4 no-srp no-srtp no-sse2 no-ssl-trace no-tests no-threads no-ts no-ubsan no-ui-console no-unit-test no-whirlpool no-weak-ssl-ciphers no-zlib no-zlib-dynamic no-msan no-dtls no-dtls1 no-dtls1-method no-dtls1_2 no-dtls1_2-method";');
@@ -155,7 +156,7 @@ SSL_111_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 SSL_111_tasks+=('[ "@TYPE@" == "android-ndk" ] && export CC=gcc || export CC=@CC@;');
 SSL_111_tasks+=('[ "@TYPE@" == "android-ndk" ] && export RANLIB=ranlib || export RANLIB=@RANLIB@;');
 SSL_111_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
-SSL_111_tasks+=('FLAGS="linux-generic32 shared";');
+SSL_111_tasks+=('[ "$LIBS_STATIC_BUILD" == "0" ] && FLAGS="linux-generic32 shared" || FLAGS="linux-generic32 -static no-shared";');
 SSL_111_tasks+=('[[ "@CC@" =~ "uclibc"|"musl" ]] && FLAGS+=" -DOPENSSL_NO_ASYNC";');
 SSL_111_tasks+=('[[ "@CC@" =~ "atom" ]] && FLAGS+=" no-threads";');
 SSL_111_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="@SSL_TARGET@ --api=0.9.8 -D__ANDROID_API__=@API@ no-shared no-afalgeng no-aria no-asan no-asm no-async no-autoalginit no-autoerrinit no-autoload-config no-bf no-blake2 no-camellia no-capieng no-cast no-chacha no-cmac no-cms no-comp no-crypto-mdebug no-ct no-devcryptoeng no-dgram no-dh no-dsa no-dso no-dynamic-engine no-ec no-ec2m no-ecdh no-ecdsa no-ec_nistp_64_gcc_128 no-egd no-engine no-err no-external-tests no-filenames no-fuzz-libfuzzer no-fuzz-afl no-gost no-idea no-makedepend no-md2 no-mdc2 no-md4 no-multiblock no-nextprotoneg no-ocb no-ocsp no-pic no-poly1305 no-posix-io no-psk no-rc2 no-rc4 no-rc5 no-rdrand no-rfc3779 no-rmd160 no-scrypt no-sctp no-seed no-siphash no-sm2 no-sm3 no-sm4 no-srp no-srtp no-sse2 no-ssl-trace no-tests no-threads no-ts no-ubsan no-ui-console no-unit-test no-whirlpool no-weak-ssl-ciphers no-zlib no-zlib-dynamic no-msan no-dtls no-dtls1 no-dtls1-method no-dtls1_2 no-dtls1_2-method";');
@@ -176,7 +177,7 @@ SSL_110_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_110_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 SSL_110_tasks+=('export CC=@CC@;');
 SSL_110_tasks+=('export RANLIB=@RANLIB@;');
-SSL_110_tasks+=('FLAGS="linux-generic32 shared";');
+SSL_110_tasks+=('[ "$LIBS_STATIC_BUILD" == "0" ] && FLAGS="linux-generic32 shared" || FLAGS="linux-generic32 -static no-shared";');
 SSL_110_tasks+=('[[ "@CC@" =~ "uclibc"|"musl" ]] && FLAGS+=" -DOPENSSL_NO_ASYNC";');
 SSL_110_tasks+=('[[ "@CC@" =~ "atom" ]] && FLAGS+=" no-threads";');
 SSL_110_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
@@ -197,7 +198,7 @@ SSL_102_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_102_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 SSL_102_tasks+=('export CC=@CC@;');
 SSL_102_tasks+=('export RANLIB=@RANLIB@;');
-SSL_102_tasks+=('FLAGS="linux-generic32 shared";');
+SSL_102_tasks+=('[ "$LIBS_STATIC_BUILD" == "0" ] && FLAGS="linux-generic32 shared" || FLAGS="linux-generic32 -static no-shared";');
 SSL_102_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_102_tasks+=('make -j@CPUS@;');
 SSL_102_tasks+=('make install SHLIB_VERSION_NUMBER=1.0.2 SHLIB_MINOR=0.2;');
@@ -218,7 +219,7 @@ SSL_102B_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_102B_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 SSL_102B_tasks+=('export CC=@CC@;');
 SSL_102B_tasks+=('export RANLIB=@RANLIB@;');
-SSL_102B_tasks+=('FLAGS="linux-generic32 shared";');
+SSL_102B_tasks+=('[ "$LIBS_STATIC_BUILD" == "0" ] && FLAGS="linux-generic32 shared" || FLAGS="linux-generic32 -static no-shared";');
 SSL_102B_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_102B_tasks+=('make -j@CPUS@;');
 SSL_102B_tasks+=('make install;');
@@ -236,7 +237,7 @@ SSL_100_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_100_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 SSL_100_tasks+=('export CC=@CC@;');
 SSL_100_tasks+=('export RANLIB=@RANLIB@;');
-SSL_100_tasks+=('FLAGS="linux-generic32 shared";');
+SSL_100_tasks+=('[ "$LIBS_STATIC_BUILD" == "0" ] && FLAGS="linux-generic32 shared" || FLAGS="linux-generic32 -static no-shared";');
 SSL_100_tasks+=('[[ "@CC@" =~ "musl" ]] && echo "Apply the musl libc patch to avoid OpenSSL build errors due to missing termio.h..." && curl --silent "https://raw.githubusercontent.com/beagleboard/buildroot/master/package/openssl/openssl-004-musl-termios.patch" | patch -p1;');
 SSL_100_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_100_tasks+=('make -j@CPUS@;');
@@ -255,7 +256,7 @@ SSL_098_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 SSL_098_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 SSL_098_tasks+=('export CC=@CC@;');
 SSL_098_tasks+=('export RANLIB=@RANLIB@;');
-SSL_098_tasks+=('FLAGS="linux-generic32 shared";');
+SSL_098_tasks+=('[ "$LIBS_STATIC_BUILD" == "0" ] && FLAGS="linux-generic32 shared" || FLAGS="linux-generic32 -static no-shared";');
 SSL_098_tasks+=('[[ "@CC@" =~ "musl" ]] && echo "Apply the musl libc patch to avoid OpenSSL build errors due to missing termio.h..." && curl --silent "https://raw.githubusercontent.com/beagleboard/buildroot/master/package/openssl/openssl-004-musl-termios.patch" | patch -p1;');
 SSL_098_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_098_tasks+=('make -j@CPUS@;');
@@ -275,7 +276,7 @@ LIB_CURL_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 LIB_CURL_tasks+=('export CC=@CC@;');
 LIB_CURL_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
 LIB_CURL_tasks+=('[ "@TYPE@" == "android-ndk" ] && cp -f "android/config.h" "./config.h";');
-LIB_CURL_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="--with-openssl --disable-shared" || FLAGS="--with-openssl";');
+LIB_CURL_tasks+=('[ "@TYPE@" == "android-ndk" -o "$LIBS_STATIC_BUILD" == "1" ] && FLAGS="--with-openssl --disable-shared" || FLAGS="--with-openssl";');
 LIB_CURL_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS;');
 LIB_CURL_tasks+=('make -j@CPUS@;');
 LIB_CURL_tasks+=('make install;');
@@ -356,7 +357,8 @@ LIB_PCSC_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 LIB_PCSC_tasks+=('export CC=@CC@;');
 LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
 LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" ] && LIBUSB_LIBS="@PREFIX@/lib/@HOST@/@API@ -lusb-1.0" || LIBUSB_LIBS="@PREFIX@/lib -lusb-1.0 -lrt";');
-LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="--enable-static --disable-shared --disable-libudev LIBS=-llog" || FLAGS="--disable-libudev";');
+LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" ] && LOG="LIBS=-llog" || LOG="";');
+LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" -o "$LIBS_STATIC_BUILD" == "1" ] && FLAGS="--enable-static --disable-shared --disable-libudev $LOG" || FLAGS="--disable-libudev";');
 LIB_PCSC_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS --disable-polkit --disable-libsystemd --with-systemdsystemunitdir=@PREFIX@/lib/systemd/system LIBUSB_LIBS="-L${LIBUSB_LIBS}" LIBUSB_CFLAGS="-I@PREFIX@/include/libusb-1.0";');
 LIB_PCSC_tasks+=('make -j@CPUS@;');
 LIB_PCSC_tasks+=('make install;');
@@ -378,7 +380,8 @@ LIB_PCSCB_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 LIB_PCSCB_tasks+=('export CC=@CC@;');
 LIB_PCSCB_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
 LIB_PCSCB_tasks+=('[ "@TYPE@" == "android-ndk" ] && LIBUSB_LIBS="@PREFIX@/lib/@HOST@/@API@ -lusb-1.0" || LIBUSB_LIBS="@PREFIX@/lib -lusb-1.0 -lrt";');
-LIB_PCSCB_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="--enable-static --disable-shared --disable-libudev LIBS=-llog" || FLAGS="--disable-libudev";');
+LIB_PCSCB_tasks+=('[ "@TYPE@" == "android-ndk" ] && LOG="LIBS=-llog" || LOG="";');
+LIB_PCSCB_tasks+=('[ "@TYPE@" == "android-ndk" -o "$LIBS_STATIC_BUILD" == "1" ] && FLAGS="--enable-static --disable-shared --disable-libudev $LOG" || FLAGS="--disable-libudev";');
 LIB_PCSCB_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS --disable-libsystemd --with-systemdsystemunitdir=@PREFIX@/lib/systemd/system LIBUSB_LIBS="-L${LIBUSB_LIBS}" LIBUSB_CFLAGS="-I@PREFIX@/include/libusb-1.0";');
 LIB_PCSCB_tasks+=('make -j@CPUS@;');
 LIB_PCSCB_tasks+=('make install;');
@@ -401,7 +404,7 @@ LIB_CCID_tasks+=('export CC=@CC@;');
 LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
 LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" ] && export LDFLAGS="-Wl,--exclude-libs=libclang_rt.builtins-arm-android.a";'); # https://android.googlesource.com/platform/bionic.git/+/master/libdl/Android.bp#62
 LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" ] && LIBUSB_LIBS="@PREFIX@/lib/@HOST@/@API@ -lusb-1.0" || LIBUSB_LIBS="@PREFIX@/lib -lusb-1.0 -lrt";');
-LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="--enable-static" || FLAGS="";');
+LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" -o "$LIBS_STATIC_BUILD" == "1" ] && FLAGS="--enable-static" || FLAGS="";');
 LIB_CCID_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS --enable-twinserial --enable-usbdropdir="@PREFIX@/..$(pkg-config libpcsclite --variable=usbdropdir)" --enable-serialconfdir="@PREFIX@$(pkg-config libpcsclite --variable=serialconfdir)" LIBUSB_LIBS="-L${LIBUSB_LIBS}" LIBUSB_CFLAGS="-I@PREFIX@/include/libusb-1.0";');
 LIB_CCID_tasks+=('make -j@CPUS@;');
 LIB_CCID_tasks+=('make install;');
@@ -424,7 +427,8 @@ LIB_ZLIB_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@" || export CFLAGS
 LIB_ZLIB_tasks+=('export CC=@CC@;');
 LIB_ZLIB_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
 LIB_ZLIB_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/@HOST@/@API@/" -maxdepth 1 -name "crt*.o" -execdir ln -frs "@PREFIX@/lib/@HOST@/@API@/{}" "@PREFIX@/lib/@HOST@/{}" \;;');
-LIB_ZLIB_tasks+=('./configure --prefix=@PREFIX@;');
+LIB_ZLIB_tasks+=('[ "$LIBS_STATIC_BUILD" == "0" ] && FLAGS="--shared" || FLAGS="--static";');
+LIB_ZLIB_tasks+=('./configure --prefix=@PREFIX@ $FLAGS;');
 LIB_ZLIB_tasks+=('make -j@CPUS@;');
 LIB_ZLIB_tasks+=('make install;');
 LIB_ZLIB_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 -name "libz.*" -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
