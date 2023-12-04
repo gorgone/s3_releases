@@ -1338,18 +1338,6 @@ _check_config(){
 		return 1;
 	fi;
 };
-_check_compiler_capability(){
-	case "$1" in
-		"c11") #checking if $CC supports -std=c11
-			CFLAGS="-std=c11";
-			echo "_Thread_local int x; int main(){x = 42; ; return 0;}" | "$compilername" -x c -o "/tmp/cc_cap_c11.chk" - >/dev/null 2>&1;
-			ret=$?;
-			[ -f "/tmp/cc_cap_c11.chk" ] && rm -f "/tmp/cc_cap_c11.chk";
-			unset CFLAGS;;
-		*)  ret=1;
-	esac;
-	return $ret;
-};
 _change_config(){
 	nok=1;
 	[[ ! $2 =~ "(" ]] && [[ ! $2 =~ ")" ]] && qte="\"" || qte=""; #no quotes if value contains parentheses

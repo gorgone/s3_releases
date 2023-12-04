@@ -220,6 +220,7 @@ _toolchain_check(){
 		printf "$fmtg" "GCC Version :" "$version"
 		printf "$fmtg" "GCC Binary  :" "$compilerpath"
 		printf "$fmtg" "GCC Sysroot :" "$sysroot"
+		printf "$fmtg" "C11 Support :" "$(! _check_compiler_capability 'c11' && printf 'No' || printf 'Yes')"
 		[ -z "$sysroot" ] && sysroot="$r_l$txt_too_old\n"
 	fi
 
@@ -505,4 +506,17 @@ _linux_version(){
 	sub=$(( $base - pp ))
 	
 	printf "$vcode;$major.$patch.$sub"
+}
+
+_check_compiler_capability(){
+	case "$1" in
+		"c11") #checking if $CC supports -std=c11
+			CFLAGS="-std=c11";
+			echo "_Thread_local int x; int main(){x = 42; ; return 0;}" | "$(realpath -s $compilername)" -x c -o "/tmp/cc_cap_c11.chk" - >/dev/null 2>&1;
+			ret=$?;
+			[ -f "/tmp/cc_cap_c11.chk" ] && rm -f "/tmp/cc_cap_c11.chk";
+			unset CFLAGS;;
+		*)  ret=1;
+	esac;
+	return $ret
 }
