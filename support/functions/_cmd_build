@@ -18,6 +18,7 @@ _cmd_build(){
 
 #set build defaults
 	CROSS="$tcdir/$_toolchainname/bin/$_compiler"
+	SYSROOT="$tcdir/$_toolchainname/$_sysroot"
 	[ "$_stagingdir" == "1" ] && export STAGING_DIR="$tcdir/$_toolchainname"
 	[ "$_androidndkdir" == "1" ] && export ANDROID_NDK="$tcdir/$_toolchainname"
 	[ -f "$configdir/compiler_option" ] && co=$(cat "$configdir/compiler_option") || co="-O2"
@@ -83,6 +84,7 @@ _cmd_build(){
 	_stapi=;
 	_stapi5=;
 	_do_patch="0"
+	_make="make"
 	for e in "${!USE_vars[@]}"
 	do
 		for e1 in $_block
@@ -112,6 +114,9 @@ _cmd_build(){
 					s3cfg_vars[TARGZ]=1;;	# overwrite global
 			"USE_COMPRESS=1")
 					s3cfg_vars[COMPRESS]=1;;# overwrite global
+			"USE_STATIC=1")
+					_make="make static"
+					s3cfg_vars[STATIC]=1;;# overwrite global
 			"USE_STAPI=1")
 					_stapi="-stapi"
 					[ -z "$stapi_lib_custom" ] && STAPI_LIB="STAPI_LIB=$sdir/stapi/liboscam_stapi.a" || STAPI_LIB="STAPI_LIB=$sdir/stapi/${stapi_lib_custom}"
@@ -167,6 +172,20 @@ printf "$y_l\n |       set : ${cdtag}$w_l"
 #IF SVN is Patched
 	[ -f "$workdir/SVN-IS-PATCHED" ] && printf $y_l"\n | ISPATCHED :$P YES"
 
+#static build
+	if [ "${s3cfg_vars[STATIC]}" == "1" ]
+	then
+		printf "$y_l\n | BUILDTYPE : static"
+		static="-static"
+		[ "${USE_vars[USE_LIBCRYPTO]}" == "USE_LIBCRYPTO=1" ] && LIBCRYPTO_STATIC="LIBCRYPTO_LIB=$(find $SYSROOT -name "libcrypto.a" -type f -print -quit)"
+		[ "${USE_vars[USE_SSL]}" == "USE_SSL=1" ] && SSL_STATIC="SSL_LIB=$(find $SYSROOT -name "libssl.a" -type f -print -quit)"
+		[ "${USE_vars[USE_LIBUSB]}" == "USE_LIBUSB=1" ] && LIBUSB_STATIC="LIBUSB_LIB=$(find $SYSROOT -name "libusb-1.0.a" -type f -print -quit)"
+		[ "${USE_vars[USE_PCSC]}" == "USE_PCSC=1" ] && PCSC_STATIC="PCSC_LIB=$(find $SYSROOT -name "libpcsclite.a" -type f -print -quit)"
+	else
+		printf "$y_l\n | BUILDTYPE : dynamic"
+		static=""
+	fi
+
 #max cpu usage
 	if [ -f "$configdir/max_cpus" ]
 	then
@@ -187,18 +206,19 @@ then
 else
 	_generate_oscam_name "$_toolchainname"
 fi
+	oscam_name="$oscam_name$static"
 	_nl
 	USESTRING=${USE_vars[@]}
 	EXTRA_USE=$extra_use
 	timer_start
-	$codecheck make -j"$cpus" $_verbose \
+	$codecheck $_make -j"$cpus" $_verbose \
 	"CONF_DIR=$CONFDIR" \
 	"OSCAM_BIN=$bdir/$oscam_name" \
 	"CC_OPTS=$co $cc_opts $extra_cc" \
 	"CC_WARN=$cc_warn" \
 	"EXTRA_LDFLAGS=$extra_ld" \
 	$EXTRA_USE \
-	"CROSS=$CROSS" $STAPI_LIB $USESTRING 2>&1 \
+	"CROSS=$CROSS" $STAPI_LIB $USESTRING $LIBCRYPTO_STATIC $SSL_STATIC $LIBUSB_STATIC $PCSC_STATIC 2>&1 \
 	|tee -a "$ldir/$log_name" \
 	|grep --line-buffered -v 'BFD\|^/' \
 	|grep --line-buffered '^CC\|^GEN\|UseFlags\|  CONF_DIR =\|Binary\|LINK\|STRIP\|BUILD\|Addons\|Protocols\|Readers\|CardRdrs\|^/' \

@@ -289,7 +289,7 @@ _oscam_extra_menu(){
 
 	for e in "${!USE_vars[@]}"
 	do
-		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_COMPRESS" ] && [ ! "$e" == "USE_PATCH" ] && [ ! "$e" == "USE_LIBUSB" ]
+		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_COMPRESS" ] && [ ! "$e" == "USE_PATCH" ] && [ ! "$e" == "USE_LIBUSB" ] && [ ! "$e" == "USE_STATIC" ]
 		then
 			if [ "${#USE_vars[$e]}" -gt "4" ]
 			then
@@ -305,7 +305,7 @@ _oscam_extra_menu(){
 
 	for e in "${!USE_vars[@]}"
 	do
-		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_COMPRESS" ] && [ ! "$e" == "USE_PATCH" ] && [ ! "$e" == "USE_LIBUSB" ]
+		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_COMPRESS" ] && [ ! "$e" == "USE_PATCH" ] && [ ! "$e" == "USE_LIBUSB" ] && [ ! "$e" == "USE_STATIC" ]
 		then
 			ok=0
 			for oex in $oextra
@@ -331,15 +331,16 @@ _build_extra_menu(){
 	us=
 	check_smargo
 	unset MENU_OPTIONS
-	for e in USE_COMPRESS USE_TARGZ USE_PATCH
+	for e in USE_COMPRESS USE_TARGZ USE_PATCH USE_STATIC
 	do
 		[ "${#USE_vars[$e]}" -gt "4" ] && MENU_OPTIONS+=( "$e" "$e=1" on ) || MENU_OPTIONS+=( "$e" "$e=1" off )
 	done
-	bextra=$("$gui" "$st_" "$nc_" "$bt_" "$title_" --title "-[ Build EXTRA ]-" "$cl_" " OPTIONS " 10 40 3 ${MENU_OPTIONS[@]})
+	bextra=$("$gui" "$st_" "$nc_" "$bt_" "$title_" --title "-[ Build EXTRA ]-" "$cl_" " OPTIONS " 11 40 3 ${MENU_OPTIONS[@]})
 	[ $? = 255 ] && _build_extra_menu
 	USE_vars[USE_COMPRESS]=
 	USE_vars[USE_PATCH]=
 	USE_vars[USE_TARGZ]=
+	USE_vars[USE_STATIC]=
 	for bex in $bextra
 	do
 		b=$(echo "$bex" | tr -d '"')

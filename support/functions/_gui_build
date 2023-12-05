@@ -17,6 +17,8 @@ _gui_build(){
 	[ -f "$configdir/max_cpus" ] && cpus="$(cat "$configdir/max_cpus")" || cpus="$(CPUS)"
 
 	CROSS="$tcdir/$_toolchainname/bin/$_compiler"
+	SYSROOT="$tcdir/$_toolchainname/$_sysroot"
+	_make="make"
 
 	[ "$_stagingdir" == "1" ] && export STAGING_DIR="$tcdir/$_toolchainname"
 	[ "$_androidndkdir" == "1" ] && export ANDROID_NDK="$tcdir/$_toolchainname"
@@ -50,7 +52,7 @@ _gui_build(){
 	for e in $_us
 	do
 
-		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_COMPRESS" ] && [ ! "$e" == "USE_PATCH" ]
+		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_COMPRESS" ] && [ ! "$e" == "USE_PATCH" ]  && [ ! "$e" == "USE_STATIC" ]
 		then
 			USESTRING_="$e=1 $USESTRING_"
 		fi
@@ -70,12 +72,25 @@ _gui_build(){
 	else
 		_usb=
 	fi
+	
+	if [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" ]
+	then
+		_make="make static"
+		static="-static"
+		[ "${USE_vars[USE_LIBCRYPTO]}" == "USE_LIBCRYPTO=1" ] && LIBCRYPTO_STATIC="LIBCRYPTO_LIB=$(find $SYSROOT -name "libcrypto.a" -type f -print -quit)"
+		[ "${USE_vars[USE_SSL]}" == "USE_SSL=1" ] && SSL_STATIC="SSL_LIB=$(find $SYSROOT -name "libssl.a" -type f -print -quit)"
+		[ "${USE_vars[USE_LIBUSB]}" == "USE_LIBUSB=1" ] && LIBUSB_STATIC="LIBUSB_LIB=$(find $SYSROOT -name "libusb-1.0.a" -type f -print -quit)"
+		[ "${USE_vars[USE_PCSC]}" == "USE_PCSC=1" ] && PCSC_STATIC="PCSC_LIB=$(find $SYSROOT -name "libpcsclite.a" -type f -print -quit)"
+	else
+		static=""
+	fi
 
 	USESTRING_=${USE_vars[@]}
 	EXTRA_USE=$extra_use
 
 #todo add switch for verbose
 	_generate_oscam_name "$_toolchainname"
+	oscam_name="$oscam_name$static"
 	targztmp="$(mktemp)"
 
 	if [ ! "${USE_vars[USE_TARGZ]}" == "USE_TARGZ=1" ]
@@ -88,8 +103,8 @@ _gui_build(){
 	_sz
 	(ologo; _nl
 	timer_start
-	make -j"$cpus" \
-		"CONF_DIR=$_oscamconfdir_default" "OSCAM_BIN=$bdir/$oscam_name" "CC_OPTS=$co $cc_opts $extra_cc" "CC_WARN=$cc_warn" "EXTRA_LDFLAGS=$extra_ld" $EXTRA_USE "CROSS=$CROSS" $stapivar $USESTRING_ 2>&1 \
+	$_make -j"$cpus" \
+		"CONF_DIR=$_oscamconfdir_default" "OSCAM_BIN=$bdir/$oscam_name" "CC_OPTS=$co $cc_opts $extra_cc" "CC_WARN=$cc_warn" "EXTRA_LDFLAGS=$extra_ld" $EXTRA_USE "CROSS=$CROSS" $stapivar $USESTRING_ $LIBCRYPTO_STATIC $SSL_STATIC $LIBUSB_STATIC $PCSC_STATIC 2>&1 \
 		|tee "$ldir/$log_name" \
 		|grep --line-buffered -v 'BFD\|^/' \
 		|grep --line-buffered '^CC\|^GEN\|UseFlags\|  CONF_DIR =\|Binary\|LINK\|STRIP\|BUILD\|Addons\|Protocols\|Readers\|CardRdrs\|^/' \
