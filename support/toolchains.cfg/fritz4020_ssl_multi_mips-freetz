@@ -6,14 +6,13 @@ extra_ld="";
 _description="FRITZ!Box 4020 SSL Multi by MasterSaMMy";
 _oscamconfdir_default="/var/media/ftp/addon/oscam";
 _oscamconfdir_custom="";
-_self_build="yes";
 _compiler="mips-linux-uclibc-";
 _sysroot="usr";
 _libsearchdir="/usr/lib";
 _toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1mcml0ejQwMjBfc3NsX211bHRpX21pcHMtZnJlZXR6LnRhci54ego=";
-_md5sum="524fee29abbe32190eac1bec978ce1d8  Toolchain-fritz4020_ssl_multi_mips-freetz.tar.xz";
+_md5sum="cedd819ad5c37b5cc4325d8811de2269  Toolchain-fritz4020_ssl_multi_mips-freetz.tar.xz";
 _tc_info="\n
-!!! tpl_type_name Toolchain !!!\n
+!!! freetz toolchains pack6 Toolchain !!!\n
 \n
 FRITZ!Box 4020 SSL Multi\n
 \n";

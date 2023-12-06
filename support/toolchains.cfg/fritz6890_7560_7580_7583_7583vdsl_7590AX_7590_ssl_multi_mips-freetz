@@ -6,14 +6,13 @@ extra_ld="-Wl,-dynamic-linker,/usr/lib/freetz/ld-uClibc.so.0";
 _description="FRITZ!Box 6890 7560 7580 7583 7583vdsl 7590AX 7590 SSL multi by MasterSaMMy";
 _oscamconfdir_default="/var/media/ftp/addon/oscam";
 _oscamconfdir_custom="";
-_self_build="yes";
 _compiler="mips-linux-uclibc-";
 _sysroot="usr";
 _libsearchdir="/usr/lib";
 _toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1mcml0ejY4OTBfNzU2MF83NTgwXzc1ODNfNzU4M3Zkc2xfNzU5MEFYXzc1OTBfc3NsX211bHRpX21pcHMtZnJlZXR6LnRhci54ego=";
-_md5sum="8b1403e7b9c55918e8b10cbac58f31a6  Toolchain-fritz6890_7560_7580_7583_7583vdsl_7590AX_7590_ssl_multi_mips-freetz.tar.xz";
+_md5sum="821bfeaf65e106aed6481051b27db6af  Toolchain-fritz6890_7560_7580_7583_7583vdsl_7590AX_7590_ssl_multi_mips-freetz.tar.xz";
 _tc_info="\n
-!!! tpl_type_name Toolchain !!!\n
+!!! freetz toolchains pack6 Toolchain !!!\n
 \n
 FRITZ!Box 6890 7560 7580 7583 7583vdsl 7590AX 7590 SSL multi\n
 \n";
