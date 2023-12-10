@@ -191,10 +191,10 @@ _toolchain_check(){
 	clear
 	printf "$w_l"
 	s3logo
-	headervars=( crypto.h pcsclite.h libusb.h pthread.h )
+	headervars=( crypto.h pcsclite.h libusb.h pthread.h zlib.h )
 	[ -f "$tccfgdir/$1" ] && source "$tccfgdir/$1"
 	
-	fmtg="  ${w_l}%-16s ${y_l}%-20s ${g_l}%-8s $p_l%-20s %s\n";
+	fmtg="  ${w_l}%-16s ${y_l}%-20s ${g_l}%-8s $p_l%-20s %-10s ${g_l}%s\n";
 	fmtb="  ${w_l}%-16s ${y_l}%-20s ${r_l}%s\n";
 
 	if [ -d "$tcdir/$1/bin" ]
@@ -262,9 +262,12 @@ _toolchain_check(){
 
 			for f in *.pc
 			do
+				unset type;ff="${f/zlib/"libz"}";ff="${ff/openssl/"libcrypto"}"
 				content=$(cat "$f" 2>/dev/null) && na=$(echo "$content" | grep 'Name:' | sed -e "s/Name: //g") && ver=$(echo "$content" | grep 'Version:' | sed -e "s/Version: //g")
 				sp1=$(printf '%*s' $((20-${#f})) | tr ' ' ' ') && sp2=$(printf '%*s' $((20-${#na})) | tr ' ' ' ')
-				[ ${#content} -gt 0 ] && printf "$fmtg" "Library Config :" "${f::20}" "$txt_found" "${na::20}" "$ver" || printf "$fmtb" "Library Config :" "${f::20}" "($txt_not_found)"
+				[ -n "$(find "$PWD/../" -name "${ff%.*}.a" -xtype f -print -quit)" ] && type="static"; [ -n "$(find "$PWD/../" \( -name "${ff%.*}.so" -o -name "${ff%.*}.so.*" \) -xtype f -print -quit)" ] && type="dynamic"
+				[ ${#content} -gt 0 ] && printf "$fmtg" "Library Config :" "${f::20}" "$txt_found" "${na::20}" "$ver" "$type" || printf "$fmtb" "Library Config :" "${f::20}" "($txt_not_found)"
+				
 			done
 		done
 	else
