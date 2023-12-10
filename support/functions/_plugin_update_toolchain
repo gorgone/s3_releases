@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #simplebuild_plugin tcupdate
-pversion="0.24.4";
+pversion="0.24.5";
 pname="s3.TUP";
 pdesc="Plugin $pname v$pversion";
 tc_url="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLw==";
@@ -177,7 +177,7 @@ tcupdate(){
 	fi;
 };
 _integrate_libs(){
-	local tc="$1" libkeys="$2" menu_close props i icount;
+	local tc="$1" libkeys="$2" menu_close props i icount err;
 
 	#toolchain native not supported and exists check
 	if ! _check_toolchain "$tc";then
@@ -291,7 +291,7 @@ _integrate_libs(){
 			0) #Start - Build library
 				ts=$(date +%F.%H%M%S);
 				tmpdir="/tmp/lib_source/$ts";
-				icount=$(echo $opts | wc -w);i=0;
+				icount=$(echo $opts | wc -w);i=0;err=0;
 
 				for o in $opts;do
 					unset buildtasks;
@@ -307,12 +307,13 @@ _integrate_libs(){
 							buildtasks+=("$task");
 						done;
 						_build_library "($i/$icount) $tc: ${txt_lib} ${lib[1]} ${lib[2]}" "$(_extract "$(_dl "${lib[6]}" "${lib[1]} ${lib[2]}")" "$tmpdir" 2>/dev/null)" "$logfile" "${buildtasks[@]}";
+						err=$(( $err + $?));
 					done;
 					[ "${#buildtasks[@]}" == "0" ] && echo -e "${r_l}  ${txt_error}:${y_l} ${o} ${w_l}${txt_s3tup_msg_library_not_found}${rs_}";
 					sleep 2;
 				done;
 
-				[ -d "$tmpdir" ] && rm -rf "$tmpdir";;
+				[ -d "$tmpdir" -a $err -eq 0 ] && rm -rf "$tmpdir";;
 			1 | 255) #Exit/Back
 				unset MENU_OPTIONS;
 				menu_close="1";
@@ -692,7 +693,7 @@ _build_library(){
 		_paktc_timer 10;
 		echo -e "${re_}${w_l}";
 	fi;
-
+	return $error_on_build;
 };
 _tpl_editor(){
 	tc="$2";tpl="$tc";unset TASKS;unset configtasks;local i=0;
