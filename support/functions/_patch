@@ -9,16 +9,29 @@ _get_patch(){
 	printf $C
 	ologo
 	printf $WH;
-	[ -f $PATCHNAME ] && printf "$Y $PATCHNAME $txt_found\n $txt_delete $P$PATCHNAME" && rm -f $PATCHNAME
-	printf $W"\n $txt_load $PATCHNAME"
-
-	if [[ `wget -S --spider $PATCHURL  2>&1 | grep 'HTTP/1.1 200 OK'` ]]
+	if [ -f patch.url.template -a ! -f patch.url ]
 	then
-		wget -q -O$PATCHNAME $PATCHURL
-		[ -f $PATCHNAME ] && printf $G" ok$W\n\n"
-	else
-		printf $R"\n\n $PATCHURL\n\n >> $txt_not_found <<$W\n\n"
+		printf "${Y}To load custom patches,\nyou have to rename the file ${P}patch.url.template${Y} to ${G}patch.url${Y}\nand adjust accordingly.${W}\n\n"
+		exit
 	fi
+	[ ! -z "$PATCHCOUNT" ] && loop="$(eval echo "{1..$PATCHCOUNT}")"
+	for c in '' $loop; do
+		DP="PATCHNAME$c"; PATCHNAME=${!DP}
+		DU="PATCHURL$c"; PATCHURL=${!DU}
+		if [ ! -z "$PATCHNAME" -a ! -z "$PATCHURL" ]
+		then
+			[ -f $PATCHNAME ] && printf "$Y $PATCHNAME $txt_found\n $txt_delete $P$PATCHNAME" && rm -f $PATCHNAME
+			printf $W"\n $txt_load $PATCHNAME"
+
+			if [[ `wget -S --spider $PATCHURL  2>&1 | grep 'HTTP/1.1 200 OK'` ]]
+			then
+				wget -q -O$PATCHNAME $PATCHURL
+				[ -f $PATCHNAME ] && printf $G" ok$W\n\n"
+			else
+				printf $R"\n\n $PATCHURL\n\n >> $txt_not_found <<$W\n\n"
+			fi
+		fi
+	done
 }
 
 _streamboard_patch(){
