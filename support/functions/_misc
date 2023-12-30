@@ -44,7 +44,12 @@ get_module_name(){
 	printf "${INTERNAL_MODULES[$1]}"
 }
 gitrevision(){
-	svn info $1 |grep Rev: |cut -d " " -f 4
+	if echo "$1" | grep -qocP '^(https?|git@.*)://\S+'
+	then
+		git ls-remote $1 2>/dev/null | head -1 | awk '{print substr($1, 1, 7)}' || echo 0
+	else
+		git -C $1 rev-parse --short HEAD 2>/dev/null || echo 0
+	fi
 }
 _wait(){
 	printf "$w_l\n"

@@ -8,54 +8,44 @@ update_me(){
 	s3local="$dldir/s3_github"
 	printf "  s3_git CHECK:\n  -------------\n"
 
-	if [ -d "$s3local/.svn" ]
-	then
-		local_revision=$(gitrevision $s3local)
-	fi
-
+	local_revision=$(gitrevision $s3local)
 	online_revision=$(gitrevision $s3url)
+	
 	if [ ! "$local_revision" == "$online_revision" ]
 	then
-		printf "  update s3_git to\n  Local Revision: $online_revision\n"
-		svn -q checkout "$s3url" "$s3local"
-		cd "$s3local"
-		printf "  update all files ...\n\n"
+		printf "  update s3_git\n   from Local Revision: $local_revision\n   to  Remote Revision: $online_revision\n"
+		rm -rf "$s3local"; git clone "$s3url" "$s3local" &>/dev/null; cd "$s3local"
+		printf "  updating all files ...\n\n"
+		rm -f ./support/patches/no.patch 2>/dev/null
 		yes | cp -rf ./s3 "$workdir/s3"
 		yes | cp -rf ./support/* "$workdir/support"
 	else
-		printf "  is up to date\n  Online Revision: $online_revision\n\n"
+		printf "  is up to date\n   Online Revision: $online_revision\n\n"
 	fi
 	sleep 1
 }
 
 update_emu(){
-	clear
-	s3logo
+	clear;s3logo
 	local_revision=0
 	online_revision=0
 	source "$configdir/urls"
 	emulocal="$dldir/emu_github"
 	printf "  emu_git CHECK:\n  --------------\n"
 
-	if [ -d "$emulocal/.svn" ]
-	then
-		local_revision=$(gitrevision $emulocal)
-	fi
-
+	local_revision=$(gitrevision $emulocal)
 	online_revision=$(gitrevision $emuurl)
+
 	if [ ! "$local_revision" == "$online_revision" ]
 	then
-		printf "  update emu_git to\n  Local Revision: $online_revision\n"
-		svn -q checkout "$emuurl" "$emulocal"
+		printf "  update emu_git\n   from Local Revision: $local_revision\n   to  Remote Revision: $online_revision\n"
+		rm -rf "$emulocal"; git clone "$emuurl" "$emulocal" &>/dev/null
 	else
-		printf "  is up to date\n  Online Revision: $online_revision\n"
+		printf "  is up to date\n   Online Revision: $online_revision\n"
 	fi
-	if [ -f "$emulocal/VERSION" ]
-	then
-		printf "  EmuVersion: "
-		grep '\$Version:' "$emulocal/VERSION" |cut -d " " -f 2
-		_nl
-	fi
+
+	printf "   Emu-Version: "
+	grep '#define EMU_VERSION' $emulocal/* | head -1 | awk '{print $3}'; _nl
 	sleep 1
 }
 
@@ -66,19 +56,8 @@ fix_me(){
 	s3local="$dldir/s3_github"
 	emulocal="$dldir/emu_github"
 
-	if [ -d "$s3local" ]
-	then
-		rm -rf $s3local
-		update_me
-	else
-		update_me
-	fi
-
-	if [ -d "$emulocal" ]
-	then
-		rm -rf $emulocal
-		update_emu
-	else
-		update_emu
-	fi
+	[ -d "$s3local" ] && rm -rf $s3local
+	update_me
+	[ -d "$emulocal" ] && rm -rf $emulocal
+	update_emu
 }
