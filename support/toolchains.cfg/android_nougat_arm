@@ -13,7 +13,7 @@ _compiler="arm-linux-androideabi-";
 _sysroot="sysroot";
 _libsearchdir="/usr/lib";
 _toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1hbmRyb2lkX25vdWdhdF9hcm0udGFyLnh6Cg==";
-_md5sum="9765fbda58003561e39d70efc7af534f  Toolchain-android_nougat_arm.tar.xz";
+_md5sum="78fe2eb0684d370861bf1062d93fe730  Toolchain-android_nougat_arm.tar.xz";
 _tc_info="\n
 !!! Android-NDK Toolchain !!!\n
 \n

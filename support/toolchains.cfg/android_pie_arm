@@ -13,7 +13,7 @@ _compiler="arm-linux-androideabi-";
 _sysroot="sysroot";
 _libsearchdir="/usr/lib";
 _toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1hbmRyb2lkX3BpZV9hcm0udGFyLnh6Cg==";
-_md5sum="76b46a398ee049431b87f83975687bcb  Toolchain-android_pie_arm.tar.xz";
+_md5sum="7a8b669d2b34a7ecd8b3298d9a90ace5  Toolchain-android_pie_arm.tar.xz";
 _tc_info="\n
 !!! Android-NDK Toolchain !!!\n
 \n
