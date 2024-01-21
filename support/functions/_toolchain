@@ -213,13 +213,14 @@ _toolchain_check(){
 		compilername="$_compiler""gcc"
 		[ ${#_realcompiler} -gt 4 ] && compilername="$_realcompiler"
 		version=$("./$compilername" -dumpversion)
-		machine=$("./$compilername" -dumpmachine)
 		[ "$_androidndkdir" == "1" ] && sr="$tcdir/$1/sysroot" || sr=$("./$compilername" -print-sysroot 2>/dev/null)
 		sysroot=$(realpath -sm "$sr" --relative-to="$tcdir/$1")
 		compilerpath=$(realpath -sm "./$compilername" --relative-to="$tcdir/$1")
 		printf "$fmtg" "GCC Version :" "$version"
 		printf "$fmtg" "GCC Binary  :" "$compilerpath"
 		printf "$fmtg" "GCC Sysroot :" "$sysroot"
+		printf "$fmtg" "HOST arch   :" "$(_get_compiler_arch host)"
+		printf "$fmtg" "TARGET arch :" "$(_get_compiler_arch target)"
 		printf "$fmtg" "C11 Support :" "$(! _check_compiler_capability 'c11' && printf 'No' || printf 'Yes')"
 		[ -z "$sysroot" ] && sysroot="$r_l$txt_too_old\n"
 	fi
@@ -522,4 +523,18 @@ _check_compiler_capability(){
 		*)  ret=1;
 	esac;
 	return $ret
+}
+
+_get_compiler_arch(){
+	ret='';
+	case "$1" in
+		"build") #checking build system architecture
+			ret="$(uname -m)";;
+		"host") #checking host architecture the compiler was build for
+			# Use ranlib instead of gcc to compatible with android toolchains, gcc is a wrapper script there
+			ret="$(file -b $(realpath "$_compiler""ranlib") | awk -F',' '{print $2}' | xargs)";;
+		"target") #checking target architecture the compiler produces binaries for
+			ret="$("./$compilername" -dumpmachine | awk -F'-' '{print $1}' | xargs)";;
+	esac;
+	printf "$ret"
 }
