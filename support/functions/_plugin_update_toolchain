@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #simplebuild_plugin tcupdate
-pversion="0.24.5";
+pversion="0.24.6";
 pname="s3.TUP";
 pdesc="Plugin $pname v$pversion";
 tc_url="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLw==";
@@ -130,7 +130,7 @@ tcupdate(){
 		bye;
 	elif [ -z "$CMDTC" ];then #show toolchain menu
 		clear;
-		unset menu_close;
+		unset menu_close;unset txtcomp;
 		while [ ! $menu_close ]
 		do
 			#TOOLCHAIN MENU
@@ -139,9 +139,16 @@ tcupdate(){
 			if [ "$tcempty" == "0" ];then
 				for i in "${INST_TCLIST[@]}";do
 					if [ ! "$i" == "native" ];then
+						unset icolor;
 						source "$tccfgdir/$i" && tcdate="";
 						tcdate=" $(_get_toolchain_date "$i")" && [ "${#tcdate}" -eq 1 ] && tcdate="";
-						MENU_OPTIONS+=("$_toolchainname" "$_description\Z2$tcdate\Zn" "${txt_s3tup_menu_toolchain_folder}$tcdir/$i | ${txt_s3tup_menu_toolchain_config}$tccfgdir/$i");
+						cd "$tcdir/$i/bin" && tcarch="$(_get_compiler_arch host)";
+						[ -z "$tcarch" ] && tcarch="unknown";
+						if echo "${tcarch//-/_}" | grep -qv "$(uname -m)"; then
+							icolor="\Zr\Z1";
+							txtcomp="\n\Zr\Z1${txt_s3tup_menu_toolchain_notsupported}\Zn";
+						fi
+						MENU_OPTIONS+=("$_toolchainname" "$icolor$_description\Zn\Z2$tcdate\Zn" "${txt_s3tup_menu_toolchain_arch}${tcarch//-/_} | ${txt_s3tup_menu_toolchain_folder}$tcdir/$i");
 						counter;
 					fi;
 				done;
@@ -150,7 +157,7 @@ tcupdate(){
 			clear;clear;
 
 			opts=$("$gui" "$st_" "$bt_" "$title_ \Z0$pdesc\Zn" "--colors" "--item-help" "--help-tags" "--default-item" "$tc" "--ok-label" "${txt_s3tup_menu_command_label_update}" "--cancel-label" "${txt_s3tup_menu_command_label_create}" "--help-button" "--help-label" "${txt_s3tup_menu_command_label_backup}" "--extra-button" "--extra-label" "${txt_s3tup_menu_command_label_repair}" "--title" "-[ ${txt_s3tup_menu_toolchain_title} ]-" \
-				--menu "\n${txt_s3tup_menu_toolchain_text1} $COUNT ${txt_s3tup_menu_toolchain_text2}\n " \
+				--menu "\n${txt_s3tup_menu_toolchain_text1} $COUNT ${txt_s3tup_menu_toolchain_text2}\n${txtcomp}" \
 				0 0 "$COUNT" "${MENU_OPTIONS[@]}");
 			ret="$?";
 			[ $ret -eq 2 ] && tc=$(echo "$opts" | awk '{printf $2}') || tc=$(echo "$opts" | awk '{printf $1}');
@@ -847,7 +854,7 @@ _dl(){
 };
 _compress(){
 	#generate xz-file
-	XZ_OPT=-e9 tar -cvJf "$1" -C "$2" .
+	XZ_OPT='-e9 -T0' tar -cvJf "$1" -C "$2" .
 	[ "$DEV_MODE" == "1" ] && gen_hashes "$1"
 };
 _extract(){
