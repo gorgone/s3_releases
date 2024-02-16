@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="56";
+S3TUP_CONFIG_VERSION="57";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -276,7 +276,7 @@ LIB_CURL_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 LIB_CURL_tasks+=('export CC=@CC@;');
 LIB_CURL_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
 LIB_CURL_tasks+=('[ "@TYPE@" == "android-ndk" ] && cp -f "android/config.h" "./config.h";');
-LIB_CURL_tasks+=('[ "@TYPE@" == "android-ndk" -o "$LIBS_STATIC_BUILD" == "1" ] && FLAGS="--with-openssl --disable-shared" || FLAGS="--with-openssl";');
+LIB_CURL_tasks+=('[ "@TYPE@" == "android-ndk" -o "$LIBS_STATIC_BUILD" == "1" ] && FLAGS="--with-openssl --without-libpsl --disable-shared" || FLAGS="--with-openssl --without-libpsl";');
 LIB_CURL_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS;');
 LIB_CURL_tasks+=('make -j@CPUS@;');
 LIB_CURL_tasks+=('make install;');
