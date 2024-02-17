@@ -7,6 +7,7 @@ update_me(){
 	source "$configdir/urls"
 	s3local="$dldir/s3_github"
 	printf "  s3_git CHECK:\n  -------------\n"
+	check_url "$s3url" || return
 
 	local_revision=$(gitrevision $s3local)
 	online_revision=$(gitrevision $s3url)
@@ -32,6 +33,7 @@ update_emu(){
 	source "$configdir/urls"
 	emulocal="$dldir/emu_github"
 	printf "  emu_git CHECK:\n  --------------\n"
+	check_url "$emuurl" || return
 
 	local_revision=$(gitrevision $emulocal)
 	online_revision=$(gitrevision $emuurl)

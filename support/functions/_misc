@@ -271,7 +271,7 @@ _select_menu(){
 		CHANGE)
 					new_rev=$("$gui" "$st_" "$nc_" --cr-wrap "$ip_" "Revision: 7000+ \nRevision: 0 = $txt_latest" 9 35)
 					[[ $new_rev =~ ^-?[0-9]+$ ]] && [ ! "$new_rev" -le "7000" ] && _rev="$new_rev" || _rev=0
-					_dialog_checkout1 "$_rev"
+					check_url "$trunkurl" && _dialog_checkout1 "$_rev"
 					_select_menu;;
 		CEDIT)
 					s3cfg_menu
@@ -707,5 +707,13 @@ _gtedit(){
 		esac
 		sed -i s@^_oscamconfdir_custom.*@_oscamconfdir_custom=\"$confdir\"@ "$tccfgdir/$_toolchainname"
 		source "$tccfgdir/$_toolchainname"
+	fi
+}
+
+check_url(){
+	if ! http_code=$(curl --output /dev/null --write-out "%{http_code}" --silent --fail "$1")
+	then
+		printf "$r_l$1 is not reachable! (HTTP status: $http_code)$re_\n"
+		return 1
 	fi
 }

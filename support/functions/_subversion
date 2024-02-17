@@ -8,6 +8,8 @@ checkout(){
 	i=0
 	COUNT=0
 
+	check_url "$trunkurl" || return
+
 	if [ -d "$svndir" ]
 	then
 		rm -rf "$svndir"
@@ -103,6 +105,8 @@ svnup(){
 	ologo
 	i=1
 
+	check_url "$trunkurl" || return
+
 	if [ -d "$svndir" ]
 	then
 		printf "$p_l\n  $txt_update oscam-svn $re_\n"
@@ -173,12 +177,17 @@ _dialog_checkout(){
 		printf  " $txt_verify_svn "
 		if [ -f "$svndir/config.sh" ]
 		then
-			printf "ok\n"
-			sleep 1
-			printf " $txt_update_svn $txt_wait\n"
-			cd "$svndir"
-			svn -q update
-			echo 1 >"$upc"
+			if check_url "$trunkurl" >/dev/null
+			then
+				printf "ok\n"
+				sleep 1
+				printf " $txt_update_svn $txt_wait\n"
+				cd "$svndir"
+				svn -q update
+				echo 1 >"$upc"
+			else
+				printf "not ok\n"
+			fi
 			sleep 1
 		fi
 	fi;) | "$gui" "$st_" "$bt_" "$title_" "$pb_" 5 52
@@ -187,7 +196,7 @@ _dialog_checkout(){
 	then
 		upc1=$(cat "$upc" 2>/dev/null)
 		rm -f "$upc"
-		[ ! "$upc1" == "1" ] && _dialog_checkout1
+		[ ! "$upc1" == "1" ] && check_url "$trunkurl" && _dialog_checkout1
 
 		if [ -f "$svndir/config.sh" ]
 		then
