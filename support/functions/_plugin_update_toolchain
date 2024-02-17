@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #simplebuild_plugin tcupdate
-pversion="0.24.6";
+pversion="0.24.7";
 pname="s3.TUP";
 pdesc="Plugin $pname v$pversion";
 tc_url="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLw==";
@@ -29,7 +29,7 @@ tcupdate(){
 
 	#update plugin
 	if [ "$CMDTC" == "-u" ] || [ "$CMDTC" == "--update_me" ];then
-		echo -e "${y_l}UPDATE -> ${pdesc} ${txt_s3tup_msg_update_hint}${re_}";
+		echo -e "${y_l}UPDATE -> ${pdesc} ${txt_s3tup_msg_update_hint}${re_}\n";
 		if ! _s3tup_update;then
 			_paktc_timer 5 "${txt_s3tup_msg_update_restart}" && printf "${re_}";
 			tcupdate "$force_reset";
@@ -1396,7 +1396,7 @@ _create_config(){
 	return 0;
 };
 _s3tup_update(){
-	local dc=0 ver="$pversion" logfile="$ldir/$(date +%F.%H%M%S)_tup_update.log" wctype repo branch diff_cmd update_cmd nl;
+	local dc=0 ver="$pversion" logfile="$ldir/$(date +%F.%H%M%S)_tup_update.log" proto repo branch diff_cmd update_cmd nl;
 	local s3tup_ffs="support/configs/plugin_update_toolchain.config.template \
 					 support/crosstool \
 					 support/functions/_plugin_update_toolchain \
@@ -1408,25 +1408,21 @@ _s3tup_update(){
 		#break if simplebuild3 update is required
 		[ "$s3_update_required" -eq 1 ] && printf "${r_l}\n${txt_s3tup_msg_update_s3update_required}${re_}" && return;
 
-		#get the working copy type and exit if unknown
+		#check git repository
 		cd "$workdir";
-		[ "$(git status 2>/dev/null | wc -l)" -gt 0 ] && wctype="GIT" && git remote update >/dev/null;
-		[ "$(svn info 2>/dev/null | wc -l)" -gt 0 ] && wctype="SVN";
-		[ "${#wctype}" -eq 0 ] && printf "${r_l}\n${txt_s3tup_msg_update_directory_unversioned}${re_}" && return;
+		[ "$(git status 2>/dev/null | wc -l)" -eq 0 ] && printf "${r_l}\n${txt_s3tup_msg_update_directory_unversioned}${re_}" && return;
+		
+		#prepare GIT commands
+		repo="$(git config --get remote.origin.url)"; #get remote url
+		proto="$(printf "$repo" | awk -F':' '{print $1}')"; #get protocol of remote url
+		branch="$(git branch --show-current)"; #get branch name
+		diff_cmd='git diff --cached --stat remotes/origin/HEAD "$ff"'; #diff command
+		update_cmd='git checkout --progress origin/"$(git branch --show-current)" -- "$ff"'; #update command
+		
+		#get remote updates
+		check_url "$repo" && git remote update >/dev/null || return;
 
-		#prepare commands for GIT and SVN and output some working copy properties
-		if [ "$wctype" == "GIT" ];then
-			repo="$(git config --get remote.origin.url)"; #get remote url of GIT working copy
-			branch="$(git branch --show-current)"; #get branch name of GIT working copy
-			diff_cmd='git diff --cached --stat remotes/origin/HEAD "$ff"'; #GIT diff command
-			update_cmd='git checkout --progress origin/"$(git branch --show-current)" -- "$ff"'; #GIT update command
-		else
-			repo="$(svn info | grep '^URL' | awk '{print $NF}')"; #get remote url of SVN working copy
-			branch="$(basename "$repo")"; #get branch name of SVN working copy
-			diff_cmd='svn diff -r BASE:HEAD "$ff" | git apply --stat 2>/dev/null'; #SVN diff command
-			update_cmd='svn update --quiet --accept theirs-full "$ff" && svn resolve --quiet --accept theirs-full "$ff"'; #SVN update command
-		fi;
-		printf "\n ${txt_repo}: ${c_l}${repo}${re_} ${txt_branch}: ${c_l}${branch}${re_} ${txt_proto}: ${c_l}${wctype}\n${re_}";
+		printf "\n ${txt_repo}: ${c_l}${repo}${re_} ${txt_branch}: ${c_l}${branch}${re_} ${txt_proto}: ${c_l}${proto}\n${re_}";
 
 		#check for remote updates and apply them
 		for ff in $s3tup_ffs;do
