@@ -217,6 +217,7 @@ fi
 	"CC_OPTS=$co $cc_opts $extra_cc" \
 	"CC_WARN=$cc_warn" \
 	"EXTRA_LDFLAGS=$extra_ld" \
+	"EXTRA_CFLAGS=$extra_c" \
 	$EXTRA_USE \
 	"CROSS=$CROSS" $STAPI_LIB $USESTRING $LIBCRYPTO_STATIC $SSL_STATIC $LIBUSB_STATIC $PCSC_STATIC 2>&1 \
 	|tee -a "$ldir/$log_name" \
