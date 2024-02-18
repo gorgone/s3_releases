@@ -115,8 +115,11 @@ s3cfg="$configdir/simplebuild.config"
 
 # Compiler settings
 cc_warn="-W -Wall -Wshadow -Wredundant-decls -Wstrict-prototypes -Wold-style-definition"
-cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections -o nodeadcode"
-#optimized compiling options
+#compiling options for minimize cpu load 
+cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections -funroll-loops -fomit-frame-pointer -fno-tree-vectorize -fno-schedule-insns"
+#compiling options for compatibility
+#cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections -o nodeadcode"
+#compiling options for optimizing
 #cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections -o nodeadcode -ffast-math -fomit-frame-pointer -fthread-jumps -foptimize-strlen --no-inline"
 
 #default url
