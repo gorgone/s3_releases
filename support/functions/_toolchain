@@ -141,6 +141,8 @@ _toolchain_main_menu(){
 				fi
 				_toolchain_main_menu;;
 		*)
+				#resetting all optional config variables
+				unset _stagingdir _androidndkdir _self_build extra_use extra_cc extra_ld extra_c stapi_allowed stapi_lib_custom
 				[ -f "$tccfgdir/$first" ] && stapi_allowed="" && source "$tccfgdir/$first" || exit
 				loadprofile="yes"
 				_toolchain_build_menu "$first";;
