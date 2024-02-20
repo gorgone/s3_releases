@@ -82,7 +82,7 @@ _generate_oscam_name(){
 	[ "$(./config.sh --enabled WEBIF)" == Y ] && echo -webif || printf ''; );_ssl=$(
 	[ "$(./config.sh --enabled WITH_SSL)" == Y ] && echo -ssl || printf ''; );_emu=$(
 	[ "$(./config.sh --enabled WITH_EMU)" == Y ] && echo -emu$(./config.sh --emu-version) || printf ''; );_neon=$(
-	[[ $("$tcdir/$_toolchainname/bin/$_compiler""gcc" -dumpmachine 2>/dev/null | awk -F'-' '{print $1}' | xargs) =~ "arm" ]] && grep -cqe 'override CFLAGS.*-mfpu=neon' "$svndir/Makefile" && [[ ! $extra_c =~ "-mfpu=" ]] && echo -neon || printf ''; );_ipv6=$(
+	[ "$(./config.sh --enabled WITH_ARM_NEON)" == Y ] && echo -neon || printf ''; );_ipv6=$(
 	[ "$(./config.sh --enabled IPV6SUPPORT)" == Y ] && echo -ipv6 || printf ''; )
 	[ "${USE_vars[USE_COMPRESS]}" == "USE_COMPRESS=1" ] && _upx="-upx" || _upx=''
 	[ "$1" == "native" ] && _b_name="$(uname -s)-$(uname -m)" || _b_name="$1"
