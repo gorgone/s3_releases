@@ -52,7 +52,7 @@ _gui_build(){
 	for e in $_us
 	do
 
-		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_COMPRESS" ] && [ ! "$e" == "USE_PATCH" ]  && [ ! "$e" == "USE_STATIC" ]
+		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_COMPRESS" ] && [ ! "$e" == "USE_PATCH" ]  && [ ! "$e" == "USE_EXTRA" ] && [ ! "$e" == "USE_STATIC" ]
 		then
 			USESTRING_="$e=1 $USESTRING_"
 		fi
@@ -73,6 +73,16 @@ _gui_build(){
 		_usb=
 	fi
 	
+#prepare extra_* variables
+	if [ "${s3cfg_vars[EXTRA]}" == "1" ]
+	then
+		printf "$y_l\n | EXTRAFLAGS : enabled"
+	else
+		printf "$y_l\n | EXTRAFLAGS : disabled"
+		unset extra_use extra_cc extra_ld extra_c
+	fi
+
+#static build
 	if [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" ]
 	then
 		_make="make static"

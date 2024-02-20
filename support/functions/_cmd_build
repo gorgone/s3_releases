@@ -114,6 +114,8 @@ _cmd_build(){
 					s3cfg_vars[TARGZ]=1;;	# overwrite global
 			"USE_COMPRESS=1")
 					s3cfg_vars[COMPRESS]=1;;# overwrite global
+			"USE_EXTRA=1")
+					s3cfg_vars[EXTRA]=1;;# overwrite global
 			"USE_STATIC=1")
 					_make="make static"
 					s3cfg_vars[STATIC]=1;;# overwrite global
@@ -171,6 +173,15 @@ printf "$y_l\n |       set : ${cdtag}$w_l"
 
 #IF SVN is Patched
 	[ -f "$workdir/SVN-IS-PATCHED" ] && printf $y_l"\n | ISPATCHED :$P YES"
+
+#prepare extra_* variables
+	if [ "${s3cfg_vars[EXTRA]}" == "1" ]
+	then
+		printf "$y_l\n | EXTRAFLAGS : enabled"
+	else
+		printf "$y_l\n | EXTRAFLAGS : disabled"
+		unset extra_use extra_cc extra_ld extra_c
+	fi
 
 #static build
 	if [ "${s3cfg_vars[STATIC]}" == "1" ]
