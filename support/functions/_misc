@@ -82,7 +82,7 @@ _generate_oscam_name(){
 	[ "$(./config.sh --enabled WEBIF)" == Y ] && echo -webif || printf ''; );_ssl=$(
 	[ "$(./config.sh --enabled WITH_SSL)" == Y ] && echo -ssl || printf ''; );_emu=$(
 	[ "$(./config.sh --enabled WITH_EMU)" == Y ] && echo -emu$(./config.sh --emu-version) || printf ''; );_neon=$(
-	[ "$(./config.sh --enabled WITH_ARM_NEON)" == Y ] && echo -neon || printf ''; );_icam=$(
+	[ "$(./config.sh --enabled WITH_ARM_NEON)" == Y ] && [[ $("$tcdir/$_toolchainname/bin/$_compiler""gcc" -dumpmachine 2>/dev/null | awk -F'-' '{print $1}' | xargs) =~ "arm" ]] && echo -neon || printf ''; );_icam=$(
 	[ "$(./config.sh --enabled MODULE_STREAMRELAY)" == Y ] && echo -icam || printf ''; );_ipv6=$(
 	[ "$(./config.sh --enabled IPV6SUPPORT)" == Y ] && echo -ipv6 || printf ''; )
 	[ "${USE_vars[USE_COMPRESS]}" == "USE_COMPRESS=1" ] && _upx="-upx" || _upx=''
