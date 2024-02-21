@@ -718,3 +718,16 @@ check_url(){
 		return 1
 	fi
 }
+
+flag_patched(){
+	patches="yes\\n\\t\\t$(echo "${patchlist[@]}" | xargs | sed 's/ /\\n\\t\\t/g')"
+	
+	#mark oscam-svn as patched
+	echo "$patches" > "$workdir/SVN-IS-PATCHED"
+	
+	#show patch file information in oscam WebIf
+	sed -i '/^#define S3PATCHED/d' "$svndir/config.h"
+	sed -i "/^#endif \/\/OSCAM_CONFIG_H_/s/^/#define S3PATCHED \""$(printf '%q' $patches)"\"\n/" "$svndir/config.h"
+	sed -i '/#ifdef S3PATCHED/,+3d' "$svndir/oscam.c"
+	sed -i "/fprintf(fp, \"WebifPort:.*/s/$/\n#endif\n\n#ifdef S3PATCHED\n\tfprintf(fp, \"Patched s3:\\\t\%s\\\n\", S3PATCHED)\;/" "$svndir/oscam.c"
+}

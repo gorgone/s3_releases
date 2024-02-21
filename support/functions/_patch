@@ -87,20 +87,18 @@ _apply_menupatch(){
 
 				case $_w in
 					ok)
-							printf "PATCH : done all ok"
-							touch "$workdir/SVN-IS-PATCHED";;
+							printf "PATCH : done all ok";;
 					hunk)
 							printf "PATCH : done with warnings save $e.log"
 							cp -f $patchlog "$ldir/$e.log"
-							ln -sf "$ldir/$e.log" "$workdir/lastpatch.log"
-							touch "$workdir/SVN-IS-PATCHED";;
+							ln -sf "$ldir/$e.log" "$workdir/lastpatch.log";;
 					fail)
 							printf "PATCH : break build save $e.log"
 							cp -f $patchlog "$ldir/$e.log"
-							ln -sf "$ldir/$e.log" "$workdir/lastpatch.log"
-							touch "$workdir/SVN-IS-PATCHED";;
+							ln -sf "$ldir/$e.log" "$workdir/lastpatch.log";;
 				esac
 
+				flag_patched
 				rm -rf "$patchlog"
 			fi;)|"$gui" "$st_" "$bt_" "$title_" "$pb_" 12 62
 				sleep 2
@@ -160,11 +158,10 @@ _apply_consolepatch(){
 			if [ "$_w" -gt "0" ]
 			then
 				printf "$y_l\n |     PATCH : done with warnings"
-				touch  "$workdir/SVN-IS-PATCHED"
 			else
 				printf "$y_l\n |     PATCH :$g_l done all ok$rs_"
-				touch  "$workdir/SVN-IS-PATCHED"
 			fi
+			flag_patched
 
 		else
 			printf "$y_l\n |     PATCH : no patch found\n"
