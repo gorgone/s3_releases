@@ -172,7 +172,11 @@ printf "$y_l\n |       set : ${cdtag}$w_l"
 	[ ! "$pf" == "empty" ] && printf "\n$y_l |   PROFILE : $pf_name"
 
 #IF SVN is Patched
-	[ -f "$workdir/SVN-IS-PATCHED" ] && printf $y_l"\n | ISPATCHED :$P YES"
+	if [ -f "$workdir/SVN-IS-PATCHED" ]
+	then
+		printf "$y_l\n | ISPATCHED :$P YES (integrate patch infomation into WebIf)"
+		patch_webif
+	fi
 
 #prepare extra_* variables
 	if [ "${s3cfg_vars[EXTRA]}" == "1" ]

@@ -72,7 +72,14 @@ _gui_build(){
 	else
 		_usb=
 	fi
-	
+
+#IF SVN is Patched
+	if [ -f "$workdir/SVN-IS-PATCHED" ]
+	then
+		printf "$y_l\n | ISPATCHED :$P YES (integrate patch infomation into WebIf)"
+		patch_webif
+	fi
+
 #prepare extra_* variables
 	if [ "${s3cfg_vars[EXTRA]}" == "1" ]
 	then

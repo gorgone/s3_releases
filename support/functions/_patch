@@ -98,7 +98,7 @@ _apply_menupatch(){
 							ln -sf "$ldir/$e.log" "$workdir/lastpatch.log";;
 				esac
 
-				flag_patched
+				mark_patched
 				rm -rf "$patchlog"
 			fi;)|"$gui" "$st_" "$bt_" "$title_" "$pb_" 12 62
 				sleep 2
@@ -161,10 +161,37 @@ _apply_consolepatch(){
 			else
 				printf "$y_l\n |     PATCH :$g_l done all ok$rs_"
 			fi
-			flag_patched
+			mark_patched
 
 		else
 			printf "$y_l\n |     PATCH : no patch found\n"
 		fi
+	fi
+}
+
+mark_patched(){
+	patches="$(echo "${patchlist[@]}" | xargs | sed 's/ /\\n\\t\\t/g')"
+	
+	#mark oscam-svn as patched
+	echo "$patches" > "$workdir/SVN-IS-PATCHED"
+}
+
+patch_webif(){
+	
+	if [ -f "$workdir/SVN-IS-PATCHED" ]
+	then
+		if [ -s "$workdir/SVN-IS-PATCHED" ]
+		then
+			#format should be: patchname1.patch\n\t\tpatchname2.patch\n\t\tpatchname3.patch
+			patches="yes\\n\\t\\t$(cat "$workdir/SVN-IS-PATCHED")"
+		else
+			patches='yes'
+		fi
+		
+		#show patch file information in oscam WebIf
+		sed -i '/^#define S3PATCHED/d' "$svndir/config.h"
+		sed -i "/^#endif \/\/OSCAM_CONFIG_H_/s/^/#define S3PATCHED \""$(printf '%q' $patches)"\"\n/" "$svndir/config.h"
+		sed -i '/#ifdef S3PATCHED/,+3d' "$svndir/oscam.c"
+		sed -i "/fprintf(fp, \"WebifPort:.*/s/$/\n#endif\n\n#ifdef S3PATCHED\n\tfprintf(fp, \"Patched:\\\t\%s\\\n\", S3PATCHED)\;/" "$svndir/oscam.c"
 	fi
 }

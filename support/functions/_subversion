@@ -153,7 +153,7 @@ svnpatch(){
 				sleep .5
 				patch -d$svndir/ $SKIPPATHS < "$pdir/$p" |sed -e "s/^patching file/$G patching > $WH/g;s/^Hunk/$P Hunk     > $Y/g;s/FAILED/$R FAILED/g; ;s/-- saving/$Y -- saving/g;"
 			done
-			flag_patched
+			mark_patched
 		else
 			printf $WH"    $txt_no patch $txt_found"
 		fi
