@@ -47,6 +47,20 @@ _cmd_build(){
 #make clean
 	make distclean > /dev/null 2>&1;
 
+#patching
+	if [ "${USE_vars['USE_PATCH']}" == "USE_PATCH=1" ]
+	then
+		if [ -f "$workdir/SVN-IS-PATCHED" ]
+		then
+			printf "$y_l\n |  $r_l WARNING : patch upon patch"
+			printf "$y_l\n |  $r_l UNCLEAN $y_l: restore SVN $G$txt_wait"
+			quicksvnrestore $_toolchainname
+			_apply_consolepatch
+		else
+			_apply_consolepatch
+		fi
+	fi
+
 #do enable and disable modules
 	for am in "${all_cc[@]}"
 	do
@@ -83,7 +97,6 @@ _cmd_build(){
 	_pcsc=;
 	_stapi=;
 	_stapi5=;
-	_do_patch="0"
 	_make="make"
 	for e in "${!USE_vars[@]}"
 	do
@@ -108,8 +121,6 @@ _cmd_build(){
 			"USE_PCSC=1")
 					_pcsc_on
 					_pcsc="-pcsc";;			# set pcsc suffix to name
-			"USE_PATCH=1")
-					_do_patch="1";;			# enable patching
 			"USE_TARGZ=1")
 					s3cfg_vars[TARGZ]=1;;	# overwrite global
 			"USE_COMPRESS=1")
@@ -153,20 +164,6 @@ then
 fi
 
 printf "$y_l\n |       set : ${cdtag}$w_l"
-
-#patching
-	if [ "$_do_patch" == "1" ]
-	then
-		if [ -f "$workdir/SVN-IS-PATCHED" ]
-		then
-			printf "$y_l\n |  $r_l WARNING : patch upon patch"
-			printf "$y_l\n |  $r_l UNCLEAN $y_l: restore SVN $G$txt_wait"
-			quicksvnrestore $_toolchainname
-			_apply_consolepatch
-		else
-			_apply_consolepatch
-		fi
-	fi
 
 #if build with profile
 	[ ! "$pf" == "empty" ] && printf "\n$y_l |   PROFILE : $pf_name"
