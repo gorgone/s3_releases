@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="58";
+S3TUP_CONFIG_VERSION="59";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -418,7 +418,7 @@ LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" -o "$LIBS_STATIC_BUILD" == "1" ] &
 LIB_CCID_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS --enable-twinserial --enable-usbdropdir="@PREFIX@/..$(pkg-config libpcsclite --variable=usbdropdir)" --enable-serialconfdir="@PREFIX@$(pkg-config libpcsclite --variable=serialconfdir)" LIBUSB_LIBS="${LIBUSB_LIBS}" LIBUSB_CFLAGS="${LIBUSB_CFLAGS}";');
 LIB_CCID_tasks+=('make -j@CPUS@;');
 LIB_CCID_tasks+=('make install;');
-LIB_CCID_tasks+=('[ $? -eq 0 ] && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include/PCSC\nusbdropdir=@PREFIX@/lib/pcsc/drivers\nserialconfdir=@PREFIX@/etc/reader.conf.d\n\nName: CCID IFD Handler\nDescription: Generic USB CCID (Chip/Smart Card Interface Devices) and ICCD (Integrated Circuit(s) Card Devices) driver\nVersion: $LIB_CCID_version\nRequires: libusb libpcsclite" > "@PREFIX@/lib/pkgconfig/libccid.pc";');
+LIB_CCID_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include/PCSC\nusbdropdir=@PREFIX@/lib/pcsc/drivers\nserialconfdir=@PREFIX@/etc/reader.conf.d\n\nName: CCID IFD Handler\nDescription: Generic USB CCID (Chip/Smart Card Interface Devices) and ICCD (Integrated Circuit(s) Card Devices) driver\nVersion: $LIB_CCID_version\nRequires: libusb libpcsclite" > "@PREFIX@/lib/pkgconfig/libccid.pc";');
 LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" ] && zip -j "$bdir/@HOST@@API@-libccid.zip" -xi "@PREFIX@/lib/pcsc/drivers/ifd-ccid.bundle/Contents/Linux/libccid.so";');
 LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" ] && zip -j "$bdir/@HOST@@API@-libccidtwin.zip" -xi "@PREFIX@/lib/pcsc/drivers/serial/libccidtwin.so";');
 LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" ] && zip -j "$bdir/@HOST@@API@-libccidplist.zip" -xi "@PREFIX@/lib/pcsc/drivers/ifd-ccid.bundle/Contents/Info.plist";');
@@ -441,7 +441,7 @@ LIB_DVB32_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHA
 LIB_DVB32_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@ --enable-uint32;');
 LIB_DVB32_tasks+=('make -j@CPUS@;');
 LIB_DVB32_tasks+=('make install;');
-LIB_DVB32_tasks+=('[ $? -eq 0 ] && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n\nName: libdvbcsa\nDescription: libdvbcsa is a free and portable implementation of the DVB Common Scrambling algorithm with decryption and encryption capabilities\nVersion: $LIB_DVB32_version\nCflags: -I\${includedir}" > "@PREFIX@/lib/pkgconfig/libdvbcsa.pc";');
+LIB_DVB32_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n\nName: libdvbcsa\nDescription: libdvbcsa is a free and portable implementation of the DVB Common Scrambling algorithm with decryption and encryption capabilities\nVersion: $LIB_DVB32_version\nCflags: -I\${includedir}" > "@PREFIX@/lib/pkgconfig/libdvbcsa.pc";');
 LIB_DVB32_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libdvbcsa.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
 
 # libdvbcsa 1.x (Use native 64 bits integers for bitslice)
@@ -462,7 +462,7 @@ LIB_DVB64_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHA
 LIB_DVB64_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@ --enable-uint64;');
 LIB_DVB64_tasks+=('make -j@CPUS@;');
 LIB_DVB64_tasks+=('make install;');
-LIB_DVB64_tasks+=('[ $? -eq 0 ] && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n\nName: libdvbcsa\nDescription: libdvbcsa is a free and portable implementation of the DVB Common Scrambling algorithm with decryption and encryption capabilities\nVersion: $LIB_DVB64_version\nCflags: -I\${includedir}" > "@PREFIX@/lib/pkgconfig/libdvbcsa.pc";');
+LIB_DVB64_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n\nName: libdvbcsa\nDescription: libdvbcsa is a free and portable implementation of the DVB Common Scrambling algorithm with decryption and encryption capabilities\nVersion: $LIB_DVB64_version\nCflags: -I\${includedir}" > "@PREFIX@/lib/pkgconfig/libdvbcsa.pc";');
 LIB_DVB64_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libdvbcsa.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
 
 # libdvbcsa 1.x (Use NEON for bitslice)
@@ -483,7 +483,7 @@ LIB_DVB128_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCH
 LIB_DVB128_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@ --enable-neon;');
 LIB_DVB128_tasks+=('make -j@CPUS@;');
 LIB_DVB128_tasks+=('make install;');
-LIB_DVB128_tasks+=('[ $? -eq 0 ] && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n\nName: libdvbcsa\nDescription: libdvbcsa is a free and portable implementation of the DVB Common Scrambling algorithm with decryption and encryption capabilities\nVersion: $LIB_DVB128_version\nCflags: -I\${includedir}" > "@PREFIX@/lib/pkgconfig/libdvbcsa.pc";');
+LIB_DVB128_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n\nName: libdvbcsa\nDescription: libdvbcsa is a free and portable implementation of the DVB Common Scrambling algorithm with decryption and encryption capabilities\nVersion: $LIB_DVB128_version\nCflags: -I\${includedir}" > "@PREFIX@/lib/pkgconfig/libdvbcsa.pc";');
 LIB_DVB128_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libdvbcsa.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
 
 # zlib
