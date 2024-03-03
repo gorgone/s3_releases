@@ -194,12 +194,13 @@ printf "$y_l\n |       set : ${cdtag}$w_l"
 		[ "${USE_vars[USE_LIBUSB]}" == "USE_LIBUSB=1" ] && LIBUSB_STATIC="LIBUSB_LIB=$(find $SYSROOT -name "libusb-1.0.a" -type f -print -quit)"
 		[ "${USE_vars[USE_PCSC]}" == "USE_PCSC=1" ] && PCSC_STATIC="PCSC_LIB=$(find $SYSROOT -name "libpcsclite.a" -type f -print -quit)"
 	else
-		#support libdvbcsa static linking
-		libdvbcsa="$(find $SYSROOT -name "libdvbcsa.a" -type f -print -quit)"
-		[ "$($svndir/config.sh --enabled MODULE_STREAMRELAY)" == Y ] && [ -f "$libdvbcsa" ] && DVBCSA_STATIC="LIB_DVBCSA=$libdvbcsa"
 		printf "$y_l\n | BUILDTYPE : dynamic"
 		static=""
 	fi
+
+#support libdvbcsa static linking
+	libdvbcsa="$(find $SYSROOT -name "libdvbcsa.a" -type f -print -quit)"
+	[ "$($svndir/config.sh --enabled MODULE_STREAMRELAY)" == Y ] && [ -f "$libdvbcsa" ] && DVBCSA_STATIC="LIB_DVBCSA=$libdvbcsa"
 
 #max cpu usage
 	if [ -f "$configdir/max_cpus" ]
