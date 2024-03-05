@@ -35,8 +35,8 @@ _get_patch(){
 }
 
 _streamboard_patch(){
-	if [ -e $1 ]; then
-		PATCHEDFILES=$(grep -e '^\(---\|+++\) ' -i $1 | grep -v /dev/null | awk '{print $2}' | sort | uniq)
+	if [ -e "$1" ]; then
+		PATCHEDFILES=$(grep -e '^\(---\|+++\) ' -i "$1" | grep -v /dev/null | awk '{print $2}' | sort | uniq)
 		for f in ${PATCHEDFILES[@]}; do
 			[[ -e "$svndir/$f" ]] && return 0
 		done
