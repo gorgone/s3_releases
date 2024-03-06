@@ -380,7 +380,7 @@ _toolchain_add_menu(){
 	case $first in
 		EXIT)
 				bye;;
-		BACK)
+		BACK | '')
 				_toolchain_main_menu;;
 		*)
 				_toolchain_gui_install
