@@ -39,8 +39,8 @@ _cmd_build(){
 		done
 
 		if [ $e == "USE_DIAG=1" ]; then
-                        codecheck=$(command -v scan-build)
-                fi
+			codecheck=$(command -v scan-build)
+		fi
 	done
 	cd "$svndir"
 
@@ -150,17 +150,17 @@ cdtag="CONF_DIR=$CONFDIR"
 
 if [ ! -z "$_oscamconfdir_custom" ];
 then
-    if [ ! "$_oscamconfdir_custom" == "not_set" ];
-    then
-        CONFDIR="$_oscamconfdir_custom"
-        cdtag="${r_l}custom CONF_DIR=$_oscamconfdir_custom (via toolchain.cfg)"
-    fi
+	if [ ! "$_oscamconfdir_custom" == "not_set" ];
+	then
+		CONFDIR="$_oscamconfdir_custom"
+		cdtag="${r_l}custom CONF_DIR=$_oscamconfdir_custom (via toolchain.cfg)"
+	fi
 fi
 
 if [ ! "$CUSTOM_CONFDIR" == "not_set" ];
 then
-    CONFDIR="$CUSTOM_CONFDIR"
-    cdtag="${r_l}custom CONF_DIR=$CUSTOM_CONFDIR (via CUSTOM_CONFDIR)"
+	CONFDIR="$CUSTOM_CONFDIR"
+	cdtag="${r_l}custom CONF_DIR=$CUSTOM_CONFDIR (via CUSTOM_CONFDIR)"
 fi
 
 printf "$y_l\n |       set : ${cdtag}$w_l"
