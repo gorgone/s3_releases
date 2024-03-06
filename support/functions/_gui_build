@@ -104,7 +104,7 @@ _gui_build(){
 
 #support libdvbcsa static linking
 	libdvbcsa="$(find $SYSROOT -name "libdvbcsa.a" -type f -print -quit)"
-	[ "$($svndir/config.sh --enabled MODULE_STREAMRELAY)" == Y ] && [ -f "$libdvbcsa" ] && DVBCSA_STATIC="LIB_DVBCSA=$libdvbcsa"
+	[ "$($svndir/config.sh --enabled MODULE_STREAMRELAY)" == Y ] && [ -f "$libdvbcsa" ] && DVBCSA_STATIC="LIBDVBCSA_LIB=$libdvbcsa"
 
 	USESTRING_=${USE_vars[@]}
 	EXTRA_USE=$extra_use
