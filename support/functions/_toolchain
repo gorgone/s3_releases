@@ -32,7 +32,7 @@ _toolchain_build_menu(){
 						_load_profile;;
 		SAVE_PROFILE)
 						_save_profile;;
-		BACK)
+		BACK | '')
 						_toolchain_main_menu;;
 		EXIT)
 						bye
@@ -50,7 +50,7 @@ _toolchain_config_menu(){
 	[ $? = 255 ] && _toolchain_config_menu
 
 	case $selected in
-		BACK)
+		BACK | '')
 						save_config
 						_toolchain_build_menu;;
 		OSCAM_EXTRA)
@@ -123,7 +123,7 @@ _toolchain_main_menu(){
 	case $first in
 		EXIT)
 				bye;;
-		BACK)
+		BACK | '')
 				_select_menu;;
 		ADD)
 				_toolchain_add_menu;;
@@ -415,7 +415,7 @@ _toolchain_remove_menu(){
 	case $first in
 		EXIT)
 				bye;;
-		BACK)
+		BACK | '')
 				_toolchain_main_menu;;
 		*)
 				[ -d "$tcdir/$first" ] && rm -rf "$tcdir/$first"
