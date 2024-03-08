@@ -308,7 +308,7 @@ _oscam_extra_menu(){
 	done
 
 	oextra=$("$gui" "$st_" "$nc_" "$bt_" "$title_" --title "-[ Oscam EXTRA ]-" "$cl_" " OPTIONS " 19 40 12 ${MENU_OPTIONS[@]});
-	[ $? = 255 ] && _toolchain_extra_menu
+	[ $? = 255 ] && _toolchain_config_menu
 
 	for e in "${!USE_vars[@]}"
 	do
