@@ -67,7 +67,12 @@ _apply_menupatch(){
 						SKIPPATHS=-p1
 						printf "PATCH : apply regular patch $e"
 					fi
-					patch -f $SKIPPATHS < "$pdir/$e" >>"$patchlog" 2>/dev/null
+					if grep 'GIT binary patch' "$pdir/$e" &>/dev/null; then
+						printf "PATCH : binary patch detected, using git apply for $e"
+						git apply --verbose $SKIPPATHS < "$pdir/$e" >>"$patchlog" 2>/dev/null
+					else
+						patch -f $SKIPPATHS < "$pdir/$e" >>"$patchlog" 2>/dev/null
+					fi
 					hunks=$(grep -c1 '^Hunk' "$patchlog")
 					fails=$(grep -c1 'hunks FAILED' "$patchlog")
 
@@ -126,7 +131,12 @@ _apply_consolepatch(){
 					SKIPPATHS=-p1
 					printf "$y_l\n |     PATCH : apply regular patch $e\n"
 				fi
-				patch -F 10 -f $SKIPPATHS < "$pdir/$e" >>"$patchlog" 2>/dev/null
+				if grep 'GIT binary patch' "$pdir/$e" &>/dev/null; then
+					printf "$y_l\n |     PATCH : binary patch detected, using git apply for $e\n"
+					git apply --verbose $SKIPPATHS < "$pdir/$e" >>"$patchlog" 2>/dev/null
+				else
+					patch -F 10 -f $SKIPPATHS < "$pdir/$e" >>"$patchlog" 2>/dev/null
+				fi
 				hunks=$(grep -c1 "^Hunk" "$patchlog")
 				fails=$(grep -c1 "hunks FAILED" "$patchlog")
 

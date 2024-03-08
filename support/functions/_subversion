@@ -151,7 +151,13 @@ svnpatch(){
 					SKIPPATHS=-p1
 				fi
 				sleep .5
-				patch -d$svndir/ $SKIPPATHS < "$pdir/$p" |sed -e "s/^patching file/$G patching > $WH/g;s/^Hunk/$P Hunk     > $Y/g;s/FAILED/$R FAILED/g; ;s/-- saving/$Y -- saving/g;"
+				if grep 'GIT binary patch' "$pdir/$p" &>/dev/null; then
+					cd "$svndir"
+					echo -e $Y"    binary patch detected, using git apply <-"$W
+					git apply --verbose $SKIPPATHS < "$pdir/$p"
+				else
+					patch -d$svndir/ $SKIPPATHS < "$pdir/$p" |sed -e "s/^patching file/$G patching > $WH/g;s/^Hunk/$P Hunk     > $Y/g;s/FAILED/$R FAILED/g; ;s/-- saving/$Y -- saving/g;"
+				fi
 			done
 			mark_patched
 		else
