@@ -181,13 +181,13 @@ _apply_consolepatch(){
 
 mark_patched(){
 	patches="$(echo "${patchlist[@]}" | xargs | sed 's/ /\\n\\t\\t/g')"
-	
+
 	#mark oscam-svn as patched
 	echo "$patches" > "$workdir/SVN-IS-PATCHED"
 }
 
 patch_webif(){
-	
+
 	if [ -f "$workdir/SVN-IS-PATCHED" ]
 	then
 		if [ -s "$workdir/SVN-IS-PATCHED" ]
@@ -197,7 +197,7 @@ patch_webif(){
 		else
 			patches='yes'
 		fi
-		
+
 		#show patch file information in oscam WebIf
 		sed -i '/^#define S3PATCHED/d' "$svndir/config.h"
 		sed -i "/^#endif \/\/OSCAM_CONFIG_H_/s/^/#define S3PATCHED \""$(printf '%q' $patches)"\"\n/" "$svndir/config.h"
