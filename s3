@@ -34,8 +34,8 @@ configdir="$sdir/configs"
 
 # create folders
 mkdir -p "$tcdir/native/bin" 2>/dev/null
-mkdir -p support/{archive,binaries,downloads,software,logs,patches,backup_svn,menu_save,upx} 2>/dev/null
-[ -f support/patches/no.patch ] && rm -f ./support/patches/no.patch 2>/dev/null
+mkdir -p $sdir/{archive,binaries,downloads,software,logs,patches,backup_svn,menu_save,upx} 2>/dev/null
+[ -f $sdir/patches/no.patch ] && rm -f $sdir/patches/no.patch 2>/dev/null
 
 # create links
 [ ! -d "$ldir" ] && clear && echo -e "\n folder creation error\n\n" && exit

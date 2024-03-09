@@ -692,26 +692,6 @@ _get_config_con(){
 		rm -rf "$tmp.load" "$tmp1.load"
 	fi
 }
-_gtedit(){
-	if [ -f "$tccfgdir/$_toolchainname" ]
-	then
-		source "$tccfgdir/$_toolchainname"
-		input=$("$gui" "$st_" "$bt_" "$title_" --title " -[ $1 Toolchain ]- " --inputbox "\n CONF_DIR=$_oscamconfdir_default 'default'\n [ESC] = default\n" 0 0 "$_oscamconfdir_custom")
-		retval=$?
-
-		case $retval in
-			0)
-				confdir="$input";;
-			1)
-				confdir="$_oscamconfdir_custom";;
-			255)
-				confdir="$_oscamconfdir_default";;
-		esac
-		sed -i s@^_oscamconfdir_custom.*@_oscamconfdir_custom=\"$confdir\"@ "$tccfgdir/$_toolchainname"
-		source "$tccfgdir/$_toolchainname"
-	fi
-}
-
 check_url(){
 	if ! http_code=$(curl --output /dev/null --write-out "%{http_code}" --silent --fail "$1")
 	then
