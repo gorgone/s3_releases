@@ -89,7 +89,7 @@ _generate_oscam_name(){
 	[ "$1" == "native" ] && _b_name="$(uname -s)-$(uname -m)" || _b_name="$1"
 	if [ "${s3cfg_vars[ADD_PROFILE_NAME]}" == "0" ] || [ $pf_name == "not_set" ]
 	then
-		oscam_name="oscam-svn$(REVISION)-$_b_name$_webif$_dvbapi$_ssl$_usb$_pcsc$_stapi$_stapi5$_emu$_ipv6$_icam$_neon$_upx"
+		oscam_name="oscam-svn$(REVISION)-$_b_name$_webif$_dvbapi$_ssl$_usb$_pcsc$_dvbcsa$_stapi$_stapi5$_emu$_ipv6$_icam$_neon$_upx"
 	else
 		oscam_name="oscam-svn$(REVISION)-${pf_name%.*}";
 	fi

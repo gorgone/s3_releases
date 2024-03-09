@@ -95,6 +95,7 @@ _cmd_build(){
 	EXTRA_USE=;
 	_usb=;
 	_pcsc=;
+	_dvbcsa=;
 	_stapi=;
 	_stapi5=;
 	_make="make"
@@ -121,6 +122,8 @@ _cmd_build(){
 			"USE_PCSC=1")
 					_pcsc_on
 					_pcsc="-pcsc";;			# set pcsc suffix to name
+			"USE_LIBDVBCSA=1")
+					_dvbcsa="-libdvbcsa";;		# set libdvbcsa suffix to name
 			"USE_TARGZ=1")
 					s3cfg_vars[TARGZ]=1;;	# overwrite global
 			"USE_COMPRESS=1")
@@ -200,7 +203,7 @@ printf "$y_l\n |       set : ${cdtag}$w_l"
 
 #support libdvbcsa static linking
 	libdvbcsa="$(find $SYSROOT -name "libdvbcsa.a" -type f -print -quit)"
-	[ "$($svndir/config.sh --enabled MODULE_STREAMRELAY)" == Y ] && [ -f "$libdvbcsa" ] && DVBCSA_STATIC="LIBDVBCSA_LIB=$libdvbcsa"
+	[ "$($svndir/config.sh --enabled MODULE_STREAMRELAY)" == Y ] && [ -f "$libdvbcsa" ] && DVBCSA_STATIC="LIBDVBCSA_LIB=$libdvbcsa" && _dvbcsa="-libdvbcsa"
 
 #max cpu usage
 	if [ -f "$configdir/max_cpus" ]
