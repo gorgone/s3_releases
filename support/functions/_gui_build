@@ -105,11 +105,12 @@ _gui_build(){
 		[ "${USE_vars[USE_SSL]}" == "USE_SSL=1" ] && SSL_STATIC="SSL_LIB=$(find $SYSROOT -name "libssl.a" -type f -print -quit)"
 		[ "${USE_vars[USE_LIBUSB]}" == "USE_LIBUSB=1" ] && LIBUSB_STATIC="LIBUSB_LIB=$(find $SYSROOT -name "libusb-1.0.a" -type f -print -quit)"
 		[ "${USE_vars[USE_PCSC]}" == "USE_PCSC=1" ] && PCSC_STATIC="PCSC_LIB=$(find $SYSROOT -name "libpcsclite.a" -type f -print -quit)"
+		[ "${USE_vars[USE_LIBDVBCSA]}" == "USE_LIBDVBCSA=1" ] && DVBCSA_STATIC="LIBDVBCSA_LIB=$(find $SYSROOT -name "libdvbcsa.a" -type f -print -quit)"
 	else
 		static=""
 	fi
 
-#support libdvbcsa static linking
+#force libdvbcsa static linking, until this lib is available on image feeds
 	libdvbcsa="$(find $SYSROOT -name "libdvbcsa.a" -type f -print -quit)"
 	[ "$($svndir/config.sh --enabled MODULE_STREAMRELAY)" == Y ] && [ -f "$libdvbcsa" ] && DVBCSA_STATIC="LIBDVBCSA_LIB=$libdvbcsa" && _dvbcsa="-libdvbcsa"
 

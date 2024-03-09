@@ -79,6 +79,7 @@ _cmd_build(){
 		fi
 
 	done
+	echo -en "\e[1A"
 
 #fix smargo case
 	if [ "$(./config.sh -e CARDREADER_SMARGO)" == "Y" ] || [ "${USE_vars[$e]}" == "USE_LIBUSB=1" ]
@@ -123,7 +124,7 @@ _cmd_build(){
 					_pcsc_on
 					_pcsc="-pcsc";;			# set pcsc suffix to name
 			"USE_LIBDVBCSA=1")
-					_dvbcsa="-libdvbcsa";;		# set libdvbcsa suffix to name
+					_dvbcsa="-libdvbcsa";;	# set libdvbcsa suffix to name
 			"USE_TARGZ=1")
 					s3cfg_vars[TARGZ]=1;;	# overwrite global
 			"USE_COMPRESS=1")
@@ -196,12 +197,13 @@ printf "$y_l\n |       set : ${cdtag}$w_l"
 		[ "${USE_vars[USE_SSL]}" == "USE_SSL=1" ] && SSL_STATIC="SSL_LIB=$(find $SYSROOT -name "libssl.a" -type f -print -quit)"
 		[ "${USE_vars[USE_LIBUSB]}" == "USE_LIBUSB=1" ] && LIBUSB_STATIC="LIBUSB_LIB=$(find $SYSROOT -name "libusb-1.0.a" -type f -print -quit)"
 		[ "${USE_vars[USE_PCSC]}" == "USE_PCSC=1" ] && PCSC_STATIC="PCSC_LIB=$(find $SYSROOT -name "libpcsclite.a" -type f -print -quit)"
+		[ "${USE_vars[USE_LIBDVBCSA]}" == "USE_LIBDVBCSA=1" ] && DVBCSA_STATIC="LIBDVBCSA_LIB=$(find $SYSROOT -name "libdvbcsa.a" -type f -print -quit)"
 	else
 		printf "$y_l\n | BUILDTYPE : dynamic"
 		static=""
 	fi
 
-#support libdvbcsa static linking
+#force libdvbcsa static linking, until this lib is available on image feeds
 	libdvbcsa="$(find $SYSROOT -name "libdvbcsa.a" -type f -print -quit)"
 	[ "$($svndir/config.sh --enabled MODULE_STREAMRELAY)" == Y ] && [ -f "$libdvbcsa" ] && DVBCSA_STATIC="LIBDVBCSA_LIB=$libdvbcsa" && _dvbcsa="-libdvbcsa"
 

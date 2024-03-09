@@ -50,7 +50,7 @@ else
 	printf "\n$WH  Patch Status :$G CLEAN \n"
 	touch "$workdir/EMU_ON"
 fi
-	
+
 	printf $re_
 	_nl
 }
