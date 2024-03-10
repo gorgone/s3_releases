@@ -78,7 +78,8 @@ _stapi5_off(){
 }
 _generate_oscam_name(){
 	cd "$svndir";_dvbapi=$(
-	[ "$(./config.sh --enabled HAVE_DVBAPI)" == Y ] && echo -dvbapi || printf ''; );_webif=$(
+	[ "$(./config.sh --enabled HAVE_DVBAPI)" == Y ] && echo -dvbapi || printf ''; );_dvbapi=$(
+	[ "$(./config.sh --enabled CARDREADER_GXAPI)" == Y ] && echo -gxapi || echo -n $_dvbapi; );_webif=$(
 	[ "$(./config.sh --enabled WEBIF)" == Y ] && echo -webif || printf ''; );_ssl=$(
 	[ "$(./config.sh --enabled WITH_SSL)" == Y ] && echo -ssl || printf ''; );_emu=$(
 	[ "$(./config.sh --enabled WITH_EMU)" == Y ] && echo -emu$(./config.sh --emu-version) || printf ''; );_neon=$(
