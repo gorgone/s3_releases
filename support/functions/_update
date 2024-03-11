@@ -11,7 +11,7 @@ update_me(){
 
 	local_revision=$(gitrevision $s3local)
 	online_revision=$(gitrevision $s3url)
-	
+
 	if [ ! "$local_revision" == "$online_revision" ]
 	then
 		printf "  update s3_git\n   from Local Revision: $local_revision\n   to  Remote Revision: $online_revision\n"
