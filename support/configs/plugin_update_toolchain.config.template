@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="61";
+S3TUP_CONFIG_VERSION="62";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -442,8 +442,8 @@ LIB_DVB32_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@ --
 LIB_DVB32_tasks+=('make -j@CPUS@;');
 LIB_DVB32_tasks+=('make install;');
 LIB_DVB32_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n\nName: libdvbcsa\nDescription: libdvbcsa is a free and portable implementation of the DVB Common Scrambling algorithm with decryption and encryption capabilities\nVersion: $LIB_DVB32_version\nCflags: -I\${includedir}" > "@PREFIX@/lib/pkgconfig/libdvbcsa.pc";');
-LIB_DVB32_tasks+=('zip -jy9 "$bdir/@HOST@@API@-${LIB_DVB32_name}-lib-${LIB_DVB32_version}.zip" -xi "@PREFIX@/lib/libdvbcsa.so"*;');
-#LIB_DVB32_tasks+=('zip -jy9 "$bdir/@HOST@@API@-${LIB_DVB32_name}-bench-${LIB_DVB32_version}.zip" -xi "@PREFIX@/bin/bench"* "@PREFIX@/bin/test"*;');
+LIB_DVB32_tasks+=('zip -jy9FS "$bdir/@HOST@@API@-${LIB_DVB32_name}-lib-${LIB_DVB32_version}.zip" -xi "@PREFIX@/lib/libdvbcsa.so"*;');
+#LIB_DVB32_tasks+=('zip -jy9FS "$bdir/@HOST@@API@-${LIB_DVB32_name}-bench-${LIB_DVB32_version}.zip" -xi "@PREFIX@/bin/bench"* "@PREFIX@/bin/test"*;');
 LIB_DVB32_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libdvbcsa.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
 
 # libdvbcsa 1.x (Use native 64 bits integers for bitslice)
@@ -465,8 +465,8 @@ LIB_DVB64_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@ --
 LIB_DVB64_tasks+=('make -j@CPUS@;');
 LIB_DVB64_tasks+=('make install;');
 LIB_DVB64_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n\nName: libdvbcsa\nDescription: libdvbcsa is a free and portable implementation of the DVB Common Scrambling algorithm with decryption and encryption capabilities\nVersion: $LIB_DVB64_version\nCflags: -I\${includedir}" > "@PREFIX@/lib/pkgconfig/libdvbcsa.pc";');
-LIB_DVB64_tasks+=('zip -jy9 "$bdir/@HOST@@API@-${LIB_DVB64_name}-lib-${LIB_DVB64_version}.zip" -xi "@PREFIX@/lib/libdvbcsa.so"*;');
-#LIB_DVB64_tasks+=('zip -jy9 "$bdir/@HOST@@API@-${LIB_DVB64_name}-bench-${LIB_DVB64_version}.zip" -xi "@PREFIX@/bin/bench"* "@PREFIX@/bin/test"*;');
+LIB_DVB64_tasks+=('zip -jy9FS "$bdir/@HOST@@API@-${LIB_DVB64_name}-lib-${LIB_DVB64_version}.zip" -xi "@PREFIX@/lib/libdvbcsa.so"*;');
+#LIB_DVB64_tasks+=('zip -jy9FS "$bdir/@HOST@@API@-${LIB_DVB64_name}-bench-${LIB_DVB64_version}.zip" -xi "@PREFIX@/bin/bench"* "@PREFIX@/bin/test"*;');
 LIB_DVB64_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libdvbcsa.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
 
 # libdvbcsa 1.x (Use NEON for bitslice)
@@ -488,8 +488,8 @@ LIB_DVB128_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@ -
 LIB_DVB128_tasks+=('make -j@CPUS@;');
 LIB_DVB128_tasks+=('make install;');
 LIB_DVB128_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n\nName: libdvbcsa\nDescription: libdvbcsa is a free and portable implementation of the DVB Common Scrambling algorithm with decryption and encryption capabilities\nVersion: $LIB_DVB128_version\nCflags: -I\${includedir}" > "@PREFIX@/lib/pkgconfig/libdvbcsa.pc";');
-LIB_DVB128_tasks+=('zip -jy9 "$bdir/@HOST@@API@-${LIB_DVB128_name}-lib-${LIB_DVB128_version}.zip" -xi "@PREFIX@/lib/libdvbcsa.so"*;');
-#LIB_DVB128_tasks+=('zip -jy9 "$bdir/@HOST@@API@-${LIB_DVB128_name}-bench-${LIB_DVB128_version}.zip" -xi "@PREFIX@/bin/bench"* "@PREFIX@/bin/test"*;');
+LIB_DVB128_tasks+=('zip -jy9FS "$bdir/@HOST@@API@-${LIB_DVB128_name}-lib-${LIB_DVB128_version}.zip" -xi "@PREFIX@/lib/libdvbcsa.so"*;');
+#LIB_DVB128_tasks+=('zip -jy9FS "$bdir/@HOST@@API@-${LIB_DVB128_name}-bench-${LIB_DVB128_version}.zip" -xi "@PREFIX@/bin/bench"* "@PREFIX@/bin/test"*;');
 LIB_DVB128_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libdvbcsa.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
 
 # zlib
