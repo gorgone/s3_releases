@@ -205,7 +205,7 @@ _pre_build(){
 	printf $WH
 	ologo
 	_tcfile=""
-	dln="$(basename $(decode "$_toolchainfilename"))"
+	[ -n "$_toolchainfilename" ] && dln="$(basename $(decode "$_toolchainfilename"))" || dln=""
 	tc_dl="$dldir/$dln"
 	if [ -f "$tcdir/$_toolchainname/bin/$_compiler""gcc" ]
 	then

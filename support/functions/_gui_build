@@ -17,7 +17,7 @@ _gui_build(){
 	[ -f "$configdir/max_cpus" ] && cpus="$(cat "$configdir/max_cpus")" || cpus="$(CPUS)"
 
 	CROSS="$tcdir/$_toolchainname/bin/$_compiler"
-	SYSROOT="$tcdir/$_toolchainname/$_sysroot"
+	SYSROOT="$(realpath -sm $tcdir/$_toolchainname/$_sysroot)"
 	_make="make"
 
 	[ "$_stagingdir" == "1" ] && export STAGING_DIR="$tcdir/$_toolchainname"
@@ -111,7 +111,7 @@ _gui_build(){
 	fi
 
 #force libdvbcsa static linking, until this lib is available on image feeds
-	libdvbcsa="$(find $SYSROOT -name "libdvbcsa.a" -type f -print -quit)"
+	libdvbcsa="$(find $SYSROOT -name "libdvbcsa.a" -type f -print -quit 2> /dev/null)"
 	[ "$($svndir/config.sh --enabled MODULE_STREAMRELAY)" == Y ] && [ -f "$libdvbcsa" ] && DVBCSA_STATIC="LIBDVBCSA_LIB=$libdvbcsa" && _dvbcsa="-libdvbcsa"
 
 	USESTRING_=${USE_vars[@]}

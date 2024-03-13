@@ -18,7 +18,7 @@ _cmd_build(){
 
 #set build defaults
 	CROSS="$tcdir/$_toolchainname/bin/$_compiler"
-	SYSROOT="$tcdir/$_toolchainname/$_sysroot"
+	SYSROOT="$(realpath -sm $tcdir/$_toolchainname/$_sysroot)"
 	[ "$_stagingdir" == "1" ] && export STAGING_DIR="$tcdir/$_toolchainname"
 	[ "$_androidndkdir" == "1" ] && export ANDROID_NDK="$tcdir/$_toolchainname"
 	[ -f "$configdir/compiler_option" ] && co=$(cat "$configdir/compiler_option") || co="-O2"
@@ -204,7 +204,7 @@ printf "$y_l\n |       set : ${cdtag}$w_l"
 	fi
 
 #force libdvbcsa static linking, until this lib is available on image feeds
-	libdvbcsa="$(find $SYSROOT -name "libdvbcsa.a" -type f -print -quit)"
+	libdvbcsa="$(find $SYSROOT -name "libdvbcsa.a" -type f -print -quit 2> /dev/null)"
 	[ "$($svndir/config.sh --enabled MODULE_STREAMRELAY)" == Y ] && [ -f "$libdvbcsa" ] && DVBCSA_STATIC="LIBDVBCSA_LIB=$libdvbcsa" && _dvbcsa="-libdvbcsa"
 
 #max cpu usage
