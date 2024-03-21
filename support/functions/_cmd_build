@@ -82,12 +82,12 @@ _cmd_build(){
 	echo -en "\e[1A"
 
 #fix smargo case
-	if [ "$(./config.sh -e CARDREADER_SMARGO)" == "Y" ] || [ "${USE_vars[$e]}" == "USE_LIBUSB=1" ]
+	if [ "$($svndir/config.sh -e CARDREADER_SMARGO)" == "Y" ] || [ "${USE_vars[$e]}" == "USE_LIBUSB=1" ]
 	then
-		silent=$(./config.sh -E CARDREADER_SMARGO)
+		silent=$($svndir/config.sh -E CARDREADER_SMARGO)
 		check_smargo
 	else
-		silent=$(./config.sh -D CARDREADER_SMARGO)
+		silent=$($svndir/config.sh -D CARDREADER_SMARGO)
 		check_smargo
 	fi
 
