@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="63";
+S3TUP_CONFIG_VERSION="64";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -65,7 +65,7 @@ ANDK_SETUP_tasks+=('mv --force "$(basename "$ANDK_PKG_URL" | cut -d "-" -f 1-3)"
 ANDK_SETUP_tasks+=('chmod -R 755 "@ANDKSOURCE@";'); # setup command3
 
 # Library build settings
-LIBS=(SSL_320 SSL_310 SSL_300 SSL_111 SSL_110 SSL_102 SSL_102B SSL_100 SSL_098 LIB_CURL LIB_USB LIB_USBB LIB_USB0 LIB_PCSC LIB_PCSCB LIB_CCID LIB_DVB32 LIB_DVB64 LIB_DVB128 LIB_ZLIB); # List of ordered libraries. Only libraries in this list are available
+LIBS=(SSL_320 SSL_310 SSL_300 SSL_111 SSL_110 SSL_102 SSL_102B SSL_100 SSL_098 LIB_CURL LIB_USB LIB_USBB LIB_USB0 LIB_PCSC LIB_PCSCB LIB_CCID LIB_DVBCSA LIB_DVBC64 LIB_DVBC32 LIB_ZLIB); # List of ordered libraries. Only libraries in this list are available
 LIBS_LIST_BETA="0"; # In(Ex)clude libraries defined as beta
 LIBS_AUTO_INTEGRATE="1"; # Automatically reintegrate libraries when rebuilding toolchains
 LIBS_STATIC_BUILD="0"; #Build static instead of dynamic libraries
@@ -423,68 +423,82 @@ LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" ] && zip -j "$bdir/@HOST@@API@-lib
 LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" ] && zip -j "$bdir/@HOST@@API@-libccidtwin.zip" -xi "@PREFIX@/lib/pcsc/drivers/serial/libccidtwin.so";');
 LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" ] && zip -j "$bdir/@HOST@@API@-libccidplist.zip" -xi "@PREFIX@/lib/pcsc/drivers/ifd-ccid.bundle/Contents/Info.plist";');
 
-# libdvbcsa 1.x (Use native 32 bits integers for bitslice)
-LIB_DVB32="1";
-LIB_DVB32_beta="0";
-LIB_DVB32_name="libdvbcsa";
-LIB_DVB32_tag="";
-LIB_DVB32_version="1.1.0-32";
-LIB_DVB32_desc="$LIB_DVB32_name $LIB_DVB32_version";
-LIB_DVB32_check="libdvbcsa.pc $LIB_DVB32_version";
-LIB_DVB32_url="https://github.com/oe-mirrors/libdvbcsa/archive/refs/heads/master.zip";
-LIB_DVB32_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
-LIB_DVB32_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
-LIB_DVB32_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
-LIB_DVB32_tasks+=('[ "@TYPE@" == "android-ndk" ] && export CC=gcc || export CC=@CC@;');
-LIB_DVB32_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
-LIB_DVB32_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@ --enable-uint32;');
-LIB_DVB32_tasks+=('make -j@CPUS@;');
-LIB_DVB32_tasks+=('make install;');
-LIB_DVB32_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n\nName: libdvbcsa\nDescription: libdvbcsa is a free and portable implementation of the DVB Common Scrambling algorithm with decryption and encryption capabilities\nVersion: $LIB_DVB32_version\nCflags: -I\${includedir}" > "@PREFIX@/lib/pkgconfig/libdvbcsa.pc";');
-LIB_DVB32_tasks+=('zip -jy9FS "$bdir/@HOST@@API@-${LIB_DVB32_name}-lib-${LIB_DVB32_version}.zip" -xi "@PREFIX@/lib/libdvbcsa.so"*;');
-LIB_DVB32_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libdvbcsa.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
+# libdvbcsa 1.x (autodetecting bitslice)
+LIB_DVBCSA="1";
+LIB_DVBCSA_beta="0";
+LIB_DVBCSA_name="libdvbcsa";
+LIB_DVBCSA_tag="";
+LIB_DVBCSA_version="1.1.0";
+LIB_DVBCSA_desc="$LIB_DVBCSA_name ${LIB_DVBCSA_version} (auto)";
+LIB_DVBCSA_check="libdvbcsa.pc ${LIB_DVBCSA_version}";
+LIB_DVBCSA_checklib="libdvbcsa.so.${LIB_DVBCSA_version}-auto";
+LIB_DVBCSA_url="https://github.com/oe-mirrors/libdvbcsa/archive/refs/heads/master.zip";
+LIB_DVBCSA_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
+LIB_DVBCSA_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
+LIB_DVBCSA_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
+LIB_DVBCSA_tasks+=('[ "@TYPE@" == "android-ndk" ] && export CC=gcc || export CC=@CC@;');
+LIB_DVBCSA_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
+LIB_DVBCSA_tasks+=('FLAGS=$(@CC@ --target-help 2>&1 | grep -iw "altivec"                       &>/dev/null && echo "--enable-altivec") && BITSLICE="128";');
+LIB_DVBCSA_tasks+=('[ -z "$FLAGS" ] && FLAGS=$(@CC@ --target-help 2>&1 | grep -iw "avx2"       &>/dev/null && echo "--enable-avx2")    && BITSLICE="256";');
+LIB_DVBCSA_tasks+=('[ -z "$FLAGS" ] && FLAGS=$(@CC@ --target-help 2>&1 | grep -iw "ssse3"      &>/dev/null && echo "--enable-ssse3")   && BITSLICE="128";');
+LIB_DVBCSA_tasks+=('[ -z "$FLAGS" ] && FLAGS=$(@CC@ --target-help 2>&1 | grep -iw "sse2"       &>/dev/null && echo "--enable-sse2")    && BITSLICE="128";');
+LIB_DVBCSA_tasks+=('[ -z "$FLAGS" ] && FLAGS=$(@CC@ --target-help 2>&1 | grep -iw "mmx"        &>/dev/null && echo "--enable-mmx")     && BITSLICE="64";');
+LIB_DVBCSA_tasks+=('[ -z "$FLAGS" ] && FLAGS=$(@CC@ --target-help 2>&1 | grep -iw "neon\|simd" &>/dev/null && echo "--enable-neon")    && BITSLICE="128";');
+LIB_DVBCSA_tasks+=('[ -z "$FLAGS" ] && FLAGS="--enable-uint32" && BITSLICE="32";');
+LIB_DVBCSA_tasks+=('echo "autodetected bitslice: $FLAGS -> ${BITSLICE}";');
+LIB_DVBCSA_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS;');
+LIB_DVBCSA_tasks+=('make -j@CPUS@;');
+LIB_DVBCSA_tasks+=('make install;');
+LIB_DVBCSA_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n\nName: libdvbcsa\nDescription: libdvbcsa is a free and portable implementation of the DVB Common Scrambling algorithm with decryption and encryption capabilities\nVersion: ${LIB_DVBCSA_version}-${BITSLICE}\nCflags: -I\${includedir}" > "@PREFIX@/lib/pkgconfig/libdvbcsa.pc";');
+LIB_DVBCSA_tasks+=('rm -f "@PREFIX@/lib/${LIB_DVBCSA_name}.so.${LIB_DVBCSA_version}-"*; ln -frs "@PREFIX@/lib/${LIB_DVBCSA_name}.so.${LIB_DVBCSA_version}" "@PREFIX@/lib/${LIB_DVBCSA_name}.so.${LIB_DVBCSA_version}-auto";');
+LIB_DVBCSA_tasks+=('zip -jy9FS "$bdir/@HOST@@API@-${LIB_DVBCSA_name}-lib-${LIB_DVBCSA_version}-${BITSLICE}.zip" -xi "@PREFIX@/lib/libdvbcsa.so"*;');
+LIB_DVBCSA_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libdvbcsa.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
 
 # libdvbcsa 1.x (Use native 64 bits integers for bitslice)
-LIB_DVB64="1";
-LIB_DVB64_beta="0";
-LIB_DVB64_name="libdvbcsa";
-LIB_DVB64_tag="";
-LIB_DVB64_version="1.1.0-64";
-LIB_DVB64_desc="$LIB_DVB64_name $LIB_DVB64_version";
-LIB_DVB64_check="libdvbcsa.pc $LIB_DVB64_version";
-LIB_DVB64_url="https://github.com/oe-mirrors/libdvbcsa/archive/refs/heads/master.zip";
-LIB_DVB64_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
-LIB_DVB64_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
-LIB_DVB64_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
-LIB_DVB64_tasks+=('[ "@TYPE@" == "android-ndk" ] && export CC=gcc || export CC=@CC@;');
-LIB_DVB64_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
-LIB_DVB64_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@ --enable-uint64;');
-LIB_DVB64_tasks+=('make -j@CPUS@;');
-LIB_DVB64_tasks+=('make install;');
-LIB_DVB64_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n\nName: libdvbcsa\nDescription: libdvbcsa is a free and portable implementation of the DVB Common Scrambling algorithm with decryption and encryption capabilities\nVersion: $LIB_DVB64_version\nCflags: -I\${includedir}" > "@PREFIX@/lib/pkgconfig/libdvbcsa.pc";');
-LIB_DVB64_tasks+=('zip -jy9FS "$bdir/@HOST@@API@-${LIB_DVB64_name}-lib-${LIB_DVB64_version}.zip" -xi "@PREFIX@/lib/libdvbcsa.so"*;');
-LIB_DVB64_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libdvbcsa.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
+LIB_DVBC64="1";
+LIB_DVBC64_beta="0";
+LIB_DVBC64_name="libdvbcsa";
+LIB_DVBC64_tag="";
+LIB_DVBC64_version="1.1.0-64";
+LIB_DVBC64_desc="$LIB_DVBC64_name ${LIB_DVBC64_version}";
+LIB_DVBC64_check="libdvbcsa.pc 1.1.0-64";
+LIB_DVBC64_checklib="libdvbcsa.so.${LIB_DVBC64_version}";
+LIB_DVBC64_url="https://github.com/oe-mirrors/libdvbcsa/archive/refs/heads/master.zip";
+LIB_DVBC64_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
+LIB_DVBC64_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
+LIB_DVBC64_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
+LIB_DVBC64_tasks+=('[ "@TYPE@" == "android-ndk" ] && export CC=gcc || export CC=@CC@;');
+LIB_DVBC64_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
+LIB_DVBC64_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@ --enable-uint64;');
+LIB_DVBC64_tasks+=('make -j@CPUS@;');
+LIB_DVBC64_tasks+=('make install;');
+LIB_DVBC64_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n\nName: libdvbcsa\nDescription: libdvbcsa is a free and portable implementation of the DVB Common Scrambling algorithm with decryption and encryption capabilities\nVersion: $LIB_DVBC64_version\nCflags: -I\${includedir}" > "@PREFIX@/lib/pkgconfig/libdvbcsa.pc";');
+LIB_DVBC64_tasks+=('rm -f "@PREFIX@/lib/${LIB_DVBC64_name}.so.1.1.0-"*; ln -frs "@PREFIX@/lib/${LIB_DVBC64_name}.so.1.1.0" "@PREFIX@/lib/${LIB_DVBC64_name}.so.${LIB_DVBC64_version}";');
+LIB_DVBC64_tasks+=('zip -jy9FS "$bdir/@HOST@@API@-${LIB_DVBC64_name}-lib-${LIB_DVBC64_version}.zip" -xi "@PREFIX@/lib/libdvbcsa.so"*;');
+LIB_DVBC64_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libdvbcsa.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
 
-# libdvbcsa 1.x (Use NEON for bitslice)
-LIB_DVB128="1";
-LIB_DVB128_beta="0";
-LIB_DVB128_name="libdvbcsa";
-LIB_DVB128_tag="";
-LIB_DVB128_version="1.1.0-128";
-LIB_DVB128_desc="$LIB_DVB128_name $LIB_DVB128_version (NEON)";
-LIB_DVB128_check="libdvbcsa.pc $LIB_DVB128_version";
-LIB_DVB128_url="https://github.com/oe-mirrors/libdvbcsa/archive/refs/heads/master.zip";
-LIB_DVB128_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
-LIB_DVB128_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
-LIB_DVB128_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
-LIB_DVB128_tasks+=('[ "@TYPE@" == "android-ndk" ] && export CC=gcc || export CC=@CC@;');
-LIB_DVB128_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
-LIB_DVB128_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@ --enable-neon;');
-LIB_DVB128_tasks+=('make -j@CPUS@;');
-LIB_DVB128_tasks+=('make install;');
-LIB_DVB128_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n\nName: libdvbcsa\nDescription: libdvbcsa is a free and portable implementation of the DVB Common Scrambling algorithm with decryption and encryption capabilities\nVersion: $LIB_DVB128_version\nCflags: -I\${includedir}" > "@PREFIX@/lib/pkgconfig/libdvbcsa.pc";');
-LIB_DVB128_tasks+=('zip -jy9FS "$bdir/@HOST@@API@-${LIB_DVB128_name}-lib-${LIB_DVB128_version}.zip" -xi "@PREFIX@/lib/libdvbcsa.so"*;');
-LIB_DVB128_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libdvbcsa.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
+# libdvbcsa 1.x (Use native 32 bits integers for bitslice)
+LIB_DVBC32="1";
+LIB_DVBC32_beta="0";
+LIB_DVBC32_name="libdvbcsa";
+LIB_DVBC32_tag="";
+LIB_DVBC32_version="1.1.0-32";
+LIB_DVBC32_desc="$LIB_DVBC32_name ${LIB_DVBC32_version}";
+LIB_DVBC32_check="libdvbcsa.pc ${LIB_DVBC32_version}";
+LIB_DVBC32_checklib="libdvbcsa.so.${LIB_DVBC32_version}";
+LIB_DVBC32_url="https://github.com/oe-mirrors/libdvbcsa/archive/refs/heads/master.zip";
+LIB_DVBC32_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
+LIB_DVBC32_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
+LIB_DVBC32_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
+LIB_DVBC32_tasks+=('[ "@TYPE@" == "android-ndk" ] && export CC=gcc || export CC=@CC@;');
+LIB_DVBC32_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
+LIB_DVBC32_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@ --enable-uint32;');
+LIB_DVBC32_tasks+=('make -j@CPUS@;');
+LIB_DVBC32_tasks+=('make install;');
+LIB_DVBC32_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n\nName: libdvbcsa\nDescription: libdvbcsa is a free and portable implementation of the DVB Common Scrambling algorithm with decryption and encryption capabilities\nVersion: $LIB_DVBC32_version\nCflags: -I\${includedir}" > "@PREFIX@/lib/pkgconfig/libdvbcsa.pc";');
+LIB_DVBC32_tasks+=('rm -f "@PREFIX@/lib/${LIB_DVBC32_name}.so.1.1.0-"*; ln -frs "@PREFIX@/lib/${LIB_DVBC32_name}.so.1.1.0" "@PREFIX@/lib/${LIB_DVBC32_name}.so.${LIB_DVBC32_version}";');
+LIB_DVBC32_tasks+=('zip -jy9FS "$bdir/@HOST@@API@-${LIB_DVBC32_name}-lib-${LIB_DVBC32_version}.zip" -xi "@PREFIX@/lib/libdvbcsa.so"*;');
+LIB_DVBC32_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libdvbcsa.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
 
 # zlib
 LIB_ZLIB="1";
