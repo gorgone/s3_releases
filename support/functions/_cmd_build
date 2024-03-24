@@ -91,9 +91,14 @@ _cmd_build(){
 		check_smargo
 	fi
 
+#fix streamrelay case 
+	check_streamrelay
+
 #fill use variables and set name addons
 	USESTRING=;
 	EXTRA_USE=;
+	libcount=0;
+	statcount=0;
 	_usb=;
 	_pcsc=;
 	_dvbcsa=;
@@ -118,22 +123,26 @@ _cmd_build(){
 		fi
 
 		case "$uv" in
+			"USE_LIBCRYPTO=1")
+					((libcount++));;
+			"USE_SSL=1")
+					((libcount++));;
 			"USE_LIBUSB=1")
+					((libcount++));
 					_usb="-libusb";;		# set libusb suffix to name
 			"USE_PCSC=1")
+					((libcount++));
 					_pcsc_on
 					_pcsc="-pcsc";;			# set pcsc suffix to name
 			"USE_LIBDVBCSA=1")
+					((libcount++));
 					_dvbcsa="-libdvbcsa";;	# set libdvbcsa suffix to name
 			"USE_TARGZ=1")
 					s3cfg_vars[TARGZ]=1;;	# overwrite global
 			"USE_COMPRESS=1")
 					s3cfg_vars[COMPRESS]=1;;# overwrite global
-			"USE_EXTRA=1")
-					s3cfg_vars[EXTRA]=1;;# overwrite global
 			"USE_STATIC=1")
-					_make="make static"
-					s3cfg_vars[STATIC]=1;;# overwrite global
+					_make="make static";;
 			"USE_STAPI=1")
 					_stapi="-stapi"
 					[ -z "$stapi_lib_custom" ] && STAPI_LIB="STAPI_LIB=$sdir/stapi/liboscam_stapi.a" || STAPI_LIB="STAPI_LIB=$sdir/stapi/${stapi_lib_custom}"
@@ -180,7 +189,7 @@ printf "$y_l\n |       set : ${cdtag}$w_l"
 	fi
 
 #prepare extra_* variables
-	if [ "${s3cfg_vars[EXTRA]}" == "1" ]
+	if [ "${USE_vars[USE_EXTRA]}" == "USE_EXTRA=1" ]
 	then
 		printf "$y_l\n | EXTRAFLAGS : enabled"
 	else
@@ -188,24 +197,25 @@ printf "$y_l\n |       set : ${cdtag}$w_l"
 		unset extra_use extra_cc extra_ld extra_c
 	fi
 
-#static build
-	if [ "${s3cfg_vars[STATIC]}" == "1" ]
+#dynamic, static, mixed build
+	[ "${USE_vars[USE_LIBCRYPTO]}" == "USE_LIBCRYPTO=1" ] && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBCRYPTO]}" == "STATIC_LIBCRYPTO=1" ]	&& LIBCRYPTO_STATIC="LIBCRYPTO_LIB=$(find $SYSROOT -name "libcrypto.a" -type f -print -quit)"	&& ((statcount++))
+	[ "${USE_vars[USE_SSL]}" == "USE_SSL=1" ]             && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_SSL]}" == "STATIC_SSL=1" ]				&& SSL_STATIC="SSL_LIB=$(find $SYSROOT -name "libssl.a" -type f -print -quit)"					&& ((statcount++))
+	[ "${USE_vars[USE_LIBUSB]}" == "USE_LIBUSB=1" ]       && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBUSB]}" == "STATIC_LIBUSB=1" ]		&& LIBUSB_STATIC="LIBUSB_LIB=$(find $SYSROOT -name "libusb-1.0.a" -type f -print -quit)"		&& ((statcount++))
+	[ "${USE_vars[USE_PCSC]}" == "USE_PCSC=1" ]           && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_PCSC]}" == "STATIC_PCSC=1" ]			&& PCSC_STATIC="PCSC_LIB=$(find $SYSROOT -name "libpcsclite.a" -type f -print -quit)"			&& ((statcount++))
+	[ "${USE_vars[USE_LIBDVBCSA]}" == "USE_LIBDVBCSA=1" ] && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBDVBCSA]}" == "STATIC_LIBDVBCSA=1" ]	&& DVBCSA_STATIC="LIBDVBCSA_LIB=$(find $SYSROOT -name "libdvbcsa.a" -type f -print -quit)"		&& ((statcount++))
+
+	if [ $statcount -ge 1 -a $statcount -lt $libcount ]
+	then
+		printf "$y_l\n | BUILDTYPE : mixed"
+		buildtype="-mixed"
+	elif [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o $statcount -ge 1 -a $libcount -ge 1 -a $statcount -eq $libcount ]
 	then
 		printf "$y_l\n | BUILDTYPE : static"
-		static="-static"
-		[ "${USE_vars[USE_LIBCRYPTO]}" == "USE_LIBCRYPTO=1" ] && LIBCRYPTO_STATIC="LIBCRYPTO_LIB=$(find $SYSROOT -name "libcrypto.a" -type f -print -quit)"
-		[ "${USE_vars[USE_SSL]}" == "USE_SSL=1" ] && SSL_STATIC="SSL_LIB=$(find $SYSROOT -name "libssl.a" -type f -print -quit)"
-		[ "${USE_vars[USE_LIBUSB]}" == "USE_LIBUSB=1" ] && LIBUSB_STATIC="LIBUSB_LIB=$(find $SYSROOT -name "libusb-1.0.a" -type f -print -quit)"
-		[ "${USE_vars[USE_PCSC]}" == "USE_PCSC=1" ] && PCSC_STATIC="PCSC_LIB=$(find $SYSROOT -name "libpcsclite.a" -type f -print -quit)"
-		[ "${USE_vars[USE_LIBDVBCSA]}" == "USE_LIBDVBCSA=1" ] && DVBCSA_STATIC="LIBDVBCSA_LIB=$(find $SYSROOT -name "libdvbcsa.a" -type f -print -quit)"
+		buildtype="-static"
 	else
 		printf "$y_l\n | BUILDTYPE : dynamic"
-		static=""
+		buildtype=""
 	fi
-
-#force libdvbcsa static linking, until this lib is available on image feeds
-	libdvbcsa="$(find $SYSROOT -name "libdvbcsa.a" -type f -print -quit 2> /dev/null)"
-	[ "$($svndir/config.sh --enabled MODULE_STREAMRELAY)" == Y ] && [ -f "$libdvbcsa" ] && DVBCSA_STATIC="LIBDVBCSA_LIB=$libdvbcsa" && _dvbcsa="-libdvbcsa"
 
 #max cpu usage
 	if [ -f "$configdir/max_cpus" ]
@@ -227,7 +237,7 @@ then
 else
 	_generate_oscam_name "$_toolchainname"
 fi
-	oscam_name="$oscam_name$static"
+	oscam_name="$oscam_name$buildtype"
 	_nl
 	USESTRING=${USE_vars[@]}
 	EXTRA_USE=$extra_use

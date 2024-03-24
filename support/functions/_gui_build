@@ -29,6 +29,11 @@ _gui_build(){
 	make distclean > /dev/null 2>&1
 	USESTRING_=''
 	EXTRA_USE=''
+	libcount=0;
+	statcount=0;
+
+#fix streamrelay case 
+	check_streamrelay
 
 #do use_vars
 	for e2 in $USESTRING
@@ -59,22 +64,35 @@ _gui_build(){
 
 	done
 
-	if [ "${USE_vars[USE_PCSC]}" == "USE_PCSC=1" ]
+	if [ "${USE_vars[USE_LIBCRYPTO]}" == "USE_LIBCRYPTO=1" ]
 	then
-		_pcsc="-pcsc"
-	else
-		_pcsc=
+		((libcount++))
+	fi
+	
+	if [ "${USE_vars[USE_SSL]}" == "USE_SSL=1" ]
+	then
+		((libcount++))
 	fi
 
 	if [ "${USE_vars[USE_LIBUSB]}" == "USE_LIBUSB=1" ]
 	then
+		((libcount++))
 		_usb="-libusb"
 	else
 		_usb=
 	fi
+
+	if [ "${USE_vars[USE_PCSC]}" == "USE_PCSC=1" ]
+	then
+		((libcount++))
+		_pcsc="-pcsc"
+	else
+		_pcsc=
+	fi
 	
 	if [ "${USE_vars[USE_LIBDVBCSA]}" == "USE_LIBDVBCSA=1" ]
 	then
+		((libcount++))
 		_dvbcsa="-libdvbcsa"
 	else
 		_dvbcsa=
@@ -83,43 +101,39 @@ _gui_build(){
 #IF SVN is Patched
 	if [ -f "$workdir/SVN-IS-PATCHED" ]
 	then
-		printf "$y_l\n | ISPATCHED :$P YES (integrate patch infomation into WebIf)"
 		patch_webif
 	fi
 
 #prepare extra_* variables
-	if [ "${s3cfg_vars[EXTRA]}" == "1" ]
+	if [ ! "${USE_vars[USE_EXTRA]}" == "USE_EXTRA=1" ]
 	then
-		printf "$y_l\n | EXTRAFLAGS : enabled"
-	else
-		printf "$y_l\n | EXTRAFLAGS : disabled"
 		unset extra_use extra_cc extra_ld extra_c
 	fi
 
-#static build
-	if [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" ]
+#dynamic, static, mixed build
+	[ "${USE_vars[USE_LIBCRYPTO]}" == "USE_LIBCRYPTO=1" ] && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBCRYPTO]}" == "STATIC_LIBCRYPTO=1" ]	&& LIBCRYPTO_STATIC="LIBCRYPTO_LIB=$(find $SYSROOT -name "libcrypto.a" -type f -print -quit)"	&& ((statcount++))
+	[ "${USE_vars[USE_SSL]}" == "USE_SSL=1" ]             && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_SSL]}" == "STATIC_SSL=1" ]				&& SSL_STATIC="SSL_LIB=$(find $SYSROOT -name "libssl.a" -type f -print -quit)"					&& ((statcount++))
+	[ "${USE_vars[USE_LIBUSB]}" == "USE_LIBUSB=1" ]       && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBUSB]}" == "STATIC_LIBUSB=1" ]		&& LIBUSB_STATIC="LIBUSB_LIB=$(find $SYSROOT -name "libusb-1.0.a" -type f -print -quit)"		&& ((statcount++))
+	[ "${USE_vars[USE_PCSC]}" == "USE_PCSC=1" ]           && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_PCSC]}" == "STATIC_PCSC=1" ]			&& PCSC_STATIC="PCSC_LIB=$(find $SYSROOT -name "libpcsclite.a" -type f -print -quit)"			&& ((statcount++))
+	[ "${USE_vars[USE_LIBDVBCSA]}" == "USE_LIBDVBCSA=1" ] && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBDVBCSA]}" == "STATIC_LIBDVBCSA=1" ]	&& DVBCSA_STATIC="LIBDVBCSA_LIB=$(find $SYSROOT -name "libdvbcsa.a" -type f -print -quit)"		&& ((statcount++))
+
+	if [ $statcount -ge 1 -a $statcount -lt $libcount ]
+	then
+		buildtype="-mixed"
+	elif [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o $statcount -ge 1 -a $libcount -ge 1 -a $statcount -eq $libcount ]
 	then
 		_make="make static"
-		static="-static"
-		[ "${USE_vars[USE_LIBCRYPTO]}" == "USE_LIBCRYPTO=1" ] && LIBCRYPTO_STATIC="LIBCRYPTO_LIB=$(find $SYSROOT -name "libcrypto.a" -type f -print -quit)"
-		[ "${USE_vars[USE_SSL]}" == "USE_SSL=1" ] && SSL_STATIC="SSL_LIB=$(find $SYSROOT -name "libssl.a" -type f -print -quit)"
-		[ "${USE_vars[USE_LIBUSB]}" == "USE_LIBUSB=1" ] && LIBUSB_STATIC="LIBUSB_LIB=$(find $SYSROOT -name "libusb-1.0.a" -type f -print -quit)"
-		[ "${USE_vars[USE_PCSC]}" == "USE_PCSC=1" ] && PCSC_STATIC="PCSC_LIB=$(find $SYSROOT -name "libpcsclite.a" -type f -print -quit)"
-		[ "${USE_vars[USE_LIBDVBCSA]}" == "USE_LIBDVBCSA=1" ] && DVBCSA_STATIC="LIBDVBCSA_LIB=$(find $SYSROOT -name "libdvbcsa.a" -type f -print -quit)"
+		buildtype="-static"
 	else
-		static=""
+		buildtype=""
 	fi
-
-#force libdvbcsa static linking, until this lib is available on image feeds
-	libdvbcsa="$(find $SYSROOT -name "libdvbcsa.a" -type f -print -quit 2> /dev/null)"
-	[ "$($svndir/config.sh --enabled MODULE_STREAMRELAY)" == Y ] && [ -f "$libdvbcsa" ] && DVBCSA_STATIC="LIBDVBCSA_LIB=$libdvbcsa" && _dvbcsa="-libdvbcsa"
 
 	USESTRING_=${USE_vars[@]}
 	EXTRA_USE=$extra_use
 
 #todo add switch for verbose
 	_generate_oscam_name "$_toolchainname"
-	oscam_name="$oscam_name$static"
+	oscam_name="$oscam_name$buildtype"
 	targztmp="$(mktemp)"
 
 	if [ ! "${USE_vars[USE_TARGZ]}" == "USE_TARGZ=1" ]
