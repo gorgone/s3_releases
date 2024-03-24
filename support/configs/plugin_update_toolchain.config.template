@@ -444,9 +444,9 @@ LIB_DVBCSA_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCH
 LIB_DVBCSA_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@ @OPTIMIZATION@;');
 LIB_DVBCSA_tasks+=('make -j@CPUS@;');
 LIB_DVBCSA_tasks+=('make install;');
-LIB_DVBCSA_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n\nName: libdvbcsa\nDescription: libdvbcsa is a free and portable implementation of the DVB Common Scrambling algorithm with decryption and encryption capabilities\nVersion: ${LIB_DVBCSA_version}\nCflags: -I\${includedir}" > "@PREFIX@/lib/pkgconfig/libdvbcsa.pc";');
-LIB_DVBCSA_tasks+=('rm -f "@PREFIX@/lib/${LIB_DVBCSA_name}.so.1.1.0-"*; ln -frs "@PREFIX@/lib/${LIB_DVBCSA_name}.so" "@PREFIX@/lib/${LIB_DVBCSA_name}.so.${LIB_DVBCSA_version}";');
-LIB_DVBCSA_tasks+=('zip -jy9FS "$bdir/@HOST@@API@-${LIB_DVBCSA_name}-${LIB_DVBCSA_version}.zip" -xi "@PREFIX@/lib/libdvbcsa.so"*;');
+LIB_DVBCSA_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n\nName: libdvbcsa\nDescription: libdvbcsa is a free and portable implementation of the DVB Common Scrambling algorithm with decryption and encryption capabilities\nVersion: 1.1.0-@BATCHSIZE@-@BITSLICE@\nCflags: -I\${includedir}" > "@PREFIX@/lib/pkgconfig/libdvbcsa.pc";');
+LIB_DVBCSA_tasks+=('rm -f "@PREFIX@/lib/${LIB_DVBCSA_name}.so.1.1.0-"*; ln -frs "@PREFIX@/lib/${LIB_DVBCSA_name}.so" "@PREFIX@/lib/${LIB_DVBCSA_name}.so.1.1.0-@BATCHSIZE@-@BITSLICE@";');
+LIB_DVBCSA_tasks+=('zip -jy9FS "$bdir/@HOST@@API@-${LIB_DVBCSA_name}-1.1.0-@BATCHSIZE@-@BITSLICE@.zip" -xi "@PREFIX@/lib/libdvbcsa.so"*;');
 LIB_DVBCSA_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libdvbcsa.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
 
 # libdvbcsa 1.x (Use native 64 bits integers for bitslice)

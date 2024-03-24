@@ -225,14 +225,14 @@ _integrate_libs(){
 		do
 			[ "${!libkey}" == "0" ] && continue;
 			libbeta="$libkey"_beta; [ "$LIBS_LIST_BETA" == "0" ] && [ "${!libbeta}" == "1" ] && continue; #skip beta libraries in list
-			libname="$libkey"_name; eval "$libname"='$(_replace_tokens "${!libname}")'; libname="${!libname}";
-			libversion="$libkey"_version; eval "$libversion"='$(_replace_tokens "${!libversion}")'; libversion="${!libversion}";
-			libdesc="$libkey"_desc; eval "$libdesc"='$(_replace_tokens "${!libdesc}")'; libdesc="${!libdesc}";
+			libname="$libkey"_name; libname="$(_replace_tokens "${!libname}")";
+			libversion="$libkey"_version; libversion="$(_replace_tokens "${!libversion}")";
+			libdesc="$libkey"_desc; libdesc="$(_replace_tokens "${!libdesc}")";
 			[ "${#libdesc}" -eq 0 ] && libdesc="$libname $libversion";
-			libcheck="$libkey"_check; eval "$libcheck"='$(_replace_tokens "${!libcheck}")'; libcheck="${!libcheck}";
+			libcheck="$libkey"_check; libcheck="$(_replace_tokens "${!libcheck}")";
 			libversioncheck=$(echo "$libcheck" | awk '{printf $2}')
 			libcheck=$(echo "$libcheck" | awk '{printf $1}')
-			libcheckcc="$libkey"_checkcc; eval "$libcheckcc"='$(_replace_tokens "${!libcheckcc}")'; libcheckcc="${!libcheckcc}";
+			libcheckcc="$libkey"_checkcc; libcheckcc="$(_replace_tokens "${!libcheckcc}")";
 			liburl="$libkey"_url;liburl="${!liburl}";
 			libtasks="$libkey"_tasks[@];libtasks=("${!libtasks}");
 
@@ -1021,10 +1021,10 @@ _get_toolchain_libs(){
 				for key in "${LIBS[@]}"
 				do
 					[ "${!key}" == "0" ] && continue;
-					libcheck="$key"_check; eval "$libcheck"='$(_replace_tokens "${!libcheck}")'; libcheck="${!libcheck}";
-					libchecklib="$key"_checklib; eval "$libchecklib"='$(_replace_tokens "${!libchecklib}")'; libchecklib="${!libchecklib}";
-					libcheckcc="$key"_checkcc; eval "$libcheckcc"='$(_replace_tokens "${!libcheckcc}")'; libcheckcc="${!libcheckcc}";
-					libversion="$key"_version; eval "$libversion"='$(_replace_tokens "${!libversion}")'; libversion="${!libversion}";
+					libcheck="$key"_check; libcheck="$(_replace_tokens "${!libcheck}")";
+					libchecklib="$key"_checklib; libchecklib="$(_replace_tokens "${!libchecklib}")";
+					libcheckcc="$key"_checkcc; libcheckcc="$(_replace_tokens "${!libcheckcc}")";
+					libversion="$key"_version; libversion="$(_replace_tokens "${!libversion}")";
 					libversioncompare=$(_compare_version $libversion $ver);
 
 					if [[ "$pkg $ver" =~ ^${libcheck}.* ]];then #regex match, don't quote the right side
