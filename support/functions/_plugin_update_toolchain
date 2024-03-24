@@ -207,6 +207,9 @@ _integrate_libs(){
 	ssl_target=$(echo "$props" | awk -F';' '{print $12}' | xargs);
 	cflags=$(echo "$props" | awk -F';' '{print $13}' | xargs);
 	ldflags=$(echo "$props" | awk -F';' '{print $14}' | xargs);
+	bitslice=$(echo "$props" | awk -F';' '{print $15}' | xargs);
+	batchsize=$(echo "$props" | awk -F';' '{print $16}' | xargs);
+	optimization=$(echo "$props" | awk -F';' '{print $17}' | xargs);
 
 	while [ ! $menu_close ]
 	do
@@ -222,14 +225,14 @@ _integrate_libs(){
 		do
 			[ "${!libkey}" == "0" ] && continue;
 			libbeta="$libkey"_beta; [ "$LIBS_LIST_BETA" == "0" ] && [ "${!libbeta}" == "1" ] && continue; #skip beta libraries in list
-			libname="$libkey"_name;libname="${!libname}";
-			libversion="$libkey"_version;libversion="${!libversion}";
-			libdesc="$libkey"_desc;libdesc="${!libdesc}";
+			libname="$libkey"_name; eval "$libname"='$(_replace_tokens "${!libname}")'; libname="${!libname}";
+			libversion="$libkey"_version; eval "$libversion"='$(_replace_tokens "${!libversion}")'; libversion="${!libversion}";
+			libdesc="$libkey"_desc; eval "$libdesc"='$(_replace_tokens "${!libdesc}")'; libdesc="${!libdesc}";
 			[ "${#libdesc}" -eq 0 ] && libdesc="$libname $libversion";
-			libcheck="$libkey"_check;libcheck="${!libcheck}";
+			libcheck="$libkey"_check; eval "$libcheck"='$(_replace_tokens "${!libcheck}")'; libcheck="${!libcheck}";
 			libversioncheck=$(echo "$libcheck" | awk '{printf $2}')
 			libcheck=$(echo "$libcheck" | awk '{printf $1}')
-			libcheckcc="$libkey"_checkcc;libcheckcc="${!libcheckcc}";
+			libcheckcc="$libkey"_checkcc; eval "$libcheckcc"='$(_replace_tokens "${!libcheckcc}")'; libcheckcc="${!libcheckcc}";
 			liburl="$libkey"_url;liburl="${!liburl}";
 			libtasks="$libkey"_tasks[@];libtasks=("${!libtasks}");
 
@@ -919,6 +922,9 @@ _replace_tokens(){
 						s#@RANLIB@#$ranlibname#g; \
 						s#@PREFIX@#$prefixdir#g; \
 						s#@HOST@#$hostname#g; \
+						s#@BITSLICE@#$bitslice#g; \
+						s#@BATCHSIZE@#$batchsize#g; \
+						s#@OPTIMIZATION@#$optimization#g; \
 						s#@CTNGSOURCE@#$ctngsrcdir#g; \
 						s#@FNGSOURCE@#$fngsrcdir#g; \
 						s#@ANDKSOURCE@#$andksrcdir#g; \
@@ -934,7 +940,7 @@ _tidy_tasks(){
 						s#"\'\)\;"##g;";
 };
 _get_toolchain_properties(){
-	local tc="$1" props tc_type;
+	local tc="$1" props tc_type slice size opt;
 	unset _target;
 
 	#load toolchain config
@@ -977,8 +983,18 @@ _get_toolchain_properties(){
 	else
 		arch=""; bitness=""; api="";
 	fi;
+	
+	#get additional optimization flags needed by some libraries
+	slice="$($compilername --target-help 2>&1 | grep -iw "altivec"							&>/dev/null && echo "altivec")"	&& size="128";
+	[ -z "$slice" ] && slice="$($compilername --target-help 2>&1 | grep -iw "avx2"			&>/dev/null && echo "avx2")"	&& size="256";
+	[ -z "$slice" ] && slice="$($compilername --target-help 2>&1 | grep -iw "ssse3"			&>/dev/null && echo "ssse3")"	&& size="128";
+	[ -z "$slice" ] && slice="$($compilername --target-help 2>&1 | grep -iw "sse2"			&>/dev/null && echo "sse2")"	&& size="128";
+	[ -z "$slice" ] && slice="$($compilername --target-help 2>&1 | grep -iw "mmx"			&>/dev/null && echo "mmx")"		&& size="64";
+	[ -z "$slice" ] && slice="$($compilername --target-help 2>&1 | grep -iw "neon\|simd"	&>/dev/null && echo "neon")"	&& size="128";
+	[ -z "$slice" ] && slice="uint32" && size="32"
+	opt="--enable-${slice}";
 
-	props="$compilername;$ranlibname;$includedir;$sysrootdir;$prefixdir;$pkgconfigdir;$hostname;$tc_type;$arch;$bitness;$api;$ssl_target;$cflags;$ldflags"
+	props="$compilername;$ranlibname;$includedir;$sysrootdir;$prefixdir;$pkgconfigdir;$hostname;$tc_type;$arch;$bitness;$api;$ssl_target;$cflags;$ldflags;$slice;$size;$opt"
 	echo "$props" | xargs;
 	[ -n "$props" ] && exit 0 || exit 1;
 };
@@ -1005,12 +1021,12 @@ _get_toolchain_libs(){
 				for key in "${LIBS[@]}"
 				do
 					[ "${!key}" == "0" ] && continue;
-					libcheck="$key"_check;libcheck="${!libcheck}";
-					libchecklib="$key"_checklib;libchecklib="${!libchecklib}";
-					libcheckcc="$key"_checkcc;libcheckcc="${!libcheckcc}";
-					libversion="$key"_version;libversion="${!libversion}";
+					libcheck="$key"_check; eval "$libcheck"='$(_replace_tokens "${!libcheck}")'; libcheck="${!libcheck}";
+					libchecklib="$key"_checklib; eval "$libchecklib"='$(_replace_tokens "${!libchecklib}")'; libchecklib="${!libchecklib}";
+					libcheckcc="$key"_checkcc; eval "$libcheckcc"='$(_replace_tokens "${!libcheckcc}")'; libcheckcc="${!libcheckcc}";
+					libversion="$key"_version; eval "$libversion"='$(_replace_tokens "${!libversion}")'; libversion="${!libversion}";
 					libversioncompare=$(_compare_version $libversion $ver);
-				
+
 					if [[ "$pkg $ver" =~ ^${libcheck}.* ]];then #regex match, don't quote the right side
 						if [ -n "$libchecklib" -a -f "$pkgconfigdir/../$libchecklib" -o -z "$libchecklib" ];then #check existance of special libs
 							if [ -n "$libcheckcc" ] && _check_compiler_capability "$libcheckcc" || [ -z "$libcheckcc" ];then #check compiler capabilities

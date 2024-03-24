@@ -20,6 +20,9 @@ S3TUP_CONFIG_VERSION="64";
 # @SSL_TARGET@		Android specific build target for OpenSSL (android-arm, android-arm64, android-x86, android-x86)
 # @CFLAGS@			individuell flags for the C compiler
 # @LDFLAGS@			individuell flags for the C linker
+# @BITSLICE@		libdvbcsa specific bitsclice mode
+# @BATCHSIZE@		libdvbcsa specific batchsite/parallelism
+# @OPTIMIZATION@	libdvbcsa specific optimisation flag
 # @CPUS@			CPU number of the build system
 # @VALIDATE@		Special validation function for some libraries (@VALIDATE@ "PCSC")
 
@@ -428,30 +431,22 @@ LIB_DVBCSA="1";
 LIB_DVBCSA_beta="0";
 LIB_DVBCSA_name="libdvbcsa";
 LIB_DVBCSA_tag="";
-LIB_DVBCSA_version="1.1.0";
-LIB_DVBCSA_desc="$LIB_DVBCSA_name ${LIB_DVBCSA_version} (auto)";
+LIB_DVBCSA_version="1.1.0-@BATCHSIZE@-@BITSLICE@";
+LIB_DVBCSA_desc="$LIB_DVBCSA_name 1.1.0-@BATCHSIZE@ (auto)";
 LIB_DVBCSA_check="libdvbcsa.pc ${LIB_DVBCSA_version}";
-LIB_DVBCSA_checklib="libdvbcsa.so.${LIB_DVBCSA_version}-auto";
+LIB_DVBCSA_checklib="libdvbcsa.so.${LIB_DVBCSA_version}";
 LIB_DVBCSA_url="https://github.com/oe-mirrors/libdvbcsa/archive/refs/heads/master.zip";
 LIB_DVBCSA_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_DVBCSA_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_DVBCSA_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 LIB_DVBCSA_tasks+=('[ "@TYPE@" == "android-ndk" ] && export CC=gcc || export CC=@CC@;');
 LIB_DVBCSA_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
-LIB_DVBCSA_tasks+=('FLAGS=$(@CC@ --target-help 2>&1 | grep -iw "altivec"                       &>/dev/null && echo "--enable-altivec") && BITSLICE="128";');
-LIB_DVBCSA_tasks+=('[ -z "$FLAGS" ] && FLAGS=$(@CC@ --target-help 2>&1 | grep -iw "avx2"       &>/dev/null && echo "--enable-avx2")    && BITSLICE="256";');
-LIB_DVBCSA_tasks+=('[ -z "$FLAGS" ] && FLAGS=$(@CC@ --target-help 2>&1 | grep -iw "ssse3"      &>/dev/null && echo "--enable-ssse3")   && BITSLICE="128";');
-LIB_DVBCSA_tasks+=('[ -z "$FLAGS" ] && FLAGS=$(@CC@ --target-help 2>&1 | grep -iw "sse2"       &>/dev/null && echo "--enable-sse2")    && BITSLICE="128";');
-LIB_DVBCSA_tasks+=('[ -z "$FLAGS" ] && FLAGS=$(@CC@ --target-help 2>&1 | grep -iw "mmx"        &>/dev/null && echo "--enable-mmx")     && BITSLICE="64";');
-LIB_DVBCSA_tasks+=('[ -z "$FLAGS" ] && FLAGS=$(@CC@ --target-help 2>&1 | grep -iw "neon\|simd" &>/dev/null && echo "--enable-neon")    && BITSLICE="128";');
-LIB_DVBCSA_tasks+=('[ -z "$FLAGS" ] && FLAGS="--enable-uint32" && BITSLICE="32";');
-LIB_DVBCSA_tasks+=('echo "autodetected bitslice: $FLAGS -> ${BITSLICE}";');
-LIB_DVBCSA_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS;');
+LIB_DVBCSA_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@ @OPTIMIZATION@;');
 LIB_DVBCSA_tasks+=('make -j@CPUS@;');
 LIB_DVBCSA_tasks+=('make install;');
-LIB_DVBCSA_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n\nName: libdvbcsa\nDescription: libdvbcsa is a free and portable implementation of the DVB Common Scrambling algorithm with decryption and encryption capabilities\nVersion: ${LIB_DVBCSA_version}-${BITSLICE}\nCflags: -I\${includedir}" > "@PREFIX@/lib/pkgconfig/libdvbcsa.pc";');
-LIB_DVBCSA_tasks+=('rm -f "@PREFIX@/lib/${LIB_DVBCSA_name}.so.${LIB_DVBCSA_version}-"*; ln -frs "@PREFIX@/lib/${LIB_DVBCSA_name}.so.${LIB_DVBCSA_version}" "@PREFIX@/lib/${LIB_DVBCSA_name}.so.${LIB_DVBCSA_version}-auto";');
-LIB_DVBCSA_tasks+=('zip -jy9FS "$bdir/@HOST@@API@-${LIB_DVBCSA_name}-lib-${LIB_DVBCSA_version}-${BITSLICE}.zip" -xi "@PREFIX@/lib/libdvbcsa.so"*;');
+LIB_DVBCSA_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n\nName: libdvbcsa\nDescription: libdvbcsa is a free and portable implementation of the DVB Common Scrambling algorithm with decryption and encryption capabilities\nVersion: ${LIB_DVBCSA_version}\nCflags: -I\${includedir}" > "@PREFIX@/lib/pkgconfig/libdvbcsa.pc";');
+LIB_DVBCSA_tasks+=('rm -f "@PREFIX@/lib/${LIB_DVBCSA_name}.so.1.1.0-"*; ln -frs "@PREFIX@/lib/${LIB_DVBCSA_name}.so" "@PREFIX@/lib/${LIB_DVBCSA_name}.so.${LIB_DVBCSA_version}";');
+LIB_DVBCSA_tasks+=('zip -jy9FS "$bdir/@HOST@@API@-${LIB_DVBCSA_name}-${LIB_DVBCSA_version}.zip" -xi "@PREFIX@/lib/libdvbcsa.so"*;');
 LIB_DVBCSA_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libdvbcsa.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
 
 # libdvbcsa 1.x (Use native 64 bits integers for bitslice)
@@ -461,7 +456,7 @@ LIB_DVBC64_name="libdvbcsa";
 LIB_DVBC64_tag="";
 LIB_DVBC64_version="1.1.0-64";
 LIB_DVBC64_desc="$LIB_DVBC64_name ${LIB_DVBC64_version}";
-LIB_DVBC64_check="libdvbcsa.pc 1.1.0-64";
+LIB_DVBC64_check="libdvbcsa.pc ${LIB_DVBC64_version}";
 LIB_DVBC64_checklib="libdvbcsa.so.${LIB_DVBC64_version}";
 LIB_DVBC64_url="https://github.com/oe-mirrors/libdvbcsa/archive/refs/heads/master.zip";
 LIB_DVBC64_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
