@@ -1,5 +1,5 @@
 _toolchainname="oe20_sh_multilib";
-default_use="USE_UTF8 USE_LIBCRYPTO";
+default_use="USE_LIBCRYPTO";
 extra_use="";
 extra_cc="";
 extra_ld="";

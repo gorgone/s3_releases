@@ -1,5 +1,5 @@
 _toolchainname="mca";
-default_use="USE_UTF8 USE_LIBCRYPTO USE_MCA";
+default_use="USE_LIBCRYPTO USE_MCA";
 _description="MATRIX CAM AIR";
 _oscamconfdir_default="/var/mca/d1";
 _oscamconfdir_custom=""

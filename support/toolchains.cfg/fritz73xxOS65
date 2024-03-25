@@ -1,5 +1,5 @@
 _toolchainname="fritz73xxOS65";
-default_use="USE_UTF8 USE_LIBCRYPTO";
+default_use="USE_LIBCRYPTO";
 _description="Fritzbox73xx Fritz OS V6.5";
 _oscamconfdir_default="/var/media/ftp/uStor01/external/mod/etc/conf";
 _oscamconfdir_custom=""

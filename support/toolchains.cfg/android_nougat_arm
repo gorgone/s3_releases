@@ -1,5 +1,5 @@
 _toolchainname="android_nougat_arm";
-default_use="USE_UTF8 USE_LIBCRYPTO";
+default_use="USE_LIBCRYPTO";
 extra_use="LIB_RT= LIB_PTHREAD=";
 extra_cc="-march=armv7-a -mtune=cortex-a9 -mfloat-abi=softfp -mfpu=vfpv3-d16 -DANDROID -D__ANDROID_API__=24 -fpic -fno-addrsig -ffunction-sections -fdata-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wno-invalid-command-line-argument -Wno-unused-command-line-argument";
 extra_ld="";

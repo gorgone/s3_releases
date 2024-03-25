@@ -1,5 +1,5 @@
 _toolchainname="fritz6890_7560_7580_7583_7583vdsl_7590AX_7590_ssl_multi_mips-freetz";
-default_use="USE_UTF8 USE_LIBCRYPTO";
+default_use="USE_LIBCRYPTO";
 extra_use="";
 extra_cc="";
 extra_ld="-Wl,-dynamic-linker,/usr/lib/freetz/ld-uClibc.so.0";

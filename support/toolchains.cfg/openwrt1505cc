@@ -1,5 +1,5 @@
 _toolchainname="openwrt1505cc";
-default_use="USE_UTF8 USE_LIBCRYPTO";
+default_use="USE_LIBCRYPTO";
 _description="OpenWRT 15.05.1 Chaos Calmer"
 _oscamconfdir_default="/etc/config/oscam"
 _oscamconfdir_custom=""

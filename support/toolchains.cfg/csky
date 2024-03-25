@@ -1,5 +1,5 @@
 _toolchainname="csky";
-default_use="USE_UTF8 USE_GXAPI";
+default_use="USE_GXAPI";
 extra_use="";
 extra_cc="";
 extra_ld="";

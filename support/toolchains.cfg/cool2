@@ -1,5 +1,5 @@
 _toolchainname="cool2";
-default_use="USE_UTF8 USE_LIBCRYPTO USE_COOLAPI2";
+default_use="USE_LIBCRYPTO USE_COOLAPI2";
 _description="COOLSTREAM HD2";
 _oscamconfdir_default="/var/tuxbox/config";
 _oscamconfdir_custom=""

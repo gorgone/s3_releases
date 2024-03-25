@@ -1,5 +1,5 @@
 _toolchainname="fritz6591_6660_6690_ssl_multi_i686-freetz";
-default_use="USE_UTF8 USE_LIBCRYPTO";
+default_use="USE_LIBCRYPTO";
 extra_use="";
 extra_cc="";
 extra_ld="-Wl,-dynamic-linker,/usr/lib/freetz/ld-uClibc.so.0";

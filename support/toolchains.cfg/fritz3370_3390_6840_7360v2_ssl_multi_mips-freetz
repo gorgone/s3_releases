@@ -1,5 +1,5 @@
 _toolchainname="fritz3370_3390_6840_7360v2_ssl_multi_mips-freetz";
-default_use="USE_UTF8 USE_LIBCRYPTO";
+default_use="USE_LIBCRYPTO";
 extra_use="";
 extra_cc="";
 extra_ld="";

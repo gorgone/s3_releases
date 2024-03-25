@@ -1,5 +1,5 @@
 _toolchainname="dream_one";
-default_use="USE_UTF8 USE_LIBCRYPTO";
+default_use="USE_LIBCRYPTO";
 _description="DreamOne aarch64";
 _oscamconfdir_default="/var/keys";
 _oscamconfdir_custom=""

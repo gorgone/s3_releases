@@ -1497,7 +1497,7 @@ $(echo "$6" | awk -F'[()]' '{print $2}' | xargs)\\\n")";
 	cd "$tccfgdir";
 	cat << EOF > $2
 _toolchainname="$2";
-default_use="USE_UTF8 USE_LIBCRYPTO";
+default_use="USE_LIBCRYPTO";
 extra_use="${11}";
 extra_cc="${12}";
 extra_ld="${13}";

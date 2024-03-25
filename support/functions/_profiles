@@ -126,7 +126,7 @@ _create_native_profile(){
 	if [ ! -f native ]; then
 		cat << EOF > native
 _toolchainname="native";
-default_use="USE_UTF8 USE_LIBCRYPTO";
+default_use="USE_LIBCRYPTO";
 _oscamconfdir_default="/usr/local/etc";
 _oscamconfdir_custom="not_set";
 _compiler="$($g -dumpmachine)-";

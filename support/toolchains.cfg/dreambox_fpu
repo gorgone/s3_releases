@@ -1,5 +1,5 @@
 _toolchainname="dreambox_fpu";
-default_use="USE_UTF8 USE_LIBCRYPTO";
+default_use="USE_LIBCRYPTO";
 _description="Dreambox & VU+ (OE 2.0 FPU)";
 _oscamconfdir_default="/var/tuxbox/config";
 _oscamconfdir_custom=""

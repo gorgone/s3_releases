@@ -1,5 +1,5 @@
 _toolchainname="hd51";
-default_use="USE_UTF8 USE_LIBCRYPTO";
+default_use="USE_LIBCRYPTO";
 _description="AX/Mutant HD51";
 _oscamconfdir_default="/etc/tuxbox/config/oscam/";
 _oscamconfdir_custom=""

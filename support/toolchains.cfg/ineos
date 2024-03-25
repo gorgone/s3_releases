@@ -1,5 +1,5 @@
 _toolchainname="ineos";
-default_use="USE_UTF8";
+default_use="";
 _description="Ineos ZX4";
 _oscamconfdir_default="/var/keys";
 _oscamconfdir_custom=""

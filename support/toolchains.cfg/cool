@@ -1,5 +1,5 @@
 _toolchainname="cool";
-default_use="USE_UTF8 USE_COOLAPI";
+default_use="USE_COOLAPI";
 _description="COOLSTREAM"
 _oscamconfdir="/var/tuxbox/config";
 

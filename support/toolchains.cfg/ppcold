@@ -1,5 +1,5 @@
 _toolchainname="ppcold"
-default_use="USE_UTF8 USE_LIBCRYPTO";
+default_use="USE_LIBCRYPTO";
 _description="Dbox2 / Dreambox DM500 and DM500-S"
 _oscamconfdir_default="/var/tuxbox/config"
 _oscamconfdir_custom=""

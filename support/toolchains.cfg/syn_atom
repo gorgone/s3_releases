@@ -1,5 +1,5 @@
 _toolchainname="syn_atom"
-default_use="USE_UTF8 USE_LIBCRYPTO";
+default_use="USE_LIBCRYPTO";
 _description="SYN_ATOM"
 _oscamconfdir_default="/usr/local/etc"
 _oscamconfdir_custom=""

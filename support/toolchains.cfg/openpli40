@@ -1,5 +1,5 @@
 _toolchainname="openpli40"
-default_use="USE_UTF8 USE_LIBCRYPTO";
+default_use="USE_LIBCRYPTO";
 _description="Openpli Dreambox Vu+ and other"
 _oscamconfdir_default="/usr/keys"
 _oscamconfdir_custom=""

@@ -1,5 +1,5 @@
 _toolchainname="mipsel_s3_ssl102";
-default_use="USE_UTF8 USE_LIBCRYPTO";
+default_use="USE_LIBCRYPTO";
 _description="generic mipsel ssl 1.0.2";
 _oscamconfdir_default="/var/keys";
 _oscamconfdir_custom=""
