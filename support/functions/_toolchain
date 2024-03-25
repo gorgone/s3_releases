@@ -196,7 +196,7 @@ _toolchain_check(){
 	headervars=( crypto.h pcsclite.h libusb.h pthread.h zlib.h )
 	[ -f "$tccfgdir/$1" ] && source "$tccfgdir/$1"
 	
-	fmtg="  ${w_l}%-16s ${y_l}%-20s ${g_l}%-8s $p_l%-20s %-10s ${g_l}%s\n";
+	fmtg="  ${w_l}%-16s ${y_l}%-20s ${g_l}%-8s $p_l%-20s %-17s ${g_l}%s\n";
 	fmtb="  ${w_l}%-16s ${y_l}%-20s ${r_l}%s\n";
 
 	if [ -d "$tcdir/$1/bin" ]
