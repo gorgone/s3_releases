@@ -86,9 +86,6 @@ do
 		g++)
 			inst="gcc-c++";
 			;;
-		python)
-			[ "$rh_version" == 8 ] && inst="python3";
-			;;
 		composite)
 			inst="ImageMagick";
 			;;

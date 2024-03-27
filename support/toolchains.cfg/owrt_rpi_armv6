@@ -1,0 +1,19 @@
+_toolchainname="owrt_rpi_armv6";
+default_use="USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="";
+_description="OpenWrt 19.07|21.02 Raspberry Pi Zero W|WH, 1 Model A|A+|B|B+";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="armv6-rpi1-linux-gnueabihf-";
+_sysroot="armv6-rpi1-linux-gnueabihf/sysroot";
+_libsearchdir="/usr/lib";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1vd3J0X3JwaV9hcm12Ni50YXIueHoK";
+_md5sum="6886bc5d3791f342bd48d00c16fa9f4e  Toolchain-owrt_rpi_armv6.tar.xz";
+_tc_info="\n
+!!! crosstool-NG Toolchain !!!\n
+\n
+OpenWrt 19.07|21.02 Raspberry Pi Zero W|WH, 1 Model A|A+|B|B+\n
+arm arm1176jzf-s 32-bit LE, glibc 2.38, gcc 13.2.0, linux 6.5.5\n";
+_tc_infolines="5";
