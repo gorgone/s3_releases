@@ -991,7 +991,15 @@ _get_toolchain_properties(){
 	[ -z "$slice" ] && slice="$($compilername --target-help 2>&1 | grep -iw "sse2"			&>/dev/null && echo "sse2")"	&& size="128";
 	[ -z "$slice" ] && slice="$($compilername --target-help 2>&1 | grep -iw "mmx"			&>/dev/null && echo "mmx")"		&& size="64";
 	[ -z "$slice" ] && slice="$($compilername --target-help 2>&1 | grep -iw "neon\|simd"	&>/dev/null && echo "neon")"	&& size="128";
-	[ -z "$slice" ] && slice="uint32" && size="32"
+	[ -z "$slice" ] && [ -n "$(find "$tcdir/$tc/" -name "arm_neon.h" -type f -print -quit)" ] && slice="neon"				&& size="128";
+	if [ -z "$slice" ]; then
+		if [[ "$sysrootdir" =~ aarch64 ]]; then
+			slice="uint64"
+		else
+			slice="uint32"
+		fi;
+		size=${slice: -2}
+	fi;
 	opt="--enable-${slice}";
 
 	props="$compilername;$ranlibname;$includedir;$sysrootdir;$prefixdir;$pkgconfigdir;$hostname;$tc_type;$arch;$bitness;$api;$ssl_target;$cflags;$ldflags;$slice;$size;$opt"
