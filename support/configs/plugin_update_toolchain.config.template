@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="65";
+S3TUP_CONFIG_VERSION="66";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -72,6 +72,7 @@ LIBS=(SSL_320 SSL_310 SSL_300 SSL_111 SSL_110 SSL_102 SSL_102B SSL_100 SSL_098 L
 LIBS_LIST_BETA="0"; # In(Ex)clude libraries defined as beta
 LIBS_AUTO_INTEGRATE="1"; # Automatically reintegrate libraries when rebuilding toolchains
 LIBS_STATIC_BUILD="0"; #Build static instead of dynamic libraries
+PKG_CONFIG_BIN="$(which pkg-config)"; #Make sure use host's pkg-config binary instead of cross toolchain's one
 
 # OpenSSL 3.2.x
 SSL_320="1";
@@ -360,8 +361,8 @@ LIB_PCSC_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_PCSC_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 LIB_PCSC_tasks+=('export CC=@CC@;');
 LIB_PCSC_tasks+=('export PKG_CONFIG_PATH="$(find @PREFIX@ -name "pkgconfig" -type d)";');
-LIB_PCSC_tasks+=('[ "$LIBS_STATIC_BUILD" == "1" ] && LIBUSB_LIBS="$(pkg-config --libs --static libusb-1.0)" || LIBUSB_LIBS="$(pkg-config --libs libusb-1.0)";');
-LIB_PCSC_tasks+=('[ "$LIBS_STATIC_BUILD" == "1" ] && LIBUSB_CFLAGS="$(pkg-config --cflags --static libusb-1.0)" || LIBUSB_CFLAGS="$(pkg-config --cflags libusb-1.0)";');
+LIB_PCSC_tasks+=('[ "$LIBS_STATIC_BUILD" == "1" ] && LIBUSB_LIBS="$($PKG_CONFIG_BIN --libs --static libusb-1.0)" || LIBUSB_LIBS="$($PKG_CONFIG_BIN --libs libusb-1.0)";');
+LIB_PCSC_tasks+=('[ "$LIBS_STATIC_BUILD" == "1" ] && LIBUSB_CFLAGS="$($PKG_CONFIG_BIN --cflags --static libusb-1.0)" || LIBUSB_CFLAGS="$($PKG_CONFIG_BIN --cflags libusb-1.0)";');
 LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
 LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" ] && LIBUSB_LIBS="-L@PREFIX@/lib/@HOST@/@API@ -lusb-1.0";');
 LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" ] && LOG="LIBS=-llog" || LOG="";');
@@ -386,8 +387,8 @@ LIB_PCSCB_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_PCSCB_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 LIB_PCSCB_tasks+=('export CC=@CC@;');
 LIB_PCSCB_tasks+=('export PKG_CONFIG_PATH="$(find @PREFIX@ -name "pkgconfig" -type d)";');
-LIB_PCSCB_tasks+=('[ "$LIBS_STATIC_BUILD" == "1" ] && LIBUSB_LIBS="$(pkg-config --libs --static libusb-1.0)" || LIBUSB_LIBS="$(pkg-config --libs libusb-1.0)";');
-LIB_PCSCB_tasks+=('[ "$LIBS_STATIC_BUILD" == "1" ] && LIBUSB_CFLAGS="$(pkg-config --cflags --static libusb-1.0)" || LIBUSB_CFLAGS="$(pkg-config --cflags libusb-1.0)";');
+LIB_PCSCB_tasks+=('[ "$LIBS_STATIC_BUILD" == "1" ] && LIBUSB_LIBS="$($PKG_CONFIG_BIN --libs --static libusb-1.0)" || LIBUSB_LIBS="$($PKG_CONFIG_BIN --libs libusb-1.0)";');
+LIB_PCSCB_tasks+=('[ "$LIBS_STATIC_BUILD" == "1" ] && LIBUSB_CFLAGS="$($PKG_CONFIG_BIN --cflags --static libusb-1.0)" || LIBUSB_CFLAGS="$($PKG_CONFIG_BIN --cflags libusb-1.0)";');
 LIB_PCSCB_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
 LIB_PCSCB_tasks+=('[ "@TYPE@" == "android-ndk" ] && LIBUSB_LIBS="-L@PREFIX@/lib/@HOST@/@API@ -lusb-1.0";');
 LIB_PCSCB_tasks+=('[ "@TYPE@" == "android-ndk" ] && LOG="LIBS=-llog" || LOG="";');
@@ -412,13 +413,15 @@ LIB_CCID_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_CCID_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 LIB_CCID_tasks+=('export CC=@CC@;');
 LIB_CCID_tasks+=('export PKG_CONFIG_PATH="$(find @PREFIX@ -name "pkgconfig" -type d)";');
-LIB_CCID_tasks+=('[ "$LIBS_STATIC_BUILD" == "1" ] && LIBUSB_LIBS="$(pkg-config --libs --static libusb-1.0)" || LIBUSB_LIBS="$(pkg-config --libs libusb-1.0)";');
-LIB_CCID_tasks+=('[ "$LIBS_STATIC_BUILD" == "1" ] && LIBUSB_CFLAGS="$(pkg-config --cflags --static libusb-1.0)" || LIBUSB_CFLAGS="$(pkg-config --cflags libusb-1.0)";');
+LIB_CCID_tasks+=('[ "$LIBS_STATIC_BUILD" == "1" ] && LIBUSB_LIBS="$($PKG_CONFIG_BIN --libs --static libusb-1.0)" || LIBUSB_LIBS="$($PKG_CONFIG_BIN --libs libusb-1.0)";');
+LIB_CCID_tasks+=('[ "$LIBS_STATIC_BUILD" == "1" ] && LIBUSB_CFLAGS="$($PKG_CONFIG_BIN --cflags --static libusb-1.0)" || LIBUSB_CFLAGS="$($PKG_CONFIG_BIN --cflags libusb-1.0)";');
+LIB_CCID_tasks+=('[ "$LIBS_STATIC_BUILD" == "1" ] && PCSC_LIBS="$($PKG_CONFIG_BIN --libs --static libpcsclite)" || PCSC_LIBS="$($PKG_CONFIG_BIN --libs libpcsclite)";');
+LIB_CCID_tasks+=('[ "$LIBS_STATIC_BUILD" == "1" ] && PCSC_CFLAGS="$($PKG_CONFIG_BIN --cflags --static libpcsclite)" || PCSC_CFLAGS="$($PKG_CONFIG_BIN --cflags libpcsclite)";');
 LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
 LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" ] && export LDFLAGS="-Wl,--exclude-libs=libclang_rt.builtins-arm-android.a";'); # https://android.googlesource.com/platform/bionic.git/+/master/libdl/Android.bp#62
 LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" ] && LIBUSB_LIBS="-L@PREFIX@/lib/@HOST@/@API@ -lusb-1.0";');
 LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" -o "$LIBS_STATIC_BUILD" == "1" ] && FLAGS="--enable-static" || FLAGS="";');
-LIB_CCID_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS --enable-twinserial --enable-usbdropdir="@PREFIX@/..$(pkg-config libpcsclite --variable=usbdropdir)" --enable-serialconfdir="@PREFIX@$(pkg-config libpcsclite --variable=serialconfdir)" LIBUSB_LIBS="${LIBUSB_LIBS}" LIBUSB_CFLAGS="${LIBUSB_CFLAGS}";');
+LIB_CCID_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS --enable-twinserial --enable-usbdropdir="$($PKG_CONFIG_BIN libpcsclite --variable=usbdropdir)" --enable-serialconfdir="$($PKG_CONFIG_BIN libpcsclite --variable=serialconfdir)" PCSC_LIBS="${PCSC_LIBS}" PCSC_CFLAGS="${PCSC_CFLAGS}" LIBUSB_LIBS="${LIBUSB_LIBS}" LIBUSB_CFLAGS="${LIBUSB_CFLAGS}";');
 LIB_CCID_tasks+=('make -j@CPUS@;');
 LIB_CCID_tasks+=('make install;');
 LIB_CCID_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include/PCSC\nusbdropdir=@PREFIX@/lib/pcsc/drivers\nserialconfdir=@PREFIX@/etc/reader.conf.d\n\nName: CCID IFD Handler\nDescription: Generic USB CCID (Chip/Smart Card Interface Devices) and ICCD (Integrated Circuit(s) Card Devices) driver\nVersion: $LIB_CCID_version\nRequires: libusb libpcsclite" > "@PREFIX@/lib/pkgconfig/libccid.pc";');
