@@ -73,6 +73,8 @@ _toolchain_config_menu(){
 
 _toolchain_main_menu(){
 	_fill_tc_array
+	_init_menu
+
 	IFS="#"
 	COUNT=0
 	MENU_OPTIONS="BACK#$txt_back_main#"
@@ -98,27 +100,22 @@ _toolchain_main_menu(){
 			then
 				unset _self_build
 				source "$tccfgdir/$i"
-				if [ "$systype" == "ok" ]
+				if [ "$systype" == "ok" -o "$_self_build" == "yes" ]
 				then
-					MENU_OPTIONS+="$_toolchainname#$_description#"
+					[[ "$i" =~ "_generic" ]] && MENU_OPTIONS_GEN+="$_toolchainname#$_description#" || MENU_OPTIONS_STD+="$_toolchainname#$_description#"
 					counter
-				elif [ "$_self_build" == "yes" ]
-				then
-					MENU_OPTIONS+="$_toolchainname#$_description#"
-					counter
-					
 				fi
 			fi
 		done
 	fi
-
-	MENU_OPTIONS+="EXIT#$txt_firstmenu_exit#"
+	MENU_OPTIONS+="${MENU_OPTIONS_GEN}${MENU_OPTIONS_STD}EXIT#$txt_firstmenu_exit#"
 	counter
+
 	out=$(
 	"$gui" "$st_" "$nc_" "$bt_" "$title_" --help-button --help-label INFO --title "-[ Toolchain $txt_menu ]-" --menu "$txt_main_revision$(REVISION)" "${COUNT+8}" 75 0 ${MENU_OPTIONS})
 	IFS=$OIFS
 	first=$(echo "$out" | awk '{printf $1}')
-	tc_info=$(echo "$out" | awk '{printf $2}';)
+	tc_info=$(echo "$out" | awk '{printf $2}')
 
 	case $first in
 		EXIT)
@@ -137,7 +134,7 @@ _toolchain_main_menu(){
 				then
 					source "$tccfgdir/$tc_info"
 					"$gui" "$st_" "$nc_" "$bt_" "$title_" "$ib_" "$_tc_info" $((_tc_infolines + 5)) 65
-					sleep 5
+					sleep 10
 				fi
 				_toolchain_main_menu;;
 		*)
@@ -185,7 +182,7 @@ _console_extract_toolchain(){
 	[ -d "$tcdir/$_toolchainname" ] && rm -rf "$tcdir/$_toolchainname"
 	mkdir "$tcdir/$_toolchainname"
 	cd "$tcdir/$_toolchainname"
-	xz -d "$tc_dl" -c | tar -x
+	tar -xf "$tc_dl" --strip-components=1
 	printf "\r$w_l    $txt_extracting :$g_l$txt_done!                             \n\n"
 }
 
@@ -364,24 +361,32 @@ _toolchain_add_menu(){
 		if [ ! "$i" == "native" ]
 		then
 			source "$tccfgdir/$i"
-			MENU_OPTIONS+="$_toolchainname#$_description#"
+			[[ "$i" =~ "_generic" ]] && MENU_OPTIONS_GEN+="$_toolchainname#$_description#" || MENU_OPTIONS_STD+="$_toolchainname#$_description#"
 			counter
 		fi
 	done
-
-	MENU_OPTIONS+="EXIT#$txt_menu_builder1#"
+	MENU_OPTIONS+="${MENU_OPTIONS_GEN}${MENU_OPTIONS_STD}EXIT#$txt_menu_builder1#"
 	counter
 
 	out=$(
 	"$gui" "$st_" "$nc_" "$bt_" "$title_" --help-button --help-label INFO --title "-[ $txt_add_menu ]-" --menu "$txt_main_revision$(REVISION)" "${COUNT+8}" 75 0 ${MENU_OPTIONS[@]})
 	IFS=$OIFS
 	first=$(echo "$out" | awk '{printf $1}')
+	tc_info=$(echo "$out" | awk '{printf $2}')
 
 	case $first in
 		EXIT)
 				bye;;
 		BACK | '')
 				_toolchain_main_menu;;
+		HELP)
+				if [ -f "$tccfgdir/$tc_info" ]
+				then
+					source "$tccfgdir/$tc_info"
+					"$gui" "$st_" "$nc_" "$bt_" "$title_" "$ib_" "$_tc_info" $((_tc_infolines + 5)) 65
+					sleep 10
+				fi
+				_toolchain_add_menu;;
 		*)
 				_toolchain_gui_install
 				_toolchain_main_menu;;
@@ -391,6 +396,7 @@ _toolchain_add_menu(){
 _toolchain_remove_menu(){
 	_fill_tc_array
 	_init_menu
+
 	if [ "$tcempty" == "0" ]
 	then
 		for i in "${INST_TCLIST[@]}"
@@ -398,13 +404,12 @@ _toolchain_remove_menu(){
 			if [ ! "$i" == "native" ]
 			then
 				source "$tccfgdir/$i"
-				MENU_OPTIONS+="$_toolchainname#$_description#"
+				[[ "$i" =~ "_generic" ]] && MENU_OPTIONS_GEN+="$_toolchainname#$_description#" || MENU_OPTIONS_STD+="$_toolchainname#$_description#"
 				counter
 			fi
 		done
 	fi
-
-	MENU_OPTIONS+="EXIT#$txt_menu_builder1#"
+	MENU_OPTIONS+="${MENU_OPTIONS_GEN}${MENU_OPTIONS_STD}EXIT#$txt_menu_builder1#"
 	counter
 
 	out=$(
@@ -441,7 +446,7 @@ _toolchain_gui_install(){
 		[ -d "$tcdir/$first" ] && rm -rf "$tcdir/$first" && printf "$txt_delete $tcdir/$first"
 		mkdir "$tcdir/$first"
 		cd "$tcdir/$first"
-		(xz -d "$dldir/$tcname" -c |tar -xv) |"$gui" "$st_" --title " -[ $txt_extracting $tcname ]- " "$pb_" 20 74
+		(tar -xvf "$dldir/$tcname" --strip-components=1) |"$gui" "$st_" --title " -[ $txt_extracting $tcname ]- " "$pb_" 20 74
 	else
 		printf "$r_l  $txt_error:$y_l $stcname$w_l Toolchain $txt_no_download""$rs_"
 	fi

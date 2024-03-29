@@ -251,6 +251,8 @@ _init_menu(){
 	IFS="#"
 	COUNT=0
 	MENU_OPTIONS="BACK#$txt_back#"
+	MENU_OPTIONS_GEN=""
+	MENU_OPTIONS_STD=""
 	counter
 }
 _select_menu(){
