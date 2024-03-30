@@ -10,6 +10,7 @@ _oscamconfdir_custom="";
 _compiler="arm-buildroot-linux-gnueabihf-";
 _sysroot="arm-buildroot-linux-gnueabihf/sysroot";
 _libsearchdir="/usr/lib";
+_extract_strip="1";
 _toolchainfilename="aHR0cHM6Ly90b29sY2hhaW5zLmJvb3RsaW4uY29tL2Rvd25sb2Fkcy9yZWxlYXNlcy90b29sY2hhaW5zL2FybXY3LWVhYmloZi90YXJiYWxscy9hcm12Ny1lYWJpaGYtLWdsaWJjLS1zdGFibGUtMjAxOC4xMS0xLnRhci5iejI=";
 _md5sum="cf6286d326c14d6a51ba05c33c8218a0  armv7-eabihf--glibc--stable-2018.11-1.tar.bz2";
 _tc_info="!!! Bootlin Stable Toolchain 2018.11-1 !!!\n

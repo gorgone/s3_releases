@@ -10,6 +10,7 @@ _oscamconfdir_custom="";
 _compiler="powerpc-buildroot-linux-gnu-";
 _sysroot="powerpc-buildroot-linux-gnu/sysroot";
 _libsearchdir="/usr/lib";
+_extract_strip="1";
 _toolchainfilename="aHR0cHM6Ly90b29sY2hhaW5zLmJvb3RsaW4uY29tL2Rvd25sb2Fkcy9yZWxlYXNlcy90b29sY2hhaW5zL3Bvd2VycGMtZTUwMG1jL3RhcmJhbGxzL3Bvd2VycGMtZTUwMG1jLS1nbGliYy0tc3RhYmxlLTIwMTguMTEtMS50YXIuYnoy";
 _md5sum="23439204ec3952cf122d9f748e966004  powerpc-e500mc--glibc--stable-2018.11-1.tar.bz2";
 _tc_info="!!! Bootlin Stable Toolchain 2018.11-1 !!!\n

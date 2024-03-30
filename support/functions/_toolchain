@@ -182,7 +182,7 @@ _console_extract_toolchain(){
 	[ -d "$tcdir/$_toolchainname" ] && rm -rf "$tcdir/$_toolchainname"
 	mkdir "$tcdir/$_toolchainname"
 	cd "$tcdir/$_toolchainname"
-	tar -xf "$tc_dl" --strip-components=1
+	tar -xf "$tc_dl" --strip-components=$_extract_strip
 	printf "\r$w_l    $txt_extracting :$g_l$txt_done!                             \n\n"
 }
 
@@ -285,6 +285,7 @@ _toolchain_repair(){
 	cd $dldir
 	zzusatz=0
 	szusatz=0
+	_extract_strip="0"
 	[ -f "$tccfgdir/$1" ] && source "$tccfgdir/$1"
 
 	fn=$(echo $_md5sum |awk '{ printf $2 }')
@@ -429,6 +430,7 @@ _toolchain_remove_menu(){
 }
 
 _toolchain_gui_install(){
+	_extract_strip="0"
 	source "$tccfgdir/$first"
 
 	url="$(decode "$_toolchainfilename")"
@@ -446,7 +448,7 @@ _toolchain_gui_install(){
 		[ -d "$tcdir/$first" ] && rm -rf "$tcdir/$first" && printf "$txt_delete $tcdir/$first"
 		mkdir "$tcdir/$first"
 		cd "$tcdir/$first"
-		(tar -xvf "$dldir/$tcname" --strip-components=1) |"$gui" "$st_" --title " -[ $txt_extracting $tcname ]- " "$pb_" 20 74
+		(tar -xvf "$dldir/$tcname" --strip-components=$_extract_strip) |"$gui" "$st_" --title " -[ $txt_extracting $tcname ]- " "$pb_" 20 74
 	else
 		printf "$r_l  $txt_error:$y_l $stcname$w_l Toolchain $txt_no_download""$rs_"
 	fi
