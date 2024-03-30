@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #simplebuild_plugin tcupdate
-pversion="0.25.1";
+pversion="0.25.2";
 pname="s3.TUP";
 pdesc="Plugin $pname v$pversion";
 tc_url="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLw==";
@@ -273,7 +273,7 @@ _integrate_libs(){
 			ret="0";
 		else
 			clear;clear;
-			opts=$("$gui" "--item-help" "--help-tags" "$st_" "$bt_" "$title_ \Z0$pdesc\Zn" "--colors" "--default-item" "$lkey" "--ok-label" "$([ "$LIBS_STATIC_BUILD" == "0" ] && echo "${txt_s3tup_menu_command_label_start}" || echo "${txt_s3tup_menu_command_label_static}")" "--help-button" "--help-label" "${txt_s3tup_menu_command_label_info}" "--cancel-label" "$([ ! "$3" -gt 0 ] && echo "${txt_s3tup_menu_command_label_exit}" || echo "${txt_s3tup_menu_command_label_back}")" "--title" "-[ ${txt_s3tup_menu_library_title} - \Z2$tc\Zn ]-" "$cl_"\
+			opts=$("$gui" "--item-help" "--help-tags" "$st_" "$bt_" "$title_ \Z0$pdesc\Zn" "--colors" "--default-item" "$lkey" "--ok-label" "${txt_s3tup_menu_command_label_start}" "--help-button" "--help-label" "${txt_s3tup_menu_command_label_info}" "--cancel-label" "$([ ! "$3" -gt 0 ] && echo "${txt_s3tup_menu_command_label_exit}" || echo "${txt_s3tup_menu_command_label_back}")" "--title" "-[ ${txt_s3tup_menu_library_title} - \Z2$tc\Zn ]-" "$cl_"\
 				"\n${txt_s3tup_menu_library_text1}\n\Z2$prefixdir\Zn${txthint}\n\n${txt_s3tup_menu_library_text2}" \
 				0 0 "$COUNT" "${MENU_OPTIONS[@]}");
 			ret="$?"
