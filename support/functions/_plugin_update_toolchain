@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #simplebuild_plugin tcupdate
-pversion="0.25.2";
+pversion="0.25.3";
 pname="s3.TUP";
 pdesc="Plugin $pname v$pversion";
 tc_url="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLw==";
@@ -55,7 +55,7 @@ tcupdate(){
 				_paktc_timer 30;
 			fi;
 		fi;
-		CMDTC="";
+		CMDTC="--reset";
 	fi;
 
 	#create config
@@ -66,6 +66,7 @@ tcupdate(){
 		else
 			echo -e "${txt_s3tup_msg_reset_config4}'$configname'\n${txt_s3tup_msg_reset_config5}\n";
 		fi;
+		[ "$CMDTC" == "--reset" ] && exit;
 		_paktc_timer 5;
 	fi;
 
