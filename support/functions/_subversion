@@ -139,12 +139,13 @@ svnpatch(){
 		unset patchlist
 		cd "$pdir"
 		patchlist=(*.patch)
+		patchlog="$(mktemp)"
 
 		if [ "$(ls -A "$pdir"/*.patch 2>/dev/null)" ]
 		then
 			for p in "${patchlist[@]}"
 			do
-				echo -e $WH"\n    -> $p <-"$W
+				echo -e $WH"\n    -> $p <-"$W; echo -e "\n$p" >> "$patchlog"
 				if _streamboard_patch "$pdir/$p"; then
 					SKIPPATHS=-p0
 				else
@@ -154,11 +155,16 @@ svnpatch(){
 				if grep 'GIT binary patch' "$pdir/$p" &>/dev/null; then
 					cd "$svndir"
 					echo -e $Y"    binary patch detected, using git apply <-"$W
-					git apply --verbose $SKIPPATHS < "$pdir/$p"
+					git apply --verbose $SKIPPATHS < "$pdir/$p" | tee -a "$patchlog"
 				else
-					patch -d$svndir/ $SKIPPATHS < "$pdir/$p" |sed -e "s/^patching file/$G patching > $WH/g;s/^Hunk/$P Hunk     > $Y/g;s/FAILED/$R FAILED/g; ;s/-- saving/$Y -- saving/g;"
+					patch -d$svndir/ $SKIPPATHS < "$pdir/$p" | tee -a "$patchlog" | sed -e "s/^patching file/$G patching > $WH/g;s/^Hunk/$P Hunk     > $Y/g;s/FAILED/$R FAILED/g; ;s/-- saving/$Y -- saving/g;"
 				fi
 			done
+
+			cat $patchlog >"$ldir/$e.log"
+			ln -sf "$ldir/$e.log" "$workdir/lastpatch.log"
+			rm -rf "$patchlog"
+
 			mark_patched
 		else
 			printf $WH"    $txt_no patch $txt_found"

@@ -60,6 +60,7 @@ _apply_menupatch(){
 
 					_w="ok"
 					cd "$svndir"
+					echo -e "\n$e" >> "$patchlog"
 					if _streamboard_patch "$pdir/$e"; then
 						SKIPPATHS=-p0
 						printf "PATCH : apply streamboard-style patch $e"
@@ -124,6 +125,7 @@ _apply_consolepatch(){
 
 				_w=0
 				cd "$svndir"
+				echo -e "\n$e" >> "$patchlog"
 				if _streamboard_patch "$pdir/$e"; then
 					SKIPPATHS=-p0
 					printf "$y_l\n |     PATCH : apply streamboard-style patch $e\n"
@@ -139,6 +141,9 @@ _apply_consolepatch(){
 				fi
 				hunks=$(grep -c1 "^Hunk" "$patchlog")
 				fails=$(grep -c1 "hunks FAILED" "$patchlog")
+
+				cat $patchlog >"$ldir/$e.log";
+				ln -sf "$ldir/$e.log" "$workdir/lastpatch.log";
 
 				if [ "$hunks" -gt "0" ]
 				then
@@ -158,9 +163,6 @@ _apply_consolepatch(){
 					svnrestore lastsvn;
 					exit
 				fi
-
-				cat $patchlog >"$ldir/$e.log";
-				ln -sf "$ldir/$e.log" "$workdir/lastpatch.log";
 			done
 
 			rm -rf "$patchlog"
