@@ -4,7 +4,7 @@ _toolchain_build_menu(){
 	[ "$loadprofile" == "yes" ] && load_config
 
 	selected=$(
-	"$gui" "$st_" "$bt_" "$title_" --no-cancel --title " -[ $txt_bmenu_title ]- " --menu "_________________________________________________________ \n $txt_bmenu_user = $(whoami)\n Toolchain       = $_toolchainname\n $txt_bmenu_comp = $_compiler""gcc\n $txt_bmenu_debu = CPU-Threads($(CPUS)) SVN($(REVISION)) SCRIPT(${SIMPLEVERSION}.${VERSIONCOUNTER})\n $txt_bmenu_use  = $(echo $USESTRING| sed -e 's/^[ \t]*//')\n _________________________________________________________ \n" 22 65 10 BUILD "$txt_bmenu_build" CONFIGURE "$txt_bmenu_config" UPDATE "$txt_bmenu_update" BACKUP "$txt_bmenu_backup" LOAD_PROFILE "$txt_bmenu_profile" SAVE_PROFILE "$txt_bmenus_profile" SHOW_BUILDLOG "$txt_bmenu_log" EDIT_CONF_DIR "Oscam config PATH" BACK "$txt_bmenu_back" EXIT "$txt_firstmenu_exit")
+	"$gui" "$st_" "$bt_" "$title_" --no-cancel --title " -[ $txt_bmenu_title ]- " --menu "_________________________________________________________ \n $txt_bmenu_user = $(whoami)\n Toolchain       = $_toolchainname\n $txt_bmenu_comp = $_compiler""gcc\n $txt_bmenu_debu = CPU-Threads($(CPUS)) ${REPO^^}($($(USEGIT) && printf "$(COMMIT)" || printf "$(REVISION)")) SCRIPT(${SIMPLEVERSION}.${VERSIONCOUNTER})\n $txt_bmenu_use  = $(echo $USESTRING| sed -e 's/^[ \t]*//')\n _________________________________________________________ \n" 22 75 10 BUILD "$txt_bmenu_build" CONFIGURE "$txt_bmenu_config" UPDATE "$txt_bmenu_update" BACKUP "$txt_bmenu_backup" LOAD_PROFILE "$txt_bmenu_profile" SAVE_PROFILE "$txt_bmenus_profile" SHOW_BUILDLOG "$txt_bmenu_log" EDIT_CONF_DIR "Oscam config PATH" BACK "$txt_bmenu_back" EXIT "$txt_firstmenu_exit")
 	[ $? = 255 ] && _toolchain_build_menu
 
 	case $selected in
@@ -58,7 +58,7 @@ _toolchain_config_menu(){
 		BUILD_EXTRA)
 						_build_extra_menu;;
 		OSCAM_MODULE)
-						eval "$svndir/config.sh -g" 2>/dev/null
+						eval "${repodir}/config.sh -g" 2>/dev/null
 						save_config;;
 		SELECT_STAPI)
 						_stapi_select;;
@@ -112,7 +112,7 @@ _toolchain_main_menu(){
 	counter
 
 	out=$(
-	"$gui" "$st_" "$nc_" "$bt_" "$title_" --help-button --help-label INFO --title "-[ Toolchain $txt_menu ]-" --menu "$txt_main_revision$(REVISION)" "${COUNT+8}" 75 0 ${MENU_OPTIONS})
+	"$gui" "$st_" "$nc_" "$bt_" "$title_" --help-button --help-label INFO --title "-[ Toolchain $txt_menu ]-" --menu "$txt_main_revision$(REVISION)$($(USEGIT) && printf " @ $(COMMIT) @ $(BRANCH)" || printf " on $(BRANCH)")" "${COUNT+8}" 75 0 ${MENU_OPTIONS})
 	IFS=$OIFS
 	first=$(echo "$out" | awk '{printf $1}')
 	tc_info=$(echo "$out" | awk '{printf $2}')

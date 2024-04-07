@@ -49,7 +49,7 @@ txt_ssh_profiles="SSH $txt_profiles"
 txt_start_menu='Main menu'
 txt_remove_menu='Remove toolchain'
 txt_add_menu='Add toolchain'
-txt_main_revision="\n the local SVN revision is : r"
+txt_main_revision="\n the local ${REPO^^} revision is : r"
 
 # help txt
 txt_help1="begin with"
@@ -57,8 +57,8 @@ txt_help2="commandline Parameters are"
 txt_help3="[ENTER] to continue..."
 
 # firstmenu ################################################
-txt_firstmenu_continue="continue with local SVN"
-   txt_firstmenu_chose="load a different SVN (7000+)"
+txt_firstmenu_continue="continue with local ${REPO^^}"
+   txt_firstmenu_chose="load a different ${REPO^^} Revision"
    txt_firstmenu_cedit="start configuration editor"
    txt_firstmenu_tcupdate="start toolchain updater"
     txt_firstmenu_lang="manual system language selection"
@@ -102,10 +102,10 @@ txt_menu_back="back to toolchain menu"
 
 # _dialog_checkout
 txt_verify_syscheck='check system                :'
-     txt_verify_svn='check existing SVN          :'
-     txt_update_svn="$txt_update SVN            :"
-    txt_prepare_svn="prepare SVN checkout     :"
-         txt_latest="latest SVN"
+	 txt_verify_svn="check existing ${REPO^^}          :"
+     txt_update_svn="$txt_update ${REPO^^}            :"
+    txt_prepare_svn="prepare ${REPO^^} checkout     :"
+         txt_latest="latest ${REPO^^}"
 
 # _load_profile ###########################################
   txt_select_profile_title="available profiles"
@@ -136,7 +136,7 @@ txt_s3tup_msg_update_hint="is being updated..."
 txt_s3tup_msg_update_restart="Restarting"
 txt_s3tup_msg_update_current="is up to date"
 txt_s3tup_msg_update_s3update_required="Please update your simplebuild3 installation first!"
-txt_s3tup_msg_update_directory_unversioned="Update not possible because the installation directory is not SVN or GIT versioned!"
+txt_s3tup_msg_update_directory_unversioned="Update not possible because the installation directory is not ${REPO^^} or ${REPO^^} versioned!"
 txt_s3tup_msg_update_pending="update pending"
 txt_s3tup_msg_update_not_required="no update required"
 txt_s3tup_msg_update_finished="Update completed to version:"
@@ -207,8 +207,6 @@ txt_s3tup_msg_table_header_libsversion_col_downgrade="${txt_s3tup_msg_table_head
 txt_s3tup_menu_toolchain_title="${txt_tc} Menu"
 txt_s3tup_menu_toolchain_text1="Select one of the"
 txt_s3tup_menu_toolchain_text2="installed cross ${txt_tc,,}s that you want to update:"
-txt_s3tup_menu_toolchain_notsupported="${txt_tc} may not be supported by this build system ($(uname -m)) due to architecture mismatch!"
-txt_s3tup_menu_toolchain_arch="$txt_tc host arch:"
 txt_s3tup_menu_toolchain_notfound="no ${txt_tc,,}s found"
 txt_s3tup_menu_toolchain_folder="$txt_tc folder:"
 txt_s3tup_menu_toolchain_config="config file:"

@@ -51,7 +51,7 @@ txt_proto="Protocol"
 txt_start_menu='menu główne';
 txt_remove_menu='usuń Toolchain';
 txt_add_menu='dodaj Toolchain';
-txt_main_revision="\n aktualna SVN REVISION to : r";
+txt_main_revision="\n aktualna ${REPO^^} REVISION to : r";
 
 # help txt
 txt_help1="zaczać z"
@@ -59,8 +59,8 @@ txt_help2="wiersz poleceń to"
 txt_help3="[ENTER] > dalej ..."
 
 # firstmenu ################################################
-txt_firstmenu_continue="dalej z lokalnym SVN";
-   txt_firstmenu_chose="załaduj inny SVN (od 7000)";
+txt_firstmenu_continue="dalej z lokalnym ${REPO^^}";
+   txt_firstmenu_chose="załaduj inny ${REPO^^} Revision";
    txt_firstmenu_cedit="$txt_conf"" - wystartuj edytor";
     txt_firstmenu_lang="opcje językowe";
     txt_firstmenu_exit="zakończ Simplebuild";
@@ -104,7 +104,7 @@ txt_menu_back="powrót do menu toolchain";
 
 # _dialog_checkout ########################################
 txt_verify_syscheck='sprawdzanie systemu          :';
-     txt_verify_svn='sprawdzanie istniejącego svn :';
+     txt_verify_svn="sprawdzanie istniejącego svn :";
      txt_update_svn="$txt_update svn         :";
     txt_prepare_svn="przygotowanie svn checkout :";
          txt_latest="ostatni aktualny";
@@ -136,7 +136,7 @@ txt_s3tup_msg_update_hint="is being updated..."
 txt_s3tup_msg_update_restart="Restarting"
 txt_s3tup_msg_update_current="is up to date"
 txt_s3tup_msg_update_s3update_required="Please update your simplebuild3 installation first!"
-txt_s3tup_msg_update_directory_unversioned="Update not possible because the installation directory is not SVN or GIT versioned!"
+txt_s3tup_msg_update_directory_unversioned="Update not possible because the installation directory is not ${REPO^^} or ${REPO^^} versioned!"
 txt_s3tup_msg_update_pending="update pending"
 txt_s3tup_msg_update_not_required="no update required"
 txt_s3tup_msg_update_finished="Update completed to version:"
@@ -207,8 +207,6 @@ txt_s3tup_msg_table_header_libsversion_col_downgrade="${txt_s3tup_msg_table_head
 txt_s3tup_menu_toolchain_title="${txt_tc} Menu"
 txt_s3tup_menu_toolchain_text1="Select one of the"
 txt_s3tup_menu_toolchain_text2="installed cross ${txt_tc,,}s that you want to update:"
-txt_s3tup_menu_toolchain_notsupported="${txt_tc} may not be supported by this build system ($(uname -m)) due to architecture mismatch!"
-txt_s3tup_menu_toolchain_arch="$txt_tc host arch:"
 txt_s3tup_menu_toolchain_notfound="no ${txt_tc,,}s found"
 txt_s3tup_menu_toolchain_folder="$txt_tc folder:"
 txt_s3tup_menu_toolchain_config="config file:"

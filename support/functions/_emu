@@ -3,10 +3,10 @@
 enable_emu(){
 	clear
 	s3logo
-	if [ -d "$svndir" ]
+	if [ -d "${repodir}" ]
 	then
-		printf "$w_l  quicksvnrestore $G$txt_wait\n"
-		quicksvnrestore
+		printf "$w_l  quickreporestore $G$txt_wait\n"
+		quickreporestore
 	else
 		printf "$w_l  checkout $G$txt_wait\n"
 		checkout
@@ -22,13 +22,13 @@ enable_emu(){
 		grep '\+#define EMU_VERSION' "$emulocal/oscam-emu.patch" |cut -d " " -f 3
 		if [ -f "$emulocal/$pname" ]
 		then
-			cp -rf "$emulocal/$pname" "$svndir"
+			cp -rf "$emulocal/$pname" "${repodir}"
 		fi
 	fi
 
 	_nl
 	printf $re_
-	cd $svndir
+	cd ${repodir}
 	printf $(date)>"$workdir/patch.log"
 	patch -p0 < $pname	|tee -a "$workdir/patch.log" \
 						|grep --line-buffered -v '^[0-9]\|^/' \

@@ -55,7 +55,7 @@ txt_proto="Protokoll"
 # menu txt
 txt_remove_menu="$txt_tc entfernen"
 txt_add_menu="$txt_tc hinzufügen"
-txt_main_revision="\n Die aktuelle SVN REVISION ist : r"
+txt_main_revision="\n Die aktuelle ${REPO^^} REVISION ist : r"
 txt_bmenu_title="Baumenü"
 
 # help txt
@@ -64,8 +64,8 @@ txt_help2="Kommandozeilen Parameter sind"
 txt_help3="Taste [ENTER] zum fortsetzen..."
 
 # firstmenu ################################################
-txt_firstmenu_continue="weiter mit lokalem SVN"
-   txt_firstmenu_chose="anderen SVN Stand (7000+) laden"
+txt_firstmenu_continue="weiter mit lokalem ${REPO^^}"
+   txt_firstmenu_chose="andere ${REPO^^} Revision laden"
    txt_firstmenu_cedit="$txt_conf""s Editor starten"
    txt_firstmenu_tcupdate="Toolchain Updater starten"
     txt_firstmenu_lang="Systemsprache manuell $txt_sel"
@@ -111,9 +111,9 @@ txt_menu_back="Zurück zum $txt_tc $txt_menu"
 
 # _dialog_checkout ########################################
 txt_verify_syscheck='überprüfe System            :'
-     txt_verify_svn='überprüfe existierenden SVN :'
-     txt_update_svn="$txt_update SVN            :"
-    txt_prepare_svn="bereite SVN checkout vor :"
+     txt_verify_svn="überprüfe existierenden ${REPO^^} :"
+     txt_update_svn="$txt_update ${REPO^^}            :"
+    txt_prepare_svn="bereite ${REPO^^} checkout vor :"
          txt_latest="letzter Stand"
 
 # _load_profile ###########################################
@@ -145,7 +145,7 @@ txt_s3tup_msg_update_hint="wird aktualisiert..."
 txt_s3tup_msg_update_restart="Starte neu"
 txt_s3tup_msg_update_current="ist aktuell"
 txt_s3tup_msg_update_s3update_required="Bitte aktualisieren Sie zuerst Ihre simplebuild3-Installation!"
-txt_s3tup_msg_update_directory_unversioned="Update nicht möglich, da das Installationsverzeichnis nicht SVN- oder GIT-versioniert ist!"
+txt_s3tup_msg_update_directory_unversioned="Update nicht möglich, da das Installationsverzeichnis nicht ${REPO^^}- oder ${REPO^^}-versioniert ist!"
 txt_s3tup_msg_update_pending="Update ausstehend"
 txt_s3tup_msg_update_not_required="kein Update erforderlich"
 txt_s3tup_msg_update_finished="Update abgeschlossen auf Version:"
@@ -216,8 +216,6 @@ txt_s3tup_msg_table_header_libsversion_col_downgrade="${txt_s3tup_msg_table_head
 txt_s3tup_menu_toolchain_title="${txt_tc} Menü"
 txt_s3tup_menu_toolchain_text1="Wählen Sie eine der"
 txt_s3tup_menu_toolchain_text2="installierten Cross-${txt_tc}s aus, die Sie aktualisieren möchten:"
-txt_s3tup_menu_toolchain_notsupported="${txt_tc} wird von diesem Buildsystem ($(uname -m)) aufgrund von Architekturkonflikten möglicherweise nicht unterstützt!"
-txt_s3tup_menu_toolchain_arch="$txt_tc Host Arch:"
 txt_s3tup_menu_toolchain_notfound="Keine ${txt_tc}s gefunden"
 txt_s3tup_menu_toolchain_folder="${txt_tc} Verzeichnis:"
 txt_s3tup_menu_toolchain_config="Konfigurationsdatei:"

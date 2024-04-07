@@ -84,54 +84,51 @@ tar_cam(){
 	fi
 }
 
-tarsvn(){
+tar_repo(){
 	cd "$workdir"
 
-	if [ -f "$svndir/config.sh" ]
+	if [ -f "${repodir}/config.sh" ]
 	then
-		cp -f "$svndir/config.sh" "$configdir/config.sh.master"
-		[ -f "$svndir/Makefile" ] && cp -f "$svndir/Makefile" "$configdir/Makefile.master"
-		printf "$w_l  SVN Backup    :$c_l "
-		tar -zcf "$bsvn/$("$svndir/config.sh" -r).tar.gz" oscam-svn
+		cp -f "${repodir}/config.sh" "$configdir/config.sh.master"
+		[ -f "${repodir}/Makefile" ] && cp -f "${repodir}/Makefile" "$configdir/Makefile.master"
+		printf "$w_l  ${REPO^^} Backup    :$c_l "
+		tar -zcf "$brepo/$(REVISION).tar.gz" oscam-${REPO}
 	fi
 
-	cd "$bsvn"
-	ln -sf "$bsvn/$("$svndir/config.sh" -r).tar.gz" "last.tar.gz"
+	cd "$brepo"
+	ln -sf "$brepo/$(REVISION).tar.gz" "last.tar.gz"
 	printf "done$re_\n\n"
 }
 
-untarsvn(){
+untar_repo(){
 	cd "$workdir"
 
-	[ -d oscam-svn ] && rm -rf oscam-svn;
+	[ -d oscam-${REPO} ] && rm -rf oscam-${REPO};
 
 	if [ -z "$1" ]
 	then
-		[ -f "$bsvn/last.tar.gz" ] && tar -xf "$bsvn/last.tar.gz"
-		printf "\e[1A $w_l SVN Revision  : $c_l$(basename $(readlink -f $bsvn/last.tar.gz) .tar.gz)$w_l\n"
+		[ -f "$brepo/last.tar.gz" ] && tar -xf "$brepo/last.tar.gz"
+		printf "\e[1A $w_l ${REPO^^} Revision  : $c_l$(basename $(readlink -f $brepo/last.tar.gz) .tar.gz)$w_l\n"
 	else
 
-		if [ -f "$bsvn/$1.tar.gz" ]
+		if [ -f "$brepo/$1.tar.gz" ]
 		then
-			tar -xf "$bsvn/$1.tar.gz"
-			cd $bsvn
-			ln -sf "$bsvn/$("$svndir/config.sh" -r).tar.gz" "last.tar.gz"
-			printf "\e[1A $w_l SVN Revision  : $c_l$(basename $(readlink -f $bsvn/last.tar.gz) .tar.gz)$w_l\n"
+			tar -xf "$brepo/$1.tar.gz"
+			cd $brepo
+			ln -sf "$brepo/$(REVISION).tar.gz" "last.tar.gz"
+			printf "\e[1A $w_l ${REPO^^} Revision  : $c_l$(basename $(readlink -f $brepo/last.tar.gz) .tar.gz)$w_l\n"
 		else
-
-			if [ -f "$bsvn/last.tar.gz" ]
+			if [ -f "$brepo/last.tar.gz" ]
 			then
-				tar -xf "$bsvn/last.tar.gz"
-				printf "\e[1A $w_l SVN Revision  : $c_l$(basename $(readlink -f $bsvn/last.tar.gz) .tar.gz)$w_l\n"
+				tar -xf "$brepo/last.tar.gz"
+				printf "\e[1A $w_l ${REPO^^} Revision  : $c_l$(basename $(readlink -f $brepo/last.tar.gz) .tar.gz)$w_l\n"
 			else
-				printf "$w_l  SVN Backup    :$r_l $txt_not_found\n"
+				printf "$w_l  ${REPO^^} Backup    :$r_l $txt_not_found\n"
 				sleep 3
 				checkout
 			fi
-
 		fi
-
 	fi
 
-	[ -f "$workdir/SVN-IS-PATCHED" ] && rm -f "$workdir/SVN-IS-PATCHED"
+	[ -f "$workdir/${REPO^^}-IS-PATCHED" ] && rm -f "$workdir/${REPO^^}-IS-PATCHED"
 }

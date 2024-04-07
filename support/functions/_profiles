@@ -70,7 +70,7 @@ _load_profile(){
 		if [ -f "$profdir/$pselect" ]
 		then
 			profile_vars=$(cat "$profdir/$pselect";)
-			reset_="$("$svndir/config.sh" -D all)"
+			reset_="$("${repodir}/config.sh" -D all)"
 
 			for e in "${!USE_vars[@]}"
 			do
@@ -92,7 +92,7 @@ _load_profile(){
 				done
 			done
 
-			_set_=$("$svndir/config.sh" -E $_em_)
+			_set_=$("${repodir}/config.sh" -E $_em_)
 			USESTRING="$(echo "${USE_vars[@]}"| sed 's@USE_@@g' | sed 's@=1@@g'| tr -s ' ')"
 			loadprofile="yes"
 		fi

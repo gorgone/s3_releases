@@ -52,7 +52,7 @@ txt_proto="Protocol"
 # menu txt
 txt_remove_menu='$txt_tc verwijderen';
 txt_add_menu='$txt_tc toevoegen';
-txt_main_revision="\n De actuele SVN versie is : r";
+txt_main_revision="\n De actuele ${REPO^^} versie is : r";
 txt_bmenu_title="Buildmenü";
 
 # help txt
@@ -61,8 +61,8 @@ txt_help2="Opdrachtregel parameters zijn"
 txt_help3="Druk op [ENTER] om door te gaan..."
 
 # firstmenu ################################################
-txt_firstmenu_continue="Doorgaan met lokale SVN";
-   txt_firstmenu_chose="Andere SVN versie (7000+) laden";
+txt_firstmenu_continue="Doorgaan met lokale ${REPO^^}";
+   txt_firstmenu_chose="Andere ${REPO^^} Revision laden";
    txt_firstmenu_cedit="$txt_conf""s Editor starten";
     txt_firstmenu_lang="Taal handmatig $txt_sel";
     txt_firstmenu_exit="Afsluiten";
@@ -104,10 +104,10 @@ txt_menu_back="Naar $txt_tc $txt_menu";
 
 # _dialog_checkout
 txt_verify_syscheck='Systeem controleren       :';
-     txt_verify_svn='Huidige SVN controleren   :';
-     txt_update_svn="SVN $txt_update           :";
-    txt_prepare_svn="SVN controle voorbereiden :";
-         txt_latest="Nieuwste SVN";
+     txt_verify_svn="Huidige ${REPO^^} controleren   :";
+     txt_update_svn="${REPO^^} $txt_update           :";
+    txt_prepare_svn="${REPO^^} controle voorbereiden :";
+         txt_latest="Nieuwste ${REPO^^}";
 
 # _load_profile ###########################################
   txt_select_profile_title="Beschikbare $txt_profiles";
@@ -136,7 +136,7 @@ txt_s3tup_msg_update_hint="is being updated..."
 txt_s3tup_msg_update_restart="Restarting"
 txt_s3tup_msg_update_current="is up to date"
 txt_s3tup_msg_update_s3update_required="Please update your simplebuild3 installation first!"
-txt_s3tup_msg_update_directory_unversioned="Update not possible because the installation directory is not SVN or GIT versioned!"
+txt_s3tup_msg_update_directory_unversioned="Update not possible because the installation directory is not ${REPO^^} or ${REPO^^} versioned!"
 txt_s3tup_msg_update_pending="update pending"
 txt_s3tup_msg_update_not_required="no update required"
 txt_s3tup_msg_update_finished="Update completed to version:"
@@ -207,8 +207,6 @@ txt_s3tup_msg_table_header_libsversion_col_downgrade="${txt_s3tup_msg_table_head
 txt_s3tup_menu_toolchain_title="${txt_tc} Menu"
 txt_s3tup_menu_toolchain_text1="Select one of the"
 txt_s3tup_menu_toolchain_text2="installed cross ${txt_tc,,}s that you want to update:"
-txt_s3tup_menu_toolchain_notsupported="${txt_tc} may not be supported by this build system ($(uname -m)) due to architecture mismatch!"
-txt_s3tup_menu_toolchain_arch="$txt_tc host arch:"
 txt_s3tup_menu_toolchain_notfound="no ${txt_tc,,}s found"
 txt_s3tup_menu_toolchain_folder="$txt_tc folder:"
 txt_s3tup_menu_toolchain_config="config file:"

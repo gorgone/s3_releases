@@ -38,14 +38,14 @@ _streamboard_patch(){
 	if [ -e "$1" ]; then
 		PATCHEDFILES=$(grep -e '^\(---\|+++\) ' -i "$1" | grep -v /dev/null | awk '{print $2}' | sort | uniq)
 		for f in ${PATCHEDFILES[@]}; do
-			[[ -e "$svndir/$f" ]] && return 0
+			[[ -e "${repodir}/$f" ]] && return 0
 		done
 	fi
 	return 1
 }
 
 _apply_menupatch(){
-	[ -f "$workdir/SVN-IS-PATCHED" ] && quicksvnrestore $_toolchainname 2>/dev/null
+	[ -f "$workdir/GIT-IS-PATCHED" ] && quickreporestore $_toolchainname 2>/dev/null
 		cd "$pdir"
 			(if [ "$(ls -1 "$pdir"/*.patch 2>/dev/null | wc -l)" -gt "0" ]
 			then
@@ -59,7 +59,7 @@ _apply_menupatch(){
 				do
 
 					_w="ok"
-					cd "$svndir"
+					cd "${repodir}"
 					echo -e "\n$e" >> "$patchlog"
 					if _streamboard_patch "$pdir/$e"; then
 						SKIPPATHS=-p0
@@ -111,7 +111,7 @@ _apply_menupatch(){
 }
 
 _apply_consolepatch(){
-	if [ ! -f "$workdir/SVN-IS-PATCHED" ]
+	if [ ! -f "$workdir/${REPO^^}-IS-PATCHED" ]
 	then
 
 		cd "$pdir"
@@ -124,7 +124,7 @@ _apply_consolepatch(){
 			do
 
 				_w=0
-				cd "$svndir"
+				cd "${repodir}"
 				echo -e "\n$e" >> "$patchlog"
 				if _streamboard_patch "$pdir/$e"; then
 					SKIPPATHS=-p0
@@ -160,7 +160,7 @@ _apply_consolepatch(){
 						sleep 1 & echo -en "$i\b"
 						wait
 					done
-					svnrestore lastsvn;
+					reporestore lastsvn;
 					exit
 				fi
 			done
@@ -184,26 +184,26 @@ _apply_consolepatch(){
 mark_patched(){
 	patches="$(echo "${patchlist[@]}" | xargs | sed 's/ /\\n\\t\\t/g')"
 
-	#mark oscam-svn as patched
-	echo "$patches" > "$workdir/SVN-IS-PATCHED"
+	#mark oscam-${REPO} as patched
+	echo "$patches" > "$workdir/${REPO}-IS-PATCHED"
 }
 
 patch_webif(){
 
-	if [ -f "$workdir/SVN-IS-PATCHED" ]
+	if [ -f "$workdir/${REPO^^}-IS-PATCHED" ]
 	then
-		if [ -s "$workdir/SVN-IS-PATCHED" ]
+		if [ -s "$workdir/${REPO^^}-IS-PATCHED" ]
 		then
 			#format should be: patchname1.patch\n\t\tpatchname2.patch\n\t\tpatchname3.patch
-			patches="yes\\n\\t\\t$(cat "$workdir/SVN-IS-PATCHED")"
+			patches="yes\\n\\t\\t$(cat "$workdir/${REPO^^}-IS-PATCHED")"
 		else
 			patches='yes'
 		fi
 
 		#show patch file information in oscam WebIf
-		sed -i '/^#define S3PATCHED/d' "$svndir/config.h"
-		sed -i "/^#endif \/\/OSCAM_CONFIG_H_/s/^/#define S3PATCHED \""$(printf '%q' $patches)"\"\n/" "$svndir/config.h"
-		sed -i '/#ifdef S3PATCHED/,+3d' "$svndir/oscam.c"
-		sed -i "/fprintf(fp, \"WebifPort:.*/s/$/\n#endif\n\n#ifdef S3PATCHED\n\tfprintf(fp, \"Patched:\\\t\%s\\\n\", S3PATCHED)\;/" "$svndir/oscam.c"
+		sed -i '/^#define S3PATCHED/d' "${repodir}/config.h"
+		sed -i "/^#endif \/\/OSCAM_CONFIG_H_/s/^/#define S3PATCHED \""$(printf '%q' $patches)"\"\n/" "${repodir}/config.h"
+		sed -i '/#ifdef S3PATCHED/,+3d' "${repodir}/oscam.c"
+		sed -i "/fprintf(fp, \"WebifPort:.*/s/$/\n#endif\n\n#ifdef S3PATCHED\n\tfprintf(fp, \"Patched:\\\t\%s\\\n\", S3PATCHED)\;/" "${repodir}/oscam.c"
 	fi
 }

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSIONCOUNTER=333
+VERSIONCOUNTER=335
 SIMPLEVERSION="2024.04"
 OIFS=$IFS
 export NCURSES_NO_UTF8_ACS=1
@@ -26,15 +26,13 @@ configdir="$sdir/configs"
     dldir="$sdir/downloads"
      fdir="$sdir/functions"
   menudir="$sdir/menu_save"
-     bsvn="$sdir/backup_svn"
     tcdir="$sdir/toolchains"
      tdir="$sdir/translation"
-   svndir="$workdir/oscam-svn"
  tccfgdir="$sdir/toolchains.cfg"
 
 # create folders
 mkdir -p "$tcdir/native/bin" 2>/dev/null
-mkdir -p $sdir/{archive,binaries,downloads,software,logs,patches,backup_svn,menu_save,upx} 2>/dev/null
+mkdir -p $sdir/{archive,binaries,downloads,software,logs,patches,menu_save,upx} 2>/dev/null
 [ -f $sdir/patches/no.patch ] && rm -f $sdir/patches/no.patch 2>/dev/null
 
 # create links
@@ -64,7 +62,6 @@ do
 	declare -A $a_n
 done
 
-
 USE_vars[USE_DIAG]=;
 USE_vars[USE_TARGZ]=;
 USE_vars[USE_PATCH]=;
@@ -88,13 +85,13 @@ s3cfg_vars[USE_COMPRESS]=0
 s3cfg_vars[S3_UPDATE_CHECK]=1
 s3cfg_vars[SAVE_LISTSMARGO]=1
 s3cfg_vars[ADD_PROFILE_NAME]=0
-s3cfg_vars[NO_SVN_AUTOUPDATE]=0
+s3cfg_vars[NO_REPO_AUTOUPDATE]=0
 s3cfg_vars[delete_oscamdebugbinary]=1
 
 #filled arrays
 config_cases=( all addons protocols readers card_readers );
 s3opts=( cedit checkout clean enable_emu fix_me get_patch help lang_select loadonly\
-	menu profiles ssh_profiles svnpatch svnrestore svnup syscheck sysinfo tccheck\
+	menu profiles ssh_profiles repopatch reporestore repoup syscheck sysinfo tccheck\
 	tcrepair tedit update update_emu update_me upload ) # extendable with plugins
 
 CUSTOM_CONFDIR="not_set"
@@ -129,7 +126,7 @@ cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections -fomit-frame-pointer -f
 #cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections -o nodeadcode -ffast-math -fomit-frame-pointer -fthread-jumps -foptimize-strlen --no-inline"
 
 #default url
-trunkurl="https://svn.streamboard.tv/oscam/trunk"
+trunkurl="https://git.streamboard.tv/common/oscam.git"
 
 [ -f "$workdir/oscamsource.url" ] && source "$workdir/oscamsource.url"
 
@@ -151,6 +148,12 @@ then
 else
 	echo "fail functions"
 fi
+
+#set additional dir_vars
+   REPO="$(REPOTYPE)"
+  brepo="$sdir/backup_${REPO}"
+repodir="$workdir/oscam-${REPO}"
+mkdir -p $sdir/backup_${REPO} 2>/dev/null
 
 #software build support
 if [ -d "$sodir" ]
@@ -199,7 +202,7 @@ else
 
 			case $e in
 
-			fix_me|checkout|update_me|update_emu|svnrestore|enable_emu|upload_cam)
+			fix_me|checkout|update_me|update_emu|reporestore|enable_emu|upload_cam)
 				if [ ! -n "$2" ]
 				then
 					eval "$e"

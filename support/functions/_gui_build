@@ -25,7 +25,7 @@ _gui_build(){
 	[ -f "$configdir/compiler_option" ] && co=$(cat "$configdir/compiler_option") || co="-O2"
 
 #make clean
-	cd "$svndir"
+	cd "${repodir}"
 	make distclean > /dev/null 2>&1
 	USESTRING_=''
 	EXTRA_USE=''
@@ -99,7 +99,7 @@ _gui_build(){
 	fi
 
 #IF SVN is Patched
-	if [ -f "$workdir/SVN-IS-PATCHED" ]
+	if [ -f "$workdir/${REPO^^}-IS-PATCHED" ]
 	then
 		patch_webif
 	fi
@@ -157,21 +157,21 @@ _gui_build(){
 	timer_calc
 
 #save list_smargo
-	cd "$svndir/Distribution"
+	cd "${repodir}/Distribution"
 	lsmn="$(ls list_smargo* 2> /dev/null)"
 
-	if [ "${s3cfg_vars[SAVE_LISTSMARGO]}" == "1" ] && [ -f "$svndir/Distribution/$lsmn" ]
+	if [ "${s3cfg_vars[SAVE_LISTSMARGO]}" == "1" ] && [ -f "${repodir}/Distribution/$lsmn" ]
 	then
 
 		if [ "$_toolchainname" == "native" ]
 		then
-			printf "SAVE\t$lsmn $txt_as oscam-svn$(REVISION)-$(hostname)-list_smargo"| tee -a "$ldir/$log_name"
-			mv -f "$lsmn" "$bdir/oscam-svn$(REVISION)-$(hostname)-list_smargo"
-			printf "oscam-svn$(REVISION)-$(hostname)-list_smargo" >"$targztmp"
+			printf "SAVE\t$lsmn $txt_as oscam-${REPO}$(REVISION)$($(USEGIT) && printf "@$(COMMIT)" || printf "")-$(hostname)-list_smargo"| tee -a "$ldir/$log_name"
+			mv -f "$lsmn" "$bdir/oscam-${REPO}$(REVISION)$($(USEGIT) && printf "@$(COMMIT)" || printf "")-$(hostname)-list_smargo"
+			printf "oscam-${REPO}$(REVISION)$($(USEGIT) && printf "@$(COMMIT)" || printf "")-$(hostname)-list_smargo" >"$targztmp"
 		else
-			printf "SAVE\t$lsmn $txt_as oscam-svn$(REVISION)-$_toolchainname-list_smargo"|tee -a "$ldir/$log_name"
-			mv -f "$lsmn" "$bdir/oscam-svn$(REVISION)-$_toolchainname-list_smargo"
-			printf "oscam-svn$(REVISION)-$_toolchainname-list_smargo" >"$targztmp\n"
+			printf "SAVE\t$lsmn $txt_as oscam-${REPO}$(REVISION)$($(USEGIT) && printf "@$(COMMIT)" || printf "")-$_toolchainname-list_smargo"|tee -a "$ldir/$log_name"
+			mv -f "$lsmn" "$bdir/oscam-${REPO}$(REVISION)$($(USEGIT) && printf "@$(COMMIT)" || printf "")-$_toolchainname-list_smargo"
+			printf "oscam-${REPO}$(REVISION)$($(USEGIT) && printf "@$(COMMIT)" || printf "")-$_toolchainname-list_smargo" >"$targztmp\n"
 		fi
 
 	fi

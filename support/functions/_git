@@ -1,0 +1,98 @@
+#!/bin/bash
+
+gitcheckout(){
+	echo -en "$c_l"
+	fc1="$(mktemp)"
+	clear
+	ologo
+	i=0
+	COUNT=0
+
+	check_url "$trunkurl" || return
+
+	if [ -d "${repodir}" ]
+	then
+		rm -rf "${repodir}"
+		printf "$p_l\n  $txt_delete oscam-${REPO} $re_\n"
+	else
+		printf "$p_l\n  $txt_no oscam-${REPO} $txt_found\n$re_"
+	fi
+
+	printf "$w_l  ${REPO^^} Repository: $g_l$trunkurl$re_"
+	[ -z "$1" ] && commit=0 || commit="$1"
+	printf "\n$w_l  ${REPO^^} Checkout  : $y_l$([ "$commit" != "0" ] && printf "commit $commit ..." || printf "$txt_latest ...")\n$re_"
+	git clone "$trunkurl" "${repodir}"
+	[ "$commit" != "0" ] && cd "${repodir}" && git reset --hard "$commit"
+
+	if [ -f "${repodir}/config.sh" ]
+	then
+		printf "$w_l  ${REPO^^} Revision  :$y_l $(REVISION) @ $(COMMIT) @ $(BRANCH) $b_l$mac_$re_\n$w_l  ${REPO^^} UserPath  :$y_l ${repodir}"
+	fi
+
+	[ -f "${repodir}/config.h" ]&& reset_="$("${repodir}/config.sh" -R)"
+	rm -rf "$fc1"
+	_nl
+	[ -f "$workdir/${REPO^^}-IS-PATCHED" ] && rm -f "$workdir/${REPO^^}-IS-PATCHED"
+	[ -f "$workdir/EMU_ON" ] && rm -f "$workdir/EMU_ON"
+	tar_repo
+}
+
+gitup(){
+	printf "$c_l"
+	clear
+	ologo
+	i=1
+
+	check_url "$trunkurl" || return
+
+	if [ -d "${repodir}" ]
+	then
+		printf "$p_l\n  $txt_update oscam-${REPO} $re_\n"
+	else
+		checkout
+		return
+	fi
+
+	printf "\n$w_l  ${REPO^^} Repository  : $g_l""$trunkurl\n""$re_"
+	
+	cd "${repodir}"
+	git reset --hard HEAD
+	git pull
+
+	if [ -f "${repodir}/config.sh" ]
+	then
+		tput cup 10 2
+		printf "\n$w_l  ${REPO^^} Revision  : ""$y_l$(REVISION) @ $(COMMIT) @ $(BRANCH) $b_l$mac_$re_\n$w_l  ${REPO^^} UserPath  : $y_l""${repodir}\n$re_"
+	fi
+
+	if [ -f "${repodir}/config.h" ]
+	then
+		reset_="$("${repodir}/config.sh" -R)"
+	fi
+	tar_repo
+}
+
+_dialog_checkout1_git(){
+	rm -rf "${repodir}" 2>/dev/null
+	[ -z "$1" ] && commit=0 || commit="$1"
+	if [ "$commit" != "0" ]
+	then
+		_rev="-r $commit"
+		sc_text="Revision: $commit"
+	else
+		_rev=''
+		sc_text="$txt_latest"
+	fi
+
+	cd "$workdir" && git clone "$trunkurl" "${repodir}"
+	cd "${repodir}"
+	[ "$commit" != "0" ] && git reset --hard "$commit"
+	if [ -f "${repodir}/config.sh" ]
+	then
+		reset_="$("${repodir}/config.sh" -R)"
+		printf "Revision: $(REVISION) done..."
+		[ -f "$workdir/${REPO^^}-IS-PATCHED" ] && rm -f "$workdir/${REPO^^}-IS-PATCHED"
+		[ -f "$workdir/EMU_ON" ] && rm -f "$workdir/EMU_ON"
+		_get_config_menu
+	fi
+}

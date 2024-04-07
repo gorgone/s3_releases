@@ -48,7 +48,7 @@ txt_ssh_profiles="SSH $txt_profiles"
 txt_start_menu="Ana menü"; 
 txt_remove_menu="$txt_tc kaldır"; 
 txt_add_menu="$txt_tc ekle"; 
-txt_main_revision="\n yerel SVN revizyonu: r"
+txt_main_revision="\n yerel ${REPO^^} revizyonu: r"
 
 # help txt 
 txt_help1="ile başla"
@@ -56,8 +56,8 @@ txt_help2="komut satırı Parametreleri"
 txt_help3="[ENTER]devam etmek için..."
 
 # firstmenu #############################################
-txt_firstmenu_continue="yerel SVN ile devam et"
-   txt_firstmenu_chose="farklı bir SVN yükle (7000+)"
+txt_firstmenu_continue="yerel ${REPO^^} ile devam et"
+   txt_firstmenu_chose="farklı bir ${REPO^^} Revizyonu yükleyin"
    txt_firstmenu_cedit="yapılandırma düzenleyicisini başlat"
 txt_firstmenu_tcupdate="toolchain güncelleyicisini başlat";
     txt_firstmenu_lang="manuel sistem dili seçimi"
@@ -101,10 +101,10 @@ txt_menu_back="$txt_tc menüsüne geri dön";
 
 # _dialog_checkout 
 txt_verify_syscheck="sistemi kontrol edin        :"
-     txt_verify_svn="mevcut SVN'yi kontrol edin  :"
-     txt_update_svn="$txt_update SVN     :"
-    txt_prepare_svn="SVN ödemesini hazırla       :"
-         txt_latest="güncel SVN"; 
+     txt_verify_svn="mevcut ${REPO^^}'yi kontrol edin  :"
+     txt_update_svn="$txt_update ${REPO^^}     :"
+    txt_prepare_svn="${REPO^^} ödemesini hazırla       :"
+         txt_latest="güncel ${REPO^^}"; 
 
 # _load_profile ############################################ 
   txt_select_profile_title="mevcut profiller"
@@ -133,7 +133,7 @@ txt_s3tup_msg_update_hint="güncelleniyor..."
 txt_s3tup_msg_update_restart="Yeniden Başlatılıyor"
 txt_s3tup_msg_update_current="güncel"
 txt_s3tup_msg_update_s3update_required="Lütfen önce simplebuild3 kurulumunuzu güncelleyin!"
-txt_s3tup_msg_update_directory_unversioned="Yükleme dizini SVN veya GIT sürümlü olmadığından güncelleme yapılamıyor!"
+txt_s3tup_msg_update_directory_unversioned="Yükleme dizini ${REPO^^} veya ${REPO^^} sürümlü olmadığından güncelleme yapılamıyor!"
 txt_s3tup_msg_update_pending="güncelleme bekleniyor"
 txt_s3tup_msg_update_not_required="güncelleme gerekli değil"
 txt_s3tup_msg_update_finished="Sürüme güncelleme tamamlandı:"
@@ -204,8 +204,6 @@ txt_s3tup_msg_table_header_libsversion_col_downgrade="${txt_s3tup_msg_table_head
 txt_s3tup_menu_toolchain_title="${txt_tc} Menüsü"
 txt_s3tup_menu_toolchain_text1="Birini seçin"
 txt_s3tup_menu_toolchain_text2="güncellemek istediğiniz cross ${txt_tc,,} yüklü:"
-txt_s3tup_menu_toolchain_notsupported="${txt_tc} may not be supported by this build system ($(uname -m)) due to architecture mismatch!"
-txt_s3tup_menu_toolchain_arch="$txt_tc host arch:"
 txt_s3tup_menu_toolchain_notfound="${txt_tc,,} bulunamadı"
 txt_s3tup_menu_toolchain_folder="$txt_tc klasörü:"
 txt_s3tup_menu_toolchain_config="yapılandırma dosyası:"
