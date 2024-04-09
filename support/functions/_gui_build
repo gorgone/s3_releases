@@ -208,6 +208,6 @@ _gui_build(){
 	fi
 
 #link log
-	ln -sf "$ldir/$log_name" "$workdir/lastbuild.log"
+	ln -frs "$ldir/$log_name" "$workdir/lastbuild.log"
 	[ -f "$targztmp" ] && rm -rf "$targztmp"
 }

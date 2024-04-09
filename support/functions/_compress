@@ -86,17 +86,18 @@ tar_cam(){
 
 tar_repo(){
 	cd "$workdir"
+	rev="$($(USEGIT) && printf "$(COMMIT)" || printf "$(REVISION)")"
 
 	if [ -f "${repodir}/config.sh" ]
 	then
 		cp -f "${repodir}/config.sh" "$configdir/config.sh.master"
 		[ -f "${repodir}/Makefile" ] && cp -f "${repodir}/Makefile" "$configdir/Makefile.master"
 		printf "$w_l  ${REPO^^} Backup    :$c_l "
-		tar -zcf "$brepo/$(REVISION).tar.gz" oscam-${REPO}
+		tar -zcf "$brepo/$rev.tar.gz" oscam-${REPO}
 	fi
 
 	cd "$brepo"
-	ln -sf "$brepo/$(REVISION).tar.gz" "last.tar.gz"
+	ln -frs "$brepo/$rev.tar.gz" "last${REPO}.tar.gz"
 	printf "done$re_\n\n"
 }
 
@@ -104,24 +105,22 @@ untar_repo(){
 	cd "$workdir"
 
 	[ -d oscam-${REPO} ] && rm -rf oscam-${REPO};
-
 	if [ -z "$1" ]
 	then
-		[ -f "$brepo/last.tar.gz" ] && tar -xf "$brepo/last.tar.gz"
-		printf "\e[1A $w_l ${REPO^^} Revision  : $c_l$(basename $(readlink -f $brepo/last.tar.gz) .tar.gz)$w_l\n"
+		[ -f "$brepo/last${REPO}.tar.gz" ] && tar -xf "$brepo/last${REPO}.tar.gz"
+		printf "\e[1A $w_l ${REPO^^} Revision  : $c_l$(basename $(readlink -f $brepo/last${REPO}.tar.gz) .tar.gz)$w_l\n"
 	else
-
 		if [ -f "$brepo/$1.tar.gz" ]
 		then
 			tar -xf "$brepo/$1.tar.gz"
 			cd $brepo
-			ln -sf "$brepo/$(REVISION).tar.gz" "last.tar.gz"
-			printf "\e[1A $w_l ${REPO^^} Revision  : $c_l$(basename $(readlink -f $brepo/last.tar.gz) .tar.gz)$w_l\n"
+			ln -frs "$brepo/$($(USEGIT) && printf "$(COMMIT)" || printf "$(REVISION)").tar.gz" "last${REPO}.tar.gz"
+			printf "\e[1A $w_l ${REPO^^} Revision  : $c_l$(basename $(readlink -f $brepo/last${REPO}.tar.gz) .tar.gz)$w_l\n"
 		else
-			if [ -f "$brepo/last.tar.gz" ]
+			if [ -f "$brepo/last${REPO}.tar.gz" ]
 			then
-				tar -xf "$brepo/last.tar.gz"
-				printf "\e[1A $w_l ${REPO^^} Revision  : $c_l$(basename $(readlink -f $brepo/last.tar.gz) .tar.gz)$w_l\n"
+				tar -xf "$brepo/last${REPO}.tar.gz"
+				printf "\e[1A $w_l ${REPO^^} Revision  : $c_l$(basename $(readlink -f $brepo/last${REPO}.tar.gz) .tar.gz)$w_l\n"
 			else
 				printf "$w_l  ${REPO^^} Backup    :$r_l $txt_not_found\n"
 				sleep 3

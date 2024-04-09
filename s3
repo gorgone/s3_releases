@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSIONCOUNTER=335
+VERSIONCOUNTER=336
 SIMPLEVERSION="2024.04"
 OIFS=$IFS
 export NCURSES_NO_UTF8_ACS=1
@@ -26,23 +26,35 @@ configdir="$sdir/configs"
     dldir="$sdir/downloads"
      fdir="$sdir/functions"
   menudir="$sdir/menu_save"
+    brepo="$sdir/backup_repo"
     tcdir="$sdir/toolchains"
      tdir="$sdir/translation"
  tccfgdir="$sdir/toolchains.cfg"
 
 # create folders
 mkdir -p "$tcdir/native/bin" 2>/dev/null
-mkdir -p $sdir/{archive,binaries,downloads,software,logs,patches,menu_save,upx} 2>/dev/null
+mkdir -p $sdir/{archive,binaries,downloads,software,logs,patches,backup_repo,menu_save,upx} 2>/dev/null
 [ -f $sdir/patches/no.patch ] && rm -f $sdir/patches/no.patch 2>/dev/null
+
+# some migrations of deprecated directories
+for migdir in backup_svn backup_git
+do
+	if [ -d "$sdir/$migdir" ]; then
+		mv -f "$sdir/$migdir"/{*,.*} "$brepo/" 2>/dev/null
+		mv "$brepo/last.tar.gz" "$brepo/last${migdir: -3}.tar.gz" 2>/dev/null
+		ln -fs "$(readlink "$brepo/last${migdir: -3}.tar.gz" | awk -F'/' '{ print $NF }')" "$brepo/last${migdir: -3}.tar.gz"
+		rm -d "$sdir/$migdir"
+	fi
+done
 
 # create links
 [ ! -d "$ldir" ] && clear && echo -e "\n folder creation error\n\n" && exit
-[ -L "$workdir/logs" ]     || ln -sf "$ldir" "$workdir/logs"     2>/dev/null
-[ -L "$workdir/archive" ]  || ln -sf "$adir" "$workdir/archive"  2>/dev/null
-[ -L "$workdir/patches" ]  || ln -sf "$pdir" "$workdir/patches"  2>/dev/null
-[ -L "$workdir/binaries" ] || ln -sf "$bdir" "$workdir/binaries" 2>/dev/null
-[ -L "$workdir/software" ] || ln -sf "$sodir" "$workdir/software" 2>/dev/null
-[ -L "$workdir/profiles" ] || ln -sf "$profdir" "$workdir/profiles" 2>/dev/null
+[ -L "$workdir/logs" ]     || ln -frs "$ldir" "$workdir/logs"     2>/dev/null
+[ -L "$workdir/archive" ]  || ln -frs "$adir" "$workdir/archive"  2>/dev/null
+[ -L "$workdir/patches" ]  || ln -frs "$pdir" "$workdir/patches"  2>/dev/null
+[ -L "$workdir/binaries" ] || ln -frs "$bdir" "$workdir/binaries" 2>/dev/null
+[ -L "$workdir/software" ] || ln -frs "$sodir" "$workdir/software" 2>/dev/null
+[ -L "$workdir/profiles" ] || ln -frs "$profdir" "$workdir/profiles" 2>/dev/null
 
 #set arrays
 array_names_a=( SHORT_PROTOCOLS SHORT_READERS SHORT_CARD_READERS AVAI_TCLIST
@@ -130,6 +142,12 @@ trunkurl="https://git.streamboard.tv/common/oscam.git"
 
 [ -f "$workdir/oscamsource.url" ] && source "$workdir/oscamsource.url"
 
+# switch trunkurl based on environment variable SOURCE
+# needs an existing oscamsource.url file containing trunkurl<SOURCE>="some url"
+# e.q. to force s3 to use trunkurlsvn which was defined in oscamsource.url, simply run: SOURCE=svn ./s3 menu
+forcedurl="trunkurl$SOURCE"
+[ -v trunkurl$SOURCE ] && trunkurl="${!forcedurl}"
+
 #load translationlist
 cd "$tdir"
 langsupport=(*)
@@ -151,9 +169,7 @@ fi
 
 #set additional dir_vars
    REPO="$(REPOTYPE)"
-  brepo="$sdir/backup_${REPO}"
 repodir="$workdir/oscam-${REPO}"
-mkdir -p $sdir/backup_${REPO} 2>/dev/null
 
 #software build support
 if [ -d "$sodir" ]

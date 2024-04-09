@@ -87,7 +87,7 @@ repopatch(){
 			done
 
 			cat $patchlog >"$ldir/$e.log"
-			ln -sf "$ldir/$e.log" "$workdir/lastpatch.log"
+			ln -frs "$ldir/$e.log" "$workdir/lastpatch.log"
 			rm -rf "$patchlog"
 
 			mark_patched
