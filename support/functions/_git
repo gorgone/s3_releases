@@ -22,7 +22,7 @@ gitcheckout(){
 	[ -z "$1" ] && commit=0 || commit="$1"
 	printf "\n$w_l  ${REPO^^} Checkout  : $y_l$([ "$commit" != "0" ] && printf "commit $commit ..." || printf "$txt_latest ...")\n$re_"
 	git clone "$trunkurl" "${repodir}"
-	[ "$commit" != "0" ] && cd "${repodir}" && git reset --hard "$commit"
+	[ "$commit" != "0" ] && cd "${repodir}" && git -c advice.detachedHead=false checkout "$commit" #git switch --detach "$commit"
 
 	if [ -f "${repodir}/config.sh" ]
 	then

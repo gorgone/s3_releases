@@ -184,7 +184,7 @@ COMMIT(){
 BRANCH(){
 	if [ -d "${repodir}" ]; then
 		if cd "${repodir}"; then
-			$(USEGIT) && git name-rev --name-only "$(COMMIT)" 2>/dev/null | awk -F'/' '{ print $NF }' || printf "$trunkurl" | awk -F'/' '{ print $NF }'
+			$(USEGIT) && git name-rev --name-only "$(COMMIT)" 2>/dev/null | awk -F'/' '{ print $NF }' | awk -F'~' '{ print $1 }' || printf "$trunkurl" | awk -F'/' '{ print $NF }'
 		fi
 	fi
 };
