@@ -1,15 +1,15 @@
-#!/bin/bash 
+#!/bin/bash
 
 #turkish
 
-txt_as='as'
+txt_as='olarak'
 txt_of='of'
 txt_for='için'
-txt_b2="oluştur"
-txt_to="to"
+txt_b2="inşa"
+txt_to="için"
 txt_now='şimdi'
 txt_new='yeni'
-txt_b1='inşa'
+txt_b1='oluştur'
 txt_menu='menü'
 txt_done='bitti'
 txt_no='hayır'
@@ -32,6 +32,7 @@ txt_existing='var'
 txt_profiles='profiller'
 txt_not_found='bulunamadı'
 txt_n_installed='kurulu değil'
+txt_no_download='indirme yoluyla kullanılamaz'
 txt_back_main="ana menüye dön"
 txt_too_old='(çok eski veya desteklenmiyor)'
 txt_selected='seçildi'
@@ -44,85 +45,88 @@ txt_branch="Şube"
 txt_proto="Protokol"
 txt_ssh_profiles="SSH $txt_profiles"
 
-# menu txt 
-txt_start_menu="Ana menü"; 
-txt_remove_menu="$txt_tc kaldır"; 
-txt_add_menu="$txt_tc ekle"; 
+# menu txt
+txt_start_menu='Ana menü'
+txt_remove_menu='Alet zincirini kaldır'
+txt_add_menu='Araç zinciri ekle'
 txt_main_revision="\n yerel ${REPO^^} revizyonu: r"
 
-# help txt 
-txt_help1="ile başla"
-txt_help2="komut satırı Parametreleri"
+# help txt
+txt_help1="şununla başla"
+txt_help2="komut satırı Parametreleri şunlardır"
 txt_help3="[ENTER]devam etmek için..."
 
-# firstmenu #############################################
+# firstmenu ################################################
 txt_firstmenu_continue="yerel ${REPO^^} ile devam et"
    txt_firstmenu_chose="farklı bir ${REPO^^} Revizyonu yükleyin"
-   txt_firstmenu_cedit="yapılandırma düzenleyicisini başlat"
-txt_firstmenu_tcupdate="toolchain güncelleyicisini başlat";
+   txt_firstmenu_cedit="yapılandırma düzenleyiciyi başlat"
+   txt_firstmenu_tcupdate="araç zinciri güncelleyicisini başlat"
     txt_firstmenu_lang="manuel sistem dili seçimi"
     txt_firstmenu_exit="simplebuild'i şimdi kapat"
 
-# _toolchain_config_menu ##################################
+# _toolchain_config_menu ###################################
      txt_config_menu="yapılandırma menüsü"
-      txt_back_build="yapılandırma menüsüne geri dön"
-txt_module_configure="oscam modüllerini seçin"
+      txt_back_build="oluşturma menüsüne geri dön"
+txt_module_configure="oscam modüllerini seçin "
      txt_oscam_extra="oscam ekstraları USB/PCSC'yi seçin"
-     txt_build_extra="derleme ekstralarını sıkıştır/düzeltmeyi seç"
+     txt_build_extra="ekstra derleme sıkıştırmasını/yamasını seçin"
       txt_build_load="son yapılandırmayı yükle"
       txt_build_save="yapılandırmayı kaydet"
      txt_build_reset="yapılandırmayı sıfırla"
 
-# _toolchain_build_menu ####################################
-   txt_bmenu_title="menü oluşturma"; 
-    txt_bmenu_user="kullanıcı adı        ";
-    txt_bmenu_comp="derleyici            ";
-    txt_bmenu_debu="hata ayıklama bilgisi";
-     txt_bmenu_use="USE_değişkenler ";
-   txt_bmenu_build="şimdi oscam oluştur";
-  txt_bmenu_config="oscam/build yapılandırma";
-  txt_bmenu_update="install/update libraries"
-  txt_bmenu_backup="backup toolchain";
- txt_bmenu_profile="mevcut $txt_profiles ile yükle";
-txt_bmenus_profile="$txt_profiles $txt_save";
-     txt_bmenu_log="göster lastbuild.log"; 
-    txt_bmenu_back="toolchain seçimine geri dön";
-     txt_compress1="önce dosya boyutu   ";
-     txt_compress2="sonra dosya boyutu  ";
-     txt_compress3="dosya boyutu azaldı ";
+# _toolchain_build_menu#####################################
+   txt_bmenu_title="menü oluştur"
+    txt_bmenu_user="kullanıcı adı  "
+    txt_bmenu_comp="derleyici      "
+    txt_bmenu_debu="hata ayıklama bilgisi"
+     txt_bmenu_use="USE_değişkenler "
+   txt_bmenu_build="oscam'ı şimdi oluştur"
+  txt_bmenu_config="oscam/derleme yapılandırması"
+  txt_bmenu_update="kitaplıkları yükle/güncelle"
+  txt_bmenu_backup="yedekleme araç zinciri"
+ txt_bmenu_profile="mevcut $txt_profiles'ı yükle"
+txt_bmenus_profile="$txt_profiles $txt_save"
+     txt_bmenu_log="lastbuild.log'u göster"
+    txt_bmenu_back="araç zinciri seçimine geri dön"
+     txt_compress1="önceki dosya boyutu "
+     txt_compress2="sonraki dosya boyutu "
+     txt_compress3="dosya boyutu azaltıldı "
 
-# _toolchain_main_menu ###################################### 
-txt_menu_builder1="kapat simplebuild"; 
-txt_menu_builder2="yeni toolchain ekle"; 
-txt_menu_builder3="yüklü toolchaini sil";
-txt_menu_builder4="mevcut yerel yapı için oluştur";
-txt_menu_builder5="yeni toolchain oluştur";
-txt_menu_back="$txt_tc menüsüne geri dön";
+# _toolchain_main_menu#####################################
+txt_menu_builder1="basit yapıyı kapat"
+txt_menu_builder2="yeni araç zinciri ekle"
+txt_menu_builder3="kurulu araç zincirini kaldır"
+txt_menu_builder4="yerel oluştur"
+txt_menu_builder5="yeni araç zinciri oluştur"
+txt_menu_back="araç zinciri menüsüne geri dön"
 
-# _dialog_checkout 
-txt_verify_syscheck="sistemi kontrol edin        :"
-     txt_verify_svn="mevcut ${REPO^^}'yi kontrol edin  :"
-     txt_update_svn="$txt_update ${REPO^^}     :"
-    txt_prepare_svn="${REPO^^} ödemesini hazırla       :"
-         txt_latest="güncel ${REPO^^}"; 
+# _dialog_checkout# _dialog_checkout
+txt_verify_syscheck='sistemi kontrol et :'
+     txt_verify_svn="mevcut ${REPO^^} yi kontrol edin :"
+     txt_update_svn="$txt_update ${REPO^^} :"
+    txt_prepare_svn="${REPO^^} ödemesini hazırla :"
+         txt_latest="en son ${REPO^^}"
 
-# _load_profile ############################################ 
+# _load_profile ###########################################
   txt_select_profile_title="mevcut profiller"
         txt_select_profile="lütfen bir profil seçin"
-txt_confirm_profile_select="lütfen seçiminizi onaylayın:"
-      txt_no_profile_found="\n\n$profdir içinde profil bulunamadı"
+txt_confirm_profile_select="lütfen seçimini onaylayın:"
+      txt_no_profile_found="\n\n$profdir'de profil bulunamadı"
 
-# _upload_cam ########################################### 
-txt_upload_cam1="ssh profili mevcut değil "; 
-txt_upload_cam2="ssh profili bulundu";
+# _upload_cam #############################################
+txt_upload_cam1="ssh profili mevcut değil"
+txt_upload_cam2="ssh profili bulundu"
 
 # _plugin_update_toolchain #############################################
 txt_s3tup_menu_command_label_exit="Çıkış"
 txt_s3tup_menu_command_label_back="Geri"
-txt_s3tup_menu_command_label_create="Oluştur"
-txt_s3tup_menu_command_label_update="Güncelle"
+txt_s3tup_menu_command_label_create="Ekle"
+txt_s3tup_menu_command_label_update="Güncelleme"
 txt_s3tup_menu_command_label_backup="Yedekle"
 txt_s3tup_menu_command_label_start="Başlat"
+txt_s3tup_menu_command_label_static="Statik Yapı"
+txt_s3tup_menu_command_label_download="İndir"
+txt_s3tup_menu_command_label_repair="Onarım"
 txt_s3tup_menu_command_label_info="Bilgi"
 txt_s3tup_menu_command_label_setup="Kurulum"
 txt_s3tup_menu_command_label_edit="Düzenle"
@@ -130,114 +134,116 @@ txt_s3tup_menu_command_label_yes="Evet"
 txt_s3tup_menu_command_label_no="Hayır"
 
 txt_s3tup_msg_update_hint="güncelleniyor..."
-txt_s3tup_msg_update_restart="Yeniden Başlatılıyor"
+txt_s3tup_msg_update_restart="Yeniden başlatılıyor"
 txt_s3tup_msg_update_current="güncel"
 txt_s3tup_msg_update_s3update_required="Lütfen önce simplebuild3 kurulumunuzu güncelleyin!"
-txt_s3tup_msg_update_directory_unversioned="Yükleme dizini ${REPO^^} veya ${REPO^^} sürümlü olmadığından güncelleme yapılamıyor!"
+txt_s3tup_msg_update_directory_unversioned="Kurulum dizini ${REPO^^} sürümüne sahip olmadığından güncelleme mümkün değil!"
 txt_s3tup_msg_update_pending="güncelleme bekleniyor"
-txt_s3tup_msg_update_not_required="güncelleme gerekli değil"
-txt_s3tup_msg_update_finished="Sürüme güncelleme tamamlandı:"
+txt_s3tup_msg_update_not_required="güncellemeye gerek yok"
+txt_s3tup_msg_update_finished="Sürüm güncellemesi tamamlandı:"
 txt_s3tup_msg_update_log="eklenti günlüğü güncelleniyor"
 txt_s3tup_msg_syscheck1="Gerekli araçların ve bağımlılıkların kontrolleri yapılırken lütfen bekleyin..."
-txt_s3tup_msg_syscheck2="Bu eklentiyi doğru kullanmak için aşağıdaki paketleri manuel olarak kurmanız gerekiyor:"
-txt_s3tup_msg_syscheck3="dialog binary dosyanız eski görünüyor, bu eklenti menüleri doğru bir şekilde görüntülemek için dialog >= 1.3 gerektiriyor. Dağıtımınız yeni bir sürüm sağlamıyorsa, lütfen aşağıdaki gibi manuel olarak derleyin ve güncelleyin:\n"
+txt_s3tup_msg_syscheck2="Bu eklentiyi düzgün bir şekilde kullanmak için aşağıdaki paketleri manuel olarak yüklemeniz gerekir:"
+txt_s3tup_msg_syscheck3="İletişim ikili dosyanız eski görünüyor, bu eklenti, menüleri doğru şekilde görüntülemek için iletişim >= 1.3 gerektirir. Dağıtımınız güncel bir sürüm sağlamıyorsa, lütfen onu aşağıdaki şekilde manuel olarak derleyin ve güncelleyin:\n"
 txt_s3tup_msg_reset_config1="Mevcut yapılandırma dosyası taşınıyor..."
 txt_s3tup_msg_reset_config2="yapılandırma dosyası yedekleme="
 txt_s3tup_msg_reset_config3="Yeni yapılandırma dosyası oluşturuluyor. Lütfen bekleyin..."
 txt_s3tup_msg_reset_config4="yapılandırma dosyası="
-txt_s3tup_msg_reset_config5="Bunları ihtiyaçlarınıza göre değiştirebilir/genişletebilirsiniz."
-txt_s3tup_msg_buildasroot_error1="Cross ${txt_tc,,} oluşturma işlemi, root olarak çalıştırılmaması gerektiği için iptal edildi!"
-txt_s3tup_msg_buildasroot_error2="${txt_tc,,}s dosyasını root olarak oluşturmanın tehlikesinin farkındaysanız ve ne yaptığınızı biliyorsanız,\n aşağıdaki komutla zorlayabilirsiniz:"
+txt_s3tup_msg_reset_config5="İhtiyaçlarınıza uyacak şekilde bunları değiştirebilir/genişletebilirsiniz."
+txt_s3tup_msg_buildasroot_error1="Çapraz ${txt_tc,,} derleme işlemi, root olarak çalıştırılmaması gerektiğinden iptal edildi!"
+txt_s3tup_msg_buildasroot_error2="${txt_tc,,}s'yi root olarak oluşturmanın tehlikesinin farkındaysanız ve ne yaptığınızı biliyorsanız,\n aşağıdaki komutla bunu zorlayabilirsiniz:"
 txt_s3tup_msg_toolchain_exists="${txt_tc} zaten var!"
 txt_s3tup_msg_library_not_found="${txt_lib} yapılandırma dosyasında bulunamadı!"
-txt_s3tup_msg_cross_toolchain_log="cross ${txt_tc,,} günlüğü oluşturuluyor"
-txt_s3tup_msg_cross_toolchain_commandlist="cross ${txt_tc,,} oluşturma için komut listesi"
-txt_s3tup_msg_cross_toolchain_library_detection="Mevcut ${txt_tc,,} içinde aşağıdaki lib dosyaları algılandı:"
-txt_s3tup_msg_cross_toolchain_library_integration="Aşağıdaki lib dosyaları şimdi ${txt_tc,,}'ya entegre edilecek:"
+txt_s3tup_msg_cross_toolchain_log="çapraz ${txt_tc,,} günlüğü oluşturuluyor"
+txt_s3tup_msg_cross_toolchain_commandlist="Çapraz ${txt_tc,,} oluşturma için komut listesi"
+txt_s3tup_msg_cross_toolchain_library_detection="Mevcut ${txt_tc,,} dosyasında aşağıdaki kütüphaneler tespit edildi:"
+txt_s3tup_msg_cross_toolchain_library_integration="Aşağıdaki kütüphaneler artık ${txt_tc,,}'ye entegre edilecek:"
 txt_s3tup_msg_cross_migrations_renamed="yeniden adlandırıldı"
-txt_s3tup_msg_cross_migrations_remove="${txt_tc} Kaldır"
-txt_s3tup_msg_cross_migrations_outdated="Aşağıdaki ${txt_tc,,} crossları ${txt_tc,,} ${txt_tpl,,} crosslarının yeniden adlandırılmasından dolayı güncel değil:"
+txt_s3tup_msg_cross_migrations_remove="${txt_tc}'yi kaldır"
+txt_s3tup_msg_cross_migrations_outdated="Aşağıdaki ${txt_tc,,}s çaprazı, ${txt_tc,,} ${txt_tpl,,}s çaprazının yeniden adlandırılması nedeniyle güncelliğini yitirdi:"
 txt_s3tup_msg_cross_migrations_outdated2="Aşağıdaki ${txt_tc,,} ${txt_conf}'lar bazı parametrelerin düzeltilmesi nedeniyle güncel değil ve otomatik olarak düzeltiliyor:"
-txt_s3tup_msg_cross_migrations_hint="Yine yukarıdan ${y_l}eski ${txt_tc,,}${re_} crossını kullanabilirsiniz, ancak ${p_l}yeni ${txt_tc,,} dayalı yenilerini oluşturmak daha iyidir Gelecekteki ${txt_tpl,,} güncellemelerini almak için ${txt_tpl,,}s${re_}.\n${y_l}eski cross ${txt_tc,,}${re_} aşağıdaki gibi manuel olarak kaldırılabilir:"
+txt_s3tup_msg_cross_migrations_hint="Yukarıdaki ${y_l}eski çaprazı ${txt_tc,,}s${re_} kullanmaya devam edebilirsiniz, ancak ${p_l}yeni çaprazı ${txt_tc,,} $ temel alarak yenilerini oluşturmak daha iyidir Gelecekteki ${txt_tpl,,} güncellemelerini almak için {txt_tpl,,}s${re_}.\n${y_l}eski çapraz ${txt_tc,,}s${re_} aşağıdaki şekilde manuel olarak kaldırılabilir:"
 txt_s3tup_msg_build_library_log="${txt_lib,,} günlüğü güncelleniyor"
 txt_s3tup_msg_build_library_commandlist="için komut listesi oluştur"
 txt_s3tup_msg_build_library_error="Derlemede HATALAR bulundu, ayrıntılar:"
-txt_s3tup_msg_ctng_setup_log="crosstool-NG günlüğü yükleme"
+txt_s3tup_msg_ctng_setup_log="crosstool-NG günlüğü yükleniyor"
 txt_s3tup_msg_ctng_setup_commandlist="için komut listesi oluştur"
-txt_s3tup_msg_ctng_setup_cleanup="Temizleme kaynak dizini"
-txt_s3tup_msg_fng_setup_log="freetz-NG günlüğü yükleme"
+txt_s3tup_msg_ctng_setup_cleanup="Kaynak dizini temizle"
+txt_s3tup_msg_fng_setup_log="freetz-NG günlüğü yükleniyor"
 txt_s3tup_msg_fng_setup_commandlist="${txt_s3tup_msg_ctng_setup_commandlist}"
 txt_s3tup_msg_fng_setup_cleanup="${txt_s3tup_msg_ctng_setup_cleanup}"
-txt_s3tup_msg_andk_setup_log="Android NDK günlüğünü yükleme"
+txt_s3tup_msg_andk_setup_log="Android NDK günlüğü yükleniyor"
 txt_s3tup_msg_andk_setup_commandlist="${txt_s3tup_msg_ctng_setup_commandlist}"
 txt_s3tup_msg_andk_setup_cleanup="${txt_s3tup_msg_ctng_setup_cleanup}"
 txt_s3tup_msg_extract_file_unreadable="dosya okunamıyor:"
 txt_s3tup_msg_extract_extension_unknown="tanınmayan dosya uzantısı:"
-txt_s3tup_msg_gtp_missing="eksik açıklama"
-txt_s3tup_msg_gtp_info="ayrıntıları göstermek için \Zr<${txt_s3tup_menu_command_label_setup}>\ZR'yi çalıştırın"
+txt_s3tup_msg_gtp_missing="açıklama eksik"
+txt_s3tup_msg_gtp_info="ayrıntıları göstermek için \Zr<${txt_s3tup_menu_command_label_setup}>\ZR komutunu çalıştırın"
 txt_s3tup_msg_paktc="Devam etmek için herhangi bir tuşa basın"
-txt_s3tup_msg_check_toolchain_empty="Parametre${w_l} ${txt_tc} ayarlanmadı!"
-txt_s3tup_msg_check_toolchain_not_supported="${txt_tc} ${txt_lib,,} güncelleme desteklenmiyor!"
-txt_s3tup_msg_check_library_info1="PCSC başlık dosyalarını kontrol edin ve son derleyici yanlış konuma yol noktaları içeriyorsa, doğru PCSC başlık dosyalarına sembolik bağlantı kurmaya çalışın..."
-txt_s3tup_msg_check_library_info2a="Doğru PCSC başlık dosyalarına sembol bağlantısı oluşturuldu."
+txt_s3tup_msg_check_toolchain_empty="Parameter${w_l} ${txt_tc} ayarlanmadı!"
+txt_s3tup_msg_check_toolchain_not_supported="${txt_tc} ${txt_lib,,} güncellemesi desteklenmiyor!"
+txt_s3tup_msg_check_library_info1="PCSC başlık dosyalarını kontrol edin ve eğer son derleyici yanlış konuma giden yol işaretlerini içeriyorsa, doğru PCSC başlık dosyalarına sembolik bağlantı kurmayı deneyin..."
+txt_s3tup_msg_check_library_info2a="Oluşturulan doğru PCSC başlık dosyalarının sembolik bağlantısı."
 txt_s3tup_msg_check_library_info2b="Aşağıdaki klasörde ve alt dizinlerinde PCSC başlık dosyası bulunamadı:"
 txt_s3tup_msg_check_library_info3a="PCSC başlık dosyaları doğru konumda:"
-txt_s3tup_msg_check_library_info3b="Derleyici içerme dizini döndürmez!"
-txt_s3tup_msg_github_api_limits_info1="${r_l}Github API hız sınırınız ${y_l} aşıldı ve şu anda sıfırlanacak:"
-txt_s3tup_msg_github_api_limits_info2="Lütfen yapılandırma dosyanızı sıfırlayana kadar bekleyin. Kitaplıkların en son sürümleri ve indirme bağlantıları Github API'si aracılığıyla dinamik olarak belirlenir. Github API'sinin hız sınırının aşılması, yapılandırma dosyasının oluşturulmasında hatalara neden olur. $ İçin {b_l}kimliği doğrulanmamış istekler${y_l}, hız limiti ${b_l}saatte 60 istek'e kadar${y_l} izin verir. Kimliği doğrulanmamış istekler, istekte bulunan kullanıcıyla değil, kaynak IP adresiyle ilişkilendirilir."
-txt_s3tup_msg_check_crosstool_setup_info="doğru ayarlanmadı. Otomatik olarak düzeltmeyi deneyin..."
-txt_s3tup_msg_check_config_info1="Yapılandırma dosyanız eski görünüyor:"
-txt_s3tup_msg_check_config_info2="Güncellenmiş bir yapılandırma dosyasını yeniden oluşturmak için lütfen s3'ü aşağıdaki gibi yeniden başlatın:"
+txt_s3tup_msg_check_library_info3b="Derleyici, içerme dizinleri döndürmez!"
+txt_s3tup_msg_github_api_limits_info1="${r_l}Github API hızı sınırınız aşıldı${y_l} ve şu anda sıfırlanacak:"
+txt_s3tup_msg_github_api_limits_info2="Lütfen yapılandırma dosyanızı sıfırlayana kadar bekleyin. Kitaplıkların en son sürümleri ve indirme bağlantıları, Github API aracılığıyla dinamik olarak belirlenir. Github API'nin hız sınırının aşılması, yapılandırma dosyasının oluşturulmasında hatalara neden olur. ${b_l}kimliği doğrulanmamış istekler${y_l}, hız sınırı ${b_l}saatte en fazla 60 isteğe${y_l} izin verir. Kimliği doğrulanmamış istekler, istekte bulunan kullanıcıyla değil, kaynak IP adresiyle ilişkilidir."
+txt_s3tup_msg_check_crosstool_setup_info="doğru şekilde kurulmadı. Otomatik olarak düzeltmeyi deneyin..."
+txt_s3tup_msg_check_config_info1="Yapılandırma dosyanız güncel değil gibi görünüyor:"
+txt_s3tup_msg_check_config_info2="Güncellenmiş bir yapılandırma dosyasını yeniden oluşturmak için lütfen s3'ü aşağıdaki şekilde yeniden başlatın:"
 txt_s3tup_msg_change_config_error="yapılandırma dosyasında değişken yok!"
 txt_s3tup_msg_change_config_info="Değişken şu şekilde değiştirildi:"
 txt_s3tup_msg_create_config_template_not_found="Şablon dosyası bulunamadı. Lütfen simplebuild 3'ü temiz bir şekilde kontrol edin!"
-txt_s3tup_msg_create_config_jq_not_found="'jq' paketi olmadan otomatik yapılandırma dosyası oluşturmak mümkün değildir. Lütfen önce onu kurun:"
-txt_s3tup_msg_table_header_libs_col_key="Geçerli ${txt_lib,,} anahtarları"
+txt_s3tup_msg_create_config_jq_not_found="'jq' paketi olmadan otomatik yapılandırma dosyası oluşturmak mümkün değildir. Lütfen önce onu yükleyin:"
+txt_s3tup_msg_table_header_libs_col_key="Geçerli ${txt_lib,,} anahtarlar"
 txt_s3tup_msg_table_header_libs_col_update="Güncellenebilir"
-txt_s3tup_msg_table_header_libs_col_downgrade="Düşürülebilir"
+txt_s3tup_msg_table_header_libs_col_downgrade="Alt sürüme geçirilebilir"
 txt_s3tup_msg_table_header_libsversion_col_key="${txt_lib} anahtarı"
 txt_s3tup_msg_table_header_libsversion_col_curversion="Geçerli sürüm"
 txt_s3tup_msg_table_header_libsversion_col_newversion="Yeni sürüm"
 txt_s3tup_msg_table_header_libsversion_col_update="${txt_s3tup_msg_table_header_libs_col_update}"
 txt_s3tup_msg_table_header_libsversion_col_downgrade="${txt_s3tup_msg_table_header_libs_col_downgrade}"
 
-txt_s3tup_menu_toolchain_title="${txt_tc} Menüsü"
-txt_s3tup_menu_toolchain_text1="Birini seçin"
-txt_s3tup_menu_toolchain_text2="güncellemek istediğiniz cross ${txt_tc,,} yüklü:"
+txt_s3tup_menu_toolchain_title="${txt_tc} Menü"
+txt_s3tup_menu_toolchain_text1="Şunlardan birini seçin"
+txt_s3tup_menu_toolchain_text2="güncellemek istediğiniz çapraz ${txt_tc,,}s yüklendi:"
+txt_s3tup_menu_toolchain_notsupported="${txt_tc}, mimari uyumsuzluğundan dolayı bu yapı sistemi ($(uname -m)) tarafından desteklenmeyebilir!"
+txt_s3tup_menu_toolchain_arch="$txt_tc ana bilgisayar arşivi:"
 txt_s3tup_menu_toolchain_notfound="${txt_tc,,} bulunamadı"
 txt_s3tup_menu_toolchain_folder="$txt_tc klasörü:"
 txt_s3tup_menu_toolchain_config="yapılandırma dosyası:"
 
 txt_s3tup_menu_library_title="${txt_lib} Güncelleme Menüsü"
-txt_s3tup_menu_library_text1="${txt_tc,,}'nın SYSROOT klasöründe güncellenecek tüm kitaplıkları seçin:"
+txt_s3tup_menu_library_text1="${txt_tc,,}'nin SYSROOT klasöründe güncellenecek tüm kitaplıkları seçin:"
 txt_s3tup_menu_library_text2=" ${txt_lib,,} sürüm YENİ GÜNCEL" #56 karakter
-txt_s3tup_menu_library_notsupported="${txt_lib}, derleyici özelliklerinin eksikliğinden dolayı bu ${txt_tc,,} tarafından desteklenmiyor!"
+txt_s3tup_menu_library_notsupported="${txt_lib}, derleyici özelliklerinin eksikliği nedeniyle bu ${txt_tc,,} tarafından desteklenmiyor!"
 txt_s3tup_menu_library_notfound="kitaplık bulunamadı"
 txt_s3tup_menu_library_wrong_selection="Aynı kitaplığı farklı sürümlerle entegre etmeyin!"
 
-txt_s3tup_menu_template_title="Cross ${txt_tc} ${txt_tpl} Menüsü"
-txt_s3tup_menu_template_text1="Birini seçin"
-txt_s3tup_menu_template_text2="${txt_tpl,,}s istediğiniz ${txt_tc,,} crossını oluşturmak için:"
+txt_s3tup_menu_template_title="${txt_tc} ${txt_tpl} Menüsünü çaprazla"
+txt_s3tup_menu_template_text1="Şunlardan birini seçin"
+txt_s3tup_menu_template_text2="${txt_tpl,,}s istediğiniz ${txt_tc,,} çaprazını oluşturmak için:"
 txt_s3tup_menu_template_text3="NOT:"
-txt_s3tup_menu_template_text4="Kırmızı renkli bir açıklama ile ${txt_tpl,,} bir cross ${txt_tc,,} oluşturursanız, aynı ada sahip mevcut bir tane sorulmadan değiştirilecektir!"
+txt_s3tup_menu_template_text4="Eğer ${txt_tpl,,} dosyasından kırmızı renkli açıklamaya sahip bir ${txt_tc,,} çaprazı indirirseniz/oluşturursanız, aynı ada sahip mevcut bir tane sorulmadan değiştirilecektir!"
 txt_s3tup_menu_template_text5="Koyu kırmızı renkli açıklamalar, ${txt_tpl,,} sürümünün mevcut ${txt_tc,,} sürümünden daha yüksek olduğunu gösterir. Bir güncelleme mantıklı olabilir."
 txt_s3tup_menu_template_notfound="${txt_tpl,,} bulunamadı"
 
 txt_s3tup_menu_info_toolchain="${txt_tc}: " #11 karakter
 txt_s3tup_menu_info_compiler="Derleyici: " #11 karakter
-txt_s3tup_menu_info_sysroot="Sysroot: " #11 karakter
+txt_s3tup_menu_info_sysroot="Sistem kökü: " #11 karakter
 txt_s3tup_menu_info_prefix="Önek: " #11 karakter
-txt_s3tup_menu_info_include="Dahil: " #11 karakter
+txt_s3tup_menu_info_include="Şunları ekle: " #11 karakter
 txt_s3tup_menu_info_library="Yapılandırma:"
 txt_s3tup_menu_info_build="komut listesi:"
 
-txt_s3tup_menu_edit_title="Cross ${txt_tc} ${txt_tpl} Kaydet"
-txt_s3tup_menu_edit_text="Bu ${txt_tc,,} ${txt_tpl,,} \Zrnow\ZR'yi \ZrSAVE\ZR yapmak ister misiniz?"
+txt_s3tup_menu_edit_title="Çapraz Kaydet ${txt_tc} ${txt_tpl}"
+txt_s3tup_menu_edit_text="Çapraz Takım Zinciri Şablon Menüsü Yeniden Yükleniyor..."
 
 txt_s3tup_menu_backup_title="$txt_s3tup_menu_command_label_backup"
-txt_s3tup_menu_build_library_title="Derleme"
+txt_s3tup_menu_build_library_title="Derle"
 txt_s3tup_menu_ctng_setup_title="$txt_s3tup_menu_command_label_setup"
 txt_s3tup_menu_fng_setup_title="$txt_s3tup_menu_command_label_setup"
 txt_s3tup_menu_andk_setup_title="$txt_s3tup_menu_command_label_setup"
 txt_s3tup_menu_download_title="İndiriliyor"
-txt_s3tup_menu_compress_title="Cross sıkıştır ${txt_tc,,}"
+txt_s3tup_menu_compress_title="Cross ${txt_tc,,}'yi sıkıştır"
