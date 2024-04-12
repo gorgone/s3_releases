@@ -275,12 +275,12 @@ _select_menu(){
 		CHANGE)
 					if $(USEGIT)
 					then
-						_rev=$("$gui" "$st_" "$nc_" --cr-wrap "$ip_" "Commit: at least 8 digits \nCommit: 0 = $txt_latest" 9 35)
+						_rev=$("$gui" "$st_" "$nc_" --cr-wrap "$ip_" "Commit: at least 8 digits \nCommit: 0 = $txt_latest" 9 35 0)
 					else
-						new_rev=$("$gui" "$st_" "$nc_" --cr-wrap "$ip_" "Revision: 7000+ \nRevision: 0 = $txt_latest" 9 35)
+						new_rev=$("$gui" "$st_" "$nc_" --cr-wrap "$ip_" "Revision: 7000+ \nRevision: 0 = $txt_latest" 9 35 0)
 						[[ $new_rev =~ ^-?[0-9]+$ ]] && [ ! "$new_rev" -le "7000" ] && _rev="$new_rev" || _rev=0
 					fi
-					[ ! -z $_rev ] && check_url "$trunkurl" && _dialog_checkout1 "$_rev"
+					[ ! -z "$_rev" ] && check_url "$trunkurl" && _dialog_checkout1 "$_rev"
 					_select_menu;;
 		CEDIT)
 					s3cfg_menu
