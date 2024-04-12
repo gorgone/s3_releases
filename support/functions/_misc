@@ -199,6 +199,7 @@ save_master(){
 _pre_build(){
 	_oscamconfdir_default=""
 	_oscamconfdir_custom=""
+	_extract_strip="0"
 	source "$tccfgdir/$1"
 	clear
 	_nl
@@ -315,7 +316,7 @@ _oscam_extra_menu(){
 			fi
 		fi
 	done
-#echo "${MENU_OPTIONS[@]}"; _paktc_timer
+
 	oextra=$("$gui" "$st_" "$nc_" "$bt_" "$title_" --title "-[ Oscam EXTRA ]-" "$cl_" " OPTIONS " 19 40 12 ${MENU_OPTIONS[@]});
 	[ $? = 255 ] && _toolchain_config_menu
 
