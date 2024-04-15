@@ -31,7 +31,7 @@ txt_parameter='Parameter'
 txt_extracting='  entpacke' #10 zeichen
 txt_checking='überprüfe'
 txt_wait='bitte warten...'
-txt_existing='vorhandenen'
+txt_existing='vorhandenes'
 txt_ssh_profiles="SSH $txt_profiles"
 txt_not_found='nicht gefunden'
 txt_n_installed='ist nicht installiert'
@@ -69,28 +69,28 @@ txt_firstmenu_continue="weiter mit lokalem ${REPO^^}"
    txt_firstmenu_cedit="$txt_conf""s Editor starten"
    txt_firstmenu_tcupdate="Toolchain Updater starten"
     txt_firstmenu_lang="Systemsprache manuell $txt_sel"
-    txt_firstmenu_exit="simplebuild sofort beenden"
+    txt_firstmenu_exit="Simplebuild sofort beenden"
 
 # _toolchain_config_menu ###################################
      txt_config_menu="$txt_conf $txt_menu"
       txt_back_build="$txt_back zum $txt_bmenu_title"
-txt_module_configure="oscam Module $txt_sel"
-     txt_oscam_extra="oscam Extras USB/PCSC $txt_sel"
+txt_module_configure="OSCam Module $txt_sel"
+     txt_oscam_extra="OSCam Extras USB/PCSC $txt_sel"
      txt_build_extra="build Extras compress/patch $txt_sel"
       txt_build_load="letzte $txt_conf laden"
       txt_build_save="$txt_conf speichern"
      txt_build_reset="$txt_conf $txt_back setzen"
        txt_use_targz='erstelle tar Archiv nach dem Bauen'
-       txt_use_patch='patche oscam vor dem Bauen'
-    txt_use_compress='Binärkompression von oscam'
+       txt_use_patch='patche OSCam vor dem Bauen'
+    txt_use_compress='Binärkompression von OSCam'
 
 # _toolchain_build_menu ####################################
    txt_bmenu_user="Benutzername   "
    txt_bmenu_comp="Compiler       "
    txt_bmenu_debu="Debug Info     "
     txt_bmenu_use="USE_Variablen "
-  txt_bmenu_build="oscam jetzt $txt_b1"
- txt_bmenu_config="oscam/Build $txt_conf"
+  txt_bmenu_build="OSCam jetzt $txt_b1"
+ txt_bmenu_config="OSCam/Build $txt_conf"
  txt_bmenu_update="${txt_lib}en aktualisieren"
  txt_bmenu_backup="Toolchain sichern"
 txt_bmenu_profile="vorhandenes $txt_profile laden"
@@ -102,7 +102,7 @@ txt_bmenus_profile="$txt_profile $txt_save"
     txt_compress3="Dateigröße verkleinert auf"
 
 # _toolchain_main_menu ####################################
-txt_menu_builder1="Beende simplebuild"
+txt_menu_builder1="Beende Simplebuild"
 txt_menu_builder2="einen neuen $txt_tc hinzufügen"
 txt_menu_builder3="entferne einen installierten $txt_tc"
 txt_menu_builder4="Nativ $txt_for"
@@ -111,7 +111,7 @@ txt_menu_back="Zurück zum $txt_tc $txt_menu"
 
 # _dialog_checkout ########################################
 txt_verify_syscheck='überprüfe System            :'
-     txt_verify_svn="überprüfe existierenden ${REPO^^} :"
+     txt_verify_svn="überprüfe existierendes ${REPO^^} :"
      txt_update_svn="$txt_update ${REPO^^}            :"
     txt_prepare_svn="bereite ${REPO^^} checkout vor :"
          txt_latest="letzter Stand"
@@ -119,7 +119,7 @@ txt_verify_syscheck='überprüfe System            :'
 # _load_profile ###########################################
   txt_select_profile_title="Verfügbare $txt_profiles"
         txt_select_profile="bitte ein $txt_profile auswählen"
-txt_confirm_profile_select="bitte bestätigen sie die Auswahl von:"
+txt_confirm_profile_select="bitte bestätigen Sie die Auswahl von:"
       txt_no_profile_found="kein $txt_profile gefunden in\n\n$profdir"
 
 # _upload_cam #############################################
@@ -216,6 +216,8 @@ txt_s3tup_msg_table_header_libsversion_col_downgrade="${txt_s3tup_msg_table_head
 txt_s3tup_menu_toolchain_title="${txt_tc} Menü"
 txt_s3tup_menu_toolchain_text1="Wählen Sie eine der"
 txt_s3tup_menu_toolchain_text2="installierten Cross-${txt_tc}s aus, die Sie aktualisieren möchten:"
+txt_s3tup_menu_toolchain_notsupported="${txt_tc} wird von diesem Buildsystem ($(uname -m)) aufgrund von Architekturkonflikten möglicherweise nicht unterstützt!"
+txt_s3tup_menu_toolchain_arch="$txt_tc Host Arch:"
 txt_s3tup_menu_toolchain_notfound="Keine ${txt_tc}s gefunden"
 txt_s3tup_menu_toolchain_folder="${txt_tc} Verzeichnis:"
 txt_s3tup_menu_toolchain_config="Konfigurationsdatei:"
