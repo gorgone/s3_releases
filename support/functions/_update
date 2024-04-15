@@ -4,7 +4,6 @@ update_me(){
 	clear;s3logo
 	local_revision=0
 	online_revision=0
-	source "$configdir/urls"
 	s3local="$dldir/s3_github"
 	printf "  s3_git CHECK:\n  -------------\n"
 	check_url "$s3url" || return
@@ -25,35 +24,9 @@ update_me(){
 	sleep 1
 }
 
-update_emu(){
-	clear;s3logo
-	local_revision=0
-	online_revision=0
-	source "$configdir/urls"
-	emulocal="$dldir/emu_github"
-	printf "  emu_git CHECK:\n  --------------\n"
-	check_url "$emuurl" || return
-
-	local_revision=$(gitrevision $emulocal)
-	online_revision=$(gitrevision $emuurl)
-
-	if [ ! "$local_revision" == "$online_revision" ]
-	then
-		printf "  update emu_git\n   from Local Revision: $local_revision\n   to  Remote Revision: $online_revision\n"
-		rm -rf "$emulocal"; git clone "$emuurl" "$emulocal" &>/dev/null
-	else
-		printf "  is up to date\n   Online Revision: $online_revision\n"
-	fi
-
-	printf "   Emu-Version: "
-	grep '#define EMU_VERSION' $emulocal/* | head -1 | awk '{print $3}'; _nl
-	sleep 1
-}
-
 fix_me(){
 	clear
 	s3logo
-	source "$configdir/urls"
 	s3local="$dldir/s3_github"
 	emulocal="$dldir/emu_github"
 

@@ -33,7 +33,6 @@ gitcheckout(){
 	rm -rf "$fc1"
 	_nl
 	[ -f "$workdir/${REPO^^}-IS-PATCHED" ] && rm -f "$workdir/${REPO^^}-IS-PATCHED"
-	[ -f "$workdir/EMU_ON" ] && rm -f "$workdir/EMU_ON"
 	tar_repo
 }
 
@@ -92,7 +91,6 @@ _dialog_checkout1_git(){
 		reset_="$("${repodir}/config.sh" -R)"
 		printf "Revision: $(REVISION) done..."
 		[ -f "$workdir/${REPO^^}-IS-PATCHED" ] && rm -f "$workdir/${REPO^^}-IS-PATCHED"
-		[ -f "$workdir/EMU_ON" ] && rm -f "$workdir/EMU_ON"
 		_get_config_menu
 	fi
 }

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-VERSIONCOUNTER=336
-SIMPLEVERSION="2024.04"
+VERSIONCOUNTER=340
+SIMPLEVERSION="2024.05"
 OIFS=$IFS
 export NCURSES_NO_UTF8_ACS=1
 
@@ -102,9 +102,9 @@ s3cfg_vars[delete_oscamdebugbinary]=1
 
 #filled arrays
 config_cases=( all addons protocols readers card_readers );
-s3opts=( cedit checkout clean enable_emu fix_me get_patch help lang_select loadonly\
+s3opts=( cedit checkout clean disable_emu enable_emu fix_me get_patch help lang_select loadonly\
 	menu profiles ssh_profiles repopatch reporestore repoup syscheck sysinfo tccheck\
-	tcrepair tedit update update_emu update_me upload ) # extendable with plugins
+	tcrepair tedit update update_me upload ) # extendable with plugins
 
 CUSTOM_CONFDIR="not_set"
 pf_name="not_set"
@@ -137,16 +137,18 @@ cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections -fomit-frame-pointer -f
 #compiling options for optimizing
 #cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections -o nodeadcode -ffast-math -fomit-frame-pointer -fthread-jumps -foptimize-strlen --no-inline"
 
-#default url
-trunkurl="https://git.streamboard.tv/common/oscam.git"
+#load default urls
+source "$configdir/urls"
 
+#load custom urls
 [ -f "$workdir/oscamsource.url" ] && source "$workdir/oscamsource.url"
+[ -f "$workdir/EMU_ON" ] && trunkurl="$emuurl"
 
 # switch trunkurl based on environment variable SOURCE
 # needs an existing oscamsource.url file containing trunkurl<SOURCE>="some url"
 # e.q. to force s3 to use trunkurlsvn which was defined in oscamsource.url, simply run: SOURCE=svn ./s3 menu
 forcedurl="trunkurl$SOURCE"
-[ -v trunkurl$SOURCE ] && trunkurl="${!forcedurl}"
+[ -v trunkurl$SOURCE ] && trunkurl="${!forcedurl}" || unset SOURCE
 
 #load translationlist
 cd "$tdir"
@@ -218,7 +220,7 @@ else
 
 			case $e in
 
-			fix_me|checkout|update_me|update_emu|reporestore|enable_emu|upload_cam)
+			fix_me|checkout|update_me|reporestore|disable_emu|enable_emu|upload_cam)
 				if [ ! -n "$2" ]
 				then
 					eval "$e"
