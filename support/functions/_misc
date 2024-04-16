@@ -276,7 +276,7 @@ _select_menu(){
 		CHANGE)
 					if $(USEGIT)
 					then
-						_rev=$("$gui" "$st_" "$nc_" --cr-wrap "$ip_" "Commit: at least 8 digits \nCommit: 0 = $txt_latest" 9 35 0)
+						_rev=$("$gui" "$st_" "$nc_" --cr-wrap "$ip_" "Commit: by sha, tag or branch name \nCommit: 0 = $txt_latest" 9 38 0)
 					else
 						new_rev=$("$gui" "$st_" "$nc_" --cr-wrap "$ip_" "Revision: 7000+ \nRevision: 0 = $txt_latest" 9 35 0)
 						[[ $new_rev =~ ^-?[0-9]+$ ]] && [ ! "$new_rev" -le "7000" ] && _rev="$new_rev" || _rev=0

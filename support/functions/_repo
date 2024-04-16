@@ -183,7 +183,17 @@ COMMIT(){
 BRANCH(){
 	if [ -d "${repodir}" ]; then
 		if cd "${repodir}"; then
-			$(USEGIT) && git name-rev --name-only "$(COMMIT)" 2>/dev/null | awk -F'/' '{ print $NF }' | awk -F'~' '{ print $1 }' || printf "$trunkurl" | awk -F'/' '{ print $NF }'
+			#$(USEGIT) && git name-rev --name-only "$(COMMIT)" 2>/dev/null | awk -F'/' '{ print $NF }' | awk -F'~' '{ print $1 }' || printf "$trunkurl" | awk -F'/' '{ print $NF }'
+			if $(USEGIT); then
+				ref="$(git name-rev --name-only "$(COMMIT)" 2>/dev/null | awk -F'/' '{ print $NF }' | awk -F'~' '{ print $1 }')"
+				if [ "$ref" == "$(REVISION)" ]; then
+					git branch | tail -n1 | tr -d ' *'
+				else
+					printf "$ref"
+				fi
+			else
+				printf "$trunkurl" | awk -F'/' '{ print $NF }'
+			fi
 		fi
 	fi
 };
@@ -192,8 +202,18 @@ USEGIT(){
 	echo $trunkurl | grep -qe '^git@\|.git$';
 }
 
+REFTYPE(){
+	if [[ "$1" =~ ^[0-9a-f]{8,40}$ ]]; then
+		printf 'sha'
+	elif [ "$1" -eq "$1" ] 2>/dev/null; then
+		printf 'tag'
+	else
+		printf 'branch'
+	fi
+}
+
 REPOTYPE(){
-	$(USEGIT) && printf "git" || printf "svn"
+	$(USEGIT) && printf 'git' || printf 'svn'
 }
 
 TTAG(){

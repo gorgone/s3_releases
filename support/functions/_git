@@ -20,9 +20,9 @@ gitcheckout(){
 
 	printf "$w_l  ${REPO^^} Repository: $g_l$trunkurl$re_"
 	[ -z "$1" ] && commit=0 || commit="$1"
-	printf "\n$w_l  ${REPO^^} Checkout  : $y_l$([ "$commit" != "0" ] && printf "commit $commit ..." || printf "$txt_latest ...")\n$re_"
+	printf "\n$w_l  ${REPO^^} Checkout  : $y_l$([ "$commit" != "0" ] && printf "$(REFTYPE "$commit") $commit ..." || printf "$txt_latest ...")\n$re_"
 	git clone "$trunkurl" "${repodir}"
-	[ "$commit" != "0" ] && cd "${repodir}" && git -c advice.detachedHead=false checkout "$commit" #git switch --detach "$commit"
+	[ "$commit" != "0" ] && cd "${repodir}" && git -c advice.detachedHead=false checkout "$commit"
 
 	if [ -f "${repodir}/config.sh" ]
 	then
@@ -84,8 +84,7 @@ _dialog_checkout1_git(){
 	fi
 
 	cd "$workdir" && git clone "$trunkurl" "${repodir}"
-	cd "${repodir}"
-	[ "$commit" != "0" ] && git reset --hard "$commit"
+	[ "$commit" != "0" ] && cd "${repodir}" && git -c advice.detachedHead=false checkout "$commit"
 	if [ -f "${repodir}/config.sh" ]
 	then
 		reset_="$("${repodir}/config.sh" -R)"
