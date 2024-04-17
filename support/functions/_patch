@@ -45,7 +45,7 @@ _streamboard_patch(){
 }
 
 _apply_menupatch(){
-	[ -f "$workdir/GIT-IS-PATCHED" ] && quickreporestore $_toolchainname 2>/dev/null
+	[ -f "$workdir/${REPO^^}-IS-PATCHED" ] && quickreporestore $_toolchainname 2>/dev/null
 		cd "$pdir"
 			(if [ "$(ls -1 "$pdir"/*.patch 2>/dev/null | wc -l)" -gt "0" ]
 			then
