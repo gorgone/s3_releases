@@ -189,8 +189,7 @@ mark_patched(){
 }
 
 patch_webif(){
-
-	if [ -f "$workdir/${REPO^^}-IS-PATCHED" ]
+	if [ -f "$workdir/${REPO^^}-IS-PATCHED" ] && [ "${s3cfg_vars[PATCH_WEBIF]}" == "1" ]
 	then
 		if [ -s "$workdir/${REPO^^}-IS-PATCHED" ]
 		then

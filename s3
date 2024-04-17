@@ -92,9 +92,12 @@ USE_vars[USE_OSCAMNAME]=;
 
 s3cfg_vars[USE_TARGZ]=0
 s3cfg_vars[DIRECTMENU]=0
+s3cfg_vars[NO_REPO_AUTOUPDATE]=0
 s3cfg_vars[USE_VERBOSE]=0
 s3cfg_vars[USE_COMPRESS]=0
 s3cfg_vars[S3_UPDATE_CHECK]=1
+s3cfg_vars[S3_URL_CHECK]=1
+s3cfg_vars[PATCH_WEBIF]=1
 s3cfg_vars[SAVE_LISTSMARGO]=1
 s3cfg_vars[ADD_PROFILE_NAME]=0
 s3cfg_vars[NO_REPO_AUTOUPDATE]=0
