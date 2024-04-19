@@ -56,7 +56,9 @@ gitup(){
 	
 	cd "${repodir}"
 	git reset --hard HEAD
-	git pull
+	git checkout --quiet master
+	git pull --quiet
+	git pull --quiet --tags
 
 	if [ -f "${repodir}/config.sh" ]
 	then
