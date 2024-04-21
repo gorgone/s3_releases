@@ -258,9 +258,9 @@ _init_menu(){
 }
 _select_menu(){
 	revision_="$($(USEGIT) && printf "$(COMMIT)" || printf "r$(REVISION)")"
-	_menutext="Simplebuild3 $(version | head -n1 | awk '{print $1}')"
+	_menutext="Simplebuild3 $(version | head -n1 | awk '{print $1}')   $(REVISION)$($(USEGIT) && printf " @ $(COMMIT) @ $(BRANCH)" || printf " on $(BRANCH)")"
 	smenu=$(
-	"$gui" "$st_" "$bt_" "$title_" "$nc_" --title "-[ $txt_start_menu$(TTAG) ]-" --menu "\n $_menutext" 14 55 7 "Continue" "$txt_firstmenu_continue $revision_" "CHANGE" "$txt_firstmenu_chose" "CEDIT" "$txt_firstmenu_cedit" "TCUPDATE" "$txt_firstmenu_tcupdate" "LANG" "$txt_firstmenu_lang" "EXIT" "$txt_firstmenu_exit")
+	"$gui" "$st_" "$bt_" "$title_" "$nc_" --title "-[ $txt_start_menu$(TTAG) ]-" --menu "\n $_menutext" 14 58 7 "Continue" "$txt_firstmenu_continue $revision_" "CHANGE" "$txt_firstmenu_chose" "CEDIT" "$txt_firstmenu_cedit" "TCUPDATE" "$txt_firstmenu_tcupdate" "LANG" "$txt_firstmenu_lang" "EXIT" "$txt_firstmenu_exit")
 	[ $? = 255 ] && _select_menu
 
 	case $smenu in
