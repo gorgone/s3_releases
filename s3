@@ -1,7 +1,8 @@
 #!/bin/bash
 
-VERSIONCOUNTER="$(git rev-list --count HEAD)"
 SIMPLEVERSION="2024.05"
+VERSIONCOUNTER="$(git rev-list --count HEAD 2>/dev/null || printf "$(echo "$SIMPLEVERSION" | sed -e 's/\(.\)/\1\+0/g' | bc)_non-git")"
+DEVELOPER="Gorgone, WXbet"
 OIFS=$IFS
 export NCURSES_NO_UTF8_ACS=1
 
@@ -107,7 +108,7 @@ s3cfg_vars[delete_oscamdebugbinary]=1
 config_cases=( all addons protocols readers card_readers );
 s3opts=( cedit checkout clean disable_emu enable_emu fix_me get_patch help lang_select loadonly\
 	menu profiles ssh_profiles repopatch reporestore repoup syscheck sysinfo tccheck\
-	tcrepair tedit update update_me upload ) # extendable with plugins
+	tcrepair tedit update update_me upload version ) # extendable with plugins
 
 CUSTOM_CONFDIR="not_set"
 pf_name="not_set"
