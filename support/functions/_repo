@@ -185,7 +185,7 @@ BRANCH(){
 		if cd "${repodir}"; then
 			#$(USEGIT) && git name-rev --name-only "$(COMMIT)" 2>/dev/null | awk -F'/' '{ print $NF }' | awk -F'~' '{ print $1 }' || printf "$trunkurl" | awk -F'/' '{ print $NF }'
 			if $(USEGIT); then
-				ref="$(git name-rev --name-only "$(COMMIT)" 2>/dev/null | awk -F'/' '{ print $NF }' | awk -F'~' '{ print $1 }')"
+				ref="$(git name-rev --name-only "$(COMMIT)" 2>/dev/null | awk -F'/' '{ print $NF }' | awk -F'~' '{ print $1 }' | awk -F'^' '{ print $1 }')"
 				if [ "$ref" == "$(REVISION)" ]; then
 					git branch | tail -n1 | tr -d ' *'
 				else

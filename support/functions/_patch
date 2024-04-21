@@ -185,7 +185,7 @@ mark_patched(){
 	patches="$(echo "${patchlist[@]}" | xargs | sed 's/ /\\n\\t\\t/g')"
 
 	#mark oscam-${REPO} as patched
-	echo "$patches" > "$workdir/${REPO}-IS-PATCHED"
+	echo "$patches" > "$workdir/${REPO^^}-IS-PATCHED"
 }
 
 patch_webif(){
