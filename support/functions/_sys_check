@@ -85,6 +85,8 @@ if [ "$(uname -m)" == "x86_64" ]
 	e="zlib32"
 	e1="/usr/lib/libz.so"
 	e2="/usr/lib32/libz.so.1"
+	e3="/usr/lib/libz.a"
+	e4="/usr/lib/libz.dll.a"
 	if [ -f $e1 ]
 	then
 		printf -v pad %40s
@@ -97,6 +99,18 @@ if [ "$(uname -m)" == "x86_64" ]
 		e=$e$pad
 		e=${e:0:15}
 		$output "$w_l  have\t$g_l$e$y_l $e2\n"
+	elif [ -f $e3 ]
+		then
+		printf -v pad %40s
+		e=$e$pad
+		e=${e:0:15}
+		$output "$w_l  have\t$g_l$e$y_l $e3\n"
+	elif [ -f $e4 ]
+		then
+		printf -v pad %40s
+		e=$e$pad
+		e=${e:0:15}
+		$output "$w_l  have\t$g_l$e$y_l $e4\n"
 	else
 		failed=1
 		printf -v pad %40s
@@ -134,6 +148,7 @@ unset binvars; unset headervars; unset libvars;
 [ -z ${3+x} ] && binvars=( dialog grep gawk wget tar bzip2 svn git bc xz upx patch gcc make scp sshpass openssl dos2unix curl ) || binvars=( $(echo "$3" | tr ' ' '\n') )
 [ -z ${4+x} ] && headervars=( crypto.h libusb.h pcsclite.h pthread.h opensslconf.h ) || headervars=( $(echo "$4" | tr ' ' '\n') )
 [ -z ${5+x} ] && libvars=( libccidtwin.so ) || libvars=( $(echo "$5" | tr ' ' '\n') )
+[ -z ${6+x} ] && libvars=( libccidtwin.la ) || libvars=( $(echo "$6" | tr ' ' '\n') )
 sanity=1
 
 if ! prerequisites silent || [ "$now" == "now" ]
