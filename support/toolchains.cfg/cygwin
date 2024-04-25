@@ -1,4 +1,4 @@
-_toolchainname="native";
+_toolchainname="cygwin";
 default_use="USE_LIBCRYPTO";
 extra_use="PCSC_LIB='-lwinscard'";
 _oscamconfdir_default="/usr/local/etc";
