@@ -192,6 +192,7 @@ printf "$y_l\n |       set : ${cdtag}$w_l"
 	if [ "${USE_vars[USE_EXTRA]}" == "USE_EXTRA=1" ]
 	then
 		printf "$y_l\n | EXTRAFLAGS: enabled"
+		extra="-extra"
 	else
 		printf "$y_l\n | EXTRAFLAGS: disabled"
 		unset extra_use extra_cc extra_ld extra_c
@@ -238,7 +239,7 @@ then
 else
 	_generate_oscam_name "$_toolchainname"
 fi
-	oscam_name="$oscam_name$buildtype"
+	oscam_name="$oscam_name$extra$buildtype"
 	_nl
 	USESTRING=${USE_vars[@]}
 	EXTRA_USE=$extra_use

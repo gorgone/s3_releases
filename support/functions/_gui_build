@@ -108,6 +108,8 @@ _gui_build(){
 	if [ ! "${USE_vars[USE_EXTRA]}" == "USE_EXTRA=1" ]
 	then
 		unset extra_use extra_cc extra_ld extra_c
+	else
+		extra="-extra"
 	fi
 
 #dynamic, static, mixed build
@@ -134,7 +136,7 @@ _gui_build(){
 
 #todo add switch for verbose
 	_generate_oscam_name "$_toolchainname"
-	oscam_name="$oscam_name$buildtype"
+	oscam_name="$oscam_name$extra$buildtype"
 	targztmp="$(mktemp)"
 
 	if [ ! "${USE_vars[USE_TARGZ]}" == "USE_TARGZ=1" ]
