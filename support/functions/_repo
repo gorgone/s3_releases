@@ -172,6 +172,10 @@ REVISION(){
 	fi
 };
 
+EMU(){
+	echo $(REVISION) | awk -F'-' '{printf $2}'
+};
+
 COMMIT(){
 	if [ -d "${repodir}" ]; then
 		if cd "${repodir}"; then

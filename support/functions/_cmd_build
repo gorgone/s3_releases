@@ -322,7 +322,7 @@ fi
 
 #build error message
 	error_on_build=$(grep -c1 error "$ldir/$log_name")
-	[ "$error_on_build" -gt "0" ] && printf "$r_l\terrors on build found$w_l"
+	[ "$error_on_build" -gt "0" ] && printf "$r_l\terrors on build found\n$w_l"
 	printf "$re_$w_l"
 	exit
 }
