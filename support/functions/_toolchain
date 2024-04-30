@@ -192,7 +192,7 @@ _toolchain_check(){
 	s3logo
 	headervars=( crypto.h pcsclite.h libusb.h pthread.h zlib.h )
 	[ -f "$tccfgdir/$1" ] && source "$tccfgdir/$1"
-	
+
 	fmtg="  ${w_l}%-16s ${y_l}%-20s ${g_l}%-8s $p_l%-20s %-17s ${g_l}%s\n";
 	fmtb="  ${w_l}%-16s ${y_l}%-20s ${r_l}%s\n";
 
@@ -236,7 +236,7 @@ _toolchain_check(){
 
 	linux="$(_linux_version $([ "$1" == "native" ] && printf "/usr/src/linux-headers-$(uname -r)" || printf "."))"; linuxc="$(echo $linux | awk -F';' '{print $1}')"; linuxv="$(echo $linux | awk -F';' '{print $2}')"
 	[ ! -z "$linux" ] && printf "$fmtg" "Linux       :" "version.h" "${linuxv::8}" "($linuxc)" || printf "$fmtb" "Linux       :" "version.h" "(missing linux headers)"
-	
+
 	libc="$(_libc_version $1)"; libcf="$(echo $libc | awk -F';' '{print $1}')"; libcl="$(echo $libc | awk -F';' '{print $2}')"; libcv="$(echo $libc | awk -F';' '{print $3}')"
 	[ ! -z "$libcl" ] && printf "$fmtg" "C-Library   :" "${libcf::20}" "${libcv::8}" "($libcl)" || printf "$fmtb" "C-Library   :" "${libcf::20}" "($txt_not_found)"
 
@@ -435,14 +435,14 @@ _toolchain_gui_install(){
 
 	url="$(decode "$_toolchainfilename")"
 	tcname="$(basename $url)"
-	
+
 	if [ ! -f "$dldir/$tcname" ] || [ ! -z "$1" ]
 	then
 		cd "$dldir"
 		rm -f "$tcname"
 		wget "$url" 2>&1 | stdbuf -o0 awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | "$gui" "$st_" "$bt_" "$title_" --title " -[ download ]- " --gauge "  $txt_loading $stcname $txt_wait" 6 74
 	fi
-	
+
 	if [ -f "$dldir/$tcname" ]
 	then
 		[ -d "$tcdir/$first" ] && rm -rf "$tcdir/$first" && printf "$txt_delete $tcdir/$first"
@@ -456,7 +456,7 @@ _toolchain_gui_install(){
 
 _libc_version(){
 	local libcfile libcname verstr
-	
+
 	if [ "$1" == "native" ]
 	then
 		libcfile="ldd"
@@ -470,7 +470,7 @@ _libc_version(){
 			libcfile="$(basename "$libcfile")"
 		fi
 		libcname=$(echo $libcfile | sed 's/\.so$//')
-		
+
 		# glibc
 		verstr="$(strings "$(find . -name "$libcfile" | head -n1)" 2>/dev/null | grep -Po '^GLIBC_(\d+\.)+\d+' | sort -Vr | head -n1)"
 		if [ -n "$verstr" ]
@@ -481,33 +481,33 @@ _libc_version(){
 		elif [ "$libcname" != "${libcname#libuClibc-}" ]
 		then
 			verstr="${libcname#lib}"
-			
+
 		# musl
 		elif [ "$(strings "$(find . -name "libc.so" | head -n1)" 2>/dev/null | grep '^musl')" ]
 		then
 			libcfile="$(basename $(find . -name "libc.so" | head -n1))"
 			verstr="musl-$(strings "$(find . -name "libc.so" | head -n1)" | grep '^[0-1]\.[0-9]\.[0-9][0-9]*$')"
-		
+
 		# bionic
 		elif [ "$(strings "$(find . -name "libc.so" ! -path "*/x86_64-linux-android/*" | head -n1)" 2>/dev/null | grep 'bionic')" ]
 		then
 			libcfile="$(basename $(find . -name "libc.so" ! -path "*/x86_64-linux-android/*" | head -n1))"
 			verstr="bionic-$(strings "$(find . -name "libc.so" ! -path "*/x86_64-linux-android/*" | head -n1)" | grep '^C[0-2]\.[0-9]*$')"
-		
+
 		#unknown
 		else
 			libcfile="[g|uc]libc|musl"
 		fi
 	fi
-	
+
 	printf "$libcfile;${verstr//-/;}"
 }
 
 _linux_version(){
 	local vcode base major patch sub
-	
+
 	vcode=$(find "$1" -name "version.h" -type f -exec grep -m1 "LINUX_VERSION_CODE" {} \; | awk '{print $3}')
-	
+
 	# LINUX_VERSION_CODE is X*65536 + Y*256 + Z
 	[ -z $vcode ] && return || base=$vcode
 	major=$(( $base / 65536 ))
@@ -517,7 +517,7 @@ _linux_version(){
 	patch=$(( $base / 256 ))
 	pp=$(( $patch * 256 ))
 	sub=$(( $base - pp ))
-	
+
 	printf "$vcode;$major.$patch.$sub"
 }
 

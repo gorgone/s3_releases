@@ -53,7 +53,7 @@ gitup(){
 	fi
 
 	printf "\n$w_l  ${REPO^^} Repository  : $g_l""$trunkurl\n""$re_"
-	
+
 	cd "${repodir}"
 	git reset --hard HEAD
 	git checkout --quiet master

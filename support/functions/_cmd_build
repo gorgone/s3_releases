@@ -6,7 +6,7 @@ _cmd_build(){
 	if [ "$_toolchainname" == "native" ]
 	then
 		log_name="$(date +%F).$(date +%X).$(hostname).log"
-		
+
 	else
 		log_name="$(date +%F).$(date +%X).$_toolchainname.log"
 	fi
@@ -91,7 +91,7 @@ _cmd_build(){
 		check_smargo
 	fi
 
-#fix streamrelay case 
+#fix streamrelay case
 	check_streamrelay
 
 #fill use variables and set name addons

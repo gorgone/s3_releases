@@ -32,7 +32,7 @@ _gui_build(){
 	libcount=0;
 	statcount=0;
 
-#fix streamrelay case 
+#fix streamrelay case
 	check_streamrelay
 
 #do use_vars
@@ -68,7 +68,7 @@ _gui_build(){
 	then
 		((libcount++))
 	fi
-	
+
 	if [ "${USE_vars[USE_SSL]}" == "USE_SSL=1" ]
 	then
 		((libcount++))
@@ -89,7 +89,7 @@ _gui_build(){
 	else
 		_pcsc=
 	fi
-	
+
 	if [ "${USE_vars[USE_LIBDVBCSA]}" == "USE_LIBDVBCSA=1" ]
 	then
 		((libcount++))

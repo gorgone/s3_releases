@@ -435,7 +435,7 @@ _create_tc(){
 							libkeys="$(echo "${libkeys%?}" | xargs)";
 						fi;
 
-						logfile="$ldir/$(date +%F.%H%M%S)_tup_crosstoolchain_"$tpl".log"; ((i++)); 
+						logfile="$ldir/$(date +%F.%H%M%S)_tup_crosstoolchain_"$tpl".log"; ((i++));
 
 						clear;
 						sp=$(printf '%*s' 80 | tr ' ' '=');
@@ -494,20 +494,20 @@ _create_tc(){
 							#print out crosstool version and generate build command list
 							unset buildtasks;
 							case "$tpl_type" in
-								"CTNG") 
+								"CTNG")
 										echo -e "${g_l}\n$(./ct-ng | grep 'crosstool-NG version' &2>/dev/null | tail -1)\n${re_}" | _log "$logfile";
 										for task in "${CTNG_BUILD_tasks[@]}";do
 											task=$(_replace_tokens "$task");	#replace tokens
 											buildtasks+=("$task");
 										done;;
-								"FNG")  
+								"FNG")
 										echo -e "${g_l}\n$([ -f "tools/freetz-revision" ] && tools/freetz-revision || tools/freetz_revision 2>&1 | tail -1)\n${re_}" | _log "$logfile";
 										[[ ! $(umask) == 0022 ]] && umask 0022;
 										for task in "${FNG_BUILD_tasks[@]}";do
 											task=$(_replace_tokens "$task");	#replace tokens
 											buildtasks+=("$task");
 										done;;
-								"ANDK") 
+								"ANDK")
 										echo -e "${g_l}\n$(grep '^Pkg.Desc =' "source.properties" | awk -F'=' '{print $2}' | xargs) $(grep '^Pkg.Revision =' "source.properties" | awk -F'=' '{print $2}' | xargs)\n${re_}" | _log "$logfile";
 										for task in "${ANDK_BUILD_tasks[@]}";do
 											task=$(_replace_tokens "$task");	#replace tokens
@@ -984,7 +984,7 @@ _get_toolchain_properties(){
 	else
 		arch=""; bitness=""; api="";
 	fi;
-	
+
 	#get additional optimization flags needed by some libraries
 	slice="$($compilername --target-help 2>&1 | grep -iw "altivec"							&>/dev/null && echo "altivec")"	&& size="128";
 	[ -z "$slice" ] && slice="$($compilername --target-help 2>&1 | grep -iw "avx2"			&>/dev/null && echo "avx2")"	&& size="256";
@@ -1044,7 +1044,7 @@ _get_toolchain_libs(){
 							fi;
 						fi;
 					fi;
-					
+
 				done;
 			done;
 		fi;
@@ -1150,7 +1150,7 @@ _get_template_properties(){
 		else
 			desc="$2";
 		fi;
-		[ -z "$desc" ] && desc="${txt_s3tup_msg_gtp_missing}"; 
+		[ -z "$desc" ] && desc="${txt_s3tup_msg_gtp_missing}";
 
 		#extract template properties based on template type
 		tpl_type="$(_get_template_type "$1" | awk -F';' '{print $1}' | xargs)";
@@ -1418,7 +1418,7 @@ _create_config(){
 		for prop in $props;
 		do
 			prop="${lib}_${prop}"; expr="$(grep "^${prop}=" "$configname")"; eval "$expr";
-			_change_config "$prop" "${!prop}" "1"; 
+			_change_config "$prop" "${!prop}" "1";
 		done;
 	done;
 
@@ -1440,14 +1440,14 @@ _s3tup_update(){
 		#check git repository
 		cd "$workdir";
 		[ "$(git status 2>/dev/null | wc -l)" -eq 0 ] && printf "${r_l}\n${txt_s3tup_msg_update_directory_unversioned}${re_}" && return;
-		
+
 		#prepare GIT commands
 		repo="$(git config --get remote.origin.url)"; #get remote url
 		proto="$(printf "$repo" | awk -F':' '{print $1}')"; #get protocol of remote url
 		branch="$(git branch --show-current)"; #get branch name
 		diff_cmd='git diff --cached --stat remotes/origin/HEAD "$ff"'; #diff command
 		update_cmd='git checkout --progress origin/"$(git branch --show-current)" -- "$ff"'; #update command
-		
+
 		#get remote updates
 		check_url "$repo" && git remote update >/dev/null || return;
 
