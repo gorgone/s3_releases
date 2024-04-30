@@ -33,5 +33,4 @@ fix_me(){
 	[ -d "$s3local" ] && rm -rf $s3local
 	update_me
 	[ -d "$emulocal" ] && rm -rf $emulocal
-	update_emu
 }
