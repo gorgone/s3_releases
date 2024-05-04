@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #simplebuild_plugin tcupdate
-pversion="0.25.3";
+pversion="0.25.4";
 pname="s3.TUP";
 pdesc="Plugin $pname v$pversion";
 tc_url="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLw==";
@@ -143,11 +143,13 @@ tcupdate(){
 						unset icolor;
 						source "$tccfgdir/$i" && tcdate="";
 						tcdate=" $(_get_toolchain_date "$i")" && [ "${#tcdate}" -eq 1 ] && tcdate="";
-						cd "$tcdir/$i/bin" && tcarch="$(_get_compiler_arch host)";
+						cd "$tcdir/$i/bin" 2>/dev/null && tcarch="$(_get_compiler_arch host)";
 						[ -z "$tcarch" ] && tcarch="unknown";
 						if echo "${tcarch//-/_}" | grep -qv "$(uname -m)"; then
-							icolor="\Zr\Z1";
-							txtcomp="\n\Zr\Z1${txt_s3tup_menu_toolchain_notsupported}\Zn";
+							if [ ! "$(uname -m)" == "x86_64" ] || [[ ! $tcarch =~ 386 ]];then
+								icolor="\Zr\Z1";
+								txtcomp="\n\Zr\Z1${txt_s3tup_menu_toolchain_notsupported}\Zn";
+							fi
 						fi
 						MENU_OPTIONS+=("$_toolchainname" "$icolor$_description\Zn\Z2$tcdate\Zn" "${txt_s3tup_menu_toolchain_arch}${tcarch//-/_} | ${txt_s3tup_menu_toolchain_folder}$tcdir/$i");
 						counter;
