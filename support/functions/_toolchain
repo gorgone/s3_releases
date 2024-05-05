@@ -242,8 +242,8 @@ _toolchain_check(){
 
 	for e in "${headervars[@]}"
 	do
-		temp=$(find * |grep -m1 "$e")
-		[ ${#temp} -gt 8 ] && printf "$fmtg" "Header File :" "${e::20}" "${txt_found}" || printf "$fmtb" "Header File :" "${e::20}" "($txt_not_found)"
+		temp=$(find * |grep -wm1 "$e")
+		[ ${#temp} -gt 5 ] && printf "$fmtg" "Header File :" "${e::20}" "${txt_found}" || printf "$fmtb" "Header File :" "${e::20}" "($txt_not_found)"
 	done
 
 	[ "$1" == "native" ] && pkgs=$(find ../* -name "pkgconfig" -type d) || pkgs=$(find . -name "pkgconfig" -type d)
