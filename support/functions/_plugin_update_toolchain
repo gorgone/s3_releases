@@ -1299,7 +1299,7 @@ _check_lib(){
 };
 _check_pkg(){
 	pkgs=( git patch curl jq gcc g++ gperf bison flex makeinfo help2man make file cmp \
-		  python3-config autoconf automake libtoolize libtool gawk wget bzip2 xz unzip rsync \
+		  python3-config autoconf autoconf-archive automake libtoolize libtool gawk wget bzip2 xz unzip rsync \
 		  composite inkscape pkg-config python3 gettext ruby );
 	headers=( ncurses libacl.h sys/capability.h readline.h glib-2.0/glib.h );
 	libs=( libstdc++.so.6 libstdc++.a libc\\.a );

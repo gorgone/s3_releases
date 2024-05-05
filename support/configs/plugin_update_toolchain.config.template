@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="68";
+S3TUP_CONFIG_VERSION="69";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -390,7 +390,8 @@ LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAI
 LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" ] && LIBUSB_LIBS="-L@PREFIX@/lib/@HOST@/@API@ -lusb-1.0";');
 LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" ] && LOG="LIBS=-llog" || LOG="";');
 LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="--enable-static --disable-shared --disable-libudev $LOG" || FLAGS="--enable-static --disable-libudev";');
-LIB_PCSC_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS --disable-polkit --disable-libsystemd --with-systemdsystemunitdir=@PREFIX@/lib/systemd/system LIBUSB_LIBS="${LIBUSB_LIBS}" LIBUSB_CFLAGS="${LIBUSB_CFLAGS}";');
+LIB_PCSC_tasks+=("find . -name "pcsc-wirecheck-main.c" -type f -exec sed -i 's/pcsc_assert_wire_constants ()/0/g' {} \;;");
+LIB_PCSC_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS --disable-polkit --disable-libsystemd --with-systemdsystemunitdir=@PREFIX@/lib/systemd/system LIBUSB_LIBS="${LIBUSB_LIBS}" LIBUSB_CFLAGS="${LIBUSB_CFLAGS}";');
 LIB_PCSC_tasks+=('make -j@CPUS@;');
 LIB_PCSC_tasks+=('make install;');
 LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 -name "libpcsc*" -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
@@ -402,9 +403,9 @@ LIB_PCSCB="1";
 LIB_PCSCB_beta="0";
 LIB_PCSCB_name="PCSC-Lite";
 LIB_PCSCB_tag="";
-LIB_PCSCB_version="$(curl --silent "https://pcsclite.apdu.fr/files/" | grep -m1 'href="pcsc-lite-1.9.5' | awk -F '"' '{printf $2}' | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
+LIB_PCSCB_version="1.9.5";
 LIB_PCSCB_check="libpcsclite.pc";
-LIB_PCSCB_url="$(printf 'https://pcsclite.apdu.fr/files/'$(curl --silent "https://pcsclite.apdu.fr/files/" | grep -m1 "href=\"pcsc-lite-$LIB_PCSCB_version" | awk -F '"' '{printf $2}'))";
+LIB_PCSCB_url="https://pcsclite.apdu.fr/files/pcsc-lite-1.9.5.tar.bz2";
 LIB_PCSCB_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_PCSCB_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_PCSCB_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
