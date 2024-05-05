@@ -60,13 +60,19 @@ prerequisites(){
 
 	for e in "${headervars[@]}"
 	do
-		e1=$(find /usr/include/* /usr/local/include/* | grep -m1 "$e")
+		e1=$(find /usr/include/* /usr/local/include/* 2>/dev/null | grep -wm1 "$e")
 		if [ ${#e1} -gt 8 ]
 		  then
 			printf -v pad %40s
 			e=$e$pad
 			e=${e:0:15}
 			$output "$w_l  have\t$g_l$e$y_l $e1\n"
+		elif [ "$e" == "dvbcsa.h" -a "${s3cfg_vars[INSTALL_NATIVE_LIBDVBCSA]}" == "0" ]
+		  then
+			printf -v pad %40s
+			e=$e$pad
+			e=${e:0:15}
+			$output "$r_l  need\t$w_l$e$r_l (skipped by config)\n"
 		else
 			failed=1
 			printf -v pad %40s

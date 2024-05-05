@@ -85,7 +85,7 @@ done;
 
 for e in "${headervars[@]}";
 do
-	e1=$(find /usr/include/* /usr/local/include/* |grep -m1 "$e");
+	e1=$(find /usr/include/* /usr/local/include/* 2>/dev/null | grep -wm1 "$e")
 	if [ ! ${#e1} -gt 8 ]; then
 		case $e in
 		crypto.h)

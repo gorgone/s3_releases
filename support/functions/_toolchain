@@ -190,7 +190,7 @@ _toolchain_check(){
 	clear
 	printf "$w_l"
 	s3logo
-	headervars=( crypto.h pcsclite.h libusb.h pthread.h zlib.h )
+	headervars=( crypto.h pcsclite.h libusb.h pthread.h dvbcsa.h zlib.h )
 	[ -f "$tccfgdir/$1" ] && source "$tccfgdir/$1"
 
 	fmtg="  ${w_l}%-16s ${y_l}%-20s ${g_l}%-8s $p_l%-20s %-17s ${g_l}%s\n";
