@@ -580,7 +580,7 @@ _create_tc(){
 								cflags=$(echo "$props" | awk -F'^' '{print $3}' | xargs);
 								[ -z "$ldf" ] && ldf=$(echo "$props" | awk -F'^' '{print $4}' | xargs);
 
-								_create_toolchaincfg "$tcdir/$tpl" "$tpl" "$target" "$sysroot" "" "$desc" "" "$dldir/$(decode "$_t1e")$tpl.tar.xz" "yes" "$tpl_type_name" "$use" "$cflags" "$ldf" "$tpl_type" "";
+								_create_toolchaincfg "$tcdir/$tpl" "$tpl" "$target" "$sysroot" "" "$desc" "" "$dldir/$(decode "$_t1e")$tpl.tar.xz" "yes" "$tpl_type_name" "$use" "$cflags" "$ldf" "" "0" "$tpl_type" "";
 							else
 								_paktc_timer 10;
 							fi;
@@ -675,8 +675,8 @@ _backup(){
 	template_type="$(_get_template_type "$cttpldir/$src")";
 	tpl_type="$(echo "$template_type" | awk -F';' '{print $1}' | xargs)";
 	tpl_type_name="$(echo "$template_type" | awk -F';' '{print $2}' | xargs)";
-	source "$tccfgdir/$src" && target="${_compiler%?}" && sysroot="$_sysroot" && lsd="$_libsearchdir" && desc="$_description" && info="$_tc_info" && sb="$_self_build" && eu="$extra_use" && ec="$extra_cc" && el="$extra_ld";
-	_create_toolchaincfg "$tcdir/$src" "$dest" "$target" "$sysroot" "$lsd" "$desc" "$info" "$xzfile" "$sb" "tpl_type_name" "$eu" "$ec" "$el" "$tpl_type" "$_toolchainfilename";
+	source "$tccfgdir/$src" && target="${_compiler%?}" && sysroot="$_sysroot" && lsd="$_libsearchdir" && desc="$_description" && info="$_tc_info" && sb="$_self_build" && eu="$extra_use" && ecc="$extra_cc" && el="$extra_ld"  && ec="$extra_c" && estrip="$_extract_strip";
+	_create_toolchaincfg "$tcdir/$src" "$dest" "$target" "$sysroot" "$lsd" "$desc" "$info" "$xzfile" "$sb" "tpl_type_name" "$eu" "$ecc" "$el" "$ec" "$estrip" "$tpl_type" "$_toolchainfilename";
 	) | "$gui" "$st_" "$bt_" "$title_ \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_backup_title} ${src} ${txt_to} $(basename "$xzfile") ]- " "$pb_" "$_lines" "$_cols";
 	[ -f "$newtccfgfile" ] && echo "$dest";
 };
@@ -1492,12 +1492,12 @@ _create_toolchaincfg(){
 		sysroot="${sr#"$1/"}";
 	fi;
 
-	[ "${14}" == "ANDK" ] && andk_vars='_oscamconfdir_custom="/data/plugin/oscam";
+	[ "${16}" == "ANDK" ] && andk_vars='_oscamconfdir_custom="/data/plugin/oscam";
 _androidndkdir="1";
 stapi_lib_custom="libwi.a";
 stapi_allowed="1";' || andk_vars='_oscamconfdir_custom="";';
 
-	[ "${14}" == "LGCY" ] && tfn="${15}" || tfn=$(echo "$(decode "$tc_url")\${pversion}/$(basename "$8")" | base64 -w0)
+	[ "${16}" == "LGCY" ] && tfn="${17}" || tfn=$(echo "$(decode "$tc_url")\${pversion}/$(basename "$8")" | base64 -w0)
 	[ "${#5}" -gt 0 ] && lsd="$5" || lsd="/usr/lib";
 	[ "${#7}" -gt 0 ] && info="$7" || info="$(echo -e "\\\n
 !!! ${10} Toolchain !!!\\\n
@@ -1512,16 +1512,18 @@ default_use="USE_LIBCRYPTO";
 extra_use="${11}";
 extra_cc="${12}";
 extra_ld="${13}";
-_description="$(echo "$6" | awk -F'[()]' '{print $1}' | xargs)";
+extra_c="${14}";
+_description="$([ "${16}" == "LGCY" ] && echo "$6" || echo "$6" | awk -F'[()]' '{print $1}' | xargs)";
 _oscamconfdir_default="/etc/tuxbox/config";
 $andk_vars
 _self_build="$([ ! "$9" == "yes" ] && echo "no" || echo "$9")";
 _compiler="$3-";
 _sysroot="$sysroot";
 _libsearchdir="$lsd";
+_extract_strip="$([ -z "${15}" ] && echo "0" || echo "${15}")";
 _toolchainfilename="$tfn";
 _md5sum="$(cd "$dldir" && md5sum $(basename "$8"))";
 _tc_info="$info";
-_tc_infolines="5";
+_tc_infolines="$(echo "$_tc_info" | wc -l)";
 EOF
 };
