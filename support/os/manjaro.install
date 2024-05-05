@@ -55,7 +55,7 @@ done;
 
 for e in "${headervars[@]}";
 do
-	e1=$(find /usr/include/* |grep -m1 "$e");
+	e1=$(find /usr/include/* /usr/local/include/* |grep -m1 "$e");
 	if [ ! ${#e1} -gt 8 ]; then
 		case $e in
 		crypto.h)
@@ -72,6 +72,10 @@ do
 			;;
 		pthread.h)
 				inst="libc-dev-bin";
+			;;
+		dvbcsa.h)
+				build="libdvbcsa source builder";
+				inst="";
 			;;
 		ncurses)
 				inst="ncurses";
@@ -90,7 +94,7 @@ do
 			;;
 		esac;
 		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
-		packages="$packages $inst";
+		packages="$packages $inst$build";
 	fi;
 done;
 
@@ -120,6 +124,7 @@ if [ "$(uname -m)" == "x86_64" ] && [ ! -f /usr/lib/libz.so ]; then
 	fi
 fi
 
+packages="$(echo "$packages" | xargs)"
 if [ ${#packages} -gt 0 ]; then
 	echo -n -e "$w_l  update$g_l package list...";
 	echo "+++ $(date): pacman -Syu" >> "$install_log"
@@ -133,6 +138,11 @@ if [ ${#packages} -gt 0 ]; then
 	else
 		echo -e "$r_l  failed!";
 	fi
+fi
+
+if [[ "$build" =~ libdvbcsa ]]; then
+	echo -e "$w_l\n  BUILD FROM SOURCE\n  =================";
+	libdvbcsa_native_installer
 fi
 
 [ $failed == 1 ] && echo -e "\n$r_l  Installation with errors - see: $install_log";

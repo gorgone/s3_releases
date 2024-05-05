@@ -81,7 +81,7 @@ done;
 
 for e in "${headervars[@]}";
 do
-	e1=$(find /usr/include/* |grep -m1 "$e");
+	e1=$(find /usr/include/* /usr/local/include/* |grep -m1 "$e");
 	if [ ! ${#e1} -gt 8 ]; then
 		case $e in
 		crypto.h)
@@ -95,6 +95,10 @@ do
 			;;
 		pthread.h)
 				inst="glibc-devel";
+			;;
+		dvbcsa.h)
+				build="libdvbcsa source builder";
+				inst="";
 			;;
 		ncurses)
 				inst="ncurses-devel";
@@ -113,7 +117,7 @@ do
 			;;
 		esac;
 		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
-		packages="$packages $inst";
+		packages="$packages $inst$build";
 	fi;
 done;
 
@@ -146,6 +150,7 @@ if [ "$(uname -m)" == "x86_64" ] && [ ! -f /usr/lib/libz.so ]; then
 	fi
 fi
 
+packages="$(echo "$packages" | xargs)"
 if [ ${#packages} -gt 0 ]; then
 	echo -n -e "$w_l  update$g_l package list...";
 	echo "+++ $(date): zypper --non-interactive refresh" >> "$install_log"
@@ -168,6 +173,11 @@ if ! hash sshpass 2>/dev/null; then
 	echo "+++ $(date): rpm -i $sshpass_src" >> "$install_log";
 	$prefix rpm -i $sshpass_src >> "$install_log" 2>&1 || failed=1;
 	echo -e -n ;
+fi
+
+if [[ "$build" =~ libdvbcsa ]]; then
+	echo -e "$w_l\n  BUILD FROM SOURCE\n  =================";
+	libdvbcsa_native_installer
 fi
 
 upxversion=(0 0);

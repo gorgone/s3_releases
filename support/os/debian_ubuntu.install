@@ -45,7 +45,7 @@ done;
 
 for e in "${headervars[@]}";
 do
-	e1=$(find /usr/include/* |grep -m1 "$e");
+	e1=$(find /usr/include/* /usr/local/include/* |grep -m1 "$e");
 	if [ ! ${#e1} -gt 8 ]; then
 		case $e in
 		crypto.h)
@@ -62,6 +62,10 @@ do
 			;;
 		pthread.h)
 				inst="libc-dev-bin";
+			;;
+		dvbcsa.h)
+				build="libdvbcsa source builder";
+				inst="";
 			;;
 		ncurses)
 				inst="libncurses-dev";
@@ -80,7 +84,7 @@ do
 			;;
 		esac;
 		printf -v pad %40s; e=$e$pad; e=${e:0:15};
-		echo -e "$w_l  select $g_l$e$y_l from: $inst";
+		echo -e "$w_l  select $g_l$e$y_l from: $inst$build";
 		packages="$packages $inst";
 	fi;
 done;
@@ -113,8 +117,9 @@ if [ "$(uname -m)" == "x86_64" ] && [ ! -f /usr/lib32/libz.so.1 ]; then
 	fi
 fi
 
+packages="$(echo "$packages" | xargs)"
+echo -n >"$install_log" &2>/dev/null;
 if [ ${#packages} -gt 0 ]; then
-	echo -n >"$install_log" &2>/dev/null;
 	echo -e "$w_l\n  INSTALLATION\n  ============";
 	if [ "$EUID" -ne 0 ] && [ ! "$ID" == "ubuntu" ]; then
 		echo -en "$r_l\n  enter root ";
@@ -131,6 +136,11 @@ if [ ${#packages} -gt 0 ]; then
 		$prefix apt-get -y -qq install $packages |grep --line-buffered '(' |grep --line-buffered -v 'nicht';
 	fi;
 fi;
+
+if [[ "$build" =~ libdvbcsa ]]; then
+	echo -e "$w_l\n  BUILD FROM SOURCE\n  =================";
+	libdvbcsa_native_installer
+fi
 
 [ $failed == 1 ] && echo -e "\n$r_l  Installation with errors - see: $install_log";
 

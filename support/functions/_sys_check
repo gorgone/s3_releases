@@ -43,7 +43,7 @@ prerequisites(){
 
 	for e in "${headervars[@]}"
 	do
-		e1=$(find /usr/include/* | grep -m1 "$e")
+		e1=$(find /usr/include/* /usr/local/include/* | grep -m1 "$e")
 		if [ ${#e1} -gt 8 ]
 		  then
 			printf -v pad %40s
@@ -132,7 +132,7 @@ fi
 
 unset binvars; unset headervars; unset libvars;
 [ -z ${3+x} ] && binvars=( dialog grep gawk wget tar bzip2 svn git bc xz upx patch gcc make scp sshpass openssl dos2unix curl ) || binvars=( $(echo "$3" | tr ' ' '\n') )
-[ -z ${4+x} ] && headervars=( crypto.h libusb.h pcsclite.h pthread.h opensslconf.h ) || headervars=( $(echo "$4" | tr ' ' '\n') )
+[ -z ${4+x} ] && headervars=( crypto.h libusb.h pcsclite.h pthread.h opensslconf.h dvbcsa.h ) || headervars=( $(echo "$4" | tr ' ' '\n') )
 [ -z ${5+x} ] && libvars=( libccidtwin.so ) || libvars=( $(echo "$5" | tr ' ' '\n') )
 sanity=1
 
@@ -171,4 +171,45 @@ then
 fi
 
 return $sanity
+}
+
+libdvbcsa_native_installer(){
+	echo -e "$w_l  Installing ${g_l}libdvbcsa$w_l from source..." | tee -a "$install_log"
+	FLAGS="$(cat /proc/cpuinfo | grep -im1 flags | awk -F':' '{print $2}')"
+	FLAGS+="$(cat /proc/cpuinfo | grep -im1 features | awk -F':' '{print $2}')"
+	echo -e "FLAGS=\"$FLAGS\"\n" |& tee -a "$install_log" &>/dev/null
+
+	echo "$FLAGS" | grep -qiw 'altivec' && optimization="--enable-altivec"
+	[ -z "$optimization" ] && echo "$FLAGS" | grep -qiw "avx2" && optimization="--enable-avx2"
+	[ -z "$optimization" ] && echo "$FLAGS" | grep -qiw "ssse3" && optimization="--enable-ssse3"
+	[ -z "$optimization" ] && echo "$FLAGS" | grep -qiw "sse2" && optimization="--enable-sse2"
+	[ -z "$optimization" ] && echo "$FLAGS" | grep -qiw "mmx" && optimization="--enable-mmx"
+	if [ -z "$optimization" ]; then
+		if [ -n "$(find "/usr/lib" -name "arm_neon.h" -type f -print -quit)" ]; then
+			echo "$FLAGS" | grep -qiw "neon\|simd\|asimd" && optimization="--enable-neon";
+		fi;
+	fi;
+	[ -z "$optimization" ] && optimization="--enable-uint32"
+	echo -e "$w_l  ${g_l}libdvbcsa$w_l optimization autodetection:$y_l $optimization" | tee -a "$install_log"
+
+	rm -rf /tmp/libdvbcsa 2>/dev/null
+	echo -e "\ngit clone https://github.com/oe-mirrors/libdvbcsa.git /tmp/libdvbcsa" |& tee -a "$install_log" &>/dev/null
+	git clone https://github.com/oe-mirrors/libdvbcsa.git /tmp/libdvbcsa |& tee -a "$install_log" &>/dev/null
+	cd /tmp/libdvbcsa
+	
+	echo -e "$w_l  Building ${g_l}libdvbcsa$w_l..." | tee -a "$install_log"
+	echo -e "\n./bootstrap && ./configure $optimization" |& tee -a "$install_log" &>/dev/null
+	(./bootstrap && ./configure $optimization) |& tee -a "$install_log" &>/dev/null
+	(($?)) && return 1;
+
+	echo -e "\nmake -j$(nproc)" |& tee -a "$install_log" &>/dev/null
+	make -j$(nproc) |& tee -a "$install_log" &>/dev/null || return 1;
+	
+	echo -e "$w_l  Installing ${g_l}libdvbcsa$w_l...$re_" | tee -a "$install_log"
+	echo -e "\n$prefix make install" |& tee -a "$install_log" &>/dev/null
+	$prefix make install |& tee -a "$install_log" &>/dev/null || return 1;
+
+	echo -e "\n$prefix ldconfig && $prefix ldconfig -v" |& tee -a "$install_log" &>/dev/null
+	($prefix ldconfig && $prefix ldconfig -v) |& tee -a "$install_log" &>/dev/null
+	rm -rf /tmp/libdvbcsa 2>/dev/null
 }
