@@ -9,7 +9,11 @@ packages="";
 
 for e in "${binvars[@]}";
 do
-	if ! hash "$e" 2>/dev/null; then
+	if [ "$e" == "autoconf-archive" -a ! -f "/usr/share/aclocal/ax_absolute_header.m4" ]; then
+		printf -v pad %40s; e=$e$pad; e=${e:0:16};
+		echo -e "$w_l  select $g_l$e$y_l from: $e";
+		packages+=" $e";
+	elif ! hash "$e" 2>/dev/null; then
 		inst="$e";
 		case $e in
 		svn)
@@ -39,7 +43,7 @@ do
 		esac;
 		printf -v pad %40s; e=$e$pad; e=${e:0:15};
 		echo -e "$w_l  select $g_l$e$y_l from: $inst";
-		packages="$packages $inst";
+		packages+=" $inst";
 	fi;
 done;
 
@@ -85,7 +89,7 @@ do
 		esac;
 		printf -v pad %40s; e=$e$pad; e=${e:0:15};
 		echo -e "$w_l  select $g_l$e$y_l from: $inst$build";
-		packages="$packages $inst";
+		packages+=" $inst";
 	fi;
 done;
 
@@ -103,7 +107,7 @@ do
 		esac;
 		printf -v pad %40s; e=$e$pad; e=${e:0:15};
 		echo -e "$w_l  select $g_l$e$y_l from: $inst";
-		packages="$packages $inst";
+		packages+=" $inst";
 	fi;
 done;
 
@@ -113,7 +117,7 @@ if [ "$(uname -m)" == "x86_64" ] && [ ! -f /usr/lib32/libz.so.1 ]; then
 		inst="lib32z1";
 		printf -v pad %40s; e=$e$pad; e=${e:0:15};
 		echo -e "$w_l  select $g_l$e$y_l from: $inst";
-		packages="$packages $inst";
+		packages+=" $inst";
 	fi
 fi
 

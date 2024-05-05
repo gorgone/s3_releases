@@ -20,7 +20,11 @@ hash sudo 2>/dev/null || { [ "$(whoami)" != "root" ] && { echo -e "$r_l  You nee
 
 for e in "${binvars[@]}";
 do
-	if ! hash "$e" 2>/dev/null; then
+	if [ "$e" == "autoconf-archive" -a ! -f "/usr/share/aclocal/ax_absolute_header.m4" ]; then
+		printf -v pad %40s; e=$e$pad; e=${e:0:16};
+		echo -e "$w_l  select $g_l$e$y_l from: $e";
+		packages+=" $e";
+	elif ! hash "$e" 2>/dev/null; then
 		inst="$e";
 		case $e in
 		svn)
@@ -49,7 +53,7 @@ do
 			;;
 		esac;
 		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
-		packages="$packages $inst";
+		packages+=" $inst";
 	fi;
 done;
 
@@ -111,7 +115,7 @@ do
 			;;
 		esac;
 		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
-		packages="$packages $inst";
+		packages+=" $inst";
 	fi;
 done;
 
@@ -120,7 +124,7 @@ if [ "$(uname -m)" == "x86_64" ] && [ ! -f /usr/lib/libz.so ]; then
 		e="zlib32";
 		inst="lib32-zlib";
 		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
-		packages="$packages $inst";
+		packages+=" $inst";
 	fi
 fi
 

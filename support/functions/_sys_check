@@ -11,7 +11,24 @@ prerequisites(){
 
 	for e in "${binvars[@]}"
 	do
-		if hash "$e" 2>/dev/null
+		if [ "$e" == "autoconf-archive" ]
+		then
+			e="autoconf-archive"
+			e1="/usr/share/aclocal/ax_absolute_header.m4"
+			if [ -f $e1 ]
+			then
+				printf -v pad %40s
+				e=$e$pad
+				e=${e:0:16}
+				$output "$w_l  have\t$g_l$e$y_l $e1\n"
+			else
+				failed=1
+				printf -v pad %40s
+				e=$e$pad
+				e=${e:0:16}
+				$output "$r_l  need\t$w_l$e$r_l $missing\n"
+			fi		
+		elif hash "$e" 2>/dev/null
 		then
 			einfo=$(type -pf "$e")
 			printf -v pad %40s

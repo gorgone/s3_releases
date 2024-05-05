@@ -1305,7 +1305,7 @@ _check_pkg(){
 	libs=( libstdc++.so.6 libstdc++.a libc\\.a );
 	echo -e "${y_l}SYSCHECK -> ${txt_s3tup_msg_syscheck1}${re_}";
 	if syscheck "" "" "${pkgs[*]}" "${headers[*]}" "${libs[*]}";then
-		echo -e "${r_l}\nSYSCHECK -> ${txt_s3tup_msg_syscheck2}\n${y_l}${prefix} install${packages}\n${re_}" && _paktc_timer 10;
+		echo -e "${r_l}\nSYSCHECK -> ${txt_s3tup_msg_syscheck2}\n${y_l}${prefix} apt install ${packages}\n${re_}" && _paktc_timer 10;
 	fi;
 
 	dialog_ver="$(dialog --version | awk -F' |-' '{printf $2}')" && [ -z $dialog_ver ] && dialog_ver="0"
