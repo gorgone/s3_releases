@@ -2,7 +2,7 @@
 
 debian_os(){
 [ -f /etc/os-release ] && source /etc/os-release || return 1;
-[ "$ID" == "ubuntu" ] && prefix="sudo" || prefix='';
+prefix="sudo"
 install_log="$ldir/os-install.log";
 failed=0;
 packages="";
@@ -14,10 +14,11 @@ do
 		echo -e "$w_l  select $g_l$e$y_l from: $e";
 		packages+=" $e";
 	elif ! hash "$e" 2>/dev/null; then
-		inst="$e";
+		inst="$e"; build="";
 		case $e in
-		svn)
-			inst="subversion";
+		upx)
+			build="upx deb installer"
+			inst="";
 			;;
 		xz)
 			inst="xz-utils";
@@ -42,8 +43,9 @@ do
 			;;
 		esac;
 		printf -v pad %40s; e=$e$pad; e=${e:0:15};
-		echo -e "$w_l  select $g_l$e$y_l from: $inst";
+		echo -e "$w_l  select $g_l$e$y_l from: $inst$build";
 		packages+=" $inst";
+		builder+=" $build"
 	fi;
 done;
 
@@ -51,6 +53,7 @@ for e in "${headervars[@]}";
 do
 	e1=$(find /usr/include/* /usr/local/include/* 2>/dev/null | grep -wm1 "$e")
 	if [ ! ${#e1} -gt 8 ]; then
+		build="";
 		case $e in
 		crypto.h)
 				inst="libssl-dev";
@@ -90,6 +93,7 @@ do
 		printf -v pad %40s; e=$e$pad; e=${e:0:15};
 		echo -e "$w_l  select $g_l$e$y_l from: $inst$build";
 		packages+=" $inst";
+		builder+=" $build"
 	fi;
 done;
 
@@ -125,23 +129,18 @@ packages="$(echo "$packages" | xargs)"
 echo -n >"$install_log" &2>/dev/null;
 if [ ${#packages} -gt 0 ]; then
 	echo -e "$w_l\n  INSTALLATION\n  ============";
-	if [ "$EUID" -ne 0 ] && [ ! "$ID" == "ubuntu" ]; then
-		echo -en "$r_l\n  enter root ";
-		su root -c "
-		echo -e '\033[1;37m\n  update\033[1;32m package list...\n';
-		apt-get -y update |grep --line-buffered -v '^T\|(\|^I\|^H' 2>&1;
-		echo -e '\n\033[1;37m  install\033[1;32m $txt_selected packages\033[1;33m $txt_wait\n';
-		apt-get -y -qq install $packages |grep --line-buffered '(' |grep --line-buffered -v 'nicht\|dpkg';
-		"
-	else
-		echo -e "\033[1;37m  update\033[1;32m package list... \n";
-		$prefix apt-get -y update |grep --line-buffered -v '^T\|(\|^I\|^H' 2>&1;
-		echo -e "\n\033[1;37m  install\033[1;32m packages \033[1;33m$txt_wait \n";
-		$prefix apt-get -y -qq install $packages |grep --line-buffered '(' |grep --line-buffered -v 'nicht';
-	fi;
+	echo -e "\033[1;37m  update\033[1;32m package list... \n";
+	$prefix apt-get -y update |grep --line-buffered -v '^T\|(\|^I\|^H' 2>&1;
+	echo -e "\n\033[1;37m  install\033[1;32m packages \033[1;33m$txt_wait \n";
+	$prefix apt-get -y -qq install $packages |grep --line-buffered '(' |grep --line-buffered -v 'nicht';
 fi;
 
-if [[ "$build" =~ libdvbcsa ]]; then
+if [[ "$builder" =~ upx ]]; then
+	echo -e "$w_l\n  INSTALL PRECOMPILED BINARY\n  ==========================";
+	upx_native_installer
+fi
+
+if [[ "$builder" =~ libdvbcsa ]]; then
 	echo -e "$w_l\n  BUILD FROM SOURCE\n  =================";
 	libdvbcsa_native_installer
 fi

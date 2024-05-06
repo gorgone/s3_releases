@@ -45,10 +45,11 @@ do
 		echo -e "$w_l  select $g_l$e$y_l from: $e";
 		packages+=" $e";
 	elif ! hash "$e" 2>/dev/null; then
-		inst="$e";
+		inst="$e"; build="";
 		case $e in
-		svn)
-			inst="subversion";
+		upx)
+			build="upx deb installer"
+			inst="";
 			;;
 		xz)
 			inst="xz-utils";
@@ -78,8 +79,9 @@ do
 			inst="diffutils";
 			;;
 		esac;
-		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
+		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst$build";
 		packages+=" $inst";
+		builder+=" $build"
 	fi;
 done;
 
@@ -87,6 +89,7 @@ for e in "${headervars[@]}";
 do
 	e1=$(find /usr/include/* /usr/local/include/* 2>/dev/null | grep -wm1 "$e")
 	if [ ! ${#e1} -gt 8 ]; then
+		build="";
 		case $e in
 		crypto.h)
 				inst="libopenssl-devel";
@@ -120,8 +123,9 @@ do
 				inst="glib2-devel-32bit";
 			;;
 		esac;
-		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
-		packages="$packages $inst$build";
+		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst$build";
+		packages+=" $inst";
+		builder+=" $build"
 	fi;
 done;
 
@@ -179,12 +183,15 @@ if ! hash sshpass 2>/dev/null; then
 	echo -e -n ;
 fi
 
-if [[ "$build" =~ libdvbcsa ]]; then
+if [[ "$builder" =~ upx ]]; then
+	echo -e "$w_l\n  INSTALL PRECOMPILED BINARY\n  ==========================";
+	upx_native_installer
+fi
+
+if [[ "$builder" =~ libdvbcsa ]]; then
 	echo -e "$w_l\n  BUILD FROM SOURCE\n  =================";
 	libdvbcsa_native_installer
 fi
-
-upxversion=(0 0);
 
 [ $failed == 1 ] && echo -e "\n$r_l  Installation with errors - see: $install_log";
 
