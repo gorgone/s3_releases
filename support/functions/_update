@@ -2,26 +2,51 @@
 
 update_me(){
 	clear;s3logo
+	printf "  s3_git CHECK:\n  -------------\n"
 	local_revision=0
 	online_revision=0
-	s3local="$dldir/s3_github"
-	printf "  s3_git CHECK:\n  -------------\n"
-	check_url "$s3url" || return
 
-	local_revision=$(gitrevision $s3local)
-	online_revision=$(gitrevision $s3url)
+	if [ ! -d $workdir/.git ]; then
+		s3local="$dldir/s3_github"
+		check_url "$s3url" || return
 
-	if [ ! "$local_revision" == "$online_revision" ]
-	then
-		printf "  update s3_git\n   from Local Revision: $local_revision\n   to  Remote Revision: $online_revision\n"
-		rm -rf "$s3local"; git clone "$s3url" "$s3local" &>/dev/null; cd "$s3local"
-		printf "  updating all files ...\n\n"
-		yes | cp -rf ./s3 "$workdir/s3"
-		yes | cp -rf ./support/* "$workdir/support"
+		local_revision=$(gitrevision $s3local)
+		online_revision=$(gitrevision $s3url)
+
+		if [ ! "$local_revision" == "$online_revision" ]
+		then
+			printf "  update s3_git\n   from Local Revision: $local_revision\n   to  Remote Revision: $online_revision\n"
+			rm -rf "$s3local"; git clone "$s3url" "$s3local" &>/dev/null; cd "$s3local"
+			printf "  updating all files ...\n\n"
+			yes | cp -rf ./s3 "$workdir/s3"
+			yes | cp -rf ./support/* "$workdir/support"
+		else
+			printf "  is up to date\n   Online Revision: $online_revision\n\n"
+		fi
 	else
-		printf "  is up to date\n   Online Revision: $online_revision\n\n"
+		cd $workdir
+		git fetch --prune
+		git switch master --quiet
+		behind=$(git rev-list HEAD..origin/master --count)
+		local_revision=$(git rev-list HEAD --count)
+		local_commit=$(git log HEAD -n1 --oneline)
+		online_revision=$(git rev-list origin/master --count)
+		online_commit=$(git log origin/master -n1 --oneline)
+		if [ $behind -eq 0 ]; then
+			printf "  is up to date\n   Online Revision $local_revision: $local_commit\n\n"
+		else
+			printf "  update s3_git\n   from Local Revision $local_revision: $local_commit\n   to  Remote Revision $online_revision: $online_commit\n\n"
+			git log HEAD..origin/master --oneline
+			printf "\n"
+			sleep 1
+			if ! git pull 2>/dev/null; then
+				git pull |& grep '^[[:blank:]]' | xargs git checkout
+				git pull
+			fi
+			printf "\n"
+		fi
 	fi
-	sleep 1
+	sleep 2
 }
 
 fix_me(){
