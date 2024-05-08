@@ -735,3 +735,6 @@ check_url(){
 version(){
 echo -e "${SIMPLEVERSION}.${VERSIONCOUNTER} by ${DEVELOPER}\n- in memory of gorgone -"
 }
+_log(){
+	cat | tee >(sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" >>"$1"); #remove ansi colors from output
+};

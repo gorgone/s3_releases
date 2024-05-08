@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #simplebuild_plugin tcupdate
-pversion="0.25.5";
+pversion="0.26.0";
 pname="s3.TUP";
 pdesc="Plugin $pname v$pversion";
 tc_url="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLw==";
@@ -13,7 +13,6 @@ ctngsrcdir="$ctdir/crosstool-ng";
 fngsrcdir="$ctdir/freetz-ng";
 andksrcdir="$ctdir/android-ndk";
 cpus="$(getconf _NPROCESSORS_ONLN)";
-s3_update_required=0;
 
 tcupdate(){
 	[ -f "$workdir/DEVELOPMENT" ] && disable_syscheck="1" && disable_template_versioning="1" && source "$workdir/DEVELOPMENT" ; # DEVELOPMENT should contain a CURL_GITHUB_TOKEN to avoid github rate limiting
@@ -26,18 +25,6 @@ tcupdate(){
 
 	#check/install prerequisites
 	[[ -z "$4" || "$FLAG" -gt 0 ]] && [ -z "$disable_syscheck" ] && _check_pkg;
-
-	#update plugin
-	if [ "$CMDTC" == "-u" ] || [ "$CMDTC" == "--update_me" ];then
-		echo -e "${y_l}UPDATE -> ${pdesc} ${txt_s3tup_msg_update_hint}${re_}\n";
-		if ! _s3tup_update;then
-			_paktc_timer 5 "${txt_s3tup_msg_update_restart}" && printf "${re_}";
-			tcupdate "$force_reset";
-		else
-			printf "${g_l}\n\n" && _paktc_timer 5 "${pdesc} ${txt_s3tup_msg_update_current}" && printf "${re_}"; clear;
-		fi;
-		CMDTC=""
-	fi;
 
 	#some migrations to upgrade older s3.TUP versions
 	# DISABLED, because slow and currently not needed
@@ -1424,61 +1411,6 @@ _create_config(){
 	done;
 
 	return 0;
-};
-_s3tup_update(){
-	local dc=0 ver="$pversion" logfile="$ldir/$(date +%F.%H%M%S)_tup_update.log" proto repo branch diff_cmd update_cmd nl;
-	local s3tup_ffs="support/configs/plugin_update_toolchain.config.template \
-					 support/crosstool \
-					 support/functions/_plugin_update_toolchain \
-					 support/translation \
-					";
-	echo -e "$pdesc - ${txt_s3tup_msg_update_log} - $(date +"%F %T")" > "$logfile";
-
-	(
-		#break if simplebuild3 update is required
-		[ "$s3_update_required" -eq 1 ] && printf "${r_l}\n${txt_s3tup_msg_update_s3update_required}${re_}" && return;
-
-		#check git repository
-		cd "$workdir";
-		[ "$(git status 2>/dev/null | wc -l)" -eq 0 ] && printf "${r_l}\n${txt_s3tup_msg_update_directory_unversioned}${re_}" && return;
-
-		#prepare GIT commands
-		repo="$(git config --get remote.origin.url)"; #get remote url
-		proto="$(printf "$repo" | awk -F':' '{print $1}')"; #get protocol of remote url
-		branch="$(git branch --show-current)"; #get branch name
-		diff_cmd='git diff --cached --stat remotes/origin/HEAD "$ff"'; #diff command
-		update_cmd='git checkout --progress origin/"$(git branch --show-current)" -- "$ff"'; #update command
-
-		#get remote updates
-		check_url "$repo" && git remote update >/dev/null || return;
-
-		printf "\n ${txt_repo}: ${c_l}${repo}${re_} ${txt_branch}: ${c_l}${branch}${re_} ${txt_proto}: ${c_l}${proto}\n${re_}";
-
-		#check for remote updates and apply them
-		for ff in $s3tup_ffs;do
-			printf "${y_l}\n ${txt_checking}: ${b_l}${ff}${re_}";
-			diff_count=$(eval "$diff_cmd" | wc -l); #get the number of diff lines
-
-			if [ "$diff_count" -gt 0 ];then
-					printf "${p_l} -> ${txt_s3tup_msg_update_pending}\n${re_}" && nl="\n";
-					eval "$diff_cmd"; #output summarized diff of changes
-					eval "$update_cmd"; #update the working copy path/file
-					[[ "$ff" == *plugin_update_toolchain.config.template ]] && force_reset="--reset" #set force reset config flag
-					[[ "$ff" == *_plugin_update_toolchain ]] && ver="$(grep 'pversion=' "$ff" | awk -F'"' '{print $2}')"; #grep new plugin version
-			else
-				printf "${y_l} -> ${g_l}${txt_s3tup_msg_update_not_required}${re_}" && nl="\n\n";
-			fi;
-
-			dc=$((dc+diff_count))
-		done;
-
-		[ "$dc" -gt 0 ] && printf "${g_l}${nl}${txt_s3tup_msg_update_finished} ${p_l}${ver}${g_l}\n";
-	) | _log "$logfile";
-
-	return $dc; #return number of diff lines
-};
-_log(){
-	cat | tee >(sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" >>"$1"); #remove ansi colors from output
 };
 _create_toolchaincfg(){
 	cd "$1/bin";
