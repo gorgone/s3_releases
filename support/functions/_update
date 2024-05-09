@@ -28,20 +28,29 @@ update_me(){
 		(
 		cd $workdir
 		GIT_OPT='-c color.ui=always --no-pager'
+		GIT_BRANCH="$(git branch | tail -n1 | tr -d ' *')"
 		git $GIT_OPT fetch --prune
-		behind=$(git rev-list HEAD..origin/master --count)
+		ahead=$(git rev-list origin/$GIT_BRANCH..HEAD --count) #local commits made or forced pushes on remote branch
+		behind=$(git rev-list HEAD..origin/$GIT_BRANCH --count)
 		local_revision=$(git rev-list HEAD --count)
 		local_commit=$(git --no-pager log HEAD -n1 --oneline)
-		online_revision=$(git rev-list origin/master --count)
-		online_commit=$(git --no-pager log origin/master -n1 --oneline)
-		if [ $behind -eq 0 ]; then
+		online_revision=$(git rev-list origin/$GIT_BRANCH --count)
+		online_commit=$(git --no-pager log origin/$GIT_BRANCH -n1 --oneline)
+		if [ $behind -eq 0 -a $ahead -eq 0 ]; then
 			printf "${p_l}STATUS: s3 is up to date${re_}\n Local = Online revision $local_revision: $local_commit\n\n"
 		else
 			git $GIT_OPT status
 			printf "\n${p_l}START: s3 updates pending${re_}\n  Local revision $local_revision: $local_commit\n Online revision $online_revision: $online_commit\n\n"
-			git $GIT_OPT log HEAD..origin/master --oneline
+			git $GIT_OPT log HEAD..origin/$GIT_BRANCH --oneline
 			sleep 1
-			printf "\n${p_l}STAGE 1: Try simple pull (auto-merge)...${re_}\n\n"
+
+			if [ $ahead -gt 0 ]; then
+				printf "\n${p_l}STAGE 1: Try pull with reset (forced pushes on remote)...${re_}\n\n"
+				git reset origin/$GIT_BRANCH --hard
+			else
+				printf "\n${p_l}STAGE 1: Try simple pull (auto-merge)...${re_}\n\n"
+			fi
+
 			if ! git $GIT_OPT pull; then
 				printf "\n${p_l}STAGE 2: Reset conflicting tracked files/folders...${re_}\n\n"
 				if ! git $GIT_OPT pull |& grep '^[[:blank:]]' | xargs git checkout; then
