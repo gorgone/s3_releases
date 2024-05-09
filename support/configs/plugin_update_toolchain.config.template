@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="69";
+S3TUP_CONFIG_VERSION="70";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -390,6 +390,7 @@ LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAI
 LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" ] && LIBUSB_LIBS="-L@PREFIX@/lib/@HOST@/@API@ -lusb-1.0";');
 LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" ] && LOG="LIBS=-llog" || LOG="";');
 LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="--enable-static --disable-shared --disable-libudev $LOG" || FLAGS="--enable-static --disable-libudev";');
+LIB_PCSC_tasks+=("find . -name "configure.ac" -type f -exec sed -i "s/[0-9]\.[0-9]\.[0-9]/$LIB_PCSC_version/g" {} \;;");
 LIB_PCSC_tasks+=("find . -name "pcsc-wirecheck-main.c" -type f -exec sed -i 's/pcsc_assert_wire_constants ()/0/g' {} \;;");
 LIB_PCSC_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS --disable-polkit --disable-libsystemd --with-systemdsystemunitdir=@PREFIX@/lib/systemd/system LIBUSB_LIBS="${LIBUSB_LIBS}" LIBUSB_CFLAGS="${LIBUSB_CFLAGS}";');
 LIB_PCSC_tasks+=('make -j@CPUS@;');
