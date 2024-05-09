@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #simplebuild_plugin tcupdate
-pversion="0.26.0";
+pversion="0.26.1";
 pname="s3.TUP";
 pdesc="Plugin $pname v$pversion";
 tc_url="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLw==";
@@ -1420,7 +1420,7 @@ _create_toolchaincfg(){
 	if [ "${#sr}" -eq 0 ];then
 		sysroot="$4";
 	else
-		sysroot="${sr#"$1/"}";
+		sysroot="${sr#$(realpath "$1")/}";
 	fi;
 
 	[ "${16}" == "ANDK" ] && andk_vars='_oscamconfdir_custom="/data/plugin/oscam";
