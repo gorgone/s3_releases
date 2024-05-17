@@ -11,9 +11,26 @@ prerequisites(){
 
 	for e in "${binvars[@]}"
 	do
-		if hash "$e" 2>/dev/null
+		if [ "$e" == "autoconf-archive" ]
 		then
-			einfo=$(which "$e")
+			e="autoconf-archive"
+			e1="/usr/share/aclocal/ax_absolute_header.m4"
+			if [ -f $e1 ]
+			then
+				printf -v pad %40s
+				e=$e$pad
+				e=${e:0:16}
+				$output "$w_l  have\t$g_l$e$y_l $e1\n"
+			else
+				failed=1
+				printf -v pad %40s
+				e=$e$pad
+				e=${e:0:16}
+				$output "$r_l  need\t$w_l$e$r_l $missing\n"
+			fi		
+		elif hash "$e" 2>/dev/null
+		then
+			einfo=$(type -pf "$e")
 			printf -v pad %40s
 			e=$e$pad
 			e=${e:0:15}
@@ -43,13 +60,19 @@ prerequisites(){
 
 	for e in "${headervars[@]}"
 	do
-		e1=$(find /usr/include/* | grep -m1 "$e")
+		e1=$(find /usr/include/* /usr/local/include/* 2>/dev/null | grep -wm1 "$e")
 		if [ ${#e1} -gt 8 ]
 		  then
 			printf -v pad %40s
 			e=$e$pad
 			e=${e:0:15}
 			$output "$w_l  have\t$g_l$e$y_l $e1\n"
+		elif [ "$e" == "dvbcsa.h" -a "${s3cfg_vars[INSTALL_NATIVE_LIBDVBCSA]}" == "0" ]
+		  then
+			printf -v pad %40s
+			e=$e$pad
+			e=${e:0:15}
+			$output "$r_l  need\t$w_l$e$r_l (skipped by config)\n"
 		else
 			failed=1
 			printf -v pad %40s
@@ -131,8 +154,8 @@ then
 fi
 
 unset binvars; unset headervars; unset libvars;
-[ -z ${3+x} ] && binvars=( dialog grep gawk wget tar bzip2 svn xz upx patch gcc make scp sshpass openssl dos2unix ) || binvars=( $(echo "$3" | tr ' ' '\n') )
-[ -z ${4+x} ] && headervars=( crypto.h libusb.h pcsclite.h pthread.h ) || headervars=( $(echo "$4" | tr ' ' '\n') )
+[ -z ${3+x} ] && binvars=( dialog grep gawk wget tar bzip2 git bc xz upx patch gcc g++ make automake autoconf autoconf-archive libtool jq scp sshpass openssl dos2unix curl ) || binvars=( $(echo "$3" | tr ' ' '\n') )
+[ -z ${4+x} ] && headervars=( crypto.h libusb.h pcsclite.h pthread.h opensslconf.h dvbcsa.h ) || headervars=( $(echo "$4" | tr ' ' '\n') )
 [ -z ${5+x} ] && libvars=( libccidtwin.so ) || libvars=( $(echo "$5" | tr ' ' '\n') )
 sanity=1
 
@@ -171,4 +194,63 @@ then
 fi
 
 return $sanity
+}
+
+upx_native_installer(){
+	echo -e "$w_l  Installing ${g_l}upx$w_l precompiled binary..." | tee -a "$install_log"
+	case $(uname -m) in
+	  i386|i686)     HOST_ARCH="i386" ;;
+	  aarch64|arm64) HOST_ARCH="arm64" ;;
+	  *)             HOST_ARCH="amd64" ;;
+	esac;
+	rm -rf "/tmp/upx_$HOST_ARCH.tar.xz" 2>/dev/null
+	UPX_TAG="$(git ls-remote --sort=-version:refname https://github.com/upx/upx.git --tags v*.*.* | grep -v 'alpha\|beta\|\-pre\|\-rc\|\^' | awk -F'/' 'NR==1 {print $NF}')"
+	echo -e "$w_l  ${g_l}upx$w_l version:$y_l $UPX_TAG ($HOST_ARCH)" | tee -a "$install_log"
+	UPX_URL="$(curl --silent "https://api.github.com/repos/upx/upx/releases/tags/$UPX_TAG" | jq -r '.assets | .[] | select( (.name | contains("'$HOST_ARCH'")) and (.name | endswith(".tar.xz"))) | .browser_download_url' | sed -e 's#\"##g')"
+	echo -e "$w_l  Downloading ${g_l}upx$w_l from $UPX_URL..." | tee -a "$install_log"
+	curl --silent -L --output "/tmp/upx_$HOST_ARCH.tar.xz" "$UPX_URL";
+	echo -e "$w_l  Installing ${g_l}upx$w_l to /usr/local/bin...$re_" | tee -a "$install_log"
+	(cd /usr/local/bin; $prefix tar -xf "/tmp/upx_$HOST_ARCH.tar.xz" $(tar -tf "/tmp/upx_$HOST_ARCH.tar.xz" | grep 'upx$') --strip-components=1)
+	rm -rf "/tmp/upx_$HOST_ARCH.tar.xz" 2>/dev/null
+}
+
+libdvbcsa_native_installer(){
+	echo -e "$w_l  Installing ${g_l}libdvbcsa$w_l from source..." | tee -a "$install_log"
+	FLAGS="$(cat /proc/cpuinfo | grep -im1 flags | awk -F':' '{print $2}')"
+	FLAGS+="$(cat /proc/cpuinfo | grep -im1 features | awk -F':' '{print $2}')"
+	echo -e "FLAGS=\"$FLAGS\"\n" |& tee -a "$install_log" &>/dev/null
+
+	echo "$FLAGS" | grep -qiw 'altivec' && optimization="--enable-altivec"
+	[ -z "$optimization" ] && echo "$FLAGS" | grep -qiw "avx2" && optimization="--enable-avx2"
+	[ -z "$optimization" ] && echo "$FLAGS" | grep -qiw "ssse3" && optimization="--enable-ssse3"
+	[ -z "$optimization" ] && echo "$FLAGS" | grep -qiw "sse2" && optimization="--enable-sse2"
+	[ -z "$optimization" ] && echo "$FLAGS" | grep -qiw "mmx" && optimization="--enable-mmx"
+	if [ -z "$optimization" ]; then
+		if [ -n "$(find "/usr/lib" -name "arm_neon.h" -type f -print -quit)" ]; then
+			echo "$FLAGS" | grep -qiw "neon\|simd\|asimd" && optimization="--enable-neon";
+		fi;
+	fi;
+	[ -z "$optimization" ] && optimization="--enable-uint32"
+	echo -e "$w_l  ${g_l}libdvbcsa$w_l optimization autodetection:$y_l $optimization" | tee -a "$install_log"
+
+	rm -rf /tmp/libdvbcsa 2>/dev/null
+	echo -e "\ngit clone https://github.com/oe-mirrors/libdvbcsa.git /tmp/libdvbcsa" |& tee -a "$install_log" &>/dev/null
+	git clone https://github.com/oe-mirrors/libdvbcsa.git /tmp/libdvbcsa |& tee -a "$install_log" &>/dev/null
+	cd /tmp/libdvbcsa
+	
+	echo -e "$w_l  Building ${g_l}libdvbcsa$w_l..." | tee -a "$install_log"
+	echo -e "\n./bootstrap && ./configure $optimization" |& tee -a "$install_log" &>/dev/null
+	(./bootstrap && ./configure $optimization) |& tee -a "$install_log" &>/dev/null
+	(($?)) && return 1;
+
+	echo -e "\nmake -j$(nproc)" |& tee -a "$install_log" &>/dev/null
+	make -j$(nproc) |& tee -a "$install_log" &>/dev/null || return 1;
+
+	echo -e "$w_l  Installing ${g_l}libdvbcsa$w_l...$re_" | tee -a "$install_log"
+	echo -e "\n$prefix make install" |& tee -a "$install_log" &>/dev/null
+	$prefix make install |& tee -a "$install_log" &>/dev/null || return 1;
+
+	echo -e "\n$prefix \$(which ldconfig || printf '/sbin/ldconfig') && $prefix \$(which ldconfig || printf '/sbin/ldconfig') -v" |& tee -a "$install_log" &>/dev/null
+	($prefix $(which ldconfig || printf '/sbin/ldconfig') && $prefix $(which ldconfig || printf '/sbin/ldconfig') -v) |& tee -a "$install_log" &>/dev/null
+	rm -rf /tmp/libdvbcsa 2>/dev/null
 }

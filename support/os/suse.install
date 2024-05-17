@@ -40,11 +40,16 @@ fi
 
 for e in "${binvars[@]}";
 do
-	if ! hash "$e" 2>/dev/null; then
-		inst="$e";
+	if [ "$e" == "autoconf-archive" -a ! -f "/usr/share/aclocal/ax_absolute_header.m4" ]; then
+		printf -v pad %40s; e=$e$pad; e=${e:0:16};
+		echo -e "$w_l  select $g_l$e$y_l from: $e";
+		packages+=" $e";
+	elif ! hash "$e" 2>/dev/null; then
+		inst="$e"; build="";
 		case $e in
-		svn)
-			inst="subversion";
+		upx)
+			build="upx deb installer"
+			inst="";
 			;;
 		xz)
 			inst="xz-utils";
@@ -74,15 +79,17 @@ do
 			inst="diffutils";
 			;;
 		esac;
-		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
-		packages="$packages $inst";
+		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst$build";
+		packages+=" $inst";
+		builder+=" $build"
 	fi;
 done;
 
 for e in "${headervars[@]}";
 do
-	e1=$(find /usr/include/* |grep -m1 "$e");
+	e1=$(find /usr/include/* /usr/local/include/* 2>/dev/null | grep -wm1 "$e")
 	if [ ! ${#e1} -gt 8 ]; then
+		build="";
 		case $e in
 		crypto.h)
 				inst="libopenssl-devel";
@@ -95,6 +102,10 @@ do
 			;;
 		pthread.h)
 				inst="glibc-devel";
+			;;
+		dvbcsa.h)
+				build="libdvbcsa source builder";
+				inst="";
 			;;
 		ncurses)
 				inst="ncurses-devel";
@@ -112,8 +123,9 @@ do
 				inst="glib2-devel-32bit";
 			;;
 		esac;
-		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
-		packages="$packages $inst";
+		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst$build";
+		packages+=" $inst";
+		builder+=" $build"
 	fi;
 done;
 
@@ -133,7 +145,7 @@ do
 			;;
 		esac;
 		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
-		packages="$packages $inst";
+		packages+=" $inst";
 	fi;
 done;
 
@@ -142,10 +154,11 @@ if [ "$(uname -m)" == "x86_64" ] && [ ! -f /usr/lib/libz.so ]; then
 		e="zlib32";
 		inst="zlib-devel-32bit glibc-32bit libz1-32bit";
 		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst";
-		packages="$packages $inst";
+		packages+=" $inst";
 	fi
 fi
 
+packages="$(echo "$packages" | xargs)"
 if [ ${#packages} -gt 0 ]; then
 	echo -n -e "$w_l  update$g_l package list...";
 	echo "+++ $(date): zypper --non-interactive refresh" >> "$install_log"
@@ -170,7 +183,15 @@ if ! hash sshpass 2>/dev/null; then
 	echo -e -n ;
 fi
 
-upxversion=(0 0);
+if [[ "$builder" =~ upx ]]; then
+	echo -e "$w_l\n  INSTALL PRECOMPILED BINARY\n  ==========================";
+	upx_native_installer
+fi
+
+if [[ "$builder" =~ libdvbcsa ]]; then
+	echo -e "$w_l\n  BUILD FROM SOURCE\n  =================";
+	libdvbcsa_native_installer
+fi
 
 [ $failed == 1 ] && echo -e "\n$r_l  Installation with errors - see: $install_log";
 

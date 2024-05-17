@@ -1,0 +1,22 @@
+_toolchainname="fritz4020_7362_ssl_multi_mips-freetz";
+default_use="USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="";
+extra_c="";
+_description="FRITZ!Box 4020 7362 SSL Multi by MasterSaMMy";
+_oscamconfdir_default="/var/media/ftp/addon/oscam";
+_oscamconfdir_custom="";
+_self_build="yes";
+_compiler="mips-linux-uclibc-";
+_sysroot="usr";
+_libsearchdir="/usr/lib";
+_extract_strip="0";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1mcml0ejQwMjBfNzM2Ml9zc2xfbXVsdGlfbWlwcy1mcmVldHoudGFyLnh6Cg==";
+_md5sum="7c156dd1ec6538e2ecb23dc1ab7b0550  Toolchain-fritz4020_7362_ssl_multi_mips-freetz.tar.xz";
+_tc_info="\n
+!!! freetz toolchains pack15 Toolchain !!!\n
+\n
+FRITZ!Box 4020 7362 SSL Multi\n
+\n";
+_tc_infolines="5";
