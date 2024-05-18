@@ -165,6 +165,12 @@ then
 	s3logo
 	prerequisites
 	sanity=0
+	rootuser="$(ps -jf 1 | tail -n 1 | awk '{print $1}')"
+	if [ "$EUID" -ne 0 ]; then
+		! hash "sudo" 2>/dev/null && prefix="su $rootuser -c" || prefix="sudo sh -c"
+	else
+		prefix="sh -c"
+	fi
 	installer="unknown"
 
 	# Debian and Ubuntu
@@ -197,7 +203,7 @@ return $sanity
 }
 
 upx_native_installer(){
-	echo -e "$w_l  Installing ${g_l}upx$w_l precompiled binary..." | tee -a "$install_log"
+	echo -e "$w_l  Installing ${g_l}upx$w_l precompiled binary..." | _log "$install_log"
 	case $(uname -m) in
 	  i386|i686)     HOST_ARCH="i386" ;;
 	  aarch64|arm64) HOST_ARCH="arm64" ;;
@@ -205,20 +211,25 @@ upx_native_installer(){
 	esac;
 	rm -rf "/tmp/upx_$HOST_ARCH.tar.xz" 2>/dev/null
 	UPX_TAG="$(git ls-remote --sort=-version:refname https://github.com/upx/upx.git --tags v*.*.* | grep -v 'alpha\|beta\|\-pre\|\-rc\|\^' | awk -F'/' 'NR==1 {print $NF}')"
-	echo -e "$w_l  ${g_l}upx$w_l version:$y_l $UPX_TAG ($HOST_ARCH)" | tee -a "$install_log"
+	echo -e "$w_l  ${g_l}upx$w_l version:$y_l $UPX_TAG ($HOST_ARCH)" | _log "$install_log"
 	UPX_URL="$(curl --silent "https://api.github.com/repos/upx/upx/releases/tags/$UPX_TAG" | jq -r '.assets | .[] | select( (.name | contains("'$HOST_ARCH'")) and (.name | endswith(".tar.xz"))) | .browser_download_url' | sed -e 's#\"##g')"
-	echo -e "$w_l  Downloading ${g_l}upx$w_l from $UPX_URL..." | tee -a "$install_log"
+	echo -e "$w_l  Downloading ${g_l}upx$w_l from $UPX_URL..." | _log "$install_log"
 	curl --silent -L --output "/tmp/upx_$HOST_ARCH.tar.xz" "$UPX_URL";
-	echo -e "$w_l  Installing ${g_l}upx$w_l to /usr/local/bin...$re_" | tee -a "$install_log"
-	(cd /usr/local/bin; $prefix tar -xf "/tmp/upx_$HOST_ARCH.tar.xz" $(tar -tf "/tmp/upx_$HOST_ARCH.tar.xz" | grep 'upx$') --strip-components=1)
+	echo -e "$w_l  Installing ${g_l}upx$w_l to /usr/local/bin...$re_" | _log "$install_log"
+	[[ "$prefix" =~ ^su[[:space:]].* ]] && echo -en "$r_l\n  (upx installer) Enter $rootuser Password: ";
+	$prefix "
+			(cd /usr/local/bin;
+			 tar -xvf "/tmp/upx_$HOST_ARCH.tar.xz" $(tar -tf "/tmp/upx_$HOST_ARCH.tar.xz" | grep 'upx$') --strip-components=1);
+	" |& _log "$install_log" &>/dev/null
+	[[ "$prefix" =~ ^su[[:space:]].* ]] && echo
 	rm -rf "/tmp/upx_$HOST_ARCH.tar.xz" 2>/dev/null
 }
 
 libdvbcsa_native_installer(){
-	echo -e "$w_l  Installing ${g_l}libdvbcsa$w_l from source..." | tee -a "$install_log"
+	echo -e "$w_l  Installing ${g_l}libdvbcsa$w_l from source..." | _log "$install_log"
 	FLAGS="$(cat /proc/cpuinfo | grep -im1 flags | awk -F':' '{print $2}')"
 	FLAGS+="$(cat /proc/cpuinfo | grep -im1 features | awk -F':' '{print $2}')"
-	echo -e "FLAGS=\"$FLAGS\"\n" |& tee -a "$install_log" &>/dev/null
+	echo -e "FLAGS=\"$FLAGS\"\n" |& _log "$install_log" &>/dev/null
 
 	echo "$FLAGS" | grep -qiw 'altivec' && optimization="--enable-altivec"
 	[ -z "$optimization" ] && echo "$FLAGS" | grep -qiw "avx2" && optimization="--enable-avx2"
@@ -231,26 +242,29 @@ libdvbcsa_native_installer(){
 		fi;
 	fi;
 	[ -z "$optimization" ] && optimization="--enable-uint32"
-	echo -e "$w_l  ${g_l}libdvbcsa$w_l optimization autodetection:$y_l $optimization" | tee -a "$install_log"
+	echo -e "$w_l  ${g_l}libdvbcsa$w_l optimization autodetection:$y_l $optimization" | _log "$install_log"
 
 	rm -rf /tmp/libdvbcsa 2>/dev/null
-	echo -e "\ngit clone https://github.com/oe-mirrors/libdvbcsa.git /tmp/libdvbcsa" |& tee -a "$install_log" &>/dev/null
-	git clone https://github.com/oe-mirrors/libdvbcsa.git /tmp/libdvbcsa |& tee -a "$install_log" &>/dev/null
+	echo -e "\ngit clone https://github.com/oe-mirrors/libdvbcsa.git /tmp/libdvbcsa" |& _log "$install_log" &>/dev/null
+	git clone https://github.com/oe-mirrors/libdvbcsa.git /tmp/libdvbcsa |& _log "$install_log" &>/dev/null
 	cd /tmp/libdvbcsa
 	
-	echo -e "$w_l  Building ${g_l}libdvbcsa$w_l..." | tee -a "$install_log"
-	echo -e "\n./bootstrap && ./configure $optimization" |& tee -a "$install_log" &>/dev/null
-	(./bootstrap && ./configure $optimization) |& tee -a "$install_log" &>/dev/null
+	echo -e "$w_l  Building ${g_l}libdvbcsa$w_l..." | _log "$install_log"
+	echo -e "\n./bootstrap && ./configure $optimization" |& _log "$install_log" &>/dev/null
+	(./bootstrap && ./configure $optimization) |& _log "$install_log" &>/dev/null
 	(($?)) && return 1;
 
-	echo -e "\nmake -j$(nproc)" |& tee -a "$install_log" &>/dev/null
-	make -j$(nproc) |& tee -a "$install_log" &>/dev/null || return 1;
+	echo -e "\nmake -j$(nproc)" |& _log "$install_log" &>/dev/null
+	make -j$(nproc) |& _log "$install_log" &>/dev/null || return 1;
 
-	echo -e "$w_l  Installing ${g_l}libdvbcsa$w_l...$re_" | tee -a "$install_log"
-	echo -e "\n$prefix make install" |& tee -a "$install_log" &>/dev/null
-	$prefix make install |& tee -a "$install_log" &>/dev/null || return 1;
-
-	echo -e "\n$prefix \$(which ldconfig || printf '/sbin/ldconfig') && $prefix \$(which ldconfig || printf '/sbin/ldconfig') -v" |& tee -a "$install_log" &>/dev/null
-	($prefix $(which ldconfig || printf '/sbin/ldconfig') && $prefix $(which ldconfig || printf '/sbin/ldconfig') -v) |& tee -a "$install_log" &>/dev/null
+	echo -e "$w_l  Installing ${g_l}libdvbcsa$w_l...$re_" | _log "$install_log"
+	echo -e "\n$prefix make install" |& _log "$install_log" &>/dev/null
+	echo -e "\n$prefix \$(which ldconfig || printf '/sbin/ldconfig') && $prefix \$(which ldconfig || printf '/sbin/ldconfig') -v" |& _log "$install_log" &>/dev/null
+	[[ "$prefix" =~ ^su[[:space:]].* ]] && echo -en "$r_l\n  (libdvbcsa installer) Enter $rootuser Password: ";
+	$prefix "
+			make install || return 1;
+			$(which ldconfig || printf '/sbin/ldconfig') && $(which ldconfig || printf '/sbin/ldconfig') -v;
+	" |& _log "$install_log" &>/dev/null
+	[[ "$prefix" =~ ^su[[:space:]].* ]] && echo
 	rm -rf /tmp/libdvbcsa 2>/dev/null
 }

@@ -3,12 +3,11 @@
 suse_os(){
 install_log="$ldir/os-install.log";
 failed=0;
-prefix="sudo";
 packages="";
 
 echo -n >"$install_log" &2>/dev/null;
 
-echo -e "$w_l\n  INSTALLATION\n  ============\n";
+echo -e "$w_l\n  INSTALLATION\n  ============\n" | _log "$install_log";
 
 suse_version=$(grep VERSION= /etc/os-release 2>/dev/null | sed -n 's/^[^0-9]*\([0-9][0-9]*\).*$/\1/p');
 
@@ -23,12 +22,6 @@ else
 	echo -e "$r_l  System not recognised -> Abort!\n"; return 1;
 fi
 
-# without sudo no user installation allowed
-hash sudo 2>/dev/null || { [ "$(whoami)" != "root" ] && { echo -e "$r_l  You need to be root for that!\n"; return 1; } }
-
-# root needs no sudo
-[ "$(whoami)" == "root" ] && prefix="";
-
 # check for sufficient repositories - SLES & SLED need an additional "SUSE Linux Enterprise Software Development Kit"
 if grep "Enterprise" /etc/os-release >/dev/null; then
 	echo -n -e "$w_l  SUSE Linux Enterprise detected$g_l check for SDK repository...";
@@ -40,10 +33,14 @@ fi
 
 for e in "${binvars[@]}";
 do
-	if [ "$e" == "autoconf-archive" -a ! -f "/usr/share/aclocal/ax_absolute_header.m4" ]; then
-		printf -v pad %40s; e=$e$pad; e=${e:0:16};
-		echo -e "$w_l  select $g_l$e$y_l from: $e";
-		packages+=" $e";
+	if [ "$e" == "autoconf-archive" ]; then
+		if [ ! -f "/usr/share/aclocal/ax_absolute_header.m4" ]; then
+			printf -v pad %40s; e=$e$pad; e=${e:0:16};
+			echo -e "$w_l  select $g_l$e$y_l from: $e";
+			packages+=" $e";
+		else
+			continue;
+		fi;
 	elif ! hash "$e" 2>/dev/null; then
 		inst="$e"; build="";
 		case $e in
@@ -162,11 +159,11 @@ packages="$(echo "$packages" | xargs)"
 if [ ${#packages} -gt 0 ]; then
 	echo -n -e "$w_l  update$g_l package list...";
 	echo "+++ $(date): zypper --non-interactive refresh" >> "$install_log"
-	$prefix zypper --non-interactive refresh >> "$install_log" 2>&1;
+	$prefix "zypper --non-interactive refresh" >> "$install_log" 2>&1;
 	echo -e "$y_l done";
 	echo -n -e "$w_l  install$g_l selected packages$y_l please wait...";
 	echo "+++ $(date): zypper --non-interactive --ignore-unknown install$packages" >> "$install_log"
-	$prefix zypper --non-interactive --ignore-unknown install $packages >> "$install_log" 2>&1 || failed=1;
+	$prefix "zypper --non-interactive --ignore-unknown install $packages" >> "$install_log" 2>&1 || failed=1;
 	if [ $failed == 0 ]; then
 		echo -e "$y_l  done";
 	else
@@ -179,17 +176,17 @@ if ! hash sshpass 2>/dev/null; then
 	[ "$(arch)" == "i686" ] && sshpass_src=$sshpass86_src;
 	echo -e "$w_l  install$g_l sshpass$y_l\tfrom: $sshpass_src";
 	echo "+++ $(date): rpm -i $sshpass_src" >> "$install_log";
-	$prefix rpm -i $sshpass_src >> "$install_log" 2>&1 || failed=1;
+	$prefix "rpm -i $sshpass_src" >> "$install_log" 2>&1 || failed=1;
 	echo -e -n ;
 fi
 
 if [[ "$builder" =~ upx ]]; then
-	echo -e "$w_l\n  INSTALL PRECOMPILED BINARY\n  ==========================";
+	echo -e "$w_l\n  INSTALL PRECOMPILED BINARY\n  ==========================" | _log "$install_log";
 	upx_native_installer
 fi
 
 if [[ "$builder" =~ libdvbcsa ]]; then
-	echo -e "$w_l\n  BUILD FROM SOURCE\n  =================";
+	echo -e "$w_l\n  BUILD FROM SOURCE\n  =================" | _log "$install_log";
 	libdvbcsa_native_installer
 fi
 
