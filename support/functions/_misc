@@ -225,24 +225,51 @@ _pre_build(){
 		_nl
 		printf "$w_l     toolchain :$y_l $_toolchainname   \n"
 		printf "$w_l        status :$r_l compiler $txt_not_found\n"
-		printf "$w_l   backupcheck : "
+		printf "$w_l   backupcheck :"
 		if [ -f "$dldir/$dln" ]
 		then
-			printf  "$g_l$dln $txt_found\n"
+			printf "$g_l$dln $txt_found\n"
 			printf "$w_l    $txt_extracting :$y_l $txt_wait"
 			_console_extract_toolchain
 			sleep 1
 			run=1
 		else
-			printf  "$r_l$dln $txt_not_found \n"
-			printf "$w_l      $txt_loading :$g_l"
-			zzusatz=0
-			szusatz=1
-			_pget
-			printf "$w_l    $txt_extracting :$y_l $txt_wait"
-			_console_extract_toolchain
-			sleep 1
-			run=1
+			if [ -n "$_toolchainfilename" ]
+			then
+				printf "$r_l"
+				printf "download $txt_not_found\n"
+				printf "$w_l      $txt_loading :$g_l"
+				zzusatz=0
+				szusatz=1
+				_pget
+				printf "$w_l    $txt_extracting :$y_l $txt_wait"
+				_console_extract_toolchain
+				sleep 1
+				run=1
+			else
+				printf "$r_l"
+				printf "download not possible\n"
+				printf "$w_l  mimic native : $g_l$tcdir/native/bin\n"
+
+				[ ! -d "$tcdir/$1/bin" ] && mkdir -p "$tcdir/$1/bin"
+				cd "$tcdir/$1/bin"
+
+				g="$(type -pf gcc)"
+				gpp="$(type -pf g++)"
+				stripvar="$(type -pf strip)"
+				if [ -f $g ]; then
+					compiler_link="$($g -dumpmachine)-gcc"
+					[ -L "$compiler_link" ] || ln -sf "$g" "$compiler_link"
+				fi
+				if [ -f $gpp ]; then
+					gpp_link="$($g -dumpmachine)-g++"
+					[ -L "$gpp_link" ]      || ln -sf "$gpp" "$gpp_link"
+				fi
+				if [ -f $stripvar ]; then
+					strip_link="$($g -dumpmachine)-strip"
+					[ -L "$strip_link" ]    || ln -sf "$stripvar" "$strip_link"
+				fi
+			fi
 		fi
 		_pre_build "$1"
 	fi
