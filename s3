@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SIMPLEVERSION="2024.05"
+SIMPLEVERSION="2024.06"
 VERSIONCOUNTER="$(git rev-list --count HEAD 2>/dev/null || printf "$(echo "$SIMPLEVERSION" | sed -e 's/\(.\)/\1\+0/g' | bc)_non-git")"
 DEVELOPER="Gorgone, WXbet"
 OIFS=$IFS
@@ -166,7 +166,7 @@ then
 	for i in "${x[@]}"
 	do
 		source "$i"
-		plugin=$(awk '/^#simplebuild_plugin/ {printf $2}' $i)
+		plugin=$(grep '^#simplebuild_plugin' $i | cut -d ' ' -f2-)
 		[ -z "$plugin" ] || s3opts+=($plugin)
 	done
 else
