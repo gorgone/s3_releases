@@ -1,0 +1,368 @@
+#!/bin/bash
+
+#simplebuild_plugin tcdownload tcd
+
+tcd(){
+	tcdownload "$@"
+};
+
+tcdownload(){
+	pversion="0.0.36";
+	pname="s3.TDP";
+	pdesc="Plugin $pname v$pversion";
+	BOOTLIN_URL='aHR0cHM6Ly90b29sY2hhaW5zLmJvb3RsaW4uY29tCg==';
+	extract_strip="1";
+
+	tcd_param_type="$1";
+	tcd_param_level="$2";
+	tcd_param_arch="$3";
+	tcd_param_toolchain="$4";
+	tc_type_menu;
+};
+
+tc_type_menu(){
+	unset type_menu_close;
+	while [ ! $type_menu_close ]; do
+		unset MENU_OPTIONS;COUNT=0;
+		unset download_menu_close;
+		MENU_OPTIONS+=("Standard Linux Devices (glibc)" "STB, Raspberry Pi, NAS"); counter;
+		MENU_OPTIONS+=("OpenWrt Devices (musl)" "Router, Embedded Devices"); counter;
+		MENU_OPTIONS+=("Fritzbox Devices" "provided by MasterSaMMy"); counter;
+		MENU_OPTIONS+=("Legacy Toolchains" "the really old stuff"); counter;
+
+		for MO in $(seq 0 2 $((${#MENU_OPTIONS[@]} - 1))); do
+			if (shopt -s nocasematch;
+				[ ! -z "$tcd_param_type" ] && [[ "${MENU_OPTIONS[$MO]}" =~ $tcd_param_type ]]); then
+				type="${MENU_OPTIONS[$MO]}";
+				echo "type: $type"
+				break;
+			fi
+		done;
+
+		if [ -z "$tcd_param_level" ]; then
+			type=$("$gui" "$st_" "$bt_" "$title_ \Z0$pdesc\Zn" --colors --ok-label "Standard" --cancel-label "$([ -z $1 ] && printf 'Exit' || printf 'Back')" \
+					--extra-button --extra-label "Advanced" \
+					--default-item "$type" \
+					--title "-[ Toolchain Type Menu ]-" \
+					--menu "\nSelect toolchain type:\n\nStandard - common architectures and compatible toolchains\nAdvanced - all available architectures and toolchains" \
+					0 0 0 "${MENU_OPTIONS[@]}");
+			ret="$?";
+		else
+			case "$tcd_param_level" in
+				Standard | standard)
+					ret=0;;
+				Advanced | advanced)
+					ret=3;;
+				*)
+					ret=1;;
+			esac;
+			echo "level: $tcd_param_level"
+		fi
+
+		if [[ "$type" =~ 'Standard' ]]; then
+			libc='glibc';
+		elif [[ "$type" =~ 'OpenWrt' ]]; then
+			libc='musl';
+		elif [[ "$type" =~ 'Fritzbox' ]]; then
+			libc='fritz';
+		elif [[ "$type" =~ 'Legacy' ]]; then
+			libc='legacy';
+		fi
+
+		case $ret in
+			0) #toolchain download menu Standard
+				tc_arch_menu "$libc" 'standard';
+				[ ! -z "$tcd_param_level" ] && { type_menu_close=1; clear; [ -z $1 ] && bye; };
+				;;
+			3) #toolchain download menu Custom
+				[[ 'fritz legacy' =~ $libc ]] && tc_arch_menu "$libc" 'standard' || tc_arch_menu "$libc" 'advanced';
+				[ ! -z "$tcd_param_level" ] && { type_menu_close=1; clear; [ -z $1 ] && bye; };
+				;;
+			1 | 255) #close
+				type_menu_close=1; clear; [ -z $1 ] && bye;
+				;;
+		esac;
+	done;
+}
+
+tc_arch_menu(){
+	unset arch_menu_close;arch_whitelist='';
+	local MENU_OPTIONS;local COUNT;COUNT=0;
+	declare -A a_archs;
+	libc="$1"
+	level="$2"
+
+	sites="$(curl --silent "$(decode "$BOOTLIN_URL")/toolchains.html" | grep '<li><a href="releases' | awk -F'"' '{print $2}')"
+
+	if [ "$level" == 'standard' ]; then
+		[ "$libc" == 'glibc' ] && arch_whitelist='aarch64 armv5-eabi armv6-eabihf armv7-eabihf mips32el powerpc-e500mc sh-sh4'
+		[ "$libc" == 'musl' ] && arch_whitelist='aarch64 armv5-eabi armv6-eabihf'
+		[ "$libc" == 'fritz' ] && { arch_whitelist='any'; BASE_URL='aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zL2ZyaXR6Ym94Cg=='; }
+		[ "$libc" == 'legacy' ] && { arch_whitelist='any'; BASE_URL='aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zL2xlZ2FjeQo='; }
+		[ "$libc" == 'todo' ] && return;
+	fi
+
+	while [ ! $arch_menu_close ]; do
+		if [ ${#MENU_OPTIONS[@]} -eq 0 ]; then
+			if [[ 'glibc musl' =~ $libc ]]; then
+				for site in $sites; do
+					arc="$(echo "$site" | awk -F'[_.]' '{print $2}')";
+					if [ ! -z "$arch_whitelist" ]; then
+						! echo "$arch_whitelist" | grep -qw "$arc" && continue;
+					fi
+					a_archs[$arc]="$(decode "$BOOTLIN_URL")/$site";
+					MENU_OPTIONS+=("$arc" '' "${a_archs[$arc]}");
+					counter;
+				done
+			elif [[ 'fritz legacy' =~ $libc ]]; then
+				for arc in $arch_whitelist; do
+					a_archs[$arc]="$(decode "$BASE_URL")";
+					MENU_OPTIONS+=("$arc" '' "${a_archs[$arc]}");
+					counter;
+				done
+			fi
+		fi
+
+		[ $COUNT -eq 0 ] && MENU_OPTIONS+=('' "no architectures available" '') && tlen=19;
+
+		if [ -z "$tcd_param_arch" -a $COUNT -gt 1 ]; then
+			arch=$("$gui" "$st_" "$bt_" "$title_ \Z0$pdesc\Zn" --colors --item-help --ok-label "Choose" --cancel-label "Back" \
+					--default-item "$arch" \
+					--title "-[ Architecture Menu ]-" \
+					--menu "\nSelect one of the $COUNT available $level architectures:" \
+					0 0 $COUNT "${MENU_OPTIONS[@]}");
+			ret="$?";
+		elif [ $COUNT -eq 1 ]; then
+			arch="$arc";
+			[ -z "$download_menu_close" ] && ret=0 || ret=$download_menu_close;
+		else
+			arch="$tcd_param_arch"; ret=0;
+			echo "arch:  $arch"
+		fi
+
+		case $ret in
+			0) #toolchain type menu
+				clear;
+				tc_download_menu "${a_archs[$arch]}" "$arch" "$libc" "$level";
+				[ ! -z "$tcd_param_arch" ] && arch_menu_close=1;
+				;;
+			1 | 255) #close
+				arch_menu_close=1; clear;
+				;;
+		esac;
+	done;
+};
+
+tc_download_menu(){
+	unset download_menu_close;release='stable';tag='';tlen=0
+	local MENU_OPTIONS;local COUNT;COUNT=0;
+	#				  1   2        3      4   5   6   7     8    9
+	declare -A a_tc; #url|filename|sha256|cfg|gcc|gdb|linux|libc|binutils
+	site="$1"
+	arch="$2"
+	libc="$3"
+	level="$4"
+
+	while [ ! $download_menu_close ]; do
+		if [ ${#MENU_OPTIONS[@]} -eq 0 ]; then
+			printf 'Gathering toolchain list';
+
+			if [ "$level" == 'standard' ]; then
+				[ "$libc" == 'glibc' ] && tag='2018.11-1';
+				[ "$libc" == 'musl' ] && tag='2020.02-2';
+			elif [ "$level" == 'advanced' ]; then
+				release='.*'
+			fi
+
+			if [[ 'glibc musl' =~ $libc ]]; then
+				extract_strip="1";
+				cheader="gcc $libc linux gdb binutils";
+				toolchains="$(curl --silent "$site" | grep -Pzo "${arch}--${libc}--${release}-${tag//./\\.}[\s\S]*?<\/tr>" | xargs --null)"
+				for i in $(seq 1 $(echo "$toolchains" | grep -c '<a.*Download<\/a>')); do
+					url="$(decode "$BOOTLIN_URL")$(echo "$toolchains" | grep -m $i '<a.*Download<\/a>' | tail -n1 | awk -F'"' '{print $2}')";
+					filename="$(basename "$url")"
+					sha256="$(curl --silent "$(decode "$BOOTLIN_URL")$(echo "$toolchains" | grep -m $i '<a.*sha256<\/a>' | tail -n1 | awk -F'"' '{print $2}')")";
+					cfg='';
+					if [ "$level" == 'standard' ]; then
+						t="$([ "$libc" == 'musl' ] && printf 'owrt_')${arch}";
+						t="${t//sh-/}" #remove leading 'sh-' from arch
+						t="${t%%-*}"; #remove '-*' from arch
+						t="${t}_${level}";
+					else
+						t="$(echo "$filename" | awk -F'.tar' '{print $1}')";
+					fi
+					[ ${#t} -gt $tlen ] && tlen=${#t};
+					a_tc[$t]="$url|$filename|$sha256|$cfg";
+
+					for j in {1..5}; do
+						offset=$(( ($i - 1) * 5 + $j ));
+						tc_prop="$(echo "$toolchains" | grep -m $offset '<td.*<\/td>' | tail -n1 | awk -F'[<>]' '{print $3}')";
+						tc_prop="${tc_prop//glibc-/}" #remove leading 'glibc-' from version
+						tc_prop="${tc_prop%%-*}"; #remove '-*' from version
+						a_tc[$t]="${a_tc[$t]}|${tc_prop}";
+					done;
+
+					if [ -d "$tcdir/$t" ]; then
+						MENU_OPTIONS+=("$t" "$(echo "${a_tc[$t]}" | awk -F'|' '{printf( "%9s %6s %8s %6s %11s\n", "\\Zr"$5, $8, $7, $6, $9"\\Zn" )}')" "$(echo "${a_tc[$t]}" | awk -F'|' '{print $1" | "$3}')");
+					else
+						MENU_OPTIONS+=("$t" "$(echo "${a_tc[$t]}" | awk -F'|' '{printf( "%9s %6s %8s %6s %11s\n", "\\ZR"$5, $8, $7, $6, $9"\\Zn" )}')" "$(echo "${a_tc[$t]}" | awk -F'|' '{print $1" | "$3}')");
+					fi
+					printf '.';
+					counter;
+				done
+			elif [[ 'fritz legacy' =~ $libc ]]; then
+				extract_strip="0";
+				cheader='Description';
+				case "$arch-$libc" in
+					any-fritz)
+						url="${site}/Toolchain-fritz4040_4050_4060_5590_5690Pro_68504g_68505g_7510_7520_7520B_7530_7530AX_ssl_multi_arm-freetz.tar.xz \
+							 ${site}/Toolchain-fritz6430_6490_6590_6591_6660_6670_6690_ssl_multi_i686-freetz.tar.xz \
+							 ${site}/Toolchain-fritz3272_3370_3390_6840_7272_7330_7330SL_7360v2_7390_ssl_multi_mips-freetz.tar.xz \
+							 ${site}/Toolchain-fritz3490_5490_5491_6890_7430_7490_7560_7580_7583_7583vdsl_7590_7590AX_7690_ssl_multi_mips-freetz.tar.xz \
+							 ${site}/Toolchain-fritz4020_7362_ssl_multi_mips-freetz.tar.xz";
+						;;
+					any-legacy)
+						url="${site}/Toolchain-arm_dream.tar.xz \
+							 ${site}/Toolchain-Coolstream_s_u_p.tar.xz \
+							 ${site}/Toolchain-Cool2_s_u_p.tar.xz \
+							 ${site}/Toolchain-ARM_Cortex_A9_s_u_p1.tar.xz \
+							 ${site}/Toolchain-Dockstar_s_u_p.tar.xz \
+							 ${site}/Toolchain-dream_one.tar.xz \
+							 ${site}/Toolchain-Dreambox-HW_s_u_p.tar.xz \
+							 ${site}/Toolchain-Fritz73xxOS65X.tar.xz \
+							 ${site}/Toolchain-Fritz74xxOS65X.tar.xz \
+							 ${site}/Toolchain-hd51.tar.xz \
+							 ${site}/Toolchain-ineos.tar.xz \
+							 ${site}/Toolchain-Matrix_s.tar.xz \
+							 ${site}/Toolchain-MIPS-Tuxbox-OE1.6_s_u_p.tar.xz \
+							 ${site}/Toolchain-mipsel_s3_ssl098.tar.xz \
+							 ${site}/Toolchain-mipsel_s3_ssl100.tar.xz \
+							 ${site}/Toolchain-mipsel_s3_ssl102.tar.xz \
+							 ${site}/Toolchain-MIPS-Tuxbox-OE2.0_s_u_p.tar.xz \
+							 ${site}/Toolchain-OpenPLI_4.0.tar.xz \
+							 ${site}/Toolchain-openwrt1505cc.tar.xz \
+							 ${site}/Toolchain-osmio4k.tar.xz \
+							 ${site}/Toolchain-PPC-Tuxbox-old_s.tar.xz \
+							 ${site}/Toolchain-Raspberrypi_hard_s_u_p.tar.xz \
+							 ${site}/Toolchain-SamsungTV.tar.xz \
+							 ${site}/Toolchain-SH4_s_u_p.tar.xz \
+							 ${site}/Toolchain-NEWSH4-Streamboard_s_u_p.tar.xz \
+							 ${site}/Toolchain-solo4k.tar.xz \
+							 ${site}/Toolchain-Syn_Atom.tar.xz";
+						;;
+				esac;
+
+				for u in $url; do
+					unset _toolchainname;
+					filename="$(basename "$u")"
+					sha256="$(curl --silent "${u}.sha256")";
+					cfg="${u}.cfg";
+					source <(curl --silent "$cfg") 2>/dev/null;
+					if [ -z "$_toolchainname" ]; then
+						t="$filename";
+						desc="not found";
+					else
+						t="$_toolchainname"; [ ${#t} -gt $tlen ] && tlen=${#t}
+						desc="$_description";
+						printf '.';
+					fi;
+					a_tc[$t]="$u|$filename|$sha256|$cfg";
+					if [ -d "$tcdir/$t" ]; then
+						MENU_OPTIONS+=("$t" "\\Zr$desc\\Zn" "$(echo "${a_tc[$t]}" | awk -F'|' '{print $1" | "$3}')");
+					else
+						MENU_OPTIONS+=("$t" "\\ZR$desc\\Zn" "$(echo "${a_tc[$t]}" | awk -F'|' '{print $1" | "$3}')");
+					fi
+					counter;
+				done
+			fi
+		fi
+
+		[ $COUNT -eq 0 ] && MENU_OPTIONS+=('' "no $libc toolchains available" '') && tlen=19;
+		
+		for MO in $(seq 0 3 $((${#MENU_OPTIONS[@]} - 1))); do
+			if (shopt -s nocasematch;
+				[ ! -z "$tcd_param_toolchain" ] && [[ "${MENU_OPTIONS[$MO]}" =~ $tcd_param_toolchain ]]); then
+				tc="${MENU_OPTIONS[$MO]}";
+				echo "toolchain: $tc"
+				break;
+			fi
+		done;
+
+		if [ -z "$tcd_param_toolchain" ]; then
+			tc=$("$gui" "$st_" "$bt_" "$title_ \Z0$pdesc\Zn" --colors --item-help --ok-label "Download" --cancel-label "Back" \
+					--help-tags --help-button --help-label "Info" \
+					--default-item "$tc" \
+					--title "-[ Toolchain Download Menu ]-" \
+					--menu "\nSelect one of the $COUNT toolchains $([[ 'glibc musl' =~ $libc ]] && printf "for $level $arch ")to download:\n\nNOTE: When you download a cross ${txt_tc,,} with \\Zrinverted colored\\Zn description, an existing one with the same name will be replaced without asking!\n\n    toolchain$(printf ' %.0s' $(seq 1 $(($tlen - 7))))$(printf "%6s %6s %8s %6s %8s\n" $cheader)" \
+					0 0 0 "${MENU_OPTIONS[@]}");
+			ret="$?";
+		else
+			ret=0;
+		fi
+
+		tc="$(echo "$tc" | awk '{printf $NF}')";
+
+		if [ ! -z "$tc" ]; then
+			url="$(echo "${a_tc[$tc]}" | awk -F'|' '{print $1}')";
+			filename="$(echo "${a_tc[$tc]}" | awk -F'|' '{print $2}')";
+			sha256="$(echo "${a_tc[$tc]}" | awk -F'|' '{print $3}')";
+			cfg="$(echo "${a_tc[$tc]}" | awk -F'|' '{print $4}')";
+			gccv="$(echo "${a_tc[$tc]}" | awk -F'|' '{print $5}')";
+			gdbv="$(echo "${a_tc[$tc]}" | awk -F'|' '{print $6}')";
+			linuxv="$(echo "${a_tc[$tc]}" | awk -F'|' '{print $7}')";
+			libcv="$(echo "${a_tc[$tc]}" | awk -F'|' '{print $8}')";
+			binutilsv="$(echo "${a_tc[$tc]}" | awk -F'|' '{print $9}')";
+		fi
+
+		case $ret in
+			0) #start toolchain download
+				if [ -f "$dldir/$filename" ]; then
+					[ ! "$sha256" == "$(cd $dldir; sha256sum $filename)" ] && rm -rf "$dldir/$filename";
+				fi
+
+				if [ ! -f "$dldir/$filename" ] && check_url "$(dirname "$url")"; then
+					(cd "$dldir";
+					 wget "$url" 2>&1 | stdbuf -o0 awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | "$gui" "$st_" "$bt_" "$title_" --title " -[ download ]- " --gauge "  $txt_loading $tc $txt_wait" 7 74)
+				fi
+
+				if [ -f "$dldir/$filename" ]; then
+					[ -d "$tcdir/$tc" ] && rm -rf "$tcdir/$tc"
+					(mkdir "$tcdir/$tc"; cd "$tcdir/$tc";
+					 tar -xvf "$dldir/$filename" --strip-components=$extract_strip
+					 [ -f "$tcdir/$tc/relocate-sdk.sh" ] && $tcdir/$tc/relocate-sdk.sh
+					 [ ! -z "$cfg" ] && curl --silent "$cfg" -o "$tccfgdir/$tc";
+					) | "$gui" "$st_" --title " -[ $txt_extracting $tc ]- " "$pb_" 20 100
+
+					if [[ 'glibc musl' =~ $libc ]]; then
+						target="$($(find "$tcdir/$tc/bin" -name '*-gcc' | head -n1) -dumpmachine)"
+						desc="$arch devices ($level)";
+						info="$(echo -e '!!! '"Bootlin $tc Toolchain"' !!!'"\\\n\n\\\n\n$level cross toolchain for $arch devices\\\n\n\\\n\narch $arch\\\n\ngcc $gccv\\\n\n$libc $libcv\\\n\nlinux $linuxv\\\n\ngdb $gdbv\\\n\nbinutils $binutilsv\\\n")";
+						[ "$libc" == 'glibc' -a "${arch:0:5}" == "armv7" ] && ec="\"-mfpu=vfpv3-d16\"; #special optimization for HiSilicon MV430 devices" || ec='"";'
+						[ "$libc" == 'musl' ] && confdir="/etc/config/oscam" || confdir=''
+						_create_toolchaincfg "$tcdir/$tc" "$tc" "$target" "" "" "$desc" "$info" "$dldir/$filename" "no" "Bootlin" "" "" "" "$ec" "$extract_strip" "LGCY" "$(echo "$url" | base64 -w0)" "$confdir";
+					fi
+				fi;
+				[ ! -z "$tcd_param_toolchain" ] && download_menu_close=1;
+				;;
+			2) #info
+				tempfile=$(mktemp);
+				if [[ 'glibc musl' =~ $libc ]]; then
+					if [ -f "$tccfgdir/$tc" ]; then
+						cp -f "$tccfgdir/$tc" "$tempfile";
+					else
+						echo 'Information is available after downloading the toolchain.' > "$tempfile";
+					fi
+				else
+					curl --silent "$cfg" -o "$tempfile";
+				fi
+				"$gui" "$st_" "$nc_" "$bt_" "$title_ \Z0$pdesc\Zn" "--colors" "--no-ok" "--extra-button" "--extra-label" "${txt_s3tup_menu_command_label_back}" "--textbox" "$tempfile" 30 80;
+				rm -f "$tempfile" 2>/dev/null;
+				;;
+			1 | 255) #close
+				download_menu_close=1;
+				;;
+		esac;
+		clear;
+	done;
+	#_paktc_timer;
+}
