@@ -975,15 +975,14 @@ _get_toolchain_properties(){
 	fi;
 
 	#get additional optimization flags needed by some libraries
-	slice="$($compilername --target-help 2>&1 | grep -iw "altivec"							&>/dev/null && echo "altivec")"	&& size="128";
+	_check_compiler_capability "altivec" "$hostname"												   && slice="altivec"	&& size="128";
 	[ -z "$slice" ] && slice="$($compilername --target-help 2>&1 | grep -iw "avx2"			&>/dev/null && echo "avx2")"	&& size="256";
 	[ -z "$slice" ] && slice="$($compilername --target-help 2>&1 | grep -iw "ssse3"			&>/dev/null && echo "ssse3")"	&& size="128";
 	[ -z "$slice" ] && slice="$($compilername --target-help 2>&1 | grep -iw "sse2"			&>/dev/null && echo "sse2")"	&& size="128";
 	[ -z "$slice" ] && slice="$($compilername --target-help 2>&1 | grep -iw "mmx"			&>/dev/null && echo "mmx")"		&& size="64";
-	[ -z "$slice" ] && slice="$($compilername --target-help 2>&1 | grep -iw "neon\|simd"	&>/dev/null && echo "neon")"	&& size="128";
-	[ -z "$slice" ] && [ -n "$(find "$tcdir/$tc/" -name "arm_neon.h" -type f -print -quit)" ] && slice="neon"				&& size="128";
+	[ -z "$slice" ] && _check_compiler_capability "neon" "$hostname"								   && slice="neon"		&& size="128";
 	if [ -z "$slice" ]; then
-		if [[ "$sysrootdir" =~ aarch64 ]]; then
+		if [[ "$hostname" =~ aarch64 ]]; then
 			slice="uint64"
 		else
 			slice="uint32"

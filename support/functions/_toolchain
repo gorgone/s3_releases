@@ -522,15 +522,19 @@ _linux_version(){
 }
 
 _check_compiler_capability(){
+	check_filename="s3_gcc_cap_$1"
 	case "$1" in
 		"c11") #checking if $CC supports -std=c11
-			CFLAGS="-std=c11";
-			echo "_Thread_local int x; int main(){x = 42; ; return 0;}" | "$(realpath -s $compilername)" -x c -o "/tmp/cc_cap_c11.chk" - >/dev/null 2>&1;
-			ret=$?;
-			[ -f "/tmp/cc_cap_c11.chk" ] && rm -f "/tmp/cc_cap_c11.chk";
-			unset CFLAGS;;
-		*)  ret=1;
+			echo "_Thread_local int x; int main(){x = 42; ; return 0;}" | "$(realpath -s $compilername)" -std=c11 -x c -o "/tmp/${check_filename}.chk" - &>"/tmp/${check_filename}.log";;
+		"neon") #checking if toolchain supports neon
+			[[ "$2" =~ aarch64 ]] && mfpu='' || mfpu='-mfpu=neon'
+			echo -e "#include <arm_neon.h>\nint main(){return 0;}" | "$(realpath -s $compilername)" $mfpu -x c -o "/tmp/${check_filename}.chk" - &>"/tmp/${check_filename}.log";;
+		"altivec") #checking if toolchain supports altivec
+			echo -e "#include <altivec.h>\nint main(){return 0;}" | "$(realpath -s $compilername)" -maltivec -x c -o "/tmp/${check_filename}.chk" - &>"/tmp/${check_filename}.log";;
+		*)  false;
 	esac;
+	ret=$?;
+	find /tmp -name "${check_filename}.chk" -type f -exec rm {} \; &>/dev/null;
 	return $ret
 }
 
