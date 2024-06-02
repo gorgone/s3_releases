@@ -218,6 +218,10 @@ _toolchain_check(){
 		printf "$fmtg" "GCC Version :" "$version"
 		printf "$fmtg" "GCC Binary  :" "$compilerpath"
 		printf "$fmtg" "GCC Sysroot :" "$sysroot"
+		gversion=$("./$_compiler""gdb" --version 2>/dev/null | head -n1 | awk '{print $NF}')
+		[ -n "$gversion" ] && printf "$fmtg" "GDB Version :" "$gversion"
+		lversion=$("./$_compiler""ld" --version 2>/dev/null | head -n1 | awk '{print $NF}')
+		[ -n "$lversion" ] && printf "$fmtg" "LD Version  :" "$lversion"
 		printf "$fmtg" "HOST arch   :" "$(_get_compiler_arch host)"
 		printf "$fmtg" "TARGET arch :" "$(_get_compiler_arch target)"
 		printf "$fmtg" "C11 Support :" "$(! _check_compiler_capability 'c11' && printf 'No' || printf 'Yes')"
