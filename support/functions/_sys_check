@@ -207,6 +207,7 @@ upx_native_installer(){
 	case $(uname -m) in
 	  i386|i686)     HOST_ARCH="i386" ;;
 	  aarch64|arm64) HOST_ARCH="arm64" ;;
+	  arm*)          HOST_ARCH="arm" ;;
 	  *)             HOST_ARCH="amd64" ;;
 	esac;
 	rm -rf "/tmp/upx_$HOST_ARCH.tar.xz" 2>/dev/null
