@@ -27,7 +27,7 @@ prerequisites(){
 				e=$e$pad
 				e=${e:0:16}
 				$output "$r_l  need\t$w_l$e$r_l $missing\n"
-			fi		
+			fi
 		elif hash "$e" 2>/dev/null
 		then
 			einfo=$(type -pf "$e")
@@ -249,7 +249,7 @@ libdvbcsa_native_installer(){
 	echo -e "\ngit clone https://github.com/oe-mirrors/libdvbcsa.git /tmp/libdvbcsa" |& _log "$install_log" &>/dev/null
 	git clone https://github.com/oe-mirrors/libdvbcsa.git /tmp/libdvbcsa |& _log "$install_log" &>/dev/null
 	cd /tmp/libdvbcsa
-	
+
 	echo -e "$w_l  Building ${g_l}libdvbcsa$w_l..." | _log "$install_log"
 	echo -e "\n./bootstrap && ./configure $optimization" |& _log "$install_log" &>/dev/null
 	(./bootstrap && ./configure $optimization) |& _log "$install_log" &>/dev/null

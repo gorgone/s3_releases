@@ -12,7 +12,7 @@ S3TUP_CONFIG_VERSION="71";
 # @CC@				C compiler binary of the toolchain
 # @RANLIB@			library archive indexer binary of the toolchain
 # @PREFIX@			prefix folder for cross builds
-# @HOST@			hostname of the toolchain 
+# @HOST@			hostname of the toolchain
 # @TYPE@			toolchain type (ct-ng, freetz-ng, android-ndk)
 # @ARCH@			architecture of the toolchain
 # @BITNESS@			bitness of the toolchain (32, 64)
@@ -26,7 +26,7 @@ S3TUP_CONFIG_VERSION="71";
 # @CPUS@			CPU number of the build system
 # @VALIDATE@		Special validation function for some libraries (@VALIDATE@ "PCSC")
 
-# You normally do *not* need to be root to build a toolchain using crosstool-NG. In fact, it is *VERY* dangerous to run as root, 
+# You normally do *not* need to be root to build a toolchain using crosstool-NG. In fact, it is *VERY* dangerous to run as root,
 # as crosstool-NG will, as part of the build process, remove a few directories. If anything goes wrong, running as root can ruin your host distribution.
 CTNG_BUILD_AS_ROOT="0"; # Enable/Disable build as root (1|0)
 
