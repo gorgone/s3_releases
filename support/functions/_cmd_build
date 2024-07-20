@@ -139,8 +139,6 @@ _cmd_build(){
 					_dvbcsa="-libdvbcsa";;	# set libdvbcsa suffix to name
 			"USE_TARGZ=1")
 					s3cfg_vars[TARGZ]=1;;	# overwrite global
-			"USE_COMPRESS=1")
-					s3cfg_vars[COMPRESS]=1;;# overwrite global
 			"USE_STATIC=1")
 					_make="make static";;
 			"USE_STAPI=1")
@@ -181,7 +179,7 @@ printf "$y_l\n |       set : ${cdtag}$w_l"
 #if build with profile
 	[ ! "$pf" == "empty" ] && printf "\n$y_l |   PROFILE : $pf_name"
 
-#IF SVN is Patched
+#IF REPO is Patched
 	if [ -f "$workdir/${REPO^^}-IS-PATCHED" ]
 	then
 		printf "$y_l\n | ISPATCHED :$P YES (integrate patch infomation into WebIf)"
@@ -201,10 +199,10 @@ printf "$y_l\n |       set : ${cdtag}$w_l"
 #dynamic, static, mixed build
 	[ "$_toolchainname" == "native" ] && SEARCHDIR="$(ldconfig -v 2>/dev/null | grep -v ^$'\t' | awk -F':' '{print $1}')" || SEARCHDIR="$SYSROOT"
 	[ "${USE_vars[USE_LIBCRYPTO]}" == "USE_LIBCRYPTO=1" ] && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBCRYPTO]}" == "STATIC_LIBCRYPTO=1" ]	&& LIBCRYPTO_STATIC="LIBCRYPTO_LIB=$(find $SEARCHDIR -name "libcrypto.a" -type f -print -quit)"	&& ((statcount++))
-	[ "${USE_vars[USE_SSL]}" == "USE_SSL=1" ]             && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_SSL]}" == "STATIC_SSL=1" ]				&& SSL_STATIC="SSL_LIB=$(find $SEARCHDIR -name "libssl.a" -type f -print -quit)"					&& ((statcount++))
+	[ "${USE_vars[USE_SSL]}" == "USE_SSL=1" ]             && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_SSL]}" == "STATIC_SSL=1" ]				&& SSL_STATIC="SSL_LIB=$(find $SEARCHDIR -name "libssl.a" -type f -print -quit)"				&& ((statcount++))
 	[ "${USE_vars[USE_LIBUSB]}" == "USE_LIBUSB=1" ]       && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBUSB]}" == "STATIC_LIBUSB=1" ]		&& LIBUSB_STATIC="LIBUSB_LIB=$(find $SEARCHDIR -name "libusb-1.0.a" -type f -print -quit)"		&& ((statcount++))
 	[ "${USE_vars[USE_PCSC]}" == "USE_PCSC=1" ]           && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_PCSC]}" == "STATIC_PCSC=1" ]			&& PCSC_STATIC="PCSC_LIB=$(find $SEARCHDIR -name "libpcsclite.a" -type f -print -quit)"			&& ((statcount++))
-	[ "${USE_vars[USE_LIBDVBCSA]}" == "USE_LIBDVBCSA=1" ] && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBDVBCSA]}" == "STATIC_LIBDVBCSA=1" ]	&& DVBCSA_STATIC="LIBDVBCSA_LIB=$(find $SEARCHDIR -name "libdvbcsa.a" -type f -print -quit)"		&& ((statcount++))
+	[ "${USE_vars[USE_LIBDVBCSA]}" == "USE_LIBDVBCSA=1" ] && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBDVBCSA]}" == "STATIC_LIBDVBCSA=1" ]	&& DVBCSA_STATIC="LIBDVBCSA_LIB=$(find $SEARCHDIR -name "libdvbcsa.a" -type f -print -quit)"	&& ((statcount++))
 
 	if [ $statcount -ge 1 -a $statcount -lt $libcount ]
 	then
@@ -239,6 +237,12 @@ then
 else
 	_generate_oscam_name "$_toolchainname"
 fi
+
+if [[ $oscam_name =~ -upx ]]
+then
+	[ -f "$configdir/upx_option" ] && source "$configdir/upx_option"
+	COMP_LEVEL="COMP_LEVEL=$upx_c"
+fi 
 	oscam_name="$oscam_name$extra$buildtype"
 	_nl
 	USESTRING=${USE_vars[@]}
@@ -252,11 +256,12 @@ fi
 	"EXTRA_LDFLAGS=$extra_ld" \
 	"EXTRA_CFLAGS=$extra_c" \
 	$EXTRA_USE \
+	$COMP_LEVEL \
 	"CROSS=$CROSS" $STAPI_LIB $USESTRING $LIBCRYPTO_STATIC $SSL_STATIC $LIBUSB_STATIC $PCSC_STATIC $DVBCSA_STATIC 2>&1 \
 	|tee -a "$ldir/$log_name" \
 	|grep --line-buffered -v 'BFD\|^/' \
-	|grep --line-buffered '^CC\|^HOSTCC\|^GEN\|^CONF\|^RM\|UseFlags\|  CONF_DIR =\|Binary\|LINK\|STRIP\|BUILD\|Addons\|Protocols\|Readers\|CardRdrs\|^/' \
-	|sed -e "s/^|/"$Y" |/g;s/^RM/"$R" REMOVE ----->$W/g;s/^CONF/"$C" CONFIG ----->$W/g;s/^LINK/"$P" LINK ------->$W/g;s/^STRIP/"$P" STRIP ------>$W/g;s/^CC\|^HOSTCC\|^BUILD/"$G" BUILD ------>$W/g;s/^GEN/"$C" GEN -------->/g;
+	|grep --line-buffered '^CC\|^HOSTCC\|^GEN\|^CONF\|^RM\|^.*\d*->\|UseFlags\|  CONF_DIR =\|Binary\|LINK\|STRIP\|BUILD\|Addons\|Protocols\|Readers\|CardRdrs\|^/' \
+	|sed -e "s/^|/"$Y" |/g;/^.*\d*->/ s/./"$C" UPX -------->$W&/;s/^RM/"$R" REMOVE ----->$W/g;s/^CONF/"$C" CONFIG ----->$W/g;s/^LINK/"$P" LINK ------->$W/g;s/^STRIP/"$P" STRIP ------>$W/g;s/^CC\|^HOSTCC\|^BUILD/"$G" BUILD ------>$W/g;s/^GEN/"$C" GEN -------->/g;
 	s/WEBIF_//g;s/WITH_//g;s/MODULE_//g;s/CS_//g;s/HAVE_//g;s/_CHARSETS//g;s/CW_CYCLE_CHECK/CWCC/g;s/SUPPORT//g;s/= /: /g;"
 
 #calc buildtime
@@ -294,13 +299,6 @@ fi
 #show build time
 	printf "$g_n""\n TIME -------> $bt$re_\n\n"
 
-#compress cam
-	if [ "${s3cfg_vars[COMPRESS]}" == "1" ]
-	then
-		printf "$w_l"" ENABLE -----> COMPRESSION:$y_l $txt_wait"
-		compress_cam "$oscam_name"
-	fi;
-
 	if [ "${s3cfg_vars[TARGZ]}" == "1" ]
 	then
 		printf "$w_l"" ENABLE -----> TARGZ:$y_l $txt_wait\n"
@@ -310,7 +308,7 @@ fi
 #link lastlog
 	ln -frs "$ldir/$log_name" "$workdir/lastbuild.log"
 	if [ "${USE_vars[USE_DIAG]}" == "USE_DIAG=1" ]; then
-		grep -v "^CC\|^GEN\|^CONF\|^RM\|^BUILD\|STRIP\|LINK\|^+\|^scan-build: R\|^scan-build: U\|HOSTCC\|^|" -i "$workdir/lastbuild.log" \
+		grep -v "^CC\|^GEN\|^CONF\|^RM\|^.*\d*->\|^BUILD\|STRIP\|LINK\|^+\|^scan-build: R\|^scan-build: U\|HOSTCC\|^|" -i "$workdir/lastbuild.log" \
 		|sed $'s/ generated./ generated.\\\n\\\n\\\n/g' >"$workdir/USE_DIAG.log"
 	fi
 
