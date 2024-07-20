@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SIMPLEVERSION="2024.05"
+SIMPLEVERSION="2024.07"
 VERSIONCOUNTER="$(git rev-list --count HEAD 2>/dev/null || printf "$(echo "$SIMPLEVERSION" | sed -e 's/\(.\)/\1\+0/g' | bc)_non-git")"
 DEVELOPER="Gorgone, WXbet"
 OIFS=$IFS
@@ -11,11 +11,8 @@ realdir=$(readlink -f $0)
 cd "$(dirname $realdir)"
 
 #set dir_vars
-workdir="$(pwd)"
- bindir="$sdir/upx"
-   PATH="$bindir:$PATH"
-   sdir="$workdir/support"
-
+  workdir="$(pwd)"
+     sdir="$workdir/support"
     osdir="$sdir/os"
      ldir="$sdir/logs"
      adir="$sdir/archive"
@@ -34,7 +31,7 @@ configdir="$sdir/configs"
 
 # create folders
 mkdir -p "$tcdir/native/bin" 2>/dev/null
-mkdir -p $sdir/{archive,binaries,downloads,software,logs,patches,backup_repo,menu_save,upx} 2>/dev/null
+mkdir -p $sdir/{archive,binaries,downloads,software,logs,patches,backup_repo,menu_save} 2>/dev/null
 [ -f $sdir/patches/no.patch ] && rm -f $sdir/patches/no.patch 2>/dev/null
 
 # some migrations of deprecated directories
@@ -81,7 +78,6 @@ USE_vars[USE_PATCH]=;
 USE_vars[USE_STAPI]=;
 USE_vars[USE_STAPI5]=;
 USE_vars[USE_CONFDIR]=;
-USE_vars[USE_COMPRESS]=;
 USE_vars[USE_EXTRA]=;
 USE_vars[USE_STATIC]=;
 USE_vars[STATIC_LIBCRYPTO]=;
@@ -95,7 +91,6 @@ s3cfg_vars[USE_TARGZ]=0
 s3cfg_vars[DIRECTMENU]=0
 s3cfg_vars[NO_REPO_AUTOUPDATE]=0
 s3cfg_vars[USE_VERBOSE]=0
-s3cfg_vars[USE_COMPRESS]=0
 s3cfg_vars[S3_UPDATE_CHECK]=1
 s3cfg_vars[S3_URL_CHECK]=1
 s3cfg_vars[INSTALL_NATIVE_LIBDVBCSA]=1
@@ -113,7 +108,6 @@ s3opts=( cedit checkout clean disable_emu enable_emu fix_me get_patch help lang_
 
 CUSTOM_CONFDIR="not_set"
 pf_name="not_set"
-UPX="not_set"
 
 #internal vars
 OPENBOX=0
@@ -386,17 +380,6 @@ else
 				fi
 			fi
 
-			if [ "${2:0:5}" == "-upx=" ] || [ "${2:0:5}" == "-UPX=" ]
-			then
-				UPX=${2#*=};USE_vars[USE_COMPRESS]="USE_COMPRESS=1"
-			fi
-
-			if [ "${3:0:5}" == "-upx=" ] || [ "${3:0:5}" == "-UPX=" ]
-			then
-				UPX=${2#*=}
-				USE_vars[USE_COMPRESS]="USE_COMPRESS=1"
-			fi
-
 			[ "$pf" == "empty" ] && c_m_d="$*" || c_m_d="all_off $pf $*"; # set only active module with profiles
 			for cmd in $c_m_d
 			do
@@ -409,12 +392,6 @@ else
 				if [ "${cmd:0:11}" == "-oscamname=" ]
 				then
 					USE_vars[USE_OSCAMNAME]="USE_OSCAMNAME=${cmd#*=}"
-				fi
-
-				if [ "${cmd:0:5}" == "-upx=" ] || [ "${cmd:0:5}" == "-UPX=" ]
-				then
-					UPX="${cmd#*=}"
-					USE_vars[USE_COMPRESS]="USE_COMPRESS=1"
 				fi
 
 				for cc in "${config_cases[@]}"

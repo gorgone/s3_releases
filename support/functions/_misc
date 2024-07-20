@@ -305,7 +305,7 @@ _oscam_extra_menu(){
 
 	for e in "${!USE_vars[@]}"
 	do
-		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_COMPRESS" ] && [ ! "$e" == "USE_PATCH" ] && [ ! "$e" == "USE_LIBUSB" ] && [ ! "$e" == "USE_EXTRA" ] && \
+		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_PATCH" ] && [ ! "$e" == "USE_LIBUSB" ] && [ ! "$e" == "USE_EXTRA" ] && \
 		   [ ! "$e" == "USE_STATIC" ] && [ ! "$e" == "STATIC_LIBCRYPTO" ] && [ ! "$e" == "STATIC_SSL" ] && [ ! "$e" == "STATIC_LIBUSB" ] && [ ! "$e" == "STATIC_PCSC" ] && [ ! "$e" == "STATIC_LIBDVBCSA" ]
 		then
 			if [ "${#USE_vars[$e]}" -gt "4" ]
@@ -322,7 +322,7 @@ _oscam_extra_menu(){
 
 	for e in "${!USE_vars[@]}"
 	do
-		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_COMPRESS" ] && [ ! "$e" == "USE_PATCH" ] && [ ! "$e" == "USE_LIBUSB" ] && [ ! "$e" == "USE_EXTRA" ] && \
+		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_PATCH" ] && [ ! "$e" == "USE_LIBUSB" ] && [ ! "$e" == "USE_EXTRA" ] && \
 		   [ ! "$e" == "USE_STATIC" ] && [ ! "$e" == "STATIC_LIBCRYPTO" ] && [ ! "$e" == "STATIC_SSL" ] && [ ! "$e" == "STATIC_LIBUSB" ] && [ ! "$e" == "STATIC_PCSC" ] && [ ! "$e" == "STATIC_LIBDVBCSA" ]
 		then
 			ok=0
@@ -349,13 +349,12 @@ _build_extra_menu(){
 	us=
 	check_smargo
 	unset MENU_OPTIONS
-	for e in USE_COMPRESS USE_TARGZ USE_PATCH USE_EXTRA USE_STATIC STATIC_LIBCRYPTO STATIC_SSL STATIC_LIBUSB STATIC_PCSC STATIC_LIBDVBCSA
+	for e in USE_TARGZ USE_PATCH USE_EXTRA USE_STATIC STATIC_LIBCRYPTO STATIC_SSL STATIC_LIBUSB STATIC_PCSC STATIC_LIBDVBCSA
 	do
 		[ "${#USE_vars[$e]}" -gt "4" ] && MENU_OPTIONS+=( "$e" "$e=1" on ) || MENU_OPTIONS+=( "$e" "$e=1" off )
 	done
 	bextra=$("$gui" "$st_" "$nc_" "$bt_" "$title_" --title "-[ Build EXTRA$(TTAG) ]-" "$cl_" " OPTIONS " 17 45 3 ${MENU_OPTIONS[@]})
 	[ $? = 255 ] && _build_extra_menu
-	USE_vars[USE_COMPRESS]=
 	USE_vars[USE_PATCH]=
 	USE_vars[USE_TARGZ]=
 	USE_vars[USE_EXTRA]=
@@ -607,8 +606,8 @@ save_config(){
 	check_smargo
 	enabled=($("${repodir}/config.sh" -s))
 	disabled=($("${repodir}/config.sh" -Z))
-	[ "$_toolchainname" == "sh4" ] && unset USE_vars[USE_COMPRESS]
-	[ "$_toolchainname" == "sh_4" ] && unset USE_vars[USE_COMPRESS]
+	[ "$_toolchainname" == "sh4" ] && silent=$("${repodir}/config.sh" --disable WITH_COMPRESS)
+	[ "$_toolchainname" == "sh_4" ] && silent=$("${repodir}/config.sh" --disable WITH_COMPRESS)
 	unset USE_vars[USE_STAPI]
 	unset USE_vars[USE_STAPI5]
 
@@ -658,15 +657,14 @@ load_config(){
 	else
 		_reset_config
 		[ "${s3cfg_vars[USE_TARGZ]}" == "1" ] && USE_vars[USE_TARGZ]="USE_TARGZ=1"
-		[ "${s3cfg_vars[USE_COMPRESS]}" == "1" ] && USE_vars[USE_COMPRESS]="USE_COMPRESS=1"
 		for e in $default_use
 		do
 			USE_vars[$e]="$e=1"
 		done
 	fi
 	check_smargo
-	[ "$_toolchainname" == "sh4" ] && unset USE_vars[USE_COMPRESS]
-	[ "$_toolchainname" == "sh_4" ] && unset USE_vars[USE_COMPRESS]
+	[ "$_toolchainname" == "sh4" ] && silent=$("${repodir}/config.sh" --disable WITH_COMPRESS)
+	[ "$_toolchainname" == "sh_4" ] && silent=$("${repodir}/config.sh" --disable WITH_COMPRESS)
 	USESTRING="$(echo "${USE_vars[@]}"| sed 's@USE_@@g'| sed 's@=1@@g'| tr -s ' ')"
 }
 _get_config_con(){

@@ -6,9 +6,6 @@ prerequisites(){
 	[[ $1 ]] && output=": &&" || output="printf";
 	$output "$w_l  CHECK for binaries\n  ==================\n";
 
-# check for a forgotten and unusable 'upx' and remove this crap
-	[ -x "$bindir"/upx ] && "$bindir"/upx -V &>/dev/null || rm -f "$bindir"/upx &>/dev/null;
-
 	for e in "${binvars[@]}"
 	do
 		if [ "$e" == "autoconf-archive" ]
