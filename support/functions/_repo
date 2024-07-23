@@ -119,7 +119,7 @@ _dialog_checkout(){
 				sleep 1
 				printf " $txt_update_svn $txt_wait\n"
 				cd "${repodir}"
-				$(USEGIT) && git pull -q || svn -q update
+				$(USEGIT) && git pull --quiet || svn -q update
 				echo 1 >"$upc"
 			else
 				printf "not ok\n"
@@ -187,11 +187,11 @@ COMMIT(){
 BRANCH(){
 	if [ -d "${repodir}" ]; then
 		if cd "${repodir}"; then
-			#$(USEGIT) && git name-rev --name-only "$(COMMIT)" 2>/dev/null | awk -F'/' '{ print $NF }' | awk -F'~' '{ print $1 }' || printf "$trunkurl" | awk -F'/' '{ print $NF }'
 			if $(USEGIT); then
 				ref="$(git name-rev --name-only "$(COMMIT)" 2>/dev/null | awk -F'/' '{ print $NF }' | awk -F'~' '{ print $1 }' | awk -F'^' '{ print $1 }')"
 				if [ "$ref" == "$(REVISION)" ]; then
-					git branch | tail -n1 | tr -d ' *'
+					branch=$(git branch | tail -n1 | tr -d ' *')
+					[ "$branch" == "(nobranch)" ] && printf 'master' || printf "$branch"
 				else
 					printf "$ref"
 				fi

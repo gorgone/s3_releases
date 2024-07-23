@@ -19,10 +19,10 @@ gitcheckout(){
 	fi
 
 	printf "$w_l  ${REPO^^} Repository: $g_l$trunkurl$re_"
-	[ -z "$1" ] && commit=0 || commit="$1"
-	printf "\n$w_l  ${REPO^^} Checkout  : $y_l$([ "$commit" != "0" ] && printf "$(REFTYPE "$commit") $commit ..." || printf "$txt_latest ...")\n$re_"
-	git clone "$trunkurl" "${repodir}"
-	[ "$commit" != "0" ] && cd "${repodir}" && git -c advice.detachedHead=false checkout "$commit"
+	[ -z "$1" ] && commit='master' || commit="$1"
+	printf "\n$w_l  ${REPO^^} Checkout  : $y_l$([ "$commit" != "master" ] && printf "$(REFTYPE "$commit") $commit ..." || printf "$txt_latest ...")\n$re_"
+
+	gitclone "$commit"
 
 	if [ -f "${repodir}/config.sh" ]
 	then
@@ -54,11 +54,20 @@ gitup(){
 
 	printf "\n$w_l  ${REPO^^} Repository  : $g_l""$trunkurl\n""$re_"
 
+	#check shallow cloned repo
 	cd "${repodir}"
-	git reset --hard HEAD
-	git checkout --quiet master
-	git pull --quiet
-	git pull --quiet --tags
+	if [ ! -f "$(git rev-parse --git-dir)"/shallow ]
+	then
+		git reset --hard HEAD
+		git checkout --quiet master
+		git pull --quiet
+		git pull --quiet --tags
+	else
+		cd "$workdir"
+		branch="$(BRANCH)"
+		rm -rf "${repodir}"
+		git clone -c advice.detachedHead=false --quiet --depth="${s3cfg_vars[GIT_CLONE_DEPTH]}" --branch "$branch" "$trunkurl" "${repodir}"
+	fi
 
 	if [ -f "${repodir}/config.sh" ]
 	then
@@ -75,8 +84,8 @@ gitup(){
 
 _dialog_checkout1_git(){
 	rm -rf "${repodir}" 2>/dev/null
-	[ -z "$1" ] && commit=0 || commit="$1"
-	if [ "$commit" != "0" ]
+	[ -z "$1" ] && commit='master' || commit="$1"
+	if [ "$commit" != 'master' ]
 	then
 		_rev="-r $commit"
 		sc_text="Revision: $commit"
@@ -85,13 +94,37 @@ _dialog_checkout1_git(){
 		sc_text="$txt_latest"
 	fi
 
-	cd "$workdir" && git clone "$trunkurl" "${repodir}"
-	[ "$commit" != "0" ] && cd "${repodir}" && git -c advice.detachedHead=false checkout "$commit"
+	cd "$workdir" && gitclone "$commit"
 	if [ -f "${repodir}/config.sh" ]
 	then
 		reset_="$("${repodir}/config.sh" -R)"
 		printf "Revision: $(REVISION) done..."
 		[ -f "$workdir/${REPO^^}-IS-PATCHED" ] && rm -f "$workdir/${REPO^^}-IS-PATCHED"
 		_get_config_menu
+	fi
+}
+
+gitclone(){
+	if [ -z "${s3cfg_vars[GIT_CLONE_DEPTH]}" ] || [ "${s3cfg_vars[GIT_CLONE_DEPTH]}" == "0" ] || [ "$(REFTYPE "$1")" == 'sha' ]
+	then
+		#git full clone repo (slow)
+		git clone "$trunkurl" "${repodir}"
+		[ "$1" != "master" ] && cd "${repodir}" && git -c advice.detachedHead=false checkout "$1"
+	fi
+
+	if [ "${s3cfg_vars[GIT_CLONE_DEPTH]}" -gt "0" ]
+	then
+		if [ "$(REFTYPE "$1")" == 'sha' ]
+		then
+			#git shallow a existing full cloned repo
+			cd "${repodir}"
+			echo "$1" > .git/shallow
+			git reflog expire --expire=0
+			git prune
+			git prune-packed
+		else
+			#git shallow clone a repo (slow)
+			git clone -c advice.detachedHead=false --depth="${s3cfg_vars[GIT_CLONE_DEPTH]}" --branch "$1" "$trunkurl" "${repodir}"
+		fi
 	fi
 }
