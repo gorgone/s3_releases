@@ -46,7 +46,7 @@ _toolchain_config_menu(){
 	[ "$loadprofile" == "yes" ] && load_config
 
 	selected=$(
-	"$gui" "$st_" "$bt_" "$title_" --no-cancel --title " -[ $txt_config_menu$(TTAG) ]- " --menu " ADDONS :\n $(e_addons)\n\n PROTOCOLS :\n $(e_protocols)\n\n READERS :\n $(e_readers)\n\n CARD_READERS :\n $(e_card_readers)\n\n USE VARIABLES :\n $(echo $USESTRING| sed -e 's/^[ \t]*//')\n\n" 29 75 6 BACK "$txt_back_build" OSCAM_MODULE "$txt_module_configure" OSCAM_EXTRA "$txt_oscam_extra" BUILD_EXTRA "$txt_build_extra" SELECT_STAPI "select stapi" RESET "$txt_build_reset")
+	"$gui" "$st_" "$bt_" "$title_" --no-cancel --title " -[ $txt_config_menu$(TTAG) ]- " --menu " ADDONS :\n $(e_addons)\n\n PROTOCOLS :\n $(e_protocols)\n\n READERS :\n $(e_readers)\n\n CARD_READERS :\n $(e_card_readers)\n\n USE VARIABLES :\n $(echo $USESTRING| sed -e 's/^[ \t]*//')\n\n" 29 75 6 BACK "$txt_back_build" OSCAM_MODULE "$txt_module_configure" OSCAM_EXTRA "$txt_oscam_extra" BUILD_EXTRA "$txt_build_extra" SELECT_STAPI "$txt_stapi" RESET "$txt_build_reset")
 	[ $? = 255 ] && _toolchain_config_menu
 
 	case $selected in

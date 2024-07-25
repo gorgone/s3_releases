@@ -303,9 +303,9 @@ _oscam_extra_menu(){
 	check_smargo
 	unset MENU_OPTIONS
 
-	for e in "${!USE_vars[@]}"
+	for e in $(printf '%s\n' "${!USE_vars[@]}" | sort -u | xargs)
 	do
-		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_PATCH" ] && [ ! "$e" == "USE_LIBUSB" ] && [ ! "$e" == "USE_EXTRA" ] && \
+		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_PATCH" ] && [ ! "$e" == "USE_DIAG" ] && [ ! "$e" == "USE_EXTRA" ] && [ ! "$e" == "USE_CONFDIR" ] && [ ! "$e" == "USE_OSCAMNAME" ] && \
 		   [ ! "$e" == "USE_STATIC" ] && [ ! "$e" == "STATIC_LIBCRYPTO" ] && [ ! "$e" == "STATIC_SSL" ] && [ ! "$e" == "STATIC_LIBUSB" ] && [ ! "$e" == "STATIC_PCSC" ] && [ ! "$e" == "STATIC_LIBDVBCSA" ]
 		then
 			if [ "${#USE_vars[$e]}" -gt "4" ]
@@ -320,9 +320,9 @@ _oscam_extra_menu(){
 	oextra=$("$gui" "$st_" "$nc_" "$bt_" "$title_" --title "-[ Oscam EXTRA$(TTAG) ]-" "$cl_" " OPTIONS " 19 40 12 ${MENU_OPTIONS[@]});
 	[ $? = 255 ] && _toolchain_config_menu
 
-	for e in "${!USE_vars[@]}"
+	for e in $(printf '%s\n' "${!USE_vars[@]}" | sort -u | xargs)
 	do
-		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_PATCH" ] && [ ! "$e" == "USE_LIBUSB" ] && [ ! "$e" == "USE_EXTRA" ] && \
+		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_PATCH" ] && [ ! "$e" == "USE_DIAG" ] && [ ! "$e" == "USE_EXTRA" ] && [ ! "$e" == "USE_CONFDIR" ] && [ ! "$e" == "USE_OSCAMNAME" ] && \
 		   [ ! "$e" == "USE_STATIC" ] && [ ! "$e" == "STATIC_LIBCRYPTO" ] && [ ! "$e" == "STATIC_SSL" ] && [ ! "$e" == "STATIC_LIBUSB" ] && [ ! "$e" == "STATIC_PCSC" ] && [ ! "$e" == "STATIC_LIBDVBCSA" ]
 		then
 			ok=0
@@ -349,21 +349,24 @@ _build_extra_menu(){
 	us=
 	check_smargo
 	unset MENU_OPTIONS
-	for e in USE_TARGZ USE_PATCH USE_EXTRA USE_STATIC STATIC_LIBCRYPTO STATIC_SSL STATIC_LIBUSB STATIC_PCSC STATIC_LIBDVBCSA
+	for e in USE_PATCH USE_EXTRA USE_CONFDIR USE_OSCAMNAME USE_TARGZ USE_DIAG USE_STATIC STATIC_LIBCRYPTO STATIC_SSL STATIC_LIBUSB STATIC_PCSC STATIC_LIBDVBCSA
 	do
 		[ "${#USE_vars[$e]}" -gt "4" ] && MENU_OPTIONS+=( "$e" "$e=1" on ) || MENU_OPTIONS+=( "$e" "$e=1" off )
 	done
 	bextra=$("$gui" "$st_" "$nc_" "$bt_" "$title_" --title "-[ Build EXTRA$(TTAG) ]-" "$cl_" " OPTIONS " 17 45 3 ${MENU_OPTIONS[@]})
 	[ $? = 255 ] && _build_extra_menu
 	USE_vars[USE_PATCH]=
-	USE_vars[USE_TARGZ]=
-	USE_vars[USE_EXTRA]=
-	USE_vars[USE_STATIC]=
 	USE_vars[STATIC_LIBCRYPTO]=
 	USE_vars[STATIC_SSL]=
 	USE_vars[STATIC_LIBUSB]=
 	USE_vars[STATIC_PCSC]=
 	USE_vars[STATIC_LIBDVBCSA]=
+	USE_vars[USE_STATIC]=
+	USE_vars[USE_EXTRA]=
+	USE_vars[USE_CONFDIR]=
+	USE_vars[USE_OSCAMNAME]=
+	USE_vars[USE_TARGZ]=
+	USE_vars[USE_DIAG]=
 	for bex in $bextra
 	do
 		b=$(echo "$bex" | tr -d '"')
