@@ -235,7 +235,7 @@ if [ ${#USE_vars[USE_OSCAMNAME]} -gt 0 ]
 then
 	oscam_name=$(echo ${USE_vars[USE_OSCAMNAME]} |cut -d "=" -f2)
 else
-	_generate_oscam_name "$_toolchainname"
+	_generate_oscam_name "$_toolchainname" "$extra$buildtype"
 fi
 
 if [[ $oscam_name =~ -upx ]]
@@ -243,7 +243,6 @@ then
 	[ -f "$configdir/upx_option" ] && source "$configdir/upx_option"
 	COMP_LEVEL="COMP_LEVEL=$upx_c"
 fi 
-	oscam_name="$oscam_name$extra$buildtype"
 	_nl
 	USESTRING=${USE_vars[@]}
 	EXTRA_USE=$extra_use

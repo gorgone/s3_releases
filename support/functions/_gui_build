@@ -135,8 +135,7 @@ _gui_build(){
 	EXTRA_USE=$extra_use
 
 #todo add switch for verbose
-	_generate_oscam_name "$_toolchainname"
-	oscam_name="$oscam_name$extra$buildtype"
+	_generate_oscam_name "$_toolchainname" "$extra$buildtype"
 	targztmp="$(mktemp)"
 
 	if [[ $oscam_name =~ -upx ]]
