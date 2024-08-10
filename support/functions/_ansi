@@ -59,8 +59,10 @@ re_b='\033[49m' #resets only background color
 #sed replace
 W=$(echo -e '\033[0m')     #normal
 Y=$(echo -e '\033[1;33m')  #yellow
+YH=$(echo -e '\033[1;93m')  #yellow
 R=$(echo -e '\033[1;31m')  #red
 G=$(echo -e '\033[1;32m')  #green
+GH=$(echo -e '\033[1;92m')  #green
 P=$(echo -e '\033[1;35m')  #pink
 C=$(echo -e '\033[1;36m')  #cyan
 WH=$(echo -e '\033[1;37m') #lightgray
