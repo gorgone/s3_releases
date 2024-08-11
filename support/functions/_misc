@@ -486,6 +486,20 @@ check_streamrelay(){
 		fi
 	fi
 }
+check_signing(){
+	if [ -f "$configdir/sign" ]
+	then
+		source "$configdir/sign"
+		if [ -f "$x509cert" ] && [ -f "$privkey" ] && [ -f "$repodir/config.sh" ]
+		then
+			if [ "$("${repodir}/config.sh" --enabled WITH_SIGNING)" == "Y" ]
+			then
+				"${repodir}/config.sh" --add-cert "$x509cert" "$privkey"
+				printf "$YH\n |   SIGNING : use provided $(basename $x509cert) and $(basename $privkey) files"
+			fi
+		fi
+	fi
+}
 _reset_config(){
 	if [ -f "${repodir}/config.sh" ]
 	then
@@ -636,7 +650,6 @@ save_config(){
 		printf "usevars=\"$usevars\"\n" >>"$menudir/$_toolchainname.save"
 	fi
 };
-
 load_config(){
 	_stapi=
 	_stapi5=

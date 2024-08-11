@@ -150,6 +150,9 @@ _gui_build(){
 	fi
 	check_smargo
 
+#signing case
+	check_signing &>/dev/null
+
 #build
 	_sz
 	(ologo; _nl

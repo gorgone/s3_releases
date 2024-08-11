@@ -230,6 +230,9 @@ printf "$y_l\n |       set : ${cdtag}$w_l"
 
 	[ "${s3cfg_vars[USE_VERBOSE]}" == "1" ] && _verbose="V=1"
 
+#signing case
+	check_signing
+
 #build
 if [ ${#USE_vars[USE_OSCAMNAME]} -gt 0 ]
 then
