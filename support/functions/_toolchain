@@ -531,6 +531,7 @@ _check_compiler_capability(){
 		"c11") #checking if $CC supports -std=c11
 			echo "_Thread_local int x; int main(){x = 42; ; return 0;}" | "$(realpath -s $compilername)" -std=c11 -x c -o "/tmp/${check_filename}.chk" - &>"/tmp/${check_filename}.log";;
 		"neon") #checking if toolchain supports neon
+			[[ "$2" =~ android ]] && return 1
 			[[ "$2" =~ aarch64 ]] && mfpu='' || mfpu='-mfpu=neon'
 			echo -e "#include <arm_neon.h>\nint main(){return 0;}" | "$(realpath -s $compilername)" $mfpu -x c -o "/tmp/${check_filename}.chk" - &>"/tmp/${check_filename}.log";;
 		"altivec") #checking if toolchain supports altivec

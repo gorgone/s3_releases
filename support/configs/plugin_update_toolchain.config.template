@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="71";
+S3TUP_CONFIG_VERSION="72";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -57,18 +57,18 @@ ANDK_PKG_SHA1="$(curl --silent https://developer.android.com/ndk/downloads | gre
 ANDK_CONFIG_tasks=('clear; editor ".config"; echo -e "${y_l}${txt_s3tup_menu_edit_text}${re_}";'); # config command1
 ANDK_BUILD_tasks=('TOOLCHAIN="@TOOLCHAIN@";'); # build command1
 ANDK_BUILD_tasks+=('echo "Extracting prebuild toolchain "@ANDKSOURCE@/toolchains/llvm/prebuilt/linux-x86_64" from NDK to "@TOOLCHAIN@"..." | tee -a "@LOGFILE@" && rm -rf "@TOOLCHAIN@" | tee -a "@LOGFILE@" && cp -rf "@ANDKSOURCE@/toolchains/llvm/prebuilt/linux-x86_64/" "@TOOLCHAIN@" | tee -a "@LOGFILE@";'); # build command2
-ANDK_BUILD_tasks+=('cleanups="aarch64 arm i686 i386 riscv64 x86_64-w64 python3 .py pkgconfig ++ cmake test prebuilt_include bfd-plugins 2to3 share 21 22 23 24 25 26 27 28 29 30 31 32 33 34";'); # build command3
+ANDK_BUILD_tasks+=('cleanups="aarch64 arm i686 i386 riscv64 x86_64-w64 python3 .py pkgconfig ++ cmake test prebuilt_include bfd-plugins 2to3 share 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35";'); # build command3
 ANDK_BUILD_tasks+=('cleanups=${cleanups//$ANDK_ARCH/} && cleanups=${cleanups//$ANDK_API/};'); # build command4
 ANDK_BUILD_tasks+=('echo "Cleaning up extracted toolchain to save disk space..." | tee -a "@LOGFILE@" && for c in $cleanups; do find "@TOOLCHAIN@" -name "*$c*" ! -name "*libc++*" -exec rm -rf {} \; 2>/dev/null >>"@LOGFILE@"; 2>&1; done;'); # build command5
 ANDK_BUILD_tasks+=('rm -rf "$TOOLCHAIN/include" "$TOOLCHAIN/libexec" | tee -a "@LOGFILE@";'); # build command6
-ANDK_BUILD_tasks+=('echo "Creating symlinks to "$TOOLCHAIN/bin/clang", "$TOOLCHAIN/bin/llvm-ar", "$TOOLCHAIN/bin/llvm-ranlib"..." | tee -a "@LOGFILE@" && ln -rsf "$TOOLCHAIN/bin/armv7a-linux-androideabi${ANDK_API}-clang" "$TOOLCHAIN/bin/${ANDK_HOST}-gcc" && ln -rsf "$TOOLCHAIN/bin/llvm-ar" "$TOOLCHAIN/bin/${ANDK_HOST}-ar" && ln -rsf "$TOOLCHAIN/bin/llvm-ranlib" "$TOOLCHAIN/bin/${ANDK_HOST}-ranlib" | tee -a "@LOGFILE@";'); # build command7
+ANDK_BUILD_tasks+=('echo "Creating symlinks to "$TOOLCHAIN/bin/clang", "$TOOLCHAIN/bin/llvm-ar", "$TOOLCHAIN/bin/llvm-ranlib", "$TOOLCHAIN/bin/llvm-strip"..." | tee -a "@LOGFILE@" && ln -rsf "$TOOLCHAIN/bin/armv7a-linux-androideabi${ANDK_API}-clang" "$TOOLCHAIN/bin/${ANDK_HOST}-gcc" && ln -rsf "$TOOLCHAIN/bin/llvm-ar" "$TOOLCHAIN/bin/${ANDK_HOST}-ar" && ln -rsf "$TOOLCHAIN/bin/llvm-ranlib" "$TOOLCHAIN/bin/${ANDK_HOST}-ranlib" && ln -rsf "$TOOLCHAIN/bin/llvm-strip" "$TOOLCHAIN/bin/${ANDK_HOST}-strip" | tee -a "@LOGFILE@";'); # build command7
 ANDK_SETUP_tasks=('pushd "$dldir" >/dev/null && [ ! "$(sha1sum "$(basename "$ANDK_PKG_URL")" 2>/dev/null | cut -d " " -f 1)" == "$ANDK_PKG_SHA1" ] && curl "$ANDK_PKG_URL" -o "$(basename "$ANDK_PKG_URL")";'); # setup command1
 ANDK_SETUP_tasks+=('unzip -o -d "$ctdir" "$(basename "$ANDK_PKG_URL")" && popd >/dev/null;'); # setup command1
 ANDK_SETUP_tasks+=('mv --force "$(basename "$ANDK_PKG_URL" | cut -d "-" -f 1-3)" "@ANDKSOURCE@";'); # setup command2
 ANDK_SETUP_tasks+=('chmod -R 755 "@ANDKSOURCE@";'); # setup command3
 
 # Library build settings
-LIBS=(SSL_330 SSL_320 SSL_310 SSL_300 SSL_111 SSL_110 SSL_102 SSL_102B SSL_100 SSL_098 LIB_CURL LIB_USB LIB_USBB LIB_USB0 LIB_PCSC LIB_PCSCB LIB_CCID LIB_DVBCSA LIB_DVBC64 LIB_DVBC32 LIB_ZLIB); # List of ordered libraries. Only libraries in this list are available
+LIBS=(SSL_330 SSL_320 SSL_310 SSL_300 SSL_111 SSL_110 SSL_102 SSL_102B SSL_100 SSL_098 LIB_CURL LIB_USB LIB_USBB LIB_USB0 LIB_PCSC LIB_PCSCB LIB_CCID LIB_CCIDB LIB_DVBCSA LIB_DVBC64 LIB_DVBC32 LIB_ZLIB); # List of ordered libraries. Only libraries in this list are available
 LIBS_LIST_BETA="0"; # In(Ex)clude libraries defined as beta
 LIBS_AUTO_INTEGRATE="1"; # Automatically reintegrate libraries when rebuilding toolchains
 PKG_CONFIG_BIN="$(which pkg-config)"; #Make sure use host's pkg-config binary instead of cross toolchain's one
@@ -405,7 +405,7 @@ LIB_PCSCB_beta="0";
 LIB_PCSCB_name="PCSC-Lite";
 LIB_PCSCB_tag="";
 LIB_PCSCB_version="1.9.5";
-LIB_PCSCB_check="libpcsclite.pc";
+LIB_PCSCB_check="libpcsclite.pc $LIB_PCSCB_version";
 LIB_PCSCB_url="https://pcsclite.apdu.fr/files/pcsc-lite-1.9.5.tar.bz2";
 LIB_PCSCB_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_PCSCB_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
@@ -454,6 +454,35 @@ LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" ] && zip -j "$bdir/@HOST@@API@-lib
 LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" ] && zip -j "$bdir/@HOST@@API@-libccidtwin.zip" -xi "@PREFIX@/lib/pcsc/drivers/serial/libccidtwin.so";');
 LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" ] && zip -j "$bdir/@HOST@@API@-libccidplist.zip" -xi "@PREFIX@/lib/pcsc/drivers/ifd-ccid.bundle/Contents/Info.plist";');
 
+# CCID IFD Handler 1.5.5
+LIB_CCIDB="1";
+LIB_CCIDB_beta="0";
+LIB_CCIDB_name="CCID";
+LIB_CCIDB_tag="";
+LIB_CCIDB_version="1.5.5";
+LIB_CCIDB_check="libccid.pc $LIB_CCIDB_version";
+LIB_CCIDB_url="https://ccid.apdu.fr/files/ccid-$LIB_CCIDB_version.tar.bz2";
+LIB_CCIDB_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
+LIB_CCIDB_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
+LIB_CCIDB_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
+LIB_CCIDB_tasks+=('export CC=@CC@;');
+LIB_CCIDB_tasks+=('export PKG_CONFIG_PATH="$(find @PREFIX@ -name "pkgconfig" -type d)";');
+LIB_CCIDB_tasks+=('LIBUSB_LIBS="$($PKG_CONFIG_BIN --libs libusb-1.0)";');
+LIB_CCIDB_tasks+=('LIBUSB_CFLAGS="$($PKG_CONFIG_BIN --cflags libusb-1.0)";');
+LIB_CCIDB_tasks+=('PCSC_LIBS="$($PKG_CONFIG_BIN --libs libpcsclite)";');
+LIB_CCIDB_tasks+=('PCSC_CFLAGS="$($PKG_CONFIG_BIN --cflags libpcsclite)";');
+LIB_CCIDB_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
+LIB_CCIDB_tasks+=('[ "@TYPE@" == "android-ndk" ] && export LDFLAGS="-Wl,--exclude-libs=libclang_rt.builtins-arm-android.a";'); # https://android.googlesource.com/platform/bionic.git/+/master/libdl/Android.bp#62
+LIB_CCIDB_tasks+=('[ "@TYPE@" == "android-ndk" ] && LIBUSB_LIBS="-L@PREFIX@/lib/@HOST@/@API@ -lusb-1.0";');
+LIB_CCIDB_tasks+=('FLAGS="--enable-static";');
+LIB_CCIDB_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS --enable-twinserial --enable-usbdropdir="$($PKG_CONFIG_BIN libpcsclite --variable=usbdropdir)" --enable-serialconfdir="$($PKG_CONFIG_BIN libpcsclite --variable=serialconfdir)" PCSC_LIBS="${PCSC_LIBS}" PCSC_CFLAGS="${PCSC_CFLAGS}" LIBUSB_LIBS="${LIBUSB_LIBS}" LIBUSB_CFLAGS="${LIBUSB_CFLAGS}";');
+LIB_CCIDB_tasks+=('make -j@CPUS@;');
+LIB_CCIDB_tasks+=('make install;');
+LIB_CCIDB_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include/PCSC\nusbdropdir=@PREFIX@/lib/pcsc/drivers\nserialconfdir=@PREFIX@/etc/reader.conf.d\n\nName: CCID IFD Handler\nDescription: Generic USB CCID (Chip/Smart Card Interface Devices) and ICCD (Integrated Circuit(s) Card Devices) driver\nVersion: $LIB_CCIDB_version\nRequires: libusb libpcsclite" > "@PREFIX@/lib/pkgconfig/libccid.pc";');
+LIB_CCIDB_tasks+=('[ "@TYPE@" == "android-ndk" ] && zip -j "$bdir/@HOST@@API@-libccid.zip" -xi "@PREFIX@/lib/pcsc/drivers/ifd-ccid.bundle/Contents/Linux/libccid.so";');
+LIB_CCIDB_tasks+=('[ "@TYPE@" == "android-ndk" ] && zip -j "$bdir/@HOST@@API@-libccidtwin.zip" -xi "@PREFIX@/lib/pcsc/drivers/serial/libccidtwin.so";');
+LIB_CCIDB_tasks+=('[ "@TYPE@" == "android-ndk" ] && zip -j "$bdir/@HOST@@API@-libccidplist.zip" -xi "@PREFIX@/lib/pcsc/drivers/ifd-ccid.bundle/Contents/Info.plist";');
+
 # libdvbcsa 1.x (autodetecting bitslice)
 LIB_DVBCSA="1";
 LIB_DVBCSA_beta="0";
@@ -466,7 +495,7 @@ LIB_DVBCSA_url="https://github.com/oe-mirrors/libdvbcsa/archive/refs/heads/maste
 LIB_DVBCSA_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_DVBCSA_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_DVBCSA_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
-LIB_DVBCSA_tasks+=('[ "@TYPE@" == "android-ndk" ] && export CC=gcc || export CC=@CC@;');
+LIB_DVBCSA_tasks+=('export CC=@CC@;');
 LIB_DVBCSA_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
 LIB_DVBCSA_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@ @OPTIMIZATION@;');
 LIB_DVBCSA_tasks+=('make -j@CPUS@;');
@@ -488,7 +517,7 @@ LIB_DVBC64_url="https://github.com/oe-mirrors/libdvbcsa/archive/refs/heads/maste
 LIB_DVBC64_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_DVBC64_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_DVBC64_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
-LIB_DVBC64_tasks+=('[ "@TYPE@" == "android-ndk" ] && export CC=gcc || export CC=@CC@;');
+LIB_DVBC64_tasks+=('export CC=@CC@;');
 LIB_DVBC64_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
 LIB_DVBC64_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@ --enable-uint64;');
 LIB_DVBC64_tasks+=('make -j@CPUS@;');
@@ -510,7 +539,7 @@ LIB_DVBC32_url="https://github.com/oe-mirrors/libdvbcsa/archive/refs/heads/maste
 LIB_DVBC32_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_DVBC32_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_DVBC32_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
-LIB_DVBC32_tasks+=('[ "@TYPE@" == "android-ndk" ] && export CC=gcc || export CC=@CC@;');
+LIB_DVBC32_tasks+=('export CC=@CC@;');
 LIB_DVBC32_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
 LIB_DVBC32_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@ --enable-uint32;');
 LIB_DVBC32_tasks+=('make -j@CPUS@;');
@@ -538,3 +567,4 @@ LIB_ZLIB_tasks+=('./configure --prefix=@PREFIX@;');
 LIB_ZLIB_tasks+=('make -j@CPUS@;');
 LIB_ZLIB_tasks+=('make install;');
 LIB_ZLIB_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 -name "libz.*" -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
+LIB_ZLIB_tasks+=('[ "@TYPE@" == "android-ndk" ] && [ ! -f "@PREFIX@/lib/libz.so" ] && mv "@PREFIX@/lib/@HOST@/@API@/libz.so" "@PREFIX@/lib/@HOST@/@API@/libz.so.to_old"');

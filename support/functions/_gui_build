@@ -114,11 +114,11 @@ _gui_build(){
 
 #dynamic, static, mixed build
 	[ "$_toolchainname" == "native" ] && SEARCHDIR="$(ldconfig -v 2>/dev/null | grep -v ^$'\t' | awk -F':' '{print $1}')" || SEARCHDIR="$SYSROOT"
-	[ "${USE_vars[USE_LIBCRYPTO]}" == "USE_LIBCRYPTO=1" ] && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBCRYPTO]}" == "STATIC_LIBCRYPTO=1" ]	&& LIBCRYPTO_STATIC="LIBCRYPTO_LIB=$(find $SEARCHDIR -name "libcrypto.a" -type f -print -quit)"	&& ((statcount++))
-	[ "${USE_vars[USE_SSL]}" == "USE_SSL=1" ]             && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_SSL]}" == "STATIC_SSL=1" ]				&& SSL_STATIC="SSL_LIB=$(find $SEARCHDIR -name "libssl.a" -type f -print -quit)"					&& ((statcount++))
-	[ "${USE_vars[USE_LIBUSB]}" == "USE_LIBUSB=1" ]       && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBUSB]}" == "STATIC_LIBUSB=1" ]		&& LIBUSB_STATIC="LIBUSB_LIB=$(find $SEARCHDIR -name "libusb-1.0.a" -type f -print -quit)"		&& ((statcount++))
-	[ "${USE_vars[USE_PCSC]}" == "USE_PCSC=1" ]           && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_PCSC]}" == "STATIC_PCSC=1" ]			&& PCSC_STATIC="PCSC_LIB=$(find $SEARCHDIR -name "libpcsclite.a" -type f -print -quit)"			&& ((statcount++))
-	[ "${USE_vars[USE_LIBDVBCSA]}" == "USE_LIBDVBCSA=1" ] && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBDVBCSA]}" == "STATIC_LIBDVBCSA=1" ]	&& DVBCSA_STATIC="LIBDVBCSA_LIB=$(find $SEARCHDIR -name "libdvbcsa.a" -type f -print -quit)"		&& ((statcount++))
+	[ "${USE_vars[USE_LIBCRYPTO]}" == "USE_LIBCRYPTO=1" ] && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBCRYPTO]}" == "STATIC_LIBCRYPTO=1" ]	&& LIBCRYPTO_LIB="LIBCRYPTO_LIB=$(find $SEARCHDIR -name "libcrypto.a" -type f -print -quit)"	&& ((statcount++))
+	[ "${USE_vars[USE_SSL]}" == "USE_SSL=1" ]             && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_SSL]}" == "STATIC_SSL=1" ]				&& SSL_LIB="SSL_LIB=$(find $SEARCHDIR -name "libssl.a" -type f -print -quit)"					&& ((statcount++))
+	[ "${USE_vars[USE_LIBUSB]}" == "USE_LIBUSB=1" ]       && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBUSB]}" == "STATIC_LIBUSB=1" ]		&& { LIBUSB_LIB="LIBUSB_LIB=$(find $SEARCHDIR -name "libusb-1.0.a" -type f -print -quit)"; ((statcount++)); } || { [ "$_androidndkdir" == "1" ] && LIBUSB_LIB="LIBUSB_LIB=-lusb-1.0"; }
+	[ "${USE_vars[USE_PCSC]}" == "USE_PCSC=1" ]           && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_PCSC]}" == "STATIC_PCSC=1" ]			&& PCSC_LIB="PCSC_LIB=$(find $SEARCHDIR -name "libpcsclite.a" -type f -print -quit)"			&& ((statcount++))
+	[ "${USE_vars[USE_LIBDVBCSA]}" == "USE_LIBDVBCSA=1" ] && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBDVBCSA]}" == "STATIC_LIBDVBCSA=1" ]	&& LIBDVBCSA_LIB="LIBDVBCSA_LIB=$(find $SEARCHDIR -name "libdvbcsa.a" -type f -print -quit)"		&& ((statcount++))
 
 	if [ $statcount -ge 1 -a $statcount -lt $libcount ]
 	then
@@ -158,7 +158,7 @@ _gui_build(){
 	(ologo; _nl
 	timer_start
 	$_make -j"$cpus" \
-		"CONF_DIR=$_oscamconfdir_default" "OSCAM_BIN=$bdir/$oscam_name" "CC_OPTS=$co $cc_opts $extra_cc" "CC_WARN=$cc_warn" "EXTRA_LDFLAGS=$extra_ld" "EXTRA_CFLAGS=$extra_c" $EXTRA_USE $COMP_LEVEL "CROSS=$CROSS" $stapivar $USESTRING_ $LIBCRYPTO_STATIC $SSL_STATIC $LIBUSB_STATIC $PCSC_STATIC $DVBCSA_STATIC 2>&1 \
+		"CONF_DIR=$_oscamconfdir_default" "OSCAM_BIN=$bdir/$oscam_name" "CC_OPTS=$co $cc_opts $extra_cc" "CC_WARN=$cc_warn" "EXTRA_LDFLAGS=$extra_ld" "EXTRA_CFLAGS=$extra_c" $EXTRA_USE $COMP_LEVEL "CROSS=$CROSS" $stapivar $USESTRING_ $LIBCRYPTO_LIB $SSL_LIB $LIBUSB_LIB $PCSC_LIB $LIBDVBCSA_LIB 2>&1 \
 		|tee "$ldir/$log_name" \
 		|grep --line-buffered -v 'BFD\|^/' \
 		|grep --line-buffered '^CC\|^HOSTCC\|^GEN\|^CONF\|^RM\|^UPX\|^SIGN\|UseFlags\|  CONF_DIR =\|Binary\|LINK\|STRIP\|BUILD\|Addons\|Protocols\|Readers\|CardRdrs\|^/' \
