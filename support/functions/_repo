@@ -76,10 +76,10 @@ repopatch(){
 					SKIPPATHS=-p1
 				fi
 				sleep .5
-				if grep '${REPO^^} binary patch' "$pdir/$p" &>/dev/null; then
+				if grep 'GIT binary patch' "$pdir/$p" &>/dev/null; then
 					cd "${repodir}"
-					echo -e $Y"    binary patch detected, using git apply <-"$W
-					git apply --verbose $SKIPPATHS < "$pdir/$p" | tee -a "$patchlog"
+					echo -e $Y" binary patch detected, using git apply <-"$W
+					export LC_ALL=C; git apply --verbose $SKIPPATHS < "$pdir/$p" 2>&1 | tee -a "$patchlog" | sed -e "s/^Checking patch/$G checking > $WH/g;s/^Applied patch/$G patching > $WH/g;s/^Hunk/$P Hunk     > $Y/g;s/FAILED/$R FAILED/g; ;s/-- saving/$Y -- saving/g;"
 				else
 					patch -d${repodir}/ $SKIPPATHS < "$pdir/$p" | tee -a "$patchlog" | sed -e "s/^patching file/$G patching > $WH/g;s/^Hunk/$P Hunk     > $Y/g;s/FAILED/$R FAILED/g; ;s/-- saving/$Y -- saving/g;"
 				fi

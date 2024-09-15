@@ -70,9 +70,9 @@ _apply_menupatch(){
 					fi
 					if grep 'GIT binary patch' "$pdir/$e" &>/dev/null; then
 						printf "PATCH : binary patch detected, using git apply for $e"
-						git apply --verbose $SKIPPATHS < "$pdir/$e" >>"$patchlog" 2>/dev/null
+						git apply --verbose $SKIPPATHS < "$pdir/$e" &>>"$patchlog"
 					else
-						patch -f $SKIPPATHS < "$pdir/$e" >>"$patchlog" 2>/dev/null
+						patch -f $SKIPPATHS < "$pdir/$e" &>>"$patchlog"
 					fi
 					hunks=$(grep -c1 '^Hunk' "$patchlog")
 					fails=$(grep -c1 'hunks FAILED' "$patchlog")
@@ -135,9 +135,9 @@ _apply_consolepatch(){
 				fi
 				if grep 'GIT binary patch' "$pdir/$e" &>/dev/null; then
 					printf "$y_l\n |     PATCH : binary patch detected, using git apply for $e\n"
-					git apply --verbose $SKIPPATHS < "$pdir/$e" >>"$patchlog" 2>/dev/null
+					git apply --verbose $SKIPPATHS < "$pdir/$e" &>>"$patchlog"
 				else
-					patch -F 10 -f $SKIPPATHS < "$pdir/$e" >>"$patchlog" 2>/dev/null
+					patch -F 10 -f $SKIPPATHS < "$pdir/$e" &>>"$patchlog"
 				fi
 				hunks=$(grep -c1 "^Hunk" "$patchlog")
 				fails=$(grep -c1 "hunks FAILED" "$patchlog")
