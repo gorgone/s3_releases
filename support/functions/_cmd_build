@@ -139,8 +139,6 @@ _cmd_build(){
 					_dvbcsa="-libdvbcsa";;	# set libdvbcsa suffix to name
 			"USE_TARGZ=1")
 					s3cfg_vars[TARGZ]=1;;	# overwrite global
-			"USE_STATIC=1")
-					_make="make static";;
 			"USE_STAPI=1")
 					_stapi="-stapi"
 					[ -z "$stapi_lib_custom" ] && STAPI_LIB="STAPI_LIB=$sdir/stapi/liboscam_stapi.a" || STAPI_LIB="STAPI_LIB=$sdir/stapi/${stapi_lib_custom}"

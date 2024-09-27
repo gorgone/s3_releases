@@ -125,7 +125,6 @@ _gui_build(){
 		buildtype="-mixed"
 	elif [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o $statcount -ge 1 -a $libcount -ge 1 -a $statcount -eq $libcount ]
 	then
-		_make="make static"
 		buildtype="-static"
 	else
 		buildtype=""
