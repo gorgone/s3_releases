@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="73";
+S3TUP_CONFIG_VERSION="74";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -346,6 +346,7 @@ LIB_USBB_tasks+=('export CC=@CC@;');
 LIB_USBB_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
 LIB_USBB_tasks+=('[ "@TYPE@" == "android-ndk" ] && cp -f "android/config.h" "./config.h";');
 LIB_USBB_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="--enable-static --disable-shared --disable-udev --enable-gcc-hardening" || FLAGS="--disable-udev --enable-gcc-hardening";');
+LIB_USBB_tasks+=('[[ "@CC@" =~ "csky" ]] && echo "Patch: Add csky arch to config ..." && curl --silent $(decode "aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby9wYXRjaGVzL2d4YXBpL2xpYi1hZGQtY3NreS1jb25maWcucGF0Y2gK") | git apply -v;');
 LIB_USBB_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS;');
 LIB_USBB_tasks+=('make -j@CPUS@;');
 LIB_USBB_tasks+=('make install;');
@@ -418,6 +419,7 @@ LIB_PCSCB_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHA
 LIB_PCSCB_tasks+=('[ "@TYPE@" == "android-ndk" ] && LIBUSB_LIBS="-L@PREFIX@/lib/@HOST@/@API@ -lusb-1.0";');
 LIB_PCSCB_tasks+=('[ "@TYPE@" == "android-ndk" ] && LOG="LIBS=-llog" || LOG="";');
 LIB_PCSCB_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="--enable-static --disable-shared --disable-libudev $LOG" || FLAGS="--enable-static --disable-libudev";');
+LIB_PCSCB_tasks+=('[[ "@CC@" =~ "csky" ]] && echo "Patch: Add csky arch to config ..." && curl --silent $(decode "aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby9wYXRjaGVzL2d4YXBpL2xpYi1hZGQtY3NreS1jb25maWcucGF0Y2gK") | git apply -v;');
 LIB_PCSCB_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS --disable-polkit --disable-libsystemd --with-systemdsystemunitdir=@PREFIX@/lib/systemd/system LIBUSB_LIBS="${LIBUSB_LIBS}" LIBUSB_CFLAGS="${LIBUSB_CFLAGS}";');
 LIB_PCSCB_tasks+=('make -j@CPUS@;');
 LIB_PCSCB_tasks+=('make install;');
@@ -497,7 +499,9 @@ LIB_DVBCSA_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_DVBCSA_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 LIB_DVBCSA_tasks+=('export CC=@CC@;');
 LIB_DVBCSA_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
-LIB_DVBCSA_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@ @OPTIMIZATION@;');
+LIB_DVBCSA_tasks+=('./bootstrap;');
+LIB_DVBCSA_tasks+=('[[ "@CC@" =~ "csky" ]] && echo "Patch: Add csky arch to config ..." && curl --silent $(decode "aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby9wYXRjaGVzL2d4YXBpL2xpYi1hZGQtY3NreS1jb25maWcucGF0Y2gK") | git apply -v;');
+LIB_DVBCSA_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ @OPTIMIZATION@;');
 LIB_DVBCSA_tasks+=('make -j@CPUS@;');
 LIB_DVBCSA_tasks+=('make install;');
 LIB_DVBCSA_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n\nName: libdvbcsa\nDescription: libdvbcsa is a free and portable implementation of the DVB Common Scrambling algorithm with decryption and encryption capabilities\nVersion: 1.1.0-@BATCHSIZE@-@BITSLICE@\nCflags: -I\${includedir}" > "@PREFIX@/lib/pkgconfig/libdvbcsa.pc";');
@@ -519,7 +523,9 @@ LIB_DVBC64_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_DVBC64_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 LIB_DVBC64_tasks+=('export CC=@CC@;');
 LIB_DVBC64_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
-LIB_DVBC64_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@ --enable-uint64;');
+LIB_DVBC64_tasks+=('./bootstrap;');
+LIB_DVBC64_tasks+=('[[ "@CC@" =~ "csky" ]] && echo "Patch: Add csky arch to config ..." && curl --silent $(decode "aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby9wYXRjaGVzL2d4YXBpL2xpYi1hZGQtY3NreS1jb25maWcucGF0Y2gK") | git apply -v;');
+LIB_DVBC64_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ --enable-uint64;');
 LIB_DVBC64_tasks+=('make -j@CPUS@;');
 LIB_DVBC64_tasks+=('make install;');
 LIB_DVBC64_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n\nName: libdvbcsa\nDescription: libdvbcsa is a free and portable implementation of the DVB Common Scrambling algorithm with decryption and encryption capabilities\nVersion: $LIB_DVBC64_version\nCflags: -I\${includedir}" > "@PREFIX@/lib/pkgconfig/libdvbcsa.pc";');
@@ -541,7 +547,9 @@ LIB_DVBC32_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_DVBC32_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 LIB_DVBC32_tasks+=('export CC=@CC@;');
 LIB_DVBC32_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
-LIB_DVBC32_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@ --enable-uint32;');
+LIB_DVBC32_tasks+=('./bootstrap;');
+LIB_DVBC32_tasks+=('[[ "@CC@" =~ "csky" ]] && echo "Patch: Add csky arch to config ..." && curl --silent $(decode "aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby9wYXRjaGVzL2d4YXBpL2xpYi1hZGQtY3NreS1jb25maWcucGF0Y2gK") | git apply -v;');
+LIB_DVBC32_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ --enable-uint32;');
 LIB_DVBC32_tasks+=('make -j@CPUS@;');
 LIB_DVBC32_tasks+=('make install;');
 LIB_DVBC32_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n\nName: libdvbcsa\nDescription: libdvbcsa is a free and portable implementation of the DVB Common Scrambling algorithm with decryption and encryption capabilities\nVersion: $LIB_DVBC32_version\nCflags: -I\${includedir}" > "@PREFIX@/lib/pkgconfig/libdvbcsa.pc";');
