@@ -1,1 +1,1 @@
-upx_c=-1
+upx_c=--best
