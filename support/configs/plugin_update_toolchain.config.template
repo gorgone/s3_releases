@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="74";
+S3TUP_CONFIG_VERSION="75";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -95,7 +95,8 @@ SSL_330_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="@SSL_TARGET@ --api=3.0 
 SSL_330_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_330_tasks+=('make -j@CPUS@;');
 SSL_330_tasks+=('make install_sw;');
-SSL_330_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libcrypto.*" -o -name "libssl.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
+SSL_330_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libcrypto.*" -o -name "libssl.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \; || true;');
+SSL_330_tasks+=('mkdir "${SSL_330_name}-${SSL_330_version}" && find "@PREFIX@/../" -maxdepth 3 \( -name "libcrypto.so.3" -o -name "libssl.so.3" -o -name "libatomic.so.1" \) -exec cp -f "{}" "${SSL_330_name}-${SSL_330_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${SSL_330_name}-${SSL_330_version}";');
 
 # OpenSSL 3.2.x
 SSL_320="1";
@@ -119,7 +120,8 @@ SSL_320_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="@SSL_TARGET@ --api=3.0 
 SSL_320_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_320_tasks+=('make -j@CPUS@;');
 SSL_320_tasks+=('make install_sw;');
-SSL_320_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libcrypto.*" -o -name "libssl.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
+SSL_320_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libcrypto.*" -o -name "libssl.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \; || true;');
+SSL_320_tasks+=('mkdir "${SSL_320_name}-${SSL_320_version}" && find "@PREFIX@/../" -maxdepth 3 \( -name "libcrypto.so.3" -o -name "libssl.so.3" -o -name "libatomic.so.1" \) -exec cp -f "{}" "${SSL_320_name}-${SSL_320_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${SSL_320_name}-${SSL_320_version}";');
 
 # OpenSSL 3.1.x
 SSL_310="1";
@@ -143,7 +145,8 @@ SSL_310_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="@SSL_TARGET@ --api=3.0 
 SSL_310_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_310_tasks+=('make -j@CPUS@;');
 SSL_310_tasks+=('make install_sw;');
-SSL_310_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libcrypto.*" -o -name "libssl.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
+SSL_310_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libcrypto.*" -o -name "libssl.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \; || true;');
+SSL_310_tasks+=('mkdir "${SSL_310_name}-${SSL_310_version}" && find "@PREFIX@/../" -maxdepth 3 \( -name "libcrypto.so.3" -o -name "libssl.so.3" -o -name "libatomic.so.1" \) -exec cp -f "{}" "${SSL_310_name}-${SSL_310_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${SSL_310_name}-${SSL_310_version}";');
 
 # OpenSSL 3.0.x
 SSL_300="1";
@@ -167,7 +170,8 @@ SSL_300_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="@SSL_TARGET@ --api=3.0 
 SSL_300_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_300_tasks+=('make -j@CPUS@;');
 SSL_300_tasks+=('make install_sw;');
-SSL_300_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libcrypto.*" -o -name "libssl.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
+SSL_300_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libcrypto.*" -o -name "libssl.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \; || true;');
+SSL_300_tasks+=('mkdir "${SSL_300_name}-${SSL_300_version}" && find "@PREFIX@/../" -maxdepth 3 \( -name "libcrypto.so.3" -o -name "libssl.so.3" -o -name "libatomic.so.1" \) -exec cp -f "{}" "${SSL_300_name}-${SSL_300_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${SSL_300_name}-${SSL_300_version}";');
 
 # OpenSSL 1.1.1
 SSL_111="1";
@@ -190,7 +194,8 @@ SSL_111_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="@SSL_TARGET@ --api=1.1.
 SSL_111_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_111_tasks+=('make -j@CPUS@;');
 SSL_111_tasks+=('make install_sw;');
-SSL_111_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libcrypto.*" -o -name "libssl.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
+SSL_111_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libcrypto.*" -o -name "libssl.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \; || true;');
+SSL_111_tasks+=('mkdir "${SSL_111_name}-${SSL_111_version}" && find "@PREFIX@" -maxdepth 2 \( -name "libcrypto.so.1.1" -o -name "libssl.so.1.1" \) -exec cp -af "{}" "${SSL_111_name}-${SSL_111_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${SSL_111_name}-${SSL_111_version}";');
 
 # OpenSSL 1.1.0
 SSL_110="1";
@@ -210,6 +215,7 @@ SSL_110_tasks+=('[[ "@CC@" =~ "atom" ]] && FLAGS+=" no-threads";');
 SSL_110_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_110_tasks+=('make -j@CPUS@;');
 SSL_110_tasks+=('make install_sw;');
+SSL_110_tasks+=('mkdir "${SSL_110_name}-${SSL_110_version}" && find "@PREFIX@" -maxdepth 2 \( -name "libcrypto.so.1.1" -o -name "libssl.so.1.1" \) -exec cp -af "{}" "${SSL_110_name}-${SSL_110_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${SSL_110_name}-${SSL_110_version}";');
 
 # OpenSSL 1.0.2
 SSL_102="1";
@@ -229,6 +235,7 @@ SSL_102_tasks+=('FLAGS="linux-generic32 shared";');
 SSL_102_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_102_tasks+=('make -j@CPUS@;');
 SSL_102_tasks+=('make install SHLIB_VERSION_NUMBER=1.0.2 SHLIB_MINOR=0.2;');
+SSL_102_tasks+=('mkdir "${SSL_102_name}-${SSL_102_version}" && find "@PREFIX@" -maxdepth 2 \( -name "libcrypto.so.1.0.2" -o -name "libssl.so.1.0.2" \) -exec cp -af "{}" "${SSL_102_name}-${SSL_102_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${SSL_102_name}-${SSL_102_version}";');
 
 # OpenSSL 1.0.2 as 1.0.0
 SSL_102B_hint="OpenSSL 1.0.2 variant to create binaries\n\t\twith version 1.0.0 in its filename.\n\t\tUse it e.g. for fritzbox toolchains!";
@@ -250,6 +257,7 @@ SSL_102B_tasks+=('FLAGS="linux-generic32 shared";');
 SSL_102B_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_102B_tasks+=('make -j@CPUS@;');
 SSL_102B_tasks+=('make install;');
+SSL_102B_tasks+=('mkdir "${SSL_102B_name}-${SSL_102B_version}" && find "@PREFIX@" -maxdepth 2 \( -name "libcrypto.so.1.0.0" -o -name "libssl.so.1.0.0" \) -exec cp -af "{}" "${SSL_102B_name}-${SSL_102B_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${SSL_102B_name}-${SSL_102B_version}";');
 
 # OpenSSL 1.0.0
 SSL_100="1";
@@ -269,6 +277,7 @@ SSL_100_tasks+=('[[ "@CC@" =~ "musl" ]] && echo "Apply the musl libc patch to av
 SSL_100_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_100_tasks+=('make -j@CPUS@;');
 SSL_100_tasks+=('make install;');
+SSL_100_tasks+=('mkdir "${SSL_100_name}-${SSL_100_version}" && find "@PREFIX@" -maxdepth 2 \( -name "libcrypto.so.1.0.0" -o -name "libssl.so.1.0.0" \) -exec cp -af "{}" "${SSL_100_name}-${SSL_100_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${SSL_100_name}-${SSL_100_version}";');
 
 # OpenSSL 0.9.8
 SSL_098="1";
@@ -288,6 +297,7 @@ SSL_098_tasks+=('[[ "@CC@" =~ "musl" ]] && echo "Apply the musl libc patch to av
 SSL_098_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_098_tasks+=('make -j@CPUS@;');
 SSL_098_tasks+=('make install;');
+SSL_098_tasks+=('mkdir "${SSL_098_name}-${SSL_098_version}" && find "@PREFIX@" -maxdepth 2 \( -name "libcrypto.so.0.9.8" -o -name "libssl.so.0.9.8" \) -exec cp -af "{}" "${SSL_098_name}-${SSL_098_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${SSL_098_name}-${SSL_098_version}";');
 
 # libcurl
 LIB_CURL="1";
@@ -307,7 +317,8 @@ LIB_CURL_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="--with-openssl --witho
 LIB_CURL_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS;');
 LIB_CURL_tasks+=('make -j@CPUS@;');
 LIB_CURL_tasks+=('make install;');
-LIB_CURL_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 -name "libcurl.*" -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
+LIB_CURL_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 -name "libcurl.*" -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \; || true;');
+LIB_CURL_tasks+=('mkdir "${LIB_CURL_name}-${LIB_CURL_version}" && find "@PREFIX@" -maxdepth 2 -name "libcurl.so*" -exec cp -af "{}" "${LIB_CURL_name}-${LIB_CURL_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${LIB_CURL_name}-${LIB_CURL_version}";');
 
 # libusb
 LIB_USB="1";
@@ -329,7 +340,8 @@ LIB_USB_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="--enable-static --disab
 LIB_USB_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS;');
 LIB_USB_tasks+=('make -j@CPUS@;');
 LIB_USB_tasks+=('make install;');
-LIB_USB_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 -name "libusb-1.0.*" -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
+LIB_USB_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 -name "libusb-1.0.*" -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \; || true;');
+LIB_USB_tasks+=('mkdir "${LIB_USB_name}-${LIB_USB_version}" && find "@PREFIX@" -maxdepth 2 -name "libusb-1.0.so*" -exec cp -af "{}" "${LIB_USB_name}-${LIB_USB_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${LIB_USB_name}-${LIB_USB_version}";');
 
 # libusb 1.0.23
 LIB_USBB="1";
@@ -350,7 +362,8 @@ LIB_USBB_tasks+=('[[ "@CC@" =~ "csky" ]] && echo "Patch: Add csky arch to config
 LIB_USBB_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS;');
 LIB_USBB_tasks+=('make -j@CPUS@;');
 LIB_USBB_tasks+=('make install;');
-LIB_USBB_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 -name "libusb-1.0.*" -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
+LIB_USBB_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 -name "libusb-1.0.*" -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \; || true;');
+LIB_USBB_tasks+=('mkdir "${LIB_USBB_name}-${LIB_USBB_version}" && find "@PREFIX@" -maxdepth 2 -name "libusb-1.0.so*" -exec cp -af "{}" "${LIB_USBB_name}-${LIB_USBB_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${LIB_USBB_name}-${LIB_USBB_version}";');
 
 # libusb 0.1.12
 LIB_USB0="1";
@@ -359,7 +372,7 @@ LIB_USB0_name="libusb";
 LIB_USB0_tag="";
 LIB_USB0_version="0.1.12";
 LIB_USB0_check="libusb.pc";
-LIB_USB0_url="http://downloads.sourceforge.net/libusb/libusb-0.1.12.tar.gz";
+LIB_USB0_url="https://repository.timesys.com/buildsources/l/libusb/libusb-0.1.12/libusb-0.1.12.tar.gz";
 LIB_USB0_tasks=('echo "Patch 1: Handle compile failures with GCC 7+..." && curl --silent https://sources.debian.org/data/main/libu/libusb/2:0.1.12-32/debian/patches/12_ENAMETOOLONG.diff | git apply -v;');
 LIB_USB0_tasks+=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_USB0_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
@@ -369,6 +382,7 @@ LIB_USB0_tasks+=('FLAGS="--disable-udev";');
 LIB_USB0_tasks+=('./configure --prefix=@PREFIX@ --host=@HOST@ $FLAGS;');
 LIB_USB0_tasks+=('make -j@CPUS@;');
 LIB_USB0_tasks+=('make install;');
+LIB_USB0_tasks+=('mkdir "${LIB_USB0_name}-${LIB_USB0_version}" && find "@PREFIX@" -maxdepth 2 -name "libusb-0.1.so*" -exec cp -af "{}" "${LIB_USB0_name}-${LIB_USB0_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${LIB_USB0_name}-${LIB_USB0_version}";');
 
 # PCSC-Lite
 LIB_PCSC="1";
@@ -399,6 +413,9 @@ LIB_PCSC_tasks+=('make install;');
 LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 -name "libpcsc*" -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
 LIB_PCSC_tasks+=('@VALIDATE@ "PCSC";');
 LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" ] && zip -j "$bdir/@HOST@@API@-pcscd.zip" -xi "@PREFIX@/sbin/pcscd";');
+LIB_PCSC_tasks+=('git clone https://github.com/LudovicRousseau/pcsc-tools.git; cd pcsc-tools;');
+LIB_PCSC_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@; make -j@CPUS@; make install;');
+LIB_PCSC_tasks+=('mkdir "${LIB_PCSC_name}-${LIB_PCSC_version}" && find "@PREFIX@" -maxdepth 2 \( -name "libpcsclite.so*" -o -name "libpcscspy.so*" -o -name "pcsc_scan" \) -exec cp -af "{}" "${LIB_PCSC_name}-${LIB_PCSC_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${LIB_PCSC_name}-${LIB_PCSC_version}";');
 
 # PCSC-Lite 1.9.5
 LIB_PCSCB="1";
@@ -426,6 +443,9 @@ LIB_PCSCB_tasks+=('make install;');
 LIB_PCSCB_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 -name "libpcsc*" -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
 LIB_PCSCB_tasks+=('@VALIDATE@ "PCSC";');
 LIB_PCSCB_tasks+=('[ "@TYPE@" == "android-ndk" ] && zip -j "$bdir/@HOST@@API@-pcscd.zip" -xi "@PREFIX@/sbin/pcscd";');
+LIB_PCSCB_tasks+=('git clone https://github.com/LudovicRousseau/pcsc-tools.git; cd pcsc-tools;');
+LIB_PCSCB_tasks+=('./bootstrap && ./configure --prefix=@PREFIX@ --host=@HOST@; make -j@CPUS@; make install;');
+LIB_PCSCB_tasks+=('mkdir "${LIB_PCSCB_name}-${LIB_PCSCB_version}" && find "@PREFIX@" -maxdepth 2 \( -name "libpcsclite.so*" -o -name "libpcscspy.so*" -o -name "pcsc_scan" \) -exec cp -af "{}" "${LIB_PCSCB_name}-${LIB_PCSCB_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${LIB_PCSCB_name}-${LIB_PCSCB_version}";');
 
 # CCID IFD Handler
 LIB_CCID="1";
@@ -455,6 +475,7 @@ LIB_CCID_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "
 LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" ] && zip -j "$bdir/@HOST@@API@-libccid.zip" -xi "@PREFIX@/lib/pcsc/drivers/ifd-ccid.bundle/Contents/Linux/libccid.so";');
 LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" ] && zip -j "$bdir/@HOST@@API@-libccidtwin.zip" -xi "@PREFIX@/lib/pcsc/drivers/serial/libccidtwin.so";');
 LIB_CCID_tasks+=('[ "@TYPE@" == "android-ndk" ] && zip -j "$bdir/@HOST@@API@-libccidplist.zip" -xi "@PREFIX@/lib/pcsc/drivers/ifd-ccid.bundle/Contents/Info.plist";');
+LIB_CCID_tasks+=('mkdir "${LIB_CCID_name}-${LIB_CCID_version}" && find "@PREFIX@/lib/pcsc/drivers/" -type f -exec cp -af "{}" "${LIB_CCID_name}-${LIB_CCID_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${LIB_CCID_name}-${LIB_CCID_version}";');
 
 # CCID IFD Handler 1.5.5
 LIB_CCIDB="1";
@@ -484,6 +505,7 @@ LIB_CCIDB_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e 
 LIB_CCIDB_tasks+=('[ "@TYPE@" == "android-ndk" ] && zip -j "$bdir/@HOST@@API@-libccid.zip" -xi "@PREFIX@/lib/pcsc/drivers/ifd-ccid.bundle/Contents/Linux/libccid.so";');
 LIB_CCIDB_tasks+=('[ "@TYPE@" == "android-ndk" ] && zip -j "$bdir/@HOST@@API@-libccidtwin.zip" -xi "@PREFIX@/lib/pcsc/drivers/serial/libccidtwin.so";');
 LIB_CCIDB_tasks+=('[ "@TYPE@" == "android-ndk" ] && zip -j "$bdir/@HOST@@API@-libccidplist.zip" -xi "@PREFIX@/lib/pcsc/drivers/ifd-ccid.bundle/Contents/Info.plist";');
+LIB_CCIDB_tasks+=('mkdir "${LIB_CCIDB_name}-${LIB_CCIDB_version}" && find "@PREFIX@/lib/pcsc/drivers/" -type f -exec cp -af "{}" "${LIB_CCIDB_name}-${LIB_CCIDB_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${LIB_CCIDB_name}-${LIB_CCIDB_version}";');
 
 # libdvbcsa 1.x (autodetecting bitslice)
 LIB_DVBCSA="1";
@@ -506,8 +528,8 @@ LIB_DVBCSA_tasks+=('make -j@CPUS@;');
 LIB_DVBCSA_tasks+=('make install;');
 LIB_DVBCSA_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n\nName: libdvbcsa\nDescription: libdvbcsa is a free and portable implementation of the DVB Common Scrambling algorithm with decryption and encryption capabilities\nVersion: 1.1.0-@BATCHSIZE@-@BITSLICE@\nCflags: -I\${includedir}" > "@PREFIX@/lib/pkgconfig/libdvbcsa.pc";');
 LIB_DVBCSA_tasks+=('rm -f "@PREFIX@/lib/${LIB_DVBCSA_name}.so.1.1.0-"*;');
-LIB_DVBCSA_tasks+=('zip -jy9FS "$bdir/@HOST@@API@-${LIB_DVBCSA_name}-1.1.0-@BATCHSIZE@-@BITSLICE@.zip" -xi "@PREFIX@/lib/libdvbcsa.so"*;');
-LIB_DVBCSA_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libdvbcsa.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
+LIB_DVBCSA_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libdvbcsa.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \; || true;');
+LIB_DVBCSA_tasks+=('mkdir "${LIB_DVBCSA_name}-1.1.0-@BATCHSIZE@-@BITSLICE@" && find "@PREFIX@" -maxdepth 2 -name "libdvbcsa.so*" -exec cp -af "{}" "${LIB_DVBCSA_name}-1.1.0-@BATCHSIZE@-@BITSLICE@" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${LIB_DVBCSA_name}-1.1.0-@BATCHSIZE@-@BITSLICE@";');
 
 # libdvbcsa 1.x (Use native 64 bits integers for bitslice)
 LIB_DVBC64="1";
@@ -530,8 +552,8 @@ LIB_DVBC64_tasks+=('make -j@CPUS@;');
 LIB_DVBC64_tasks+=('make install;');
 LIB_DVBC64_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n\nName: libdvbcsa\nDescription: libdvbcsa is a free and portable implementation of the DVB Common Scrambling algorithm with decryption and encryption capabilities\nVersion: $LIB_DVBC64_version\nCflags: -I\${includedir}" > "@PREFIX@/lib/pkgconfig/libdvbcsa.pc";');
 LIB_DVBC64_tasks+=('rm -f "@PREFIX@/lib/${LIB_DVBC64_name}.so.1.1.0-"*;');
-LIB_DVBC64_tasks+=('zip -jy9FS "$bdir/@HOST@@API@-${LIB_DVBC64_name}-lib-${LIB_DVBC64_version}.zip" -xi "@PREFIX@/lib/libdvbcsa.so"*;');
-LIB_DVBC64_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libdvbcsa.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
+LIB_DVBC64_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libdvbcsa.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \; || true;');
+LIB_DVBC64_tasks+=('mkdir "${LIB_DVBC64_name}-${LIB_DVBC64_version}" && find "@PREFIX@" -maxdepth 2 -name "libdvbcsa.so*" -exec cp -af "{}" "${LIB_DVBC64_name}-${LIB_DVBC64_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${LIB_DVBC64_name}-${LIB_DVBC64_version}";');
 
 # libdvbcsa 1.x (Use native 32 bits integers for bitslice)
 LIB_DVBC32="1";
@@ -554,8 +576,8 @@ LIB_DVBC32_tasks+=('make -j@CPUS@;');
 LIB_DVBC32_tasks+=('make install;');
 LIB_DVBC32_tasks+=('[ $? -eq 0 ] && mkdir -p "@PREFIX@/lib/pkgconfig" && echo -e "prefix=@PREFIX@\nexec_prefix=\${prefix}\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n\nName: libdvbcsa\nDescription: libdvbcsa is a free and portable implementation of the DVB Common Scrambling algorithm with decryption and encryption capabilities\nVersion: $LIB_DVBC32_version\nCflags: -I\${includedir}" > "@PREFIX@/lib/pkgconfig/libdvbcsa.pc";');
 LIB_DVBC32_tasks+=('rm -f "@PREFIX@/lib/${LIB_DVBC32_name}.so.1.1.0-"*;');
-LIB_DVBC32_tasks+=('zip -jy9FS "$bdir/@HOST@@API@-${LIB_DVBC32_name}-lib-${LIB_DVBC32_version}.zip" -xi "@PREFIX@/lib/libdvbcsa.so"*;');
-LIB_DVBC32_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libdvbcsa.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
+LIB_DVBC32_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libdvbcsa.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \; || true;');
+LIB_DVBC32_tasks+=('mkdir "${LIB_DVBC32_name}-${LIB_DVBC32_version}" && find "@PREFIX@" -maxdepth 2 -name "libdvbcsa.so*" -exec cp -af "{}" "${LIB_DVBC32_name}-${LIB_DVBC32_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${LIB_DVBC32_name}-${LIB_DVBC32_version}";');
 
 # zlib
 LIB_ZLIB="1";
@@ -574,5 +596,6 @@ LIB_ZLIB_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/@HOST@/@AP
 LIB_ZLIB_tasks+=('./configure --prefix=@PREFIX@;');
 LIB_ZLIB_tasks+=('make -j@CPUS@;');
 LIB_ZLIB_tasks+=('make install;');
-LIB_ZLIB_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 -name "libz.*" -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \;;');
-LIB_ZLIB_tasks+=('[ "@TYPE@" == "android-ndk" ] && [ ! -f "@PREFIX@/lib/libz.so" ] && mv "@PREFIX@/lib/@HOST@/@API@/libz.so" "@PREFIX@/lib/@HOST@/@API@/libz.so.to_old"');
+LIB_ZLIB_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 -name "libz.*" -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \; || true;');
+LIB_ZLIB_tasks+=('[ "@TYPE@" == "android-ndk" ] && [ ! -f "@PREFIX@/lib/libz.so" ] && mv "@PREFIX@/lib/@HOST@/@API@/libz.so" "@PREFIX@/lib/@HOST@/@API@/libz.so.to_old" || true;');
+LIB_ZLIB_tasks+=('mkdir "${LIB_ZLIB_name}-${LIB_ZLIB_version}" && find "@PREFIX@" -maxdepth 2 -name "libz.so*" -exec cp -af "{}" "${LIB_ZLIB_name}-${LIB_ZLIB_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${LIB_ZLIB_name}-${LIB_ZLIB_version}";');
