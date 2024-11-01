@@ -167,13 +167,9 @@ _dialog_checkout1(){
 REVISION(){
 	if [ -d "${repodir}" ]; then
 		if cd "${repodir}"; then
-			./config.sh --oscam-revision
+			./config.sh --oscam-version | cut -d '-' -f 2-
 		fi
 	fi
-};
-
-EMU(){
-	echo $(REVISION) | awk -F'-' '{printf $2}'
 };
 
 COMMIT(){

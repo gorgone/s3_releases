@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="76";
+S3TUP_CONFIG_VERSION="77";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -95,7 +95,7 @@ SSL_330_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_330_tasks+=('make -j@CPUS@;');
 SSL_330_tasks+=('make install_sw;');
 SSL_330_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libcrypto.*" -o -name "libssl.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \; || true;');
-SSL_330_tasks+=('mkdir "${SSL_330_name}-${SSL_330_version}" && find "@PREFIX@/../" -maxdepth 3 \( -name "libcrypto.so.3" -o -name "libssl.so.3" \) -exec cp -f "{}" "${SSL_330_name}-${SSL_330_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${SSL_330_name}-${SSL_330_version}";');
+SSL_330_tasks+=('mkdir "${SSL_330_name}-${SSL_330_version}" && find "@PREFIX@" -maxdepth 2 \( -name "libcrypto.so.3" -o -name "libssl.so.3" \) -exec cp -f "{}" "${SSL_330_name}-${SSL_330_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${SSL_330_name}-${SSL_330_version}";');
 
 # OpenSSL 3.2.x
 SSL_320="1";
@@ -119,7 +119,7 @@ SSL_320_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_320_tasks+=('make -j@CPUS@;');
 SSL_320_tasks+=('make install_sw;');
 SSL_320_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libcrypto.*" -o -name "libssl.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \; || true;');
-SSL_320_tasks+=('mkdir "${SSL_320_name}-${SSL_320_version}" && find "@PREFIX@/../" -maxdepth 3 \( -name "libcrypto.so.3" -o -name "libssl.so.3" \) -exec cp -f "{}" "${SSL_320_name}-${SSL_320_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${SSL_320_name}-${SSL_320_version}";');
+SSL_320_tasks+=('mkdir "${SSL_320_name}-${SSL_320_version}" && find "@PREFIX@" -maxdepth 2 \( -name "libcrypto.so.3" -o -name "libssl.so.3" \) -exec cp -f "{}" "${SSL_320_name}-${SSL_320_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${SSL_320_name}-${SSL_320_version}";');
 
 # OpenSSL 3.1.x
 SSL_310="1";
@@ -143,7 +143,7 @@ SSL_310_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_310_tasks+=('make -j@CPUS@;');
 SSL_310_tasks+=('make install_sw;');
 SSL_310_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libcrypto.*" -o -name "libssl.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \; || true;');
-SSL_310_tasks+=('mkdir "${SSL_310_name}-${SSL_310_version}" && find "@PREFIX@/../" -maxdepth 3 \( -name "libcrypto.so.3" -o -name "libssl.so.3" \) -exec cp -f "{}" "${SSL_310_name}-${SSL_310_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${SSL_310_name}-${SSL_310_version}";');
+SSL_310_tasks+=('mkdir "${SSL_310_name}-${SSL_310_version}" && find "@PREFIX@" -maxdepth 2 \( -name "libcrypto.so.3" -o -name "libssl.so.3" \) -exec cp -f "{}" "${SSL_310_name}-${SSL_310_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${SSL_310_name}-${SSL_310_version}";');
 
 # OpenSSL 3.0.x
 SSL_300="1";
@@ -167,7 +167,7 @@ SSL_300_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
 SSL_300_tasks+=('make -j@CPUS@;');
 SSL_300_tasks+=('make install_sw;');
 SSL_300_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libcrypto.*" -o -name "libssl.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \; || true;');
-SSL_300_tasks+=('mkdir "${SSL_300_name}-${SSL_300_version}" && find "@PREFIX@/../" -maxdepth 3 \( -name "libcrypto.so.3" -o -name "libssl.so.3" \) -exec cp -f "{}" "${SSL_300_name}-${SSL_300_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${SSL_300_name}-${SSL_300_version}";');
+SSL_300_tasks+=('mkdir "${SSL_300_name}-${SSL_300_version}" && find "@PREFIX@" -maxdepth 2 \( -name "libcrypto.so.3" -o -name "libssl.so.3" \) -exec cp -f "{}" "${SSL_300_name}-${SSL_300_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${SSL_300_name}-${SSL_300_version}";');
 
 # OpenSSL 1.1.1
 SSL_111="1";
