@@ -220,6 +220,6 @@ TTAG(){
 	if [ -v SOURCE ]; then
 		 printf " $SOURCE"
 	else
-		[ -f "$workdir/EMU_ON" ] && printf " EMU" || printf ""
+		printf ""
 	fi
 }
