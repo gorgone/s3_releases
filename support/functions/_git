@@ -84,7 +84,7 @@ gitup(){
 
 _dialog_checkout1_git(){
 	rm -rf "${repodir}" 2>/dev/null
-	[ -z "$1" ] && commit='master' || commit="$1"
+	[ -z "$1" -o "$1" == "0" ] && commit='master' || commit="$1"
 	if [ "$commit" != 'master' ]
 	then
 		_rev="-r $commit"
