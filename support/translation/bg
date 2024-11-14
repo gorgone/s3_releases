@@ -26,12 +26,13 @@ txt_found='открити'
 txt_create='създай'
 txt_conf='конфигурация'
 txt_extracting='извличане ' #10 chars
-txt_checking='checking';
+txt_checking='проверка'
 txt_wait='изчакайте...  '
 txt_existing='съществува'
 txt_profiles='профили'
 txt_not_found='не е намерен'
 txt_n_installed='не е инсталиран'
+txt_no_download='не е наличен чрез download'
 txt_back_main="обратно към основно меню"
 txt_too_old='(твърде стар или не се поддържа)'
 txt_selected='избран '
@@ -39,10 +40,10 @@ txt_update='опреснява'
 txt_tc="Toolchain"
 txt_tpl="Шаблон"
 txt_lib="Библиотека"
+txt_repo="Репозитори"
+txt_branch="Клон"
+txt_proto="Протокол"
 txt_ssh_profiles="SSH $txt_profiles"
-txt_repo="Repository"
-txt_branch="Branch"
-txt_proto="Protocol"
 
 # menu txt
 txt_start_menu='Главно меню'
@@ -52,27 +53,27 @@ txt_main_revision="\n локалната ${REPO^^} ревизия е : r"
 
 # help txt
 txt_help1="започва с"
-txt_help2="Параметрите на командния ред са"
+txt_help2="Параметрите на команден ред са"
 txt_help3="[ENTER] да продължиш..."
 
 # firstmenu ################################################
 txt_firstmenu_continue="продължи с локалния ${REPO^^}"
-   txt_firstmenu_chose="зареди различен ${REPO^^} Revision "
-   txt_firstmenu_cedit="старт конфигурационния редактор"
+   txt_firstmenu_chose="зареди различна ${REPO^^} Ревизия  "
+   txt_firstmenu_cedit="старт конфигурац. редактор"
    txt_firstmenu_tcupdate="старт опресняване на toolchain"
-    txt_firstmenu_lang="ръчен избор на системен език"
+    txt_firstmenu_lang="ръчен избор на системен език    "
     txt_firstmenu_exit="затвори simplebuild сега"
 
 # _toolchain_config_menu ###################################
      txt_config_menu="конфигурационно меню"
       txt_back_build="назад към билд меню"
 txt_module_configure="избери oscam модулите "
-     txt_oscam_extra="избери oscam екстрите libraries/features"
-     txt_build_extra="избери билд екстри пач/static"
-     txt_stapi="избери STAPI variant"
+     txt_oscam_extra="избери oscam библиотеки/функции"
+     txt_build_extra="избери билд екстри пач/статик"
+     txt_stapi="избери STAPI вариянт"
       txt_build_load="зареди последната конфигурация"
       txt_build_save="запази конфигурацията"
-     txt_build_reset="ресет на конфигурацията"
+     txt_build_reset="ресет конфигурацията"
 
 # _toolchain_build_menu#####################################
    txt_bmenu_title="билд меню";
@@ -101,67 +102,69 @@ txt_menu_builder5="създай нов toolchain"
 txt_menu_back="обратно в меню toolchain"
 
 # _dialog_checkout
-txt_verify_syscheck='проверявам системата   :'
-     txt_verify_svn='провери съществуващ ${REPO^^}:'
-     txt_update_svn="$txt_update ${REPO^^}        :"
+txt_verify_syscheck='проверявам на системата     :'
+	 txt_verify_svn="провери съществуващият  ${REPO^^}          :"
+     txt_update_svn="$txt_update ${REPO^^}            :"
     txt_prepare_svn="подготвям ${REPO^^} checkout :"
          txt_latest="последен ${REPO^^}"
 
 # _load_profile ###########################################
   txt_select_profile_title="налични профили   "
         txt_select_profile="моля изберете профил   "
-txt_confirm_profile_select="моля потвърдете избора на: "
-      txt_no_profile_found="няма открит профил в\n\n$profdir";
+txt_confirm_profile_select="моля потвърдете избора на:      "
+      txt_no_profile_found="няма открит профил в\n\n$profdir"
 
 # _upload_cam #############################################
 txt_upload_cam1="ssh профила не съществува"
-txt_upload_cam2="ssh профил е открит"
+txt_upload_cam2="открит ssh профил"
 
 # _plugin_update_toolchain #############################################
 txt_s3tup_menu_command_label_exit="Изход"
-txt_s3tup_menu_command_label_back="Обратно"
+txt_s3tup_menu_command_label_back="Върни"
 txt_s3tup_menu_command_label_create="Създай"
 txt_s3tup_menu_command_label_update="Опресни"
-txt_s3tup_menu_command_label_backup="Бекъп"
-txt_s3tup_menu_command_label_start="Старт"
+txt_s3tup_menu_command_label_backup="Архивирай"
+txt_s3tup_menu_command_label_start="Билд"txt_s3tup_menu_command_label_download="Download"
+txt_s3tup_menu_command_label_repair="Поправи"
 txt_s3tup_menu_command_label_info="Инфо"
 txt_s3tup_menu_command_label_setup="Настройка"
-txt_s3tup_menu_command_label_edit="Редактиране"
+txt_s3tup_menu_command_label_edit="Редактирай"
 txt_s3tup_menu_command_label_yes="Да"
 txt_s3tup_menu_command_label_no="Не"
 
-txt_s3tup_msg_update_hint="is being updated..."
-txt_s3tup_msg_update_restart="Restarting"
-txt_s3tup_msg_update_current="is up to date"
-txt_s3tup_msg_update_s3update_required="Please update your simplebuild3 installation first!"
-txt_s3tup_msg_update_directory_unversioned="Update not possible because the installation directory is not ${REPO^^} or ${REPO^^} versioned!"
-txt_s3tup_msg_update_pending="update pending"
-txt_s3tup_msg_update_not_required="no update required"
-txt_s3tup_msg_update_finished="Update completed to version:"
-txt_s3tup_msg_update_log="updating plugin log"
+txt_s3tup_msg_update_hint="опреснява се...    "
+txt_s3tup_msg_update_restart="Рестартира"
+txt_s3tup_msg_update_current="е актуален   "
+txt_s3tup_msg_update_s3update_required="Моля опресни първо инасталацията си на simplebuild3!
+"
+txt_s3tup_msg_update_directory_unversioned="Опресняване не е възможно защото инсталационната директория не е ${REPO^^} или ${REPO^^} версийна!"
+txt_s3tup_msg_update_pending="изисква опресняване"
+txt_s3tup_msg_update_not_required="опресняване не нужно"
+txt_s3tup_msg_update_finished="Опресняване завръшено до версия:"
+txt_s3tup_msg_update_log="опреснява plugin лога"
 txt_s3tup_msg_syscheck1="Моля изчакайте докато се извършат проверките на необходимите инструменти и зависимости..."
 txt_s3tup_msg_syscheck2="Нужно е ръчно да инсталираш следните пакети, за да може да ползваш съответно плъгина:"
-txt_s3tup_msg_syscheck3="Your dialog binary seems to be outdated, this plugin requires dialog >= 1.3 to display menus correctly. If your distribution does not provide a recent version, please compile and update it manually as follows:\n"
+txt_s3tup_msg_syscheck3="Бинарния ти диалог изглежда е остарял, тоя плъгин изисква диалог >= 1.3, за да покаже менютата корекно. Ако твоята дистрибуция не осигурява последна версия, моля я компилирай и опресни ръчно както следва:\n"
 txt_s3tup_msg_reset_config1="Премествам съществуващия конфиг файл..."
 txt_s3tup_msg_reset_config2="бекъп на конфиг файл="
-txt_s3tup_msg_reset_config3="Създаване нов конфиг файл. Моля почакайте..."
+txt_s3tup_msg_reset_config3="Създавам нов конфиг файл. Моля изчакай..."
 txt_s3tup_msg_reset_config4="конфиг файл="
 txt_s3tup_msg_reset_config5="Може да ги промениш/удължиш да паснат на нуждите ти."
-txt_s3tup_msg_buildasroot_error1="Крос ${txt_tc} билд процеса бе прекъснат защото не трябва да се стартира като root!"
-txt_s3tup_msg_buildasroot_error2="Ако сте наясно с опасността да изградите ${txt_tc}s като root и знаеш какво правиш,\n         можеш да форсираш със следващата команда:"
+txt_s3tup_msg_buildasroot_error1="Крос ${txt_tc,,} билд процеса бе прекъснат защото не трябва да се стартира като root!"
+txt_s3tup_msg_buildasroot_error2="Ако сте наясно с опасността да изградите ${txt_tc,,}s като root и знаеш какво правиш,\n         можеш да я форсираш със следната команда:"
 txt_s3tup_msg_toolchain_exists="${txt_tc} вече съществува!"
-txt_s3tup_msg_library_not_found="${txt_lib} не е намерен в конфиг файла!"
-txt_s3tup_msg_cross_toolchain_log="създавам крос ${txt_tc} лог"
-txt_s3tup_msg_cross_toolchain_commandlist="създавам командния лист за крос ${txt_tc}"
-txt_s3tup_msg_cross_toolchain_library_detection="Следните библиотеки бяха намерени в съществуващият    ${txt_tc}:"
-txt_s3tup_msg_cross_toolchain_library_integration="Следните библиотеки сега ще бъдат интегрирани в         ${txt_tc}:"
+txt_s3tup_msg_library_not_found="${txt_lib} не е намерена в конфиг файла!"
+txt_s3tup_msg_cross_toolchain_log="създавам крос ${txt_tc,,} лог"
+txt_s3tup_msg_cross_toolchain_commandlist="създавам командния лист за крос ${txt_tc,,}"
+txt_s3tup_msg_cross_toolchain_library_detection="Следните библиотеки бяха намерени в съществуващият    ${txt_tc,,}:"
+txt_s3tup_msg_cross_toolchain_library_integration="Следните библиотеки сега ще бъдат интегрирани в ${txt_tc,,}:"
 txt_s3tup_msg_cross_migrations_renamed="бе преименуван на"
 txt_s3tup_msg_cross_migrations_remove="Маха ${txt_tc}"
-txt_s3tup_msg_cross_migrations_outdated="Следните крос ${txt_tc}ве са остарели вследствие на преименуване на крос      ${txt_tc} ${txt_tpl}s:"
-txt_s3tup_msg_cross_migrations_outdated2="Следните ${txt_tc,,} ${txt_conf}s са острели вследствие на корекция на някои от параметрите и са коригирани автоматично        :"
+txt_s3tup_msg_cross_migrations_outdated="Следните крос ${txt_tc,,}ве са остарели вследствие на преименуване на крос ${txt_tc,,} ${txt_tpl,,}ти:"
+txt_s3tup_msg_cross_migrations_outdated2="Следните ${txt_tc,,} ${txt_conf}зи са острели вследствие на корекция на някои от параметрите и са коригирани автоматично:"
 txt_s3tup_msg_cross_migrations_hint="
-Все още може да използвате ${y_l}стар крос ${txt_tc}s${re_} отгоре, но е по-добре да създадете нови на базата на ${p_l}нов крос ${txt_tc} ${txt_tpl}s${re_} ,за да получите бъдещи ${txt_tpl} актуализации.\n${y_l}стария крос ${txt_tc}s${re_} може да бъде изваден ръчно както следва:"
-txt_s3tup_msg_build_library_log="опреснява ${txt_lib} лога"
+Все още може да използвате ${y_l}стар крос ${txt_tc,,}ве${re_} отгоре, но е по-добре да създадете нови на базата на ${p_l}нов крос ${txt_tc,,} ${txt_tpl,,}и${re_} ,за да получите бъдещи ${txt_tpl,,} актуализации.\n${y_l}старият крос ${txt_tc,,}и${re_} може да бъде махнат ръчно както следва:"
+txt_s3tup_msg_build_library_log="опреснява ${txt_lib,,} лога"
 txt_s3tup_msg_build_library_commandlist="изгражда команден списък за"
 txt_s3tup_msg_build_library_error="ГРЕШКИ открити при билда, детайли:"
 txt_s3tup_msg_ctng_setup_log="инсталира crosstool-NG лог"
@@ -179,68 +182,69 @@ txt_s3tup_msg_gtp_missing="липсва описание"
 txt_s3tup_msg_gtp_info="run \Zr<${txt_s3tup_menu_command_label_setup}>\ZR да покаже детайли"
 txt_s3tup_msg_paktc="Натисни клавиш да продължи"
 txt_s3tup_msg_check_toolchain_empty="Параметъра${w_l} ${txt_tc} не е сетнат!"
-txt_s3tup_msg_check_toolchain_not_supported="${txt_tc} ${txt_lib} неподдържана актуализация!"
-txt_s3tup_msg_check_library_info1="Проверка за PCSC хедър файлове и опит за symlink към коректните PCSC хедър файлове ако последния компилатор включва точки на пътя към грешно място   ..."
-txt_s3tup_msg_check_library_info2a="Symlink към създадени коректни PCSC хедър файлове."
+txt_s3tup_msg_check_toolchain_not_supported="${txt_tc} ${txt_lib,,} неподдържана актуализация!"
+txt_s3tup_msg_check_library_info1="Проверка за PCSC хедър файлове и опит за symlink към коректните PCSC хедър файлове ако последния компилатор включва точки на пътя към грешно място..."
+txt_s3tup_msg_check_library_info2a="Symlink към коректни PCSC хедър файлове създаден."
 txt_s3tup_msg_check_library_info2b="Няма открити PCSC хедър файлове в следащата папка и поддиректориите й:"
 txt_s3tup_msg_check_library_info3a="PCSC хедър файловете са в правилната директория:"
 txt_s3tup_msg_check_library_info3b="Компилатора не върна директории include!"
 txt_s3tup_msg_github_api_limits_info1="Вашия ${r_l}Github API лимит на обхвата е надхвърлен${y_l} и ще бъде ресетнат в следното време:"
-txt_s3tup_msg_github_api_limits_info2="Моля изчакайте докато ресетнете конфигурацията си. Последните версии и линковете за сваляне на библиотеките се определят динамично от Github API. Надхвърлянето на лимита за Github API ще се отрази в грешки в генерирането на конфигурационния файл. За ${b_l}unauthenticated requests${y_l}, рейт лимита позволява ${b_l}до 60 заявки на час${y_l}. Неидентифицираните заявки се асоциират с IP адреса на иницииращият, а не с потребителя правещ заявките."
+txt_s3tup_msg_github_api_limits_info2="Моля изчакайте докато ресетнете конфигурацията си. Последните версии и линковете за сваляне на библиотеките се определят динамично от Github API. Надхвърлянето на лимита за Github API ще се отрази в грешки в генерирането на конфигурационния файл. За ${b_l}неоторизирани заявки${y_l}, рейт лимита позволява ${b_l}до 60 заявки на час${y_l}. Неидентифицираните заявки се асоциират с IP адреса на иницииращият, а не с потребителя правещ заявките."
 txt_s3tup_msg_check_crosstool_setup_info="не е настроен коректно. Опит за поправка автоматично..."
-txt_s3tup_msg_check_config_info1="Изглежда конфиг фала Ви е остарял:"
+txt_s3tup_msg_check_config_info1="Изглежда конфиг файла Ви е остарял:"
 txt_s3tup_msg_check_config_info2="Моля рестарт s3 както следва за пресъздаване на свеж конфиг файл:"
 txt_s3tup_msg_change_config_error="променливата не съществува в конфигурационния файл!"
-txt_s3tup_msg_change_config_info="Променливата променена на:"
-txt_s3tup_msg_create_config_template_not_found="Шаблонния файл не е намерен. Моля извърши чисто освежаване на simplebuild 3!"
+txt_s3tup_msg_change_config_info="Променливата е променена на:"
+txt_s3tup_msg_create_config_template_not_found="Шаблонният файл не е намерен. Моля извърши чисто освежаване на simplebuild 3!"
 txt_s3tup_msg_create_config_jq_not_found="Без пакет 'jq' автоматичното генериране на конфиг файла не е възможно. Моля първо го инсталирайте:"
-txt_s3tup_msg_table_header_libs_col_key="Current ${txt_lib,,} keys"
-txt_s3tup_msg_table_header_libs_col_update="Updatable"
+txt_s3tup_msg_table_header_libs_col_key="Текущи ${txt_lib,,} ключове"
+txt_s3tup_msg_table_header_libs_col_update="Опресняем"
 txt_s3tup_msg_table_header_libs_col_downgrade="Downgradable"
-txt_s3tup_msg_table_header_libsversion_col_key="${txt_lib} key"
-txt_s3tup_msg_table_header_libsversion_col_curversion="Current version"
-txt_s3tup_msg_table_header_libsversion_col_newversion="New version"
+txt_s3tup_msg_table_header_libsversion_col_key="${txt_lib} ключ"
+txt_s3tup_msg_table_header_libsversion_col_curversion="Текуща версия"
+txt_s3tup_msg_table_header_libsversion_col_newversion="Нова версия"
 txt_s3tup_msg_table_header_libsversion_col_update="${txt_s3tup_msg_table_header_libs_col_update}"
 txt_s3tup_msg_table_header_libsversion_col_downgrade="${txt_s3tup_msg_table_header_libs_col_downgrade}"
 
 txt_s3tup_menu_toolchain_title="${txt_tc} Меню"
 txt_s3tup_menu_toolchain_text1="Изберете един от"
-txt_s3tup_menu_toolchain_text2="инсталиран cross ${txt_tc}s който искате да опресните:"
-txt_s3tup_menu_toolchain_notsupported="${txt_tc} may not be supported by this build system ($(uname -m)) due to architecture mismatch!"
+txt_s3tup_menu_toolchain_text2="инсталиран cross ${txt_tc,,}и който искате да опресните:"
+txt_s3tup_menu_toolchain_notsupported="${txt_tc} може да не се поддържа от тази билд система ($(uname -m)) поради грешна архитектура!   "
 txt_s3tup_menu_toolchain_arch="$txt_tc host arch:"
-txt_s3tup_menu_toolchain_notfound="не открит ${txt_tc}s"
+txt_s3tup_menu_toolchain_notfound="не открит ${txt_tc,,}"
 txt_s3tup_menu_toolchain_folder="$txt_tc папка:"
 txt_s3tup_menu_toolchain_config="конфиг файл:"
 
 txt_s3tup_menu_library_title="${txt_lib} Меню опресняване"
-txt_s3tup_menu_library_text1="Изберете всички библиотеки да опресните в SYSROOT папката на ${txt_tc}:"
-txt_s3tup_menu_library_text2="         ${txt_lib}   версия NEW                      CURRENT" #56 знака
-txt_s3tup_menu_library_notsupported="${txt_lib} is not supported by this ${txt_tc,,} due to lack of compiler capabilities!"
+txt_s3tup_menu_library_text1="Изберете всички библиотеки да опресните в SYSROOT папката на ${txt_tc,,}:"
+txt_s3tup_menu_library_text2="         ${txt_lib,,}   версия NEW               CURRENT" #56 знака
+txt_s3tup_menu_library_notsupported="${txt_lib} не се поддържа от тоз ${txt_tc,,} поради несъвместимост на компилатора!"
 txt_s3tup_menu_library_notfound="няма открити библиотеки"
-txt_s3tup_menu_library_wrong_selection="Не интегрирайте същите библиотеки с различна версия!"
+txt_s3tup_menu_library_wrong_selection="Не интегрирайте енднакви библиотеки с различна версия!"
 
 txt_s3tup_menu_template_title="Крос ${txt_tc} ${txt_tpl} Меню"
 txt_s3tup_menu_template_text1="Избери един от"
-txt_s3tup_menu_template_text2="${txt_tpl}s да създадете крос ${txt_tc} който искате:"
+txt_s3tup_menu_template_text2="${txt_tpl,,} да създадете крос ${txt_tc,,} който искате:"
 txt_s3tup_menu_template_text3="БЛЕЖКА:"
-txt_s3tup_menu_template_text4="Ако създадете крос ${txt_tc} от ${txt_tpl} с оцветено в червено описание, съществуващия такъв със същото име ще бъде заменен без да пита!"
-txt_s3tup_menu_template_text5="Тъмно червено оцветено описание покзва, че версията на ${txt_tpl} е по-висока от съществуващия ${txt_tc}. Актуализацията може да има смисъл."
-txt_s3tup_menu_template_notfound="не е открит ${txt_tpl}(и)"
+txt_s3tup_menu_template_text4="Ако заредите/създадете крос ${txt_tc,,} от ${txt_tpl,,} с оцветено в червено описание, съществуващия такъв със същото име ще бъде заменен без да пита!"
+txt_s3tup_menu_template_text5="Тъмно червено оцветено описание покзва, че версията на ${txt_tpl,,} е по-висока от съществуващия ${txt_tc,,}. Актуализацията може да има смисъл."
+txt_s3tup_menu_template_notfound="не е открит ${txt_tpl,,}и"
 
 txt_s3tup_menu_info_toolchain="${txt_tc}: " #11 chars
 txt_s3tup_menu_info_compiler="Компилатор:"  #11 chars
 txt_s3tup_menu_info_sysroot="Sysroot:   "   #11 chars
 txt_s3tup_menu_info_prefix="Префикс:   "    #11 chars
-txt_s3tup_menu_info_include="Include:   "   #11 chars
+txt_s3tup_menu_info_include="Включени:  "   #11 chars
 txt_s3tup_menu_info_library="Конфигурация:"
 txt_s3tup_menu_info_build="команден списък:"
 
-txt_s3tup_menu_edit_title="Запази Cross ${txt_tc} ${txt_tpl}"
-txt_s3tup_menu_edit_text="Искате ли да \ZrЗАПАЗИТЕ\ZR този ${txt_tc} ${txt_tpl} \Zrсега\ZR?"
+txt_s3tup_menu_edit_title="Запази Крос ${txt_tc} ${txt_tpl}"
+txt_s3tup_menu_edit_text="Презареди Крос Тулчейн Шаблонното Меню"
 
 txt_s3tup_menu_backup_title="$txt_s3tup_menu_command_label_backup"
 txt_s3tup_menu_build_library_title="Билд"
 txt_s3tup_menu_ctng_setup_title="$txt_s3tup_menu_command_label_setup"
 txt_s3tup_menu_fng_setup_title="$txt_s3tup_menu_command_label_setup"
-txt_s3tup_menu_download_title="Сваля"
-txt_s3tup_menu_compress_title="Компресиран cross ${txt_tc}"
+txt_s3tup_menu_andk_setup_title="$txt_s3tup_menu_command_label_setup"
+txt_s3tup_menu_download_title="Свалям"
+txt_s3tup_menu_compress_title="Компресиран крос ${txt_tc,,}"
