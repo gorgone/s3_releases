@@ -51,6 +51,8 @@ txt_lib="Bibliothek"
 txt_repo="Repository"
 txt_branch="Branch"
 txt_proto="Protokoll"
+txt_wc="Arbeitskopie"
+txt_wc_deviation="$txt_wc URL Abweichung"
 
 # menu txt
 txt_remove_menu="$txt_tc entfernen"

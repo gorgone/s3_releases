@@ -44,6 +44,8 @@ txt_repo="Repository"
 txt_branch="Branch"
 txt_proto="Protocol"
 txt_ssh_profiles="SSH $txt_profiles"
+txt_wc="working copy"
+txt_wc_deviation="$txt_wc url deviation"
 
 # menu txt
 txt_start_menu='Main menu'

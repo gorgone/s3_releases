@@ -112,3 +112,7 @@ done < <(svn co "$trunkurl" "${repodir}" $_rev| sed "s@${repodir}@@g"| awk '{pri
 		_get_config_menu
 	fi;))
 }
+
+svnurl(){
+	svn info | sed -ne 's/^URL: //p'
+}
