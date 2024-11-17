@@ -20,5 +20,6 @@ echo -e $C"
    \_____  \\   _(__  <   $(printf '%-6s %29s' "$w_l"'Version' "$g_l$(version | head -n1 | awk '{print $1}')")$C
    /        \\ /       \\  ===========================
   /_______  //______  / $p_l by$y_l Gorgone$p_l 2021$C,$y_l WXbet$p_l 2023$C
-          \\/        \/   ===========================\n$W";
+          \\/        \/   ===========================$C
+  $(printf "$SOURCE ${txt_repo::4}:" | xargs) ${w_l}$trunkurl\n$W";
 };
