@@ -21,5 +21,5 @@ echo -e $C"
    /        \\ /       \\  ===========================
   /_______  //______  / $p_l by$y_l Gorgone$p_l 2021$C,$y_l WXbet$p_l 2023$C
           \\/        \/   ===========================$C
-  $(printf "$SOURCE ${txt_repo::4}:" | xargs) $w_l$(REPOURL) $($(REPOURLDIRTY) && printf "$r_l($txt_wc_deviation)")\n$W";
+  $(printf "$SOURCE ${txt_repo::4}:" | xargs) $w_l$(basename ${repodir}) $($(REPOURLDIRTY) && printf "$r_l($txt_wc_deviation)")\n$W";
 };

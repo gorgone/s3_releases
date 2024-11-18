@@ -261,7 +261,7 @@ _select_menu(){
 	revision_="$($(USEGIT) && printf "$(COMMIT)" || printf "r$(REVISION)")"
 	_menutext="Simplebuild3 $(version | head -n1 | awk '{print $1}')\n $(REVISION)$($(USEGIT) && printf " @ $(COMMIT) @ $(BRANCH)" || printf " on $(BRANCH)")"
 	smenu=$(
-	"$gui" "$st_" "$bt_" "$title_" "$nc_" --title "-[ $txt_start_menu$(TTAG) ]-" --menu "\n $_menutext" 15 55 7 "Continue" "$txt_firstmenu_continue $revision_" "CHANGE" "$txt_firstmenu_chose" "CEDIT" "$txt_firstmenu_cedit" "TCUPDATE" "$txt_firstmenu_tcupdate" "LANG" "$txt_firstmenu_lang" "EXIT" "$txt_firstmenu_exit")
+	"$gui" "$st_" "$bt_" "$title_" "$nc_" --title "-[ $txt_start_menu$(REPOIDENT) ]-" --menu "\n $_menutext" 15 55 7 "Continue" "$txt_firstmenu_continue $revision_" "CHANGE" "$txt_firstmenu_chose" "CEDIT" "$txt_firstmenu_cedit" "TCUPDATE" "$txt_firstmenu_tcupdate" "LANG" "$txt_firstmenu_lang" "EXIT" "$txt_firstmenu_exit")
 	[ $? = 255 ] && _select_menu
 
 	case $smenu in
@@ -318,7 +318,7 @@ _oscam_extra_menu(){
 		fi
 	done
 
-	oextra=$("$gui" "$st_" "$nc_" "$bt_" "$title_" --title "-[ Oscam EXTRA$(TTAG) ]-" "$cl_" " OPTIONS " 19 40 12 ${MENU_OPTIONS[@]});
+	oextra=$("$gui" "$st_" "$nc_" "$bt_" "$title_" --title "-[ Oscam EXTRA$(REPOIDENT) ]-" "$cl_" " OPTIONS " 19 40 12 ${MENU_OPTIONS[@]});
 	[ $? = 255 ] && _toolchain_config_menu
 
 	for e in $(printf '%s\n' "${!USE_vars[@]}" | sort -u | xargs)
@@ -354,7 +354,7 @@ _build_extra_menu(){
 	do
 		[ "${#USE_vars[$e]}" -gt "4" ] && MENU_OPTIONS+=( "$e" "$e=1" on ) || MENU_OPTIONS+=( "$e" "$e=1" off )
 	done
-	bextra=$("$gui" "$st_" "$nc_" "$bt_" "$title_" --title "-[ Build EXTRA$(TTAG) ]-" "$cl_" " OPTIONS " 17 45 3 ${MENU_OPTIONS[@]})
+	bextra=$("$gui" "$st_" "$nc_" "$bt_" "$title_" --title "-[ Build EXTRA$(REPOIDENT) ]-" "$cl_" " OPTIONS " 17 45 3 ${MENU_OPTIONS[@]})
 	[ $? = 255 ] && _build_extra_menu
 	USE_vars[USE_PATCH]=
 	USE_vars[STATIC_LIBCRYPTO]=
@@ -407,7 +407,7 @@ _pre_main_menu(){
 		fi
 	fi
 
-	out=$("$gui" --help-button --help-label INFO --title "-[ Toolchain Menu $(version | head -n1 | awk '{print $1}')$(TTAG) ]-" --menu "$txt_t_menu1$REVISION" "${COUNT+8}" 75 0 "${MENU_OPTIONS}")
+	out=$("$gui" --help-button --help-label INFO --title "-[ Toolchain Menu $(version | head -n1 | awk '{print $1}')$(REPOIDENT) ]-" --menu "$txt_t_menu1$REVISION" "${COUNT+8}" 75 0 "${MENU_OPTIONS}")
 	IFS=$OIFS
 	first=$(echo "$out" | awk '{printf $1}')
 	tc_info=$(echo "$out" | awk '{printf $2}')
@@ -448,7 +448,7 @@ _gtedit(){
 	if [ -f "$tccfgdir/$_toolchainname" ]
 	then
 		source "$tccfgdir/$_toolchainname"
-		input=$("$gui" "$st_" "$bt_" "$title_" --title " -[ $1 Toolchain$(TTAG) ]- " --inputbox "\n CONF_DIR=$_oscamconfdir_default 'default'\n [ESC] = default\n" 0 0 "$_oscamconfdir_custom")
+		input=$("$gui" "$st_" "$bt_" "$title_" --title " -[ $1 Toolchain$(REPOIDENT) ]- " --inputbox "\n CONF_DIR=$_oscamconfdir_default 'default'\n [ESC] = default\n" 0 0 "$_oscamconfdir_custom")
 		retval=$?
 
 		case $retval in

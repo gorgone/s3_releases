@@ -168,7 +168,8 @@ fi
 
 #set additional dir_vars
    REPO="$(REPOTYPE)"
-repodir="$workdir/oscam-${REPO}"
+   ID="$(echo "$(REPOIDENT)" | tr ' ' '-')"
+repodir="$workdir/oscam-${REPO}${ID}"
 
 #software build support
 if [ -d "$sodir" ]
