@@ -59,11 +59,11 @@ tar_repo(){
 		cp -f "${repodir}/config.sh" "$configdir/config.sh.master"
 		[ -f "${repodir}/Makefile" ] && cp -f "${repodir}/Makefile" "$configdir/Makefile.master"
 		printf "$w_l  ${REPO^^} Backup    :$c_l "
-		tar -zcf "$brepo/$rev${ID}.tar.gz" $(basename ${repodir})
+		tar -zcf "$brepo/$rev-${REPO}${ID}.tar.gz" $(basename ${repodir})
 	fi
 
 	cd "$brepo"
-	ln -frs "$brepo/$rev${ID}.tar.gz" "last${REPO}${ID}.tar.gz"
+	ln -frs "$brepo/$rev-${REPO}${ID}.tar.gz" "last-${REPO}${ID}.tar.gz"
 	printf "done$re_\n\n"
 }
 
@@ -72,20 +72,20 @@ untar_repo(){
 	[ -d $(basename ${repodir}) ] && rm -rf $(basename ${repodir});
 	if [ -z "$1" ]
 	then
-		[ -f "$brepo/last${REPO}${ID}.tar.gz" ] && tar -xf "$brepo/last${REPO}${ID}.tar.gz"
-		printf "\e[1A $w_l ${REPO^^} Revision  : $c_l$(basename $(readlink -f $brepo/last${REPO}${ID}.tar.gz) .tar.gz)$w_l\n"
+		[ -f "$brepo/last-${REPO}${ID}.tar.gz" ] && tar -xf "$brepo/last-${REPO}${ID}.tar.gz"
+		printf "\e[1A $w_l ${REPO^^} Revision  : $c_l$(basename $(readlink -f $brepo/last-${REPO}${ID}.tar.gz) .tar.gz)$w_l\n"
 	else
-		if [ -f "$brepo/$1${ID}.tar.gz" ]
+		if [ -f "$brepo/$1-${REPO}${ID}.tar.gz" ]
 		then
-			tar -xf "$brepo/$1${ID}.tar.gz"
+			tar -xf "$brepo/$1-${REPO}${ID}.tar.gz"
 			cd $brepo
-			ln -frs "$brepo/$($(USEGIT) && printf "$(COMMIT)" || printf "$(REVISION)")${ID}.tar.gz" "last${REPO}${ID}.tar.gz"
-			printf "\e[1A $w_l ${REPO^^} Revision  : $c_l$(basename $(readlink -f $brepo/last${REPO}${ID}.tar.gz) .tar.gz)$w_l\n"
+			ln -frs "$brepo/$($(USEGIT) && printf "$(COMMIT)" || printf "$(REVISION)")-${REPO}${ID}.tar.gz" "last-${REPO}${ID}.tar.gz"
+			printf "\e[1A $w_l ${REPO^^} Revision  : $c_l$(basename $(readlink -f $brepo/last-${REPO}${ID}.tar.gz) .tar.gz)$w_l\n"
 		else
-			if [ -f "$brepo/last${REPO}${ID}.tar.gz" ]
+			if [ -f "$brepo/last-${REPO}${ID}.tar.gz" ]
 			then
-				tar -xf "$brepo/last${REPO}${ID}.tar.gz"
-				printf "\e[1A $w_l ${REPO^^} Revision  : $c_l$(basename $(readlink -f $brepo/last${REPO}${ID}.tar.gz) .tar.gz)$w_l\n"
+				tar -xf "$brepo/last-${REPO}${ID}.tar.gz"
+				printf "\e[1A $w_l ${REPO^^} Revision  : $c_l$(basename $(readlink -f $brepo/last-${REPO}${ID}.tar.gz) .tar.gz)$w_l\n"
 			else
 				printf "$w_l  ${REPO^^} Backup    :$r_l $txt_not_found\n"
 				sleep 3
@@ -94,5 +94,5 @@ untar_repo(){
 		fi
 	fi
 
-	[ -f "$workdir/${REPO^^}-IS-PATCHED" ] && rm -f "$workdir/${REPO^^}-IS-PATCHED"
+	[ -f "$ispatched" ] && rm -f "$ispatched"
 }

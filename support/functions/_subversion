@@ -46,7 +46,7 @@ svncheckout(){
 	[ -f "${repodir}/config.h" ]&& reset_="$("${repodir}/config.sh" -R)"
 	rm -rf "$fc1"
 	_nl
-	[ -f "$workdir/${REPO^^}-IS-PATCHED" ] && rm -f "$workdir/${REPO^^}-IS-PATCHED"
+	[ -f "$ispatched" ] && rm -f "$ispatched"
 	tar_repo
 }
 
@@ -108,7 +108,7 @@ done < <(svn co "$trunkurl" "${repodir}" $_rev| sed "s@${repodir}@@g"| awk '{pri
 	then
 		reset_="$("${repodir}/config.sh" -R)"
 		printf "Revision: $(REVISION) done..."
-		[ -f "$workdir/${REPO^^}-IS-PATCHED" ] && rm -f "$workdir/${REPO^^}-IS-PATCHED"
+		[ -f "$ispatched" ] && rm -f "$ispatched"
 		_get_config_menu
 	fi;))
 }

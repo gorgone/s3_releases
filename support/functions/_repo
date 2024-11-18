@@ -4,6 +4,43 @@ checkout(){
 	$(USEGIT) && gitcheckout $@ || svncheckout $@
 }
 
+repoclean(){
+	clear
+	echo -en "$c_l"
+	ologo
+	
+	cd "$workdir"
+	wcfolders="$(find . -maxdepth 1 -type d -name "oscam-${REPO}${ID}" | sed 's|./||')"
+	bcount=$(echo "$wcfolders" |wc -w)
+	
+	if [ "$bcount" -gt "0" ]; then
+		echo -e "\n$c_l    ${bcount}$w_l oscam-${REPO}${ID} $txt_wc ${txt_found}\n    ___________________________________$re_\n"
+		for wc in $wcfolders; do
+			rm -rf $wc
+			echo -e "$c_l    --> $w_l$txt_delete $txt_wc $wc"
+		done
+		_nl
+	else
+		echo -e "\n$r_l    ${bcount}$w_l oscam-${REPO}${ID} $txt_wc ${txt_found}\n    ___________________________________$re_\n"
+	fi
+	
+	cd "$brepo"
+	bfiles="$(find . -maxdepth 1 -name "*-${REPO}${ID}.tar.gz" |sed 's|./||')"
+	bcount=$(echo "$bfiles" |wc -w)
+	
+	if [ "$bcount" -gt "0" ]; then
+		echo -e "\n$c_l    ${bcount}$w_l ${REPO}${ID} backup ${txt_found}\n    _______________________$re_\n"
+		for b in $bfiles; do
+			rm -f $b
+			echo -e "$c_l    --> $w_l$txt_delete backup $b"
+		done
+		_nl
+	else
+		echo -e "\n$r_l    ${bcount}$w_l ${REPO}${ID} backup ${txt_found}\n    _______________________$re_\n"
+	fi
+	[ -f "$ispatched" ] && rm -f "$ispatched";
+}
+
 reporestore(){
 	clear
 	echo -en "$c_l"
@@ -12,20 +49,19 @@ reporestore(){
 	if [ "$1" == "list" ]
 	then
 		cd "$brepo"
-		grepit=$([ ! -z "$ID" ] && echo "\\${ID}")
-		bfiles="$(find . -type f |sed 's|./||' |sed 's|.tar.gz||' |grep "$grepit")"
+		bfiles="$(find . -type f -name "*-${REPO}${ID}.tar.gz" |sed 's|./||' |sed 's|.tar.gz||')"
 		bcount=$(echo "$bfiles" |wc -w)
 
 		if [ "$bcount" -gt "0" ]
 		then
-			echo -e "\n$c_l    $bcount$w_l ${REPO} backups found\n    ____________________$re_\n"
+			echo -e "\n$c_l    $bcount$w_l ${REPO}${ID} backups found\n    ____________________$re_\n"
 			for b in $bfiles
 			do
 				echo -e "$c_l    --> $w_l$b"
 			done
 			_nl
 		else
-			echo -e "\n$r_l    $bcount$w_l ${REPO} backups found\n    ____________________$re_\n"
+			echo -e "\n$r_l    $bcount$w_l ${REPO}${ID} backups found\n    ____________________$re_\n"
 		fi
 
 		exit
@@ -39,10 +75,10 @@ reporestore(){
 	fi
 	_nl
 	untar_repo $1
-	printf "\e[1A\t\t\t\t$y_l""restored\n\n$re_"
+	printf "\e[1A\t\t\t\t\t$y_l""restored\n\n$re_"
 	[ -L "$workdir/lastbuild.log" ]&& rm "$workdir/lastbuild.log";
 	[ -L "$workdir/lastpatch.log" ]&& rm "$workdir/lastpatch.log";
-	[ -f "$workdir/${REPO^^}-IS-PATCHED" ] && rm -f "$workdir/${REPO^^}-IS-PATCHED";
+	[ -f "$ispatched" ] && rm -f "$ispatched";
 }
 
 repoup(){
@@ -55,7 +91,7 @@ quickreporestore(){
 }
 
 repopatch(){
-	if [ ! -f "$workdir/${REPO^^}-IS-PATCHED" ]
+	if [ ! -f "$ispatched" ]
 	then
 		clear
 		printf $C

@@ -99,7 +99,7 @@ _gui_build(){
 	fi
 
 #IF SVN is Patched
-	if [ -f "$workdir/${REPO^^}-IS-PATCHED" ]
+	if [ -f "$ispatched" ]
 	then
 		patch_webif
 	fi

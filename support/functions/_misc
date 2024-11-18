@@ -504,7 +504,7 @@ _reset_config(){
 	if [ -f "${repodir}/config.sh" ]
 	then
 		[ -f "$menudir/$_toolchainname.save" ] && rm -rf "$menudir/$_toolchainname.save"
-		if [ ! -f "$workdir/${REPO^^}-IS-PATCHED" ]
+		if [ ! -f "$ispatched" ]
 		then
 			reset_="$("${repodir}/config.sh" -R)"
 		fi

@@ -50,7 +50,7 @@ _cmd_build(){
 #patching
 	if [ "${USE_vars['USE_PATCH']}" == "USE_PATCH=1" ]
 	then
-		if [ -f "$workdir/${REPO^^}-IS-PATCHED" ]
+		if [ -f "$ispatched" ]
 		then
 			printf "$y_l\n |  $r_l WARNING : patch upon patch"
 			printf "$y_l\n |  $r_l UNCLEAN $y_l: restore SVN $G$txt_wait"
@@ -178,7 +178,7 @@ printf "$y_l\n |       set : ${cdtag}$w_l"
 	[ ! "$pf" == "empty" ] && printf "\n$y_l |   PROFILE : $pf_name"
 
 #IF REPO is Patched
-	if [ -f "$workdir/${REPO^^}-IS-PATCHED" ]
+	if [ -f "$ispatched" ]
 	then
 		printf "$y_l\n | ISPATCHED :$P YES (integrate patch infomation into WebIf)"
 		patch_webif
