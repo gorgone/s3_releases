@@ -34,8 +34,17 @@ upload_cam(){
 		exit
 	fi
 
+	scp_cmd="sshpass -p "$password" scp -P "$port" "$bdir/$buildcamname" "$loginname@$ip":/tmp"
 	printf "$p_l\n  UPLOAD  > $w_l$txt_to IP:$b_l$ip$w_l port:$b_l$port\n"
-	sshpass -p "$password" scp -P "$port" "$bdir/$buildcamname" "$loginname@$ip":/tmp
+	if ! $scp_cmd; then
+		scp_cmd=${scp_cmd/scp/scp -s}
+		printf "${y_l}Falling back to compatibility mode by forcing SFTP protocol...${re_}\n"
+		if ! $scp_cmd; then
+			scp_cmd=${scp_cmd/scp -s/scp -O}
+			printf "${y_l}Falling back to compatibility mode by forcing SCP protocol...${re_}\n"
+			$scp_cmd
+		fi
+	fi
 
 #replace target cam
 	if [ "$replace_target" == "y" ]
