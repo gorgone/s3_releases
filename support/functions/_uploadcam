@@ -5,8 +5,7 @@ upload_cam(){
 	slogo
 	FILENAME=$1
 
-	if [ ! -f "$profdir/$FILENAME" ]
-	then
+	if [ ! -f "$profdir/$FILENAME" ]; then
 		printf "$r_l\n  $txt_error $FILENAME $txt_upload_cam1 $re_\n"
 		exit
 	else
@@ -18,12 +17,11 @@ upload_cam(){
 
 #find newest build by date for toolchain
 	cd "$bdir"
-	buildcamname="$(find . -type f \( -iname "*$toolchain*" ! -iname "*list_smargo" \) -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" " |sed 's@./@@g')"
+	buildcamname="$(find . -type f \( -iname "*$toolchain*" ! -iname "*list_smargo" ! -iname "*.zip" \) -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" " |sed 's@./@@g')"
 	cd "$workdir"
 
 #output date from cam
-	if [ -f "$bdir/$buildcamname" ]
-	then
+	if [ -f "$bdir/$buildcamname" ]; then
 		printf "$w_l  CAMNAME : $y_l$buildcamname\n"
 		printf "$w_l  FILEDATE: "$(
 			stat -c %y "$bdir/$buildcamname" |awk '{print $1" "; printf substr($2,1,8)}'
@@ -34,39 +32,83 @@ upload_cam(){
 		exit
 	fi
 
-	scp_cmd="sshpass -p "$password" scp -P "$port" "$bdir/$buildcamname" "$loginname@$ip":/tmp"
-	printf "$p_l\n  UPLOAD  > $w_l$txt_to IP:$b_l$ip$w_l port:$b_l$port\n"
-	if ! $scp_cmd; then
+#upload cam to remote tmp folder
+	scp_cmd="sshpass -p "$password" scp -P "$port" -o StrictHostKeyChecking=no "$bdir/$buildcamname" "$loginname@$ip":/tmp"
+	success=0
+	printf "$p_l\n  UPLOAD  > $w_l$txt_to Host: $b_l$ip$w_l Port: $b_l$port${w_n}\n  "
+	errors="$(mktemp)"
+	if ! $scp_cmd 2>"$errors"; then
+		printf "${r_n}"; cat "$errors"; rm -f "$errors"
 		scp_cmd=${scp_cmd/scp/scp -s}
-		printf "${y_l}Falling back to compatibility mode by forcing SFTP protocol...${re_}\n"
-		if ! $scp_cmd; then
+		printf "${y_l}  Falling back to compatibility mode by forcing SFTP protocol...${w_n}\n  "
+		if ! $scp_cmd 2>"$errors"; then
+			printf "${r_n}"; cat "$errors"; rm -f "$errors"
 			scp_cmd=${scp_cmd/scp -s/scp -O}
-			printf "${y_l}Falling back to compatibility mode by forcing SCP protocol...${re_}\n"
-			$scp_cmd
+			printf "${y_l}  Falling back to compatibility mode by forcing SCP protocol...${w_n}\n  "
+			$scp_cmd 2>"$errors" && success=1
+		else
+			success=1
 		fi
+	else
+		success=1
+	fi
+	printf "${r_n}"; cat "$errors"; rm -f "$errors"
+	[ "$success" = "1" ] && printf " $g_l$txt_done!$re_\n"
+
+#stop target cam
+	if [ "$stop_target" == 'y' -a "$success" = "1" ]; then
+		stop="killall -9 $(basename "$targetcam")"
+		stopped=0
+		printf "$p_l  STOP > $y_l$stop${w_n}\n  "
+		errors="$(mktemp)"
+		if sshpass -p "$password" ssh -p "$port" -o StrictHostKeyChecking=no "$loginname@$ip" "$stop;" 2>"$errors"; then
+			stopped=1
+		fi
+		printf "${r_n}"; cat "$errors"; rm -f "$errors"
+		[ "$stopped" = "1" ] && printf " $g_l$txt_done!$re_\n"
 	fi
 
 #replace target cam
-	if [ "$replace_target" == "y" ]
-	then
-		printf "$p_l  REPLACE > $y_l$targetcam$re_\n"
-		sshpass -p "$password" ssh -p "$port" -o StrictHostKeyChecking=no "$loginname@$ip" \
-		"cd /tmp;if [ -f \"$buildcamname\" ];then if [ -f \"$targetcam\" ];then if [ \"$backup_target\" == \"y\" ]; then cp -pf \"$targetcam\" \"$targetcam.backup\"; fi;mv -f \"$buildcamname\" \"$targetcam\";fi;fi;exit;"
-		printf " $g_l$txt_done!$re_\n"
-	fi
-
-#stop target cam
-	if [ "$stop_target" == 'y' ]
-	then
-		stop="killall -9 $(basename "$targetcam")"
+	if [ "$replace_target" == "y" -a "$success" = "1" ]; then
+		success=0
+		printf "$p_l  REPLACE > $y_l$targetcam${w_n}\n  "
+		errors="$(mktemp)"
+		if sshpass -p "$password" ssh -p "$port" -o StrictHostKeyChecking=no "$loginname@$ip" \
+		"cd /tmp; \
+		 if [ -f \"$buildcamname\" ]; then \
+			if [ -f \"$targetcam\" ]; then \
+				if [ \"$backup_target\" == \"y\" ]; then \
+					cp -pf \"$targetcam\" \"$targetcam.backup\"; \
+				fi; \
+				mv -f \"$buildcamname\" \"$targetcam\"; \
+				chmod +x \"$targetcam\"; \
+			else \
+				echo \"targetcam $targetcam does not exist!\" 1>&2; \
+				exit 1; \
+			fi; \
+		 else \
+			echo \"binary $buildcamname does not exist!\" 1>&2; \
+			exit 1; \
+		 fi; \
+		 exit;" 2>"$errors"; then
+			success=1
+		fi
+		printf "${r_n}"; cat "$errors"; rm -f "$errors"
+		[ "$success" = "1" ] && printf " $g_l$txt_done!$re_\n"
 	fi
 
 #remote command (example restart cam)
-	if [ ! "$remote_command" == "none" ]
-	then
-		printf "$w_l  SSH COMMANDS $remote_command $y_l$txt_wait\n\n"
+	if [ ! "$remote_command" == "none" -a "$success" = "1" ]; then
+		success=0
+		printf "$p_l  REMOTE COMMANDS > $y_l$remote_command${w_n}\n  "
+		errors="$(mktemp)"
 		# do remote commands
-		sshpass -p "$password" ssh -p "$port" -o StrictHostKeyChecking=no "$loginname@$ip" "$remote_command;"
-		_nl
+		if sshpass -p "$password" ssh -p "$port" -o StrictHostKeyChecking=no "$loginname@$ip" "$remote_command;" 2>"$errors"; then
+			success=1
+		fi
+		printf "${r_n}"; cat "$errors"; rm -f "$errors"
+		[ "$success" = "1" ] && printf " $g_l$txt_done!$re_\n"
 	fi
+
+printf "${re_}\n"
 }
