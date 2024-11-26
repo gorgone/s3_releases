@@ -97,8 +97,9 @@ _cmd_build(){
 #fill use variables and set name addons
 	USESTRING=;
 	EXTRA_USE=;
-	libcount=0;
-	statcount=0;
+	buildtype=""
+	libcount=0
+	statcount=0
 	_usb=;
 	_pcsc=;
 	_dvbcsa=;
@@ -195,25 +196,7 @@ printf "$y_l\n |       set : ${cdtag}$w_l"
 	fi
 
 #dynamic, static, mixed build
-	[ "$_toolchainname" == "native" ] && SEARCHDIR="$(ldconfig -v 2>/dev/null | grep -v ^$'\t' | awk -F':' '{print $1}')" || SEARCHDIR="$SYSROOT"
-	[ "${USE_vars[USE_LIBCRYPTO]}" == "USE_LIBCRYPTO=1" ] && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBCRYPTO]}" == "STATIC_LIBCRYPTO=1" ]	&& LIBCRYPTO_LIB="LIBCRYPTO_LIB=$(find $SEARCHDIR -name "libcrypto.a" -type f -print -quit)"	&& ((statcount++))
-	[ "${USE_vars[USE_SSL]}" == "USE_SSL=1" ]             && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_SSL]}" == "STATIC_SSL=1" ]				&& SSL_LIB="SSL_LIB=$(find $SEARCHDIR -name "libssl.a" -type f -print -quit)"				&& ((statcount++))
-	[ "${USE_vars[USE_LIBUSB]}" == "USE_LIBUSB=1" ]       && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBUSB]}" == "STATIC_LIBUSB=1" ]		&& { LIBUSB_LIB="LIBUSB_LIB=$(find $SEARCHDIR -name "libusb-1.0.a" -type f -print -quit)"; ((statcount++)); } || { [ "$_androidndkdir" == "1" ] && LIBUSB_LIB="LIBUSB_LIB=-lusb-1.0"; }
-	[ "${USE_vars[USE_PCSC]}" == "USE_PCSC=1" ]           && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_PCSC]}" == "STATIC_PCSC=1" ]			&& PCSC_LIB="PCSC_LIB=$(find $SEARCHDIR -name "libpcsclite.a" -type f -print -quit)"			&& ((statcount++))
-	[ "${USE_vars[USE_LIBDVBCSA]}" == "USE_LIBDVBCSA=1" ] && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBDVBCSA]}" == "STATIC_LIBDVBCSA=1" ]	&& LIBDVBCSA_LIB="LIBDVBCSA_LIB=$(find $SEARCHDIR -name "libdvbcsa.a" -type f -print -quit)"	&& ((statcount++))
-
-	if [ $statcount -ge 1 -a $statcount -lt $libcount ]
-	then
-		printf "$y_l\n | BUILDTYPE : mixed"
-		buildtype="-mixed"
-	elif [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o $statcount -ge 1 -a $libcount -ge 1 -a $statcount -eq $libcount ]
-	then
-		printf "$y_l\n | BUILDTYPE : static"
-		buildtype="-static"
-	else
-		printf "$y_l\n | BUILDTYPE : dynamic"
-		buildtype=""
-	fi
+	set_buildtype
 
 #max cpu usage
 	if [ -f "$configdir/max_cpus" ]

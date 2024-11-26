@@ -27,10 +27,11 @@ _gui_build(){
 #make clean
 	cd "${repodir}"
 	make distclean > /dev/null 2>&1
-	USESTRING_=''
+	USESTRING=''
 	EXTRA_USE=''
-	libcount=0;
-	statcount=0;
+	buildtype=""
+	libcount=0
+	statcount=0
 
 #fix streamrelay case
 	check_streamrelay
@@ -59,7 +60,7 @@ _gui_build(){
 
 		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_PATCH" ]  && [ ! "$e" == "USE_EXTRA" ] && [ ! "$e" == "USE_STATIC" ]
 		then
-			USESTRING_="$e=1 $USESTRING_"
+			USESTRING="$e=1 $USESTRING"
 		fi
 
 	done
@@ -113,25 +114,7 @@ _gui_build(){
 	fi
 
 #dynamic, static, mixed build
-	[ "$_toolchainname" == "native" ] && SEARCHDIR="$(ldconfig -v 2>/dev/null | grep -v ^$'\t' | awk -F':' '{print $1}')" || SEARCHDIR="$SYSROOT"
-	[ "${USE_vars[USE_LIBCRYPTO]}" == "USE_LIBCRYPTO=1" ] && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBCRYPTO]}" == "STATIC_LIBCRYPTO=1" ]	&& LIBCRYPTO_LIB="LIBCRYPTO_LIB=$(find $SEARCHDIR -name "libcrypto.a" -type f -print -quit)"	&& ((statcount++))
-	[ "${USE_vars[USE_SSL]}" == "USE_SSL=1" ]             && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_SSL]}" == "STATIC_SSL=1" ]				&& SSL_LIB="SSL_LIB=$(find $SEARCHDIR -name "libssl.a" -type f -print -quit)"					&& ((statcount++))
-	[ "${USE_vars[USE_LIBUSB]}" == "USE_LIBUSB=1" ]       && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBUSB]}" == "STATIC_LIBUSB=1" ]		&& { LIBUSB_LIB="LIBUSB_LIB=$(find $SEARCHDIR -name "libusb-1.0.a" -type f -print -quit)"; ((statcount++)); } || { [ "$_androidndkdir" == "1" ] && LIBUSB_LIB="LIBUSB_LIB=-lusb-1.0"; }
-	[ "${USE_vars[USE_PCSC]}" == "USE_PCSC=1" ]           && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_PCSC]}" == "STATIC_PCSC=1" ]			&& PCSC_LIB="PCSC_LIB=$(find $SEARCHDIR -name "libpcsclite.a" -type f -print -quit)"			&& ((statcount++))
-	[ "${USE_vars[USE_LIBDVBCSA]}" == "USE_LIBDVBCSA=1" ] && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBDVBCSA]}" == "STATIC_LIBDVBCSA=1" ]	&& LIBDVBCSA_LIB="LIBDVBCSA_LIB=$(find $SEARCHDIR -name "libdvbcsa.a" -type f -print -quit)"		&& ((statcount++))
-
-	if [ $statcount -ge 1 -a $statcount -lt $libcount ]
-	then
-		buildtype="-mixed"
-	elif [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o $statcount -ge 1 -a $libcount -ge 1 -a $statcount -eq $libcount ]
-	then
-		buildtype="-static"
-	else
-		buildtype=""
-	fi
-
-	USESTRING_=${USE_vars[@]}
-	EXTRA_USE=$extra_use
+	set_buildtype &>/dev/null
 
 #todo add switch for verbose
 	_generate_oscam_name "$_toolchainname" "$extra$buildtype"
@@ -155,9 +138,11 @@ _gui_build(){
 #build
 	_sz
 	(ologo; _nl
+	USESTRING=${USE_vars[@]}
+	EXTRA_USE=$extra_use
 	timer_start
 	$_make -j"$cpus" \
-		"CONF_DIR=$_oscamconfdir_default" "OSCAM_BIN=$bdir/$oscam_name" "CC_OPTS=$co $cc_opts $extra_cc" "CC_WARN=$cc_warn" "EXTRA_LDFLAGS=$extra_ld" "EXTRA_CFLAGS=$extra_c" $EXTRA_USE $COMP_LEVEL "CROSS=$CROSS" $stapivar $USESTRING_ $LIBCRYPTO_LIB $SSL_LIB $LIBUSB_LIB $PCSC_LIB $LIBDVBCSA_LIB 2>&1 \
+		"CONF_DIR=$_oscamconfdir_default" "OSCAM_BIN=$bdir/$oscam_name" "CC_OPTS=$co $cc_opts $extra_cc" "CC_WARN=$cc_warn" "EXTRA_LDFLAGS=$extra_ld" "EXTRA_CFLAGS=$extra_c" $EXTRA_USE $COMP_LEVEL "CROSS=$CROSS" $stapivar $USESTRING $LIBCRYPTO_LIB $SSL_LIB $LIBUSB_LIB $PCSC_LIB $LIBDVBCSA_LIB 2>&1 \
 		|tee "$ldir/$log_name" \
 		|grep --line-buffered -v 'BFD\|^/' \
 		|grep --line-buffered '^CC\|^HOSTCC\|^GEN\|^CONF\|^RM\|^UPX\|^SIGN\|UseFlags\|  CONF_DIR =\|Binary\|LINK\|STRIP\|BUILD\|Addons\|Protocols\|Readers\|CardRdrs\|^/' \
