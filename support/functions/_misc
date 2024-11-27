@@ -756,9 +756,9 @@ _get_config_con(){
 	fi
 }
 check_url(){
-	if [[ ! "$1" =~ "@" ]] && [ "${s3cfg_vars[S3_URL_CHECK]}" == "1" ]
+	if [[ ! "$1" =~ "@" ]] && [ ${s3cfg_vars[S3_URL_CHECK]} -gt 0 ]
 	then
-		if ! http_code=$(curl --output /dev/null --write-out "%{http_code}" --silent --fail "$1")
+		if ! http_code=$(curl --output /dev/null --write-out "%{http_code}" --silent --fail --connect-timeout ${s3cfg_vars[S3_URL_CHECK]} "$1")
 		then
 			if [ ! "$http_code" == "401" ]
 			then
