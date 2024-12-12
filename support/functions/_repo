@@ -98,7 +98,8 @@ repopatch(){
 		ologo
 		unset patchlist
 		cd "$pdir"
-		patchlist=(*.patch)
+		[ -z "$1" ] && filter="*" || filter="$1"
+		patchlist=(${filter}.patch)
 		patchlog="$(mktemp)"
 
 		if [ "$(ls -A "$pdir"/*.patch 2>/dev/null)" ]
