@@ -56,12 +56,16 @@ upload_cam(){
 	[ "$success" = "1" ] && printf " $g_l$txt_done!$re_\n"
 
 #stop target cam
-	if [ "$stop_target" == 'y' -a "$success" = "1" ]; then
-		stop="killall -9 $(basename "$targetcam")"
+	if [ ! -z "$stop_target" -a ! "$stop_target" == 'n' -a "$success" = "1" ]; then
+		if [ "$stop_target" == 'y' ]; then
+			stop="killall -9 $(basename "$targetcam");"
+		else
+			stop="$stop_target"
+		fi
 		stopped=0
 		printf "$p_l  STOP > $y_l$stop${w_n}\n  "
 		errors="$(mktemp)"
-		if sshpass -p "$password" ssh -p "$port" -o StrictHostKeyChecking=no "$loginname@$ip" "$stop;" 2>"$errors"; then
+		if sshpass -p "$password" ssh -p "$port" -o StrictHostKeyChecking=no "$loginname@$ip" "$stop" 2>"$errors"; then
 			stopped=1
 		fi
 		printf "${r_n}"; cat "$errors"; rm -f "$errors"
