@@ -91,22 +91,38 @@ quickreporestore(){
 }
 
 repopatch(){
-	if [ ! -f "$ispatched" ]
+	filter="*"
+	if [ ! -z "$1" ]; then
+		if [ "$1" == "-f" -o "$1" == "--force" ]; then
+			force="$1 "
+		else
+			filter="$1"
+		fi
+	fi
+
+	if [ ! -z "$2" ]; then
+		if [ "$2" == "-f" -o "$2" == "--force" ]; then
+			force="$2 "
+		else
+			filter="$2"
+		fi
+	fi
+
+	if [ ! -f "$ispatched" -o ! -z "$force" ]
 	then
 		clear
 		printf $C
 		ologo
 		unset patchlist
 		cd "$pdir"
-		[ -z "$1" ] && filter="*" || filter="$1"
 		patchlist=(${filter}.patch)
 		patchlog="$(mktemp)"
 
-		if [ "$(ls -A "$pdir"/*.patch 2>/dev/null)" ]
+		if [ "$(ls -A "$pdir"/${filter}.patch 2>/dev/null)" ]
 		then
 			for p in "${patchlist[@]}"
 			do
-				echo -e $WH"\n    -> $p <-"$W; echo -e "\n$p" >> "$patchlog"
+				echo -e $WH"\n    -> $p $force<-"$W; echo -e "\n$p" >> "$patchlog"
 				if _streamboard_patch "$pdir/$p"; then
 					SKIPPATHS=-p0
 				else
