@@ -40,7 +40,7 @@ svncheckout(){
 	if [ -f "${repodir}/config.sh" ]
 	then
 		tput cup 11 0;
-		printf "$w_l  ${REPO^^} Revision  :$y_l $("${repodir}/config.sh" -r) $b_l$mac_$re_\n$w_l  ${REPO^^} UserPath  :$y_l ${repodir}"
+		printf "$w_l  ${REPO^^} Revision  :$y_l $(REVISION) @ $(BRANCH) $b_l$mac_$re_\n$w_l  ${REPO^^} UserPath  :$y_l ${repodir}"
 	fi
 
 	[ -f "${repodir}/config.h" ]&& reset_="$("${repodir}/config.sh" -R)"
@@ -72,7 +72,7 @@ svnup(){
 	if [ -f "${repodir}/config.sh" ]
 	then
 		tput cup 10 2
-		printf "\n$w_l  ${REPO^^} Revision  : ""$y_l$("${repodir}/config.sh" -r) $b_l$mac_$re_\n$w_l  ${REPO^^} UserPath  : $y_l""${repodir}\n$re_"
+		printf "\n$w_l  ${REPO^^} Revision  : ""$y_l$(REVISION) @ $(BRANCH) $b_l$mac_$re_\n$w_l  ${REPO^^} UserPath  : $y_l""${repodir}\n$re_"
 	fi
 
 	if [ -f "${repodir}/config.h" ]
