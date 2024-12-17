@@ -94,7 +94,7 @@ repopatch(){
 	filter="*"
 	if [ ! -z "$1" ]; then
 		if [ "$1" == "-f" -o "$1" == "--force" ]; then
-			force="$1 "
+			force="$1"
 		else
 			filter="$1"
 		fi
@@ -102,7 +102,7 @@ repopatch(){
 
 	if [ ! -z "$2" ]; then
 		if [ "$2" == "-f" -o "$2" == "--force" ]; then
-			force="$2 "
+			force="$2"
 		else
 			filter="$2"
 		fi
@@ -122,19 +122,15 @@ repopatch(){
 		then
 			for p in "${patchlist[@]}"
 			do
-				echo -e $WH"\n    -> $p $force<-"$W; echo -e "\n$p" >> "$patchlog"
-				if _streamboard_patch "$pdir/$p"; then
-					SKIPPATHS=-p0
-				else
-					SKIPPATHS=-p1
-				fi
+				PATCHSTYLE=$(_patch_style "$pdir/$p")
+				echo -e "\n$C ${PATCHSTYLE:1}-patch :  $p $force$W"; echo -e "\n$p" >> "$patchlog"
 				sleep .5
 				if grep 'GIT binary patch' "$pdir/$p" &>/dev/null; then
 					cd "${repodir}"
-					echo -e $Y" binary patch detected, using git apply <-"$W
-					export LC_ALL=C; git apply --verbose $SKIPPATHS < "$pdir/$p" 2>&1 | tee -a "$patchlog" | sed -e "s/^Checking patch/$G checking > $WH/g;s/^Applied patch/$G patching > $WH/g;s/^Hunk/$P Hunk     > $Y/g;s/FAILED/$R FAILED/g; ;s/-- saving/$Y -- saving/g;"
+					echo -e $Y" binary patch detected, using 'git apply' <-"$W
+					export LC_ALL=C; git apply --verbose $PATCHSTYLE < "$pdir/$p" 2>&1 | tee -a "$patchlog" | sed -e "s/^Checking patch/$G checking > $WH/g;s/^Applied patch/$G patching > $WH/g;s/^Hunk/$P Hunk     > $Y/g;s/FAILED/$R FAILED/g; ;s/-- saving/$Y -- saving/g;"
 				else
-					patch -d${repodir}/ $SKIPPATHS < "$pdir/$p" | tee -a "$patchlog" | sed -e "s/^patching file/$G patching > $WH/g;s/^Hunk/$P Hunk     > $Y/g;s/FAILED/$R FAILED/g; ;s/-- saving/$Y -- saving/g;"
+					patch -d${repodir}/ $PATCHSTYLE < "$pdir/$p" | tee -a "$patchlog" | sed -e "s/^patching file/$G patching > $WH/g;s/^Hunk/$P Hunk     > $Y/g;s/FAILED/$R FAILED/g; ;s/-- saving/$Y -- saving/g;"
 				fi
 			done
 

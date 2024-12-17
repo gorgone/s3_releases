@@ -34,14 +34,16 @@ _get_patch(){
 	done
 }
 
-_streamboard_patch(){
+_patch_style(){
+	local ret=1 style='-p1'
 	if [ -e "$1" ]; then
 		PATCHEDFILES=$(grep -e '^\(---\|+++\) ' -i "$1" | grep -v /dev/null | awk '{print $2}' | sort | uniq)
 		for f in ${PATCHEDFILES[@]}; do
-			[[ -e "${repodir}/$f" ]] && return 0
+			[[ -e "${repodir}/$f" ]] && { style='-p0'; ret=0; break; }
 		done
 	fi
-	return 1
+	printf -- "$style"
+	return $ret
 }
 
 _apply_menupatch(){
@@ -61,18 +63,14 @@ _apply_menupatch(){
 					_w="ok"
 					cd "${repodir}"
 					echo -e "\n$e" >> "$patchlog"
-					if _streamboard_patch "$pdir/$e"; then
-						SKIPPATHS=-p0
-						printf "PATCH : apply streamboard-style patch $e"
-					else
-						SKIPPATHS=-p1
-						printf "PATCH : apply regular patch $e"
-					fi
+					PATCHSTYLE=$(_patch_style "$pdir/$e")
+					printf "PATCH : applying ${PATCHSTYLE:1}-patch $e"
+
 					if grep 'GIT binary patch' "$pdir/$e" &>/dev/null; then
-						printf "PATCH : binary patch detected, using git apply for $e"
-						git apply --verbose $SKIPPATHS < "$pdir/$e" &>>"$patchlog"
+						printf "PATCH : binary patch detected, using 'git apply' for $e"
+						git apply --verbose $PATCHSTYLE < "$pdir/$e" &>>"$patchlog"
 					else
-						patch -f $SKIPPATHS < "$pdir/$e" &>>"$patchlog"
+						patch -f $PATCHSTYLE < "$pdir/$e" &>>"$patchlog"
 					fi
 					hunks=$(grep -c1 '^Hunk' "$patchlog")
 					fails=$(grep -c1 'hunks FAILED' "$patchlog")
@@ -126,18 +124,14 @@ _apply_consolepatch(){
 				_w=0
 				cd "${repodir}"
 				echo -e "\n$e" >> "$patchlog"
-				if _streamboard_patch "$pdir/$e"; then
-					SKIPPATHS=-p0
-					printf "$y_l\n |     PATCH : apply streamboard-style patch $e\n"
-				else
-					SKIPPATHS=-p1
-					printf "$y_l\n |     PATCH : apply regular patch $e\n"
-				fi
+				PATCHSTYLE=$(_patch_style "$pdir/$e")
+				printf "$y_l\n |     PATCH : applying ${PATCHSTYLE:1}-patch $e\n"
+
 				if grep 'GIT binary patch' "$pdir/$e" &>/dev/null; then
-					printf "$y_l\n |     PATCH : binary patch detected, using git apply for $e\n"
-					git apply --verbose $SKIPPATHS < "$pdir/$e" &>>"$patchlog"
+					printf "$y_l\n |     PATCH : binary patch detected, using 'git apply' for $e\n"
+					git apply --verbose $PATCHSTYLE < "$pdir/$e" &>>"$patchlog"
 				else
-					patch -F 10 -f $SKIPPATHS < "$pdir/$e" &>>"$patchlog"
+					patch -F 10 -f $PATCHSTYLE < "$pdir/$e" &>>"$patchlog"
 				fi
 				hunks=$(grep -c1 "^Hunk" "$patchlog")
 				fails=$(grep -c1 "hunks FAILED" "$patchlog")
