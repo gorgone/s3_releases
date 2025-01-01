@@ -1,0 +1,22 @@
+_toolchainname="fritz4040_4050_4060_5590_5690Pro_68504g_68505g_7510_7520_7520B_7530_7530AX_ssl_multi_arm-freetz";
+default_use="USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="-Wl,-dynamic-linker,/usr/lib/freetz/ld-uClibc.so.0";
+extra_c="";
+_description="FRITZ!Box 4040 4050 4060 5590 5690Pro 68504g 68505g 7510 7520 7520B 7530 7530AX SSL multi by MasterSaMMy";
+_oscamconfdir_default="/var/media/ftp/addon/oscam";
+_oscamconfdir_custom="";
+_self_build="yes";
+_compiler="arm-linux-uclibcgnueabi-";
+_sysroot="usr";
+_libsearchdir="/usr/lib";
+_extract_strip="0";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1mcml0ejQwNDBfNDA1MF80MDYwXzU1OTBfNTY5MFByb182ODUwNGdfNjg1MDVnXzc1MTBfNzUyMF83NTIwQl83NTMwXzc1MzBBWF9zc2xfbXVsdGlfYXJtLWZyZWV0ei50YXIueHoK";
+_md5sum="d9267838ea1c06e88f32ec1a6fbd9990  Toolchain-fritz4040_4050_4060_5590_5690Pro_68504g_68505g_7510_7520_7520B_7530_7530AX_ssl_multi_arm-freetz.tar.xz";
+_tc_info="\n
+!!! freetz toolchains pack15 Toolchain !!!\n
+\n
+FRITZ!Box 4040 4050 4060 5590 5690Pro 68504g 68505g 7510 7520 7520B 7530 7530AX SSL multi\n
+\n";
+_tc_infolines="5";

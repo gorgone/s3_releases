@@ -1,0 +1,19 @@
+_toolchainname="oe20_mipsel";
+default_use="USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="";
+_description="OpenEmbedded 2.0 STBs";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="mipsel-oe20-linux-gnu-";
+_sysroot="mipsel-oe20-linux-gnu/sysroot";
+_libsearchdir="/usr/lib";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1vZTIwX21pcHNlbC50YXIueHoK";
+_md5sum="3f14f79c3a78ce5f1f21480a71422c7f  Toolchain-oe20_mipsel.tar.xz";
+_tc_info="\n
+!!! crosstool-NG Toolchain !!!\n
+\n
+OpenEmbedded 2.0 STBs\n
+mips mips1 32-bit LE, glibc 2.19, gcc 13.2.0, linux 6.5.5\n";
+_tc_infolines="5";
