@@ -210,7 +210,7 @@ upx_native_installer(){
 	rm -rf "/tmp/upx_$HOST_ARCH.tar.xz" 2>/dev/null
 	UPX_TAG="$(git ls-remote --sort=-version:refname https://github.com/upx/upx.git --tags v*.*.* | grep -v 'alpha\|beta\|\-pre\|\-rc\|\^' | awk -F'/' 'NR==1 {print $NF}')"
 	echo -e "$w_l  ${g_l}upx$w_l version:$y_l $UPX_TAG ($HOST_ARCH)" | _log "$install_log"
-	UPX_URL="$(curl --silent "https://api.github.com/repos/upx/upx/releases/tags/$UPX_TAG" | jq -r '.assets | .[] | select( (.name | contains("'$HOST_ARCH'")) and (.name | endswith(".tar.xz"))) | .browser_download_url' | sed -e 's#\"##g')"
+	UPX_URL="$(curl --silent "https://api.github.com/repos/upx/upx/releases/tags/$UPX_TAG" | jq -r '.assets | .[] | select( (.name | contains("-'$HOST_ARCH'_")) and (.name | endswith(".tar.xz"))) | .browser_download_url' | sed -e 's#\"##g')"
 	echo -e "$w_l  Downloading ${g_l}upx$w_l from $UPX_URL..." | _log "$install_log"
 	curl --silent -L --output "/tmp/upx_$HOST_ARCH.tar.xz" "$UPX_URL";
 	echo -e "$w_l  Installing ${g_l}upx$w_l to /usr/local/bin...$re_" | _log "$install_log"
