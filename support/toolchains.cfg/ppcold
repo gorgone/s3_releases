@@ -1,5 +1,5 @@
 _toolchainname="ppcold"
-default_use="USE_UTF8 USE_LIBCRYPTO";
+default_use="USE_LIBCRYPTO";
 _description="Dbox2 / Dreambox DM500 and DM500-S"
 _oscamconfdir_default="/var/tuxbox/config"
 _oscamconfdir_custom=""
@@ -7,7 +7,7 @@ _oscamconfdir_custom=""
 _compiler="powerpc-linux-"
 _sysroot=""
 _libsearchdir="/lib"
-_toolchainfilename="UFBDLVR1eGJveC1vbGRfcy50YXIueHo=";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zL2xlZ2FjeS9Ub29sY2hhaW4tUFBDLVR1eGJveC1vbGRfcy50YXIueHoK";
 _md5sum="d1db3a6b9fb743d0f6753fb72d755924  Toolchain-PPC-Tuxbox-old_s.tar.xz";
 _block="USE_PCSC USE_LIBUSB"
 _tc_info="\n

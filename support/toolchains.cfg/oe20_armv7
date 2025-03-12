@@ -1,0 +1,19 @@
+_toolchainname="oe20_armv7";
+default_use="USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="";
+_description="OpenEmbedded 2.0 STBs, ARM-Cortex-A9 devices";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="armv7-oe20-linux-gnueabihf-";
+_sysroot="armv7-oe20-linux-gnueabihf/sysroot";
+_libsearchdir="/usr/lib";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1vZTIwX2FybXY3LnRhci54ego=";
+_md5sum="d1fec214ee48bbecb0041949431d5c41  Toolchain-oe20_armv7.tar.xz";
+_tc_info="\n
+!!! crosstool-NG Toolchain !!!\n
+\n
+OpenEmbedded 2.0 STBs, ARM-Cortex-A9 devices\n
+arm armv7-a 32-bit LE, glibc 2.23, gcc 13.2.0, linux 6.5.5\n";
+_tc_infolines="5";
