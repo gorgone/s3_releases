@@ -4,7 +4,7 @@ _toolchain_build_menu(){
 	[ "$loadprofile" == "yes" ] && load_config
 
 	selected=$(
-	"$gui" "$st_" "$bt_" "$title_" --no-cancel --title " -[ $txt_bmenu_title ]- " --menu "_________________________________________________________ \n $txt_bmenu_user = $(whoami)\n Toolchain       = $_toolchainname\n $txt_bmenu_comp = $_compiler""gcc\n $txt_bmenu_debu = CPU-Threads($(CPUS)) SVN($(REVISION)) SCRIPT($SIMPLEVERSION)\n $txt_bmenu_use  = $(echo $USESTRING| sed -e 's/^[ \t]*//')\n _________________________________________________________ \n" 22 65 10 BUILD "$txt_bmenu_build" CONFIGURE "$txt_bmenu_config" UPDATE "$txt_bmenu_update" BACKUP "$txt_bmenu_backup" LOAD_PROFILE "$txt_bmenu_profile" SAVE_PROFILE "$txt_bmenus_profile" SHOW_BUILDLOG "$txt_bmenu_log" EDIT_CONF_DIR "Oscam config PATH" BACK "$txt_bmenu_back" EXIT "$txt_firstmenu_exit")
+	"$gui" "$st_" "$bt_" "$title_" --no-cancel --title " -[ $txt_bmenu_title$(REPOIDENT) ]- " --menu "_________________________________________________________ \n $txt_bmenu_user = $(whoami)\n Toolchain       = $_toolchainname\n $txt_bmenu_comp = $_compiler""gcc\n $txt_bmenu_debu = CPU-Threads($(CPUS)) ${REPO^^}($($(USEGIT) && printf "$(COMMIT)" || printf "$(REVISION)")) SCRIPT(${SIMPLEVERSION}.${VERSIONCOUNTER})\n $txt_bmenu_use  = $(echo $USESTRING| sed -e 's/^[ \t]*//')\n _________________________________________________________ \n" 22 75 10 BUILD "$txt_bmenu_build" CONFIGURE "$txt_bmenu_config" UPDATE "$txt_bmenu_update" BACKUP "$txt_bmenu_backup" LOAD_PROFILE "$txt_bmenu_profile" SAVE_PROFILE "$txt_bmenus_profile" SHOW_BUILDLOG "$txt_bmenu_log" EDIT_CONF_DIR "Oscam config PATH" BACK "$txt_bmenu_back" EXIT "$txt_firstmenu_exit")
 	[ $? = 255 ] && _toolchain_build_menu
 
 	case $selected in
@@ -16,7 +16,7 @@ _toolchain_build_menu(){
 						tcupdate "$_toolchainname" "" "" "2"
 						_toolchain_build_menu;;
 		BACKUP)
-						tcupdate "-b" "$_toolchainname" "" "" "1"
+						tcupdate "-b" "$_toolchainname" "" "1"
 						_toolchain_build_menu;;
 		EDIT_CONF_DIR)
 						_gtedit
@@ -32,7 +32,7 @@ _toolchain_build_menu(){
 						_load_profile;;
 		SAVE_PROFILE)
 						_save_profile;;
-		BACK)
+		BACK | '')
 						_toolchain_main_menu;;
 		EXIT)
 						bye
@@ -46,11 +46,11 @@ _toolchain_config_menu(){
 	[ "$loadprofile" == "yes" ] && load_config
 
 	selected=$(
-	"$gui" "$st_" "$bt_" "$title_" --no-cancel --title " -[ $txt_config_menu ]- " --menu " ADDONS :\n $(e_addons)\n\n PROTOCOLS :\n $(e_protocols)\n\n READERS :\n $(e_readers)\n\n CARD_READERS :\n $(e_card_readers)\n\n USE VARIABLES :\n $(echo $USESTRING| sed -e 's/^[ \t]*//')\n\n" 29 75 6 BACK "$txt_back_build" OSCAM_MODULE "$txt_module_configure" OSCAM_EXTRA "$txt_oscam_extra" BUILD_EXTRA "$txt_build_extra" SELECT_STAPI "select stapi" RESET "$txt_build_reset")
+	"$gui" "$st_" "$bt_" "$title_" --no-cancel --title " -[ $txt_config_menu$(REPOIDENT) ]- " --menu " ADDONS :\n $(e_addons)\n\n PROTOCOLS :\n $(e_protocols)\n\n READERS :\n $(e_readers)\n\n CARD_READERS :\n $(e_card_readers)\n\n USE VARIABLES :\n $(echo $USESTRING| sed -e 's/^[ \t]*//')\n\n" 29 75 6 BACK "$txt_back_build" OSCAM_MODULE "$txt_module_configure" OSCAM_EXTRA "$txt_oscam_extra" BUILD_EXTRA "$txt_build_extra" SELECT_STAPI "$txt_stapi" RESET "$txt_build_reset")
 	[ $? = 255 ] && _toolchain_config_menu
 
 	case $selected in
-		BACK)
+		BACK | '')
 						save_config
 						_toolchain_build_menu;;
 		OSCAM_EXTRA)
@@ -58,7 +58,7 @@ _toolchain_config_menu(){
 		BUILD_EXTRA)
 						_build_extra_menu;;
 		OSCAM_MODULE)
-						eval "$svndir/config.sh -g" 2>/dev/null
+						eval "${repodir}/config.sh -g" 2>/dev/null
 						save_config;;
 		SELECT_STAPI)
 						_stapi_select;;
@@ -73,6 +73,8 @@ _toolchain_config_menu(){
 
 _toolchain_main_menu(){
 	_fill_tc_array
+	_init_menu
+
 	IFS="#"
 	COUNT=0
 	MENU_OPTIONS="BACK#$txt_back_main#"
@@ -98,32 +100,27 @@ _toolchain_main_menu(){
 			then
 				unset _self_build
 				source "$tccfgdir/$i"
-				if [ "$systype" == "ok" ]
+				if [ "$systype" == "ok" -o "$_self_build" == "yes" ]
 				then
-					MENU_OPTIONS+="$_toolchainname#$_description#"
+					[[ "$i" =~ "_generic" ]] && MENU_OPTIONS_GEN+="$_toolchainname#$_description#" || MENU_OPTIONS_STD+="$_toolchainname#$_description#"
 					counter
-				elif [ "$_self_build" == "yes" ]
-				then
-					MENU_OPTIONS+="$_toolchainname#$_description#"
-					counter
-					
 				fi
 			fi
 		done
 	fi
-
-	MENU_OPTIONS+="EXIT#$txt_firstmenu_exit#"
+	MENU_OPTIONS+="${MENU_OPTIONS_GEN}${MENU_OPTIONS_STD}EXIT#$txt_firstmenu_exit#"
 	counter
+
 	out=$(
-	"$gui" "$st_" "$nc_" "$bt_" "$title_" --help-button --help-label INFO --title "-[ Toolchain $txt_menu ]-" --menu "$txt_main_revision$(REVISION)" "${COUNT+8}" 75 0 ${MENU_OPTIONS})
+	"$gui" "$st_" "$nc_" "$bt_" "$title_" --help-button --help-label INFO --title "-[ Toolchain $txt_menu$(REPOIDENT) ]-" --menu "$txt_main_revision$(REVISION)$($(USEGIT) && printf " @ $(COMMIT) @ $(BRANCH)" || printf " on $(BRANCH)")" "${COUNT+8}" 75 0 ${MENU_OPTIONS})
 	IFS=$OIFS
 	first=$(echo "$out" | awk '{printf $1}')
-	tc_info=$(echo "$out" | awk '{printf $2}';)
+	tc_info=$(echo "$out" | awk '{printf $2}')
 
 	case $first in
 		EXIT)
 				bye;;
-		BACK)
+		BACK | '')
 				_select_menu;;
 		ADD)
 				_toolchain_add_menu;;
@@ -137,10 +134,12 @@ _toolchain_main_menu(){
 				then
 					source "$tccfgdir/$tc_info"
 					"$gui" "$st_" "$nc_" "$bt_" "$title_" "$ib_" "$_tc_info" $((_tc_infolines + 5)) 65
-					sleep 5
+					sleep 10
 				fi
 				_toolchain_main_menu;;
 		*)
+				#resetting all optional config variables
+				unset _stagingdir _androidndkdir _self_build extra_use extra_cc extra_ld extra_c stapi_allowed stapi_lib_custom
 				[ -f "$tccfgdir/$first" ] && stapi_allowed="" && source "$tccfgdir/$first" || exit
 				loadprofile="yes"
 				_toolchain_build_menu "$first";;
@@ -157,7 +156,7 @@ get_toolchain_config(){
 
 _load_toolchain(){
 	[ ! -z "$1" ] && source "$tccfgdir/$1"
-	dln="$(decode "$_t1e")$(decode "$_toolchainfilename")"
+	dln="$(basename $(decode "$_toolchainfilename"))"
 	tc_dl="$dldir/$dln"
 	[ -f "$dln" ] && rm -rf "$dln"
 	clear
@@ -183,7 +182,7 @@ _console_extract_toolchain(){
 	[ -d "$tcdir/$_toolchainname" ] && rm -rf "$tcdir/$_toolchainname"
 	mkdir "$tcdir/$_toolchainname"
 	cd "$tcdir/$_toolchainname"
-	xz -d "$tc_dl" -c | tar -x
+	tar -xf "$tc_dl" --strip-components=$_extract_strip
 	printf "\r$w_l    $txt_extracting :$g_l$txt_done!                             \n\n"
 }
 
@@ -191,8 +190,11 @@ _toolchain_check(){
 	clear
 	printf "$w_l"
 	s3logo
-	headervars=( crypto.h pcsclite.h libusb.h pthread.h )
+	headervars=( crypto.h pcsclite.h libusb.h pthread.h dvbcsa.h zlib.h )
 	[ -f "$tccfgdir/$1" ] && source "$tccfgdir/$1"
+
+	fmtg="  ${w_l}%-16s ${y_l}%-20s ${g_l}%-8s $p_l%-20s %-17s ${g_l}%s\n";
+	fmtb="  ${w_l}%-16s ${y_l}%-20s ${r_l}%s\n";
 
 	if [ -d "$tcdir/$1/bin" ]
 	then
@@ -203,60 +205,80 @@ _toolchain_check(){
 		exit
 	fi
 
-	printf "$w_l  Compiler Info -----> $C$1$w_l\n  ====================\n"
+	printf "$w_l  Compiler info -----> $C$1$w_l\n  ====================\n"
 
 	if [ -z "$sysroot" ] && [ ! "$1" == "native" ]
 	then
 		compilername="$_compiler""gcc"
 		[ ${#_realcompiler} -gt 4 ] && compilername="$_realcompiler"
 		version=$("./$compilername" -dumpversion)
-		machine=$("./$compilername" -dumpmachine)
-		sr=$("./$compilername" -print-sysroot 2>/dev/null)
-		sysroot=${sr#"$tcdir/$1/bin/../"}
-		printf "$w_l  GCC Version :$y_l $version\n"
-		printf "$w_l  GCC Binary  :$y_l $machine""-gcc\n"
-		printf "$w_l  GCC Sysroot :$y_l $sysroot\n"
+		[ "$_androidndkdir" == "1" ] && sr="$tcdir/$1/sysroot" || sr=$("./$compilername" -print-sysroot 2>/dev/null)
+		sysroot=$(realpath -sm "$sr" --relative-to="$tcdir/$1")
+		compilerpath=$(realpath -sm "./$compilername" --relative-to="$tcdir/$1")
+		printf "$fmtg" "GCC Version :" "$version"
+		printf "$fmtg" "GCC Binary  :" "$compilerpath"
+		printf "$fmtg" "GCC Sysroot :" "$sysroot"
+		gversion=$("./$_compiler""gdb" --version 2>/dev/null | head -n1 | awk '{print $NF}')
+		[ -n "$gversion" ] && printf "$fmtg" "GDB Version :" "$gversion"
+		lversion=$("./$_compiler""ld" --version 2>/dev/null | head -n1 | awk '{print $NF}')
+		[ -n "$lversion" ] && printf "$fmtg" "LD Version  :" "$lversion"
+		printf "$fmtg" "HOST arch   :" "$(_get_compiler_arch host)"
+		printf "$fmtg" "TARGET arch :" "$(_get_compiler_arch target)"
+		printf "$fmtg" "C11 Support :" "$(! _check_compiler_capability 'c11' && printf 'No' || printf 'Yes')"
 		[ -z "$sysroot" ] && sysroot="$r_l$txt_too_old\n"
-		cd "$sr"
-		for e in "${headervars[@]}"
-		do
-			temp=$(find * |grep -m1 "$e")
-			[ ${#temp} -gt 8 ] && printf "$w_l  Header File :$y_l $e$g_l\t$txt_found\n" || printf "$w_l  Header File :$y_l $e$r_l\t($txt_not_found)\n"
-		done
 	fi
 
 	if [ "$1" == "native" ]
 	then
-		printf "$w_l  GCC Version :$y_l $(gcc --version |head -n 1 )"
-		printf "$w_l  GCC Binary  :$y_l $(gcc -dumpmachine )"
+		printf "$fmtg" "GCC Version :" "$(gcc --version | head -n 1)"
+		printf "$fmtg" "GCC Binary  :" "$(which $(gcc -dumpmachine)-gcc || which gcc)"
 	fi
 
 	printf "\n$w_l  Sysroot config ----> $C$_sysroot$w_l\n  ====================\n"
 
 	[ "$1" == "native" ] && cd "$_sysroot" || cd "$tcdir/$1/$_sysroot"
 
+	linux="$(_linux_version $([ "$1" == "native" ] && printf "/usr/src/linux-headers-$(uname -r)" || printf "."))"; linuxc="$(echo $linux | awk -F';' '{print $1}')"; linuxv="$(echo $linux | awk -F';' '{print $2}')"
+	[ ! -z "$linux" ] && printf "$fmtg" "Linux       :" "version.h" "${linuxv::8}" "($linuxc)" || printf "$fmtb" "Linux       :" "version.h" "(missing linux headers)"
+
+	libc="$(_libc_version $1)"; libcf="$(echo $libc | awk -F';' '{print $1}')"; libcl="$(echo $libc | awk -F';' '{print $2}')"; libcv="$(echo $libc | awk -F';' '{print $3}')"
+	[ ! -z "$libcl" ] && printf "$fmtg" "C-Library   :" "${libcf::20}" "${libcv::8}" "($libcl)" || printf "$fmtb" "C-Library   :" "${libcf::20}" "($txt_not_found)"
+
 	for e in "${headervars[@]}"
 	do
-		temp=$(find * |grep -m1 "$e")
-		[ ${#temp} -gt 8 ] && printf "$w_l  Header File :$y_l $e$g_l\t$txt_found\n" || printf "$w_l  Header File :$y_l $e$r_l\t($txt_not_found)\n"
+		temp=$(find * |grep -wm1 "$e")
+		[ ${#temp} -gt 5 ] && printf "$fmtg" "Header File :" "${e::20}" "${txt_found}" || printf "$fmtb" "Header File :" "${e::20}" "($txt_not_found)"
 	done
 
-	pkg=$(find * |grep -m1 "pkgconfig")
-	if [ ${#pkg} -gt 0 ]
+	[ "$1" == "native" ] && pkgs=$(find ../* -name "pkgconfig" -type d) || pkgs=$(find . -name "pkgconfig" -type d)
+	if [ ${#pkgs} -gt 0 ]
 	then
-		[ "$1" == "native" ] && cd "$_sysroot/$pkg" || cd "$tcdir/$1/$_sysroot/$pkg"
-		printf "\n$w_l  Library config ----> $C$_sysroot/$pkg$w_l\n  ====================\n"
-		for f in *.pc
+		for pkg in ${pkgs}
 		do
-			content=$(cat "$f") && na=$(echo "$content" | grep 'Name:' | sed -e "s/Name: //g") && ver=$(echo "$content" | grep 'Version:' | sed -e "s/Version: //g")
-			sp1=$(printf '%*s' $((20-${#f})) | tr ' ' ' ') && sp2=$(printf '%*s' $((20-${#na})) | tr ' ' ' ')
-			[ ${#content} -gt 0 ] && printf "$w_l  Library Config :$y_l "$f"$sp1$g_l$txt_found\t$p_l$na$sp2$ver\n" || printf "$w_l  Library Config :$y_l "$f"$sp1$r_l($txt_not_found)\n"
+			if [ "$1" == "native" ]
+			then
+				cd "$_sysroot/$pkg"
+				printf "\n$w_l  Library config ----> $C$PWD$w_l\n  ====================\n"
+			else
+				cd "$tcdir/$1/$_sysroot/$pkg"
+				printf "\n$w_l  Library config ----> $C$(realpath -sm "$PWD" --relative-to="$tcdir/$1")$w_l\n  ====================\n"
+			fi
+
+			for f in *.pc
+			do
+				unset type;ff="${f/zlib/"libz"}";ff="${ff/openssl/"libcrypto"}"
+				content=$(cat "$f" 2>/dev/null) && na=$(echo "$content" | grep 'Name:' | sed -e "s/Name: //g") && ver=$(echo "$content" | grep 'Version:' | sed -e "s/Version: //g")
+				sp1=$(printf '%*s' $((20-${#f})) | tr ' ' ' ') && sp2=$(printf '%*s' $((20-${#na})) | tr ' ' ' ')
+				[ -n "$(find "$PWD/../" -name "${ff%.*}.a" -xtype f -print -quit)" ] && type="static"; [ -n "$(find "$PWD/../" \( -name "${ff%.*}.so" -o -name "${ff%.*}.so.*" \) -xtype f -print -quit)" ] && type+="$([ -n "$type" ] && echo '+')dynamic"
+				[ ${#content} -gt 0 ] && printf "$fmtg" "Library Config :" "${f::20}" "$txt_found" "${na::20}" "$ver" "$type" || printf "$fmtb" "Library Config :" "${f::20}" "($txt_not_found)"
+
+			done
 		done
 	else
 		printf "\n$w_l  Library config ----> $C no libraries found in pkgconfig$w_l\n  ====================\n"
 	fi
 
-	printf $re_
+	printf "$re_\n"
 	exit
 }
 
@@ -267,6 +289,7 @@ _toolchain_repair(){
 	cd $dldir
 	zzusatz=0
 	szusatz=0
+	_extract_strip="0"
 	[ -f "$tccfgdir/$1" ] && source "$tccfgdir/$1"
 
 	fn=$(echo $_md5sum |awk '{ printf $2 }')
@@ -343,24 +366,32 @@ _toolchain_add_menu(){
 		if [ ! "$i" == "native" ]
 		then
 			source "$tccfgdir/$i"
-			MENU_OPTIONS+="$_toolchainname#$_description#"
+			[[ "$i" =~ "_generic" ]] && MENU_OPTIONS_GEN+="$_toolchainname#$_description#" || MENU_OPTIONS_STD+="$_toolchainname#$_description#"
 			counter
 		fi
 	done
-
-	MENU_OPTIONS+="EXIT#$txt_menu_builder1#"
+	MENU_OPTIONS+="${MENU_OPTIONS_GEN}${MENU_OPTIONS_STD}EXIT#$txt_menu_builder1#"
 	counter
 
 	out=$(
-	"$gui" "$st_" "$nc_" "$bt_" "$title_" --help-button --help-label INFO --title "-[ $txt_add_menu ]-" --menu "$txt_main_revision$(REVISION)" "${COUNT+8}" 75 0 ${MENU_OPTIONS[@]})
+	"$gui" "$st_" "$nc_" "$bt_" "$title_" --help-button --help-label INFO --title "-[ $txt_add_menu$(REPOIDENT) ]-" --menu "$txt_main_revision$(REVISION)" "${COUNT+8}" 75 0 ${MENU_OPTIONS[@]})
 	IFS=$OIFS
 	first=$(echo "$out" | awk '{printf $1}')
+	tc_info=$(echo "$out" | awk '{printf $2}')
 
 	case $first in
 		EXIT)
 				bye;;
-		BACK)
+		BACK | '')
 				_toolchain_main_menu;;
+		HELP)
+				if [ -f "$tccfgdir/$tc_info" ]
+				then
+					source "$tccfgdir/$tc_info"
+					"$gui" "$st_" "$nc_" "$bt_" "$title_" "$ib_" "$_tc_info" $((_tc_infolines + 5)) 65
+					sleep 10
+				fi
+				_toolchain_add_menu;;
 		*)
 				_toolchain_gui_install
 				_toolchain_main_menu;;
@@ -370,6 +401,7 @@ _toolchain_add_menu(){
 _toolchain_remove_menu(){
 	_fill_tc_array
 	_init_menu
+
 	if [ "$tcempty" == "0" ]
 	then
 		for i in "${INST_TCLIST[@]}"
@@ -377,24 +409,23 @@ _toolchain_remove_menu(){
 			if [ ! "$i" == "native" ]
 			then
 				source "$tccfgdir/$i"
-				MENU_OPTIONS+="$_toolchainname#$_description#"
+				[[ "$i" =~ "_generic" ]] && MENU_OPTIONS_GEN+="$_toolchainname#$_description#" || MENU_OPTIONS_STD+="$_toolchainname#$_description#"
 				counter
 			fi
 		done
 	fi
-
-	MENU_OPTIONS+="EXIT#$txt_menu_builder1#"
+	MENU_OPTIONS+="${MENU_OPTIONS_GEN}${MENU_OPTIONS_STD}EXIT#$txt_menu_builder1#"
 	counter
 
 	out=$(
-	"$gui" "$st_" "$nc_" "$bt_" "$title_" --title "-[ $txt_remove_menu ]-" --menu "$txt_main_revision$(REVISION)" "${COUNT+8}" 75 0 ${MENU_OPTIONS})
+	"$gui" "$st_" "$nc_" "$bt_" "$title_" --title "-[ $txt_remove_menu$(REPOIDENT) ]-" --menu "$txt_main_revision$(REVISION)" "${COUNT+8}" 75 0 ${MENU_OPTIONS})
 	IFS=$OIFS
 	first=$(echo "$out" | awk '{printf $1}')
 
 	case $first in
 		EXIT)
 				bye;;
-		BACK)
+		BACK | '')
 				_toolchain_main_menu;;
 		*)
 				[ -d "$tcdir/$first" ] && rm -rf "$tcdir/$first"
@@ -403,20 +434,125 @@ _toolchain_remove_menu(){
 }
 
 _toolchain_gui_install(){
-	[ -d "$tcdir/$first" ] && rm -rf "$tcdir/$first" && printf "$txt_delete $tcdir/$first"
-	mkdir "$tcdir/$first"
-	cd "$tcdir/$first"
+	_extract_strip="0"
 	source "$tccfgdir/$first"
-	tcname="$(decode "$_t1e$_toolchainfilename")"
-	stcname="$(decode "$_toolchainfilename")"
+
+	url="$(decode "$_toolchainfilename")"
+	tcname="$(basename $url)"
+
+	if [ ! -f "$dldir/$tcname" ] || [ ! -z "$1" ]
+	then
+		cd "$dldir"
+		rm -f "$tcname"
+		wget "$url" 2>&1 | stdbuf -o0 awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | "$gui" "$st_" "$bt_" "$title_" --title " -[ download ]- " --gauge "  $txt_loading $stcname $txt_wait" 6 74
+	fi
 
 	if [ -f "$dldir/$tcname" ]
 	then
-		(xz -d "$dldir/$tcname" -c| tar -xv) |"$gui" "$st_" --title " -[ $txt_extracting ]- " "$pb_" 20 74
-	else
-		cd "$dldir"
-		wget "$(decode "$_u1e")/$tcname" 2>&1 | stdbuf -o0 awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | "$gui" "$st_" "$bt_" "$title_" --title " -[ download ]- " --gauge "  $txt_loading $stcname $txt_wait" 6 74
+		[ -d "$tcdir/$first" ] && rm -rf "$tcdir/$first" && printf "$txt_delete $tcdir/$first"
+		mkdir "$tcdir/$first"
 		cd "$tcdir/$first"
-		(xz -d "$dldir/$tcname" -c |tar -xv) |"$gui" "$st_" --title " -[ $txt_extracting ]- " "$pb_" 20 74
+		(tar -xvf "$dldir/$tcname" --strip-components=$_extract_strip) |"$gui" "$st_" --title " -[ $txt_extracting $tcname ]- " "$pb_" 20 74
+	else
+		printf "$r_l  $txt_error:$y_l $stcname$w_l Toolchain $txt_no_download""$rs_"
 	fi
+}
+
+_libc_version(){
+	local libcfile libcname verstr
+
+	if [ "$1" == "native" ]
+	then
+		libcfile="ldd"
+		verstr="$(ldd --version | head -n1 | awk '{printf $3 "-" $5}')"; verstr="${verstr,,}"
+	else
+		libcfile="$(find . -name "libc.so.?" -o -name "libc-*.so" -o -name "libuClibc-*.so" 2>/dev/null | head -n1)"
+		if [ -L "$libcfile" ] && [ -e "$libcfile" ]
+		then
+			libcfile="$(readlink "$libcfile")"
+		else
+			libcfile="$(basename "$libcfile")"
+		fi
+		libcname=$(echo $libcfile | sed 's/\.so$//')
+
+		# glibc
+		verstr="$(strings "$(find . -name "$libcfile" | head -n1)" 2>/dev/null | grep -Po '^GLIBC_(\d+\.)+\d+' | sort -Vr | head -n1)"
+		if [ -n "$verstr" ]
+		then
+			verstr="${verstr,,}"; verstr="${verstr//_/-}"
+
+		# uclibc
+		elif [ "$libcname" != "${libcname#libuClibc-}" ]
+		then
+			verstr="${libcname#lib}"
+
+		# musl
+		elif [ "$(strings "$(find . -name "libc.so" | head -n1)" 2>/dev/null | grep '^musl')" ]
+		then
+			libcfile="$(basename $(find . -name "libc.so" | head -n1))"
+			verstr="musl-$(strings "$(find . -name "libc.so" | head -n1)" | grep '^[0-1]\.[0-9]\.[0-9][0-9]*$')"
+
+		# bionic
+		elif [ "$(strings "$(find . -name "libc.so" ! -path "*/x86_64-linux-android/*" | head -n1)" 2>/dev/null | grep 'bionic')" ]
+		then
+			libcfile="$(basename $(find . -name "libc.so" ! -path "*/x86_64-linux-android/*" | head -n1))"
+			verstr="bionic-$(strings "$(find . -name "libc.so" ! -path "*/x86_64-linux-android/*" | head -n1)" | grep '^C[0-2]\.[0-9]*$')"
+
+		#unknown
+		else
+			libcfile="[g|uc]libc|musl"
+		fi
+	fi
+
+	printf "$libcfile;${verstr//-/;}"
+}
+
+_linux_version(){
+	local vcode base major patch sub
+
+	vcode=$(find "$1" -name "version.h" -type f -exec grep -m1 "LINUX_VERSION_CODE" {} \; | awk '{print $3}')
+
+	# LINUX_VERSION_CODE is X*65536 + Y*256 + Z
+	[ -z $vcode ] && return || base=$vcode
+	major=$(( $base / 65536 ))
+	mp=$(( $major * 65536 ))
+	base=$(( $base - mp ))
+
+	patch=$(( $base / 256 ))
+	pp=$(( $patch * 256 ))
+	sub=$(( $base - pp ))
+
+	printf "$vcode;$major.$patch.$sub"
+}
+
+_check_compiler_capability(){
+	check_filename="s3_gcc_cap_$1"
+	case "$1" in
+		"c11") #checking if $CC supports -std=c11
+			echo "_Thread_local int x; int main(){x = 42; ; return 0;}" | "$(realpath -s $compilername)" -std=c11 -x c -o "/tmp/${check_filename}.chk" - &>"/tmp/${check_filename}.log";;
+		"neon") #checking if toolchain supports neon
+			[[ "$2" =~ android ]] && return 1
+			[[ "$2" =~ aarch64 ]] && mfpu='' || mfpu='-mfpu=neon'
+			echo -e "#include <arm_neon.h>\nint main(){return 0;}" | "$(realpath -s $compilername)" $mfpu -x c -o "/tmp/${check_filename}.chk" - &>"/tmp/${check_filename}.log";;
+		"altivec") #checking if toolchain supports altivec
+			echo -e "#include <altivec.h>\nint main(){return 0;}" | "$(realpath -s $compilername)" -maltivec -x c -o "/tmp/${check_filename}.chk" - &>"/tmp/${check_filename}.log";;
+		*)  false;
+	esac;
+	ret=$?;
+	find /tmp -name "${check_filename}.chk" -type f -exec rm {} \; &>/dev/null;
+	return $ret
+}
+
+_get_compiler_arch(){
+	ret='';
+	case "$1" in
+		"build") #checking build system architecture
+			ret="$(uname -m)";;
+		"host") #checking host architecture the compiler was build for
+			# Use ranlib instead of gcc to compatible with android toolchains, gcc is a wrapper script there
+			ret="$(file -b $(realpath "$_compiler""ranlib") | awk -F',' '{print $2}' | xargs)";;
+		"target") #checking target architecture the compiler produces binaries for
+			ret="$("./$compilername" -dumpmachine | awk -F'-' '{print $1}' | xargs)";;
+	esac;
+	printf "$ret"
 }

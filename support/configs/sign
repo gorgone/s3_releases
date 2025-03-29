@@ -1,0 +1,2 @@
+x509cert="/path/to/your/certificate.crt";
+privkey="/path/to/your/private.key"

@@ -1,5 +1,5 @@
 _toolchainname="osmio4k";
-default_use="USE_UTF8 USE_LIBCRYPTO";
+default_use="USE_LIBCRYPTO";
 _description="Edision OS MIO 4k aarch64";
 _oscamconfdir_default="/var/keys/";
 _oscamconfdir_custom=""
@@ -7,7 +7,7 @@ _oscamconfdir_custom=""
 _compiler="aarch64-osmio4k-linux-gnu-";
 _sysroot="aarch64-osmio4k-linux-gnu/sysroot/";
 _libsearchdir="/lib";
-_toolchainfilename="b3NtaW80ay50YXIueHoK";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zL2xlZ2FjeS9Ub29sY2hhaW4tb3NtaW80ay50YXIueHoK";
 _md5sum="41fbf9b4f91eb61cb926565da644b6ed  Toolchain-osmio4k.tar.xz";
 _tc_info="\n
     !!! beware the box must have FPU !!!\n
