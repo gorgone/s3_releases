@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="80";
+S3TUP_CONFIG_VERSION="81";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -75,9 +75,9 @@ PKG_CONFIG_BIN="$(which pkg-config)"; #Make sure use host's pkg-config binary in
 
 # OpenSSL 3.5.x
 SSL_350="1";
-SSL_350_beta="1";
+SSL_350_beta="0";
 SSL_350_name="OpenSSL";
-SSL_350_tag="$(git ls-remote --sort=-version:refname https://github.com/openssl/openssl.git --tags openssl-3.5.* | grep -v '\^' | awk -F'/' 'NR==1 {print $NF}')";
+SSL_350_tag="$(git ls-remote --sort=-version:refname https://github.com/openssl/openssl.git --tags openssl-3.5.* | grep -v 'alpha\|beta\|\-pre\|\-rc\|\^' | awk -F'/' 'NR==1 {print $NF}')";
 SSL_350_version="$(printf "$SSL_350_tag" | sed -e 's#openssl-##g; s#_#.#g; s#\"##g')";
 SSL_350_check="openssl.pc $(printf "$SSL_350_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
 SSL_350_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/releases/tags/$SSL_350_tag" | jq -r '.assets | .[] | select( .name | endswith(".tar.gz")) | .browser_download_url' | sed -e 's#\"##g')";
@@ -101,7 +101,7 @@ SSL_350_tasks+=('mkdir "${SSL_350_name}-${SSL_350_version}" && find "@PREFIX@" -
 SSL_340="1";
 SSL_340_beta="0";
 SSL_340_name="OpenSSL";
-SSL_340_tag="$(git ls-remote --sort=-version:refname https://github.com/openssl/openssl.git --tags openssl-3.4.* | grep -v '\^' | awk -F'/' 'NR==1 {print $NF}')";
+SSL_340_tag="$(git ls-remote --sort=-version:refname https://github.com/openssl/openssl.git --tags openssl-3.4.* | grep -v 'alpha\|beta\|\-pre\|\-rc\|\^' | awk -F'/' 'NR==1 {print $NF}')";
 SSL_340_version="$(printf "$SSL_340_tag" | sed -e 's#openssl-##g; s#_#.#g; s#\"##g')";
 SSL_340_check="openssl.pc $(printf "$SSL_340_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
 SSL_340_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/releases/tags/$SSL_340_tag" | jq -r '.assets | .[] | select( .name | endswith(".tar.gz")) | .browser_download_url' | sed -e 's#\"##g')";
@@ -125,7 +125,7 @@ SSL_340_tasks+=('mkdir "${SSL_340_name}-${SSL_340_version}" && find "@PREFIX@" -
 SSL_330="1";
 SSL_330_beta="0";
 SSL_330_name="OpenSSL";
-SSL_330_tag="$(git ls-remote --sort=-version:refname https://github.com/openssl/openssl.git --tags openssl-3.3.* | grep -v '\^' | awk -F'/' 'NR==1 {print $NF}')";
+SSL_330_tag="$(git ls-remote --sort=-version:refname https://github.com/openssl/openssl.git --tags openssl-3.3.* | grep -v 'alpha\|beta\|\-pre\|\-rc\|\^' | awk -F'/' 'NR==1 {print $NF}')";
 SSL_330_version="$(printf "$SSL_330_tag" | sed -e 's#openssl-##g; s#_#.#g; s#\"##g')";
 SSL_330_check="openssl.pc $(printf "$SSL_330_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
 SSL_330_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/releases/tags/$SSL_330_tag" | jq -r '.assets | .[] | select( .name | endswith(".tar.gz")) | .browser_download_url' | sed -e 's#\"##g')";
@@ -149,7 +149,7 @@ SSL_330_tasks+=('mkdir "${SSL_330_name}-${SSL_330_version}" && find "@PREFIX@" -
 SSL_320="1";
 SSL_320_beta="0";
 SSL_320_name="OpenSSL";
-SSL_320_tag="$(git ls-remote --sort=-version:refname https://github.com/openssl/openssl.git --tags openssl-3.2.* | grep -v '\^' | awk -F'/' 'NR==1 {print $NF}')";
+SSL_320_tag="$(git ls-remote --sort=-version:refname https://github.com/openssl/openssl.git --tags openssl-3.2.* | grep -v 'alpha\|beta\|\-pre\|\-rc\|\^' | awk -F'/' 'NR==1 {print $NF}')";
 SSL_320_version="$(printf "$SSL_320_tag" | sed -e 's#openssl-##g; s#_#.#g; s#\"##g')";
 SSL_320_check="openssl.pc $(printf "$SSL_320_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
 SSL_320_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/releases/tags/$SSL_320_tag" | jq -r '.assets | .[] | select( .name | endswith(".tar.gz")) | .browser_download_url' | sed -e 's#\"##g')";
@@ -173,7 +173,7 @@ SSL_320_tasks+=('mkdir "${SSL_320_name}-${SSL_320_version}" && find "@PREFIX@" -
 SSL_310="1";
 SSL_310_beta="0";
 SSL_310_name="OpenSSL";
-SSL_310_tag="$(git ls-remote --sort=-version:refname https://github.com/openssl/openssl.git --tags openssl-3.1.* | grep -v '\^' | awk -F'/' 'NR==1 {print $NF}')";
+SSL_310_tag="$(git ls-remote --sort=-version:refname https://github.com/openssl/openssl.git --tags openssl-3.1.* | grep -v 'alpha\|beta\|\-pre\|\-rc\|\^' | awk -F'/' 'NR==1 {print $NF}')";
 SSL_310_version="$(printf "$SSL_310_tag" | sed -e 's#openssl-##g; s#_#.#g; s#\"##g')";
 SSL_310_check="openssl.pc $(printf "$SSL_310_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
 SSL_310_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/releases/tags/$SSL_310_tag" | jq -r '.assets | .[] | select( .name | endswith(".tar.gz")) | .browser_download_url' | sed -e 's#\"##g')";
@@ -197,7 +197,7 @@ SSL_310_tasks+=('mkdir "${SSL_310_name}-${SSL_310_version}" && find "@PREFIX@" -
 SSL_300="1";
 SSL_300_beta="0";
 SSL_300_name="OpenSSL";
-SSL_300_tag="$(git ls-remote --sort=-version:refname https://github.com/openssl/openssl.git --tags openssl-3.0.* | grep -v '\^' | awk -F'/' 'NR==1 {print $NF}')";
+SSL_300_tag="$(git ls-remote --sort=-version:refname https://github.com/openssl/openssl.git --tags openssl-3.0.* | grep -v 'alpha\|beta\|\-pre\|\-rc\|\^' | awk -F'/' 'NR==1 {print $NF}')";
 SSL_300_version="$(printf "$SSL_300_tag" | sed -e 's#openssl-##g; s#_#.#g; s#\"##g')";
 SSL_300_check="openssl.pc $(printf "$SSL_300_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
 SSL_300_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/releases/tags/$SSL_300_tag" | jq -r '.assets | .[] | select( .name | endswith(".tar.gz")) | .browser_download_url' | sed -e 's#\"##g')";
