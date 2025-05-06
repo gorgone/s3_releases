@@ -1,12 +1,12 @@
 _toolchainname="cool";
-default_use="USE_UTF8 USE_COOLAPI";
+default_use="USE_COOLAPI";
 _description="COOLSTREAM"
 _oscamconfdir="/var/tuxbox/config";
 
 _compiler="arm-cx2450x-linux-gnueabi-";
 _sysroot="arm-cx2450x-linux-gnueabi/sys-root/usr";
 _libsearchdir="/lib";
-_toolchainfilename="Q29vbHN0cmVhbV9zX3VfcC50YXIueHoK";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zL2xlZ2FjeS9Ub29sY2hhaW4tQ29vbHN0cmVhbV9zX3VfcC50YXIueHoK";
 _md5sum="a4c92c6bcfeee5fd105f3590034b8d12  Toolchain-Coolstream_s_u_p.tar.xz";
 _tc_info="\n
     !!! COOLSTREAM HD1!!!\n

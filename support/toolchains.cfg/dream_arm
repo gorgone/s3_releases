@@ -1,0 +1,19 @@
+_toolchainname="dream_arm";
+default_use="USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="";
+_description="Dreambox DM9x0 UHD";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="arm-dreambox-linux-gnueabihf-";
+_sysroot="arm-dreambox-linux-gnueabihf/sysroot";
+_libsearchdir="/usr/lib";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1kcmVhbV9hcm0udGFyLnh6Cg==";
+_md5sum="d0cb74426ebfb020ab531550f5c6412d  Toolchain-dream_arm.tar.xz";
+_tc_info="\n
+!!! crosstool-NG Toolchain !!!\n
+\n
+Dreambox DM9x0 UHD\n
+arm 32-bit LE, glibc 2.23, gcc 13.2.0, linux 6.5.5\n";
+_tc_infolines="5";
