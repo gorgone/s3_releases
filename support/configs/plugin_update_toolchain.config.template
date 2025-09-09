@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="81";
+S3TUP_CONFIG_VERSION="82";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -68,10 +68,34 @@ ANDK_SETUP_tasks+=('mv --force "$(basename "$ANDK_PKG_URL" | cut -d "-" -f 1-3)"
 ANDK_SETUP_tasks+=('chmod -R 755 "@ANDKSOURCE@";'); # setup command3
 
 # Library build settings
-LIBS=(SSL_350 SSL_340 SSL_330 SSL_320 SSL_310 SSL_300 SSL_111 SSL_110 SSL_102 SSL_102B SSL_100 SSL_098 LIB_CURL LIB_USB LIB_USBB LIB_USB0 LIB_PCSC LIB_PCSCB LIB_CCID LIB_CCIDB LIB_DVBCSA LIB_DVBC64 LIB_DVBC32 LIB_ZLIB); # List of ordered libraries. Only libraries in this list are available
+LIBS=(SSL_360 SSL_350 SSL_340 SSL_330 SSL_320 SSL_310 SSL_300 SSL_111 SSL_110 SSL_102 SSL_102B SSL_100 SSL_098 LIB_CURL LIB_USB LIB_USBB LIB_USB0 LIB_PCSC LIB_PCSCB LIB_CCID LIB_CCIDB LIB_DVBCSA LIB_DVBC64 LIB_DVBC32 LIB_ZLIB); # List of ordered libraries. Only libraries in this list are available
 LIBS_LIST_BETA="0"; # In(Ex)clude libraries defined as beta
 LIBS_AUTO_INTEGRATE="1"; # Automatically reintegrate libraries when rebuilding toolchains
 PKG_CONFIG_BIN="$(which pkg-config)"; #Make sure use host's pkg-config binary instead of cross toolchain's one
+
+# OpenSSL 3.6.x
+SSL_360="1";
+SSL_360_beta="1";
+SSL_360_name="OpenSSL";
+SSL_360_tag="$(git ls-remote --sort=-version:refname https://github.com/openssl/openssl.git --tags openssl-3.6.* | grep -v '\^' | awk -F'/' 'NR==1 {print $NF}')";
+SSL_360_version="$(printf "$SSL_360_tag" | sed -e 's#openssl-##g; s#_#.#g; s#\"##g')";
+SSL_360_check="openssl.pc $(printf "$SSL_360_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
+SSL_360_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/releases/tags/$SSL_360_tag" | jq -r '.assets | .[] | select( .name | endswith(".tar.gz")) | .browser_download_url' | sed -e 's#\"##g')";
+SSL_360_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
+SSL_360_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
+SSL_360_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
+SSL_360_tasks+=('export LDFLAGS="@LDFLAGS@";');
+SSL_360_tasks+=('[ "@TYPE@" == "android-ndk" ] && export CC=gcc || export CC=@CC@;');
+SSL_360_tasks+=('[ "@TYPE@" == "android-ndk" ] && export RANLIB=ranlib || export RANLIB=@RANLIB@;');
+SSL_360_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
+SSL_360_tasks+=('FLAGS="linux-generic32 shared no-tests no-threads";');
+SSL_360_tasks+=('[[ "@CC@" =~ "uclibc"|"musl" ]] && FLAGS+=" -DOPENSSL_NO_ASYNC";');
+SSL_360_tasks+=('[ "@TYPE@" == "android-ndk" ] && FLAGS="@SSL_TARGET@ --api=3.0 -D__ANDROID_API__=@API@";');
+SSL_360_tasks+=('./Configure --prefix=@PREFIX@ $FLAGS;');
+SSL_360_tasks+=('make -j@CPUS@;');
+SSL_360_tasks+=('make install_sw;');
+SSL_360_tasks+=('[ "@TYPE@" == "android-ndk" ] && find "@PREFIX@/lib/" -maxdepth 1 \( -name "libcrypto.*" -o -name "libssl.*" \) -execdir ln -frs "@PREFIX@/lib/{}" "@PREFIX@/lib/@HOST@/@API@/{}" \; || true;');
+SSL_360_tasks+=('mkdir "${SSL_360_name}-${SSL_360_version}" && find "@PREFIX@" -maxdepth 2 \( -name "libcrypto.so.3" -o -name "libssl.so.3" \) -exec cp -f "{}" "${SSL_360_name}-${SSL_360_version}" \; && zip -9yr "$bdir/${TOOLCHAIN##*/}-libs.zip" "${SSL_360_name}-${SSL_360_version}";');
 
 # OpenSSL 3.5.x
 SSL_350="1";
