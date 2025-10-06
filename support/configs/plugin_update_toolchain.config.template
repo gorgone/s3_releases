@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="82";
+S3TUP_CONFIG_VERSION="83";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -75,9 +75,9 @@ PKG_CONFIG_BIN="$(which pkg-config)"; #Make sure use host's pkg-config binary in
 
 # OpenSSL 3.6.x
 SSL_360="1";
-SSL_360_beta="1";
+SSL_360_beta="0";
 SSL_360_name="OpenSSL";
-SSL_360_tag="$(git ls-remote --sort=-version:refname https://github.com/openssl/openssl.git --tags openssl-3.6.* | grep -v '\^' | awk -F'/' 'NR==1 {print $NF}')";
+SSL_360_tag="$(git ls-remote --sort=-version:refname https://github.com/openssl/openssl.git --tags openssl-3.6.* | grep -v 'alpha\|beta\|\-pre\|\-rc\|\^' | awk -F'/' 'NR==1 {print $NF}')";
 SSL_360_version="$(printf "$SSL_360_tag" | sed -e 's#openssl-##g; s#_#.#g; s#\"##g')";
 SSL_360_check="openssl.pc $(printf "$SSL_360_version" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')";
 SSL_360_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/openssl/openssl/releases/tags/$SSL_360_tag" | jq -r '.assets | .[] | select( .name | endswith(".tar.gz")) | .browser_download_url' | sed -e 's#\"##g')";
