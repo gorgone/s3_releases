@@ -34,18 +34,20 @@ _get_patch(){
 	done
 }
 
-_streamboard_patch(){
+_patch_style(){
+	local ret=1 style='-p1'
 	if [ -e "$1" ]; then
 		PATCHEDFILES=$(grep -e '^\(---\|+++\) ' -i "$1" | grep -v /dev/null | awk '{print $2}' | sort | uniq)
 		for f in ${PATCHEDFILES[@]}; do
-			[[ -e "${repodir}/$f" ]] && return 0
+			[[ -e "${repodir}/$f" ]] && { style='-p0'; ret=0; break; }
 		done
 	fi
-	return 1
+	printf -- "$style"
+	return $ret
 }
 
 _apply_menupatch(){
-	[ -f "$workdir/${REPO^^}-IS-PATCHED" ] && quickreporestore $_toolchainname 2>/dev/null
+	[ -f "$ispatched" ] && quickreporestore $_toolchainname 2>/dev/null
 		cd "$pdir"
 			(if [ "$(ls -1 "$pdir"/*.patch 2>/dev/null | wc -l)" -gt "0" ]
 			then
@@ -61,18 +63,14 @@ _apply_menupatch(){
 					_w="ok"
 					cd "${repodir}"
 					echo -e "\n$e" >> "$patchlog"
-					if _streamboard_patch "$pdir/$e"; then
-						SKIPPATHS=-p0
-						printf "PATCH : apply streamboard-style patch $e"
-					else
-						SKIPPATHS=-p1
-						printf "PATCH : apply regular patch $e"
-					fi
+					PATCHSTYLE=$(_patch_style "$pdir/$e")
+					printf "PATCH : applying ${PATCHSTYLE:1}-patch $e"
+
 					if grep 'GIT binary patch' "$pdir/$e" &>/dev/null; then
-						printf "PATCH : binary patch detected, using git apply for $e"
-						git apply --verbose $SKIPPATHS < "$pdir/$e" >>"$patchlog" 2>/dev/null
+						printf "PATCH : binary patch detected, using 'git apply' for $e"
+						git apply --verbose $PATCHSTYLE < "$pdir/$e" &>>"$patchlog"
 					else
-						patch -f $SKIPPATHS < "$pdir/$e" >>"$patchlog" 2>/dev/null
+						patch -f $PATCHSTYLE < "$pdir/$e" &>>"$patchlog"
 					fi
 					hunks=$(grep -c1 '^Hunk' "$patchlog")
 					fails=$(grep -c1 'hunks FAILED' "$patchlog")
@@ -111,7 +109,7 @@ _apply_menupatch(){
 }
 
 _apply_consolepatch(){
-	if [ ! -f "$workdir/${REPO^^}-IS-PATCHED" ]
+	if [ ! -f "$ispatched" ]
 	then
 
 		cd "$pdir"
@@ -126,18 +124,14 @@ _apply_consolepatch(){
 				_w=0
 				cd "${repodir}"
 				echo -e "\n$e" >> "$patchlog"
-				if _streamboard_patch "$pdir/$e"; then
-					SKIPPATHS=-p0
-					printf "$y_l\n |     PATCH : apply streamboard-style patch $e\n"
-				else
-					SKIPPATHS=-p1
-					printf "$y_l\n |     PATCH : apply regular patch $e\n"
-				fi
+				PATCHSTYLE=$(_patch_style "$pdir/$e")
+				printf "$y_l\n |     PATCH : applying ${PATCHSTYLE:1}-patch $e\n"
+
 				if grep 'GIT binary patch' "$pdir/$e" &>/dev/null; then
-					printf "$y_l\n |     PATCH : binary patch detected, using git apply for $e\n"
-					git apply --verbose $SKIPPATHS < "$pdir/$e" >>"$patchlog" 2>/dev/null
+					printf "$y_l\n |     PATCH : binary patch detected, using 'git apply' for $e\n"
+					git apply --verbose $PATCHSTYLE < "$pdir/$e" &>>"$patchlog"
 				else
-					patch -F 10 -f $SKIPPATHS < "$pdir/$e" >>"$patchlog" 2>/dev/null
+					patch -F 10 -f $PATCHSTYLE < "$pdir/$e" &>>"$patchlog"
 				fi
 				hunks=$(grep -c1 "^Hunk" "$patchlog")
 				fails=$(grep -c1 "hunks FAILED" "$patchlog")
@@ -185,16 +179,16 @@ mark_patched(){
 	patches="$(echo "${patchlist[@]}" | xargs | sed 's/ /\\n\\t\\t/g')"
 
 	#mark oscam-${REPO} as patched
-	echo "$patches" > "$workdir/${REPO^^}-IS-PATCHED"
+	echo "$patches" > "$ispatched"
 }
 
 patch_webif(){
-	if [ -f "$workdir/${REPO^^}-IS-PATCHED" ] && [ "${s3cfg_vars[PATCH_WEBIF]}" == "1" ]
+	if [ -f "$ispatched" ] && [ "${s3cfg_vars[PATCH_WEBIF]}" == "1" ]
 	then
-		if [ -s "$workdir/${REPO^^}-IS-PATCHED" ]
+		if [ -s "$ispatched" ]
 		then
 			#format should be: patchname1.patch\n\t\tpatchname2.patch\n\t\tpatchname3.patch
-			patches="yes\\n\\t\\t$(cat "$workdir/${REPO^^}-IS-PATCHED")"
+			patches="yes\\n\\t\\t$(cat "$ispatched")"
 		else
 			patches='yes'
 		fi

@@ -109,6 +109,8 @@ _create_native_profile(){
 	g="$(type -pf gcc)"
 	gpp="$(type -pf g++)"
 	stripvar="$(type -pf strip)"
+	objcopy="$(type -pf objcopy)"
+	objdump="$(type -pf objdump)"
 	if [ -f $g ]; then
 		compiler_link="$($g -dumpmachine)-gcc"
 		[ -L "$compiler_link" ] || ln -sf "$g" "$compiler_link"
@@ -120,6 +122,14 @@ _create_native_profile(){
 	if [ -f $stripvar ]; then
 		strip_link="$($g -dumpmachine)-strip"
 		[ -L "$strip_link" ]    || ln -sf "$stripvar" "$strip_link"
+	fi
+	if [ -f $objcopy ]; then
+		objcopy_link="$($g -dumpmachine)-objcopy"
+		[ -L "$objcopy_link" ]  || ln -sf "$objcopy" "$objcopy_link"
+	fi
+	if [ -f $objdump ]; then
+		objdump_link="$($g -dumpmachine)-objdump"
+		[ -L "$objdump_link" ]  || ln -sf "$objdump" "$objdump_link"
 	fi
 	cd "$tccfgdir"
 

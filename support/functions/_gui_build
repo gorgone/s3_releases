@@ -29,10 +29,11 @@ _gui_build(){
 	make distclean > /dev/null 2>&1
 	USESTRING_=''
 	EXTRA_USE=''
-	libcount=0;
-	statcount=0;
+	buildtype=""
+	libcount=0
+	statcount=0
 
-#fix streamrelay case 
+#fix streamrelay case
 	check_streamrelay
 
 #do use_vars
@@ -57,7 +58,7 @@ _gui_build(){
 	for e in $_us
 	do
 
-		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_COMPRESS" ] && [ ! "$e" == "USE_PATCH" ]  && [ ! "$e" == "USE_EXTRA" ] && [ ! "$e" == "USE_STATIC" ]
+		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_PATCH" ]  && [ ! "$e" == "USE_EXTRA" ] && [ ! "$e" == "USE_STATIC" ]
 		then
 			USESTRING_="$e=1 $USESTRING_"
 		fi
@@ -68,7 +69,7 @@ _gui_build(){
 	then
 		((libcount++))
 	fi
-	
+
 	if [ "${USE_vars[USE_SSL]}" == "USE_SSL=1" ]
 	then
 		((libcount++))
@@ -89,7 +90,7 @@ _gui_build(){
 	else
 		_pcsc=
 	fi
-	
+
 	if [ "${USE_vars[USE_LIBDVBCSA]}" == "USE_LIBDVBCSA=1" ]
 	then
 		((libcount++))
@@ -99,7 +100,7 @@ _gui_build(){
 	fi
 
 #IF SVN is Patched
-	if [ -f "$workdir/${REPO^^}-IS-PATCHED" ]
+	if [ -f "$ispatched" ]
 	then
 		patch_webif
 	fi
@@ -108,34 +109,22 @@ _gui_build(){
 	if [ ! "${USE_vars[USE_EXTRA]}" == "USE_EXTRA=1" ]
 	then
 		unset extra_use extra_cc extra_ld extra_c
+	else
+		extra="-extra"
 	fi
 
 #dynamic, static, mixed build
-	[ "$_toolchainname" == "native" ] && SEARCHDIR="$(ldconfig -v 2>/dev/null | grep -v ^$'\t' | awk -F':' '{print $1}')" || SEARCHDIR="$SYSROOT"
-	[ "${USE_vars[USE_LIBCRYPTO]}" == "USE_LIBCRYPTO=1" ] && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBCRYPTO]}" == "STATIC_LIBCRYPTO=1" ]	&& LIBCRYPTO_STATIC="LIBCRYPTO_LIB=$(find $SEARCHDIR -name "libcrypto.a" -type f -print -quit)"	&& ((statcount++))
-	[ "${USE_vars[USE_SSL]}" == "USE_SSL=1" ]             && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_SSL]}" == "STATIC_SSL=1" ]				&& SSL_STATIC="SSL_LIB=$(find $SEARCHDIR -name "libssl.a" -type f -print -quit)"					&& ((statcount++))
-	[ "${USE_vars[USE_LIBUSB]}" == "USE_LIBUSB=1" ]       && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBUSB]}" == "STATIC_LIBUSB=1" ]		&& LIBUSB_STATIC="LIBUSB_LIB=$(find $SEARCHDIR -name "libusb-1.0.a" -type f -print -quit)"		&& ((statcount++))
-	[ "${USE_vars[USE_PCSC]}" == "USE_PCSC=1" ]           && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_PCSC]}" == "STATIC_PCSC=1" ]			&& PCSC_STATIC="PCSC_LIB=$(find $SEARCHDIR -name "libpcsclite.a" -type f -print -quit)"			&& ((statcount++))
-	[ "${USE_vars[USE_LIBDVBCSA]}" == "USE_LIBDVBCSA=1" ] && [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBDVBCSA]}" == "STATIC_LIBDVBCSA=1" ]	&& DVBCSA_STATIC="LIBDVBCSA_LIB=$(find $SEARCHDIR -name "libdvbcsa.a" -type f -print -quit)"		&& ((statcount++))
-
-	if [ $statcount -ge 1 -a $statcount -lt $libcount ]
-	then
-		buildtype="-mixed"
-	elif [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o $statcount -ge 1 -a $libcount -ge 1 -a $statcount -eq $libcount ]
-	then
-		_make="make static"
-		buildtype="-static"
-	else
-		buildtype=""
-	fi
-
-	USESTRING_=${USE_vars[@]}
-	EXTRA_USE=$extra_use
+	set_buildtype &>/dev/null
 
 #todo add switch for verbose
-	_generate_oscam_name "$_toolchainname"
-	oscam_name="$oscam_name$buildtype"
+	_generate_oscam_name "$_toolchainname" "$extra$buildtype"
 	targztmp="$(mktemp)"
+
+	if [[ $oscam_name =~ -upx ]]
+	then
+		[ -f "$configdir/upx_option" ] && source "$configdir/upx_option"
+		COMP_LEVEL="COMP_LEVEL=$upx_c"
+	fi
 
 	if [ ! "${USE_vars[USE_TARGZ]}" == "USE_TARGZ=1" ]
 	then
@@ -143,16 +132,22 @@ _gui_build(){
 	fi
 	check_smargo
 
+#signing case
+	check_signing &>/dev/null
+
 #build
 	_sz
 	(ologo; _nl
+	USESTRING_=${USE_vars[@]}
+	EXTRA_USE=$extra_use
 	timer_start
 	$_make -j"$cpus" \
-		"CONF_DIR=$_oscamconfdir_default" "OSCAM_BIN=$bdir/$oscam_name" "CC_OPTS=$co $cc_opts $extra_cc" "CC_WARN=$cc_warn" "EXTRA_LDFLAGS=$extra_ld" "EXTRA_CFLAGS=$extra_c" $EXTRA_USE "CROSS=$CROSS" $stapivar $USESTRING_ $LIBCRYPTO_STATIC $SSL_STATIC $LIBUSB_STATIC $PCSC_STATIC $DVBCSA_STATIC 2>&1 \
+		"CONF_DIR=$_oscamconfdir_default" "OSCAM_BIN=$bdir/$oscam_name" "CC_OPTS=$co $cc_opts $extra_cc" "CC_WARN=$cc_warn" "EXTRA_LDFLAGS=$extra_ld" "EXTRA_CFLAGS=$extra_c" $EXTRA_USE $COMP_LEVEL "CROSS=$CROSS" $stapivar $USESTRING_ $LIBCRYPTO_LIB $SSL_LIB $LIBUSB_LIB $PCSC_LIB $LIBDVBCSA_LIB 2>&1 \
 		|tee "$ldir/$log_name" \
 		|grep --line-buffered -v 'BFD\|^/' \
-		|grep --line-buffered '^CC\|^GEN\|UseFlags\|  CONF_DIR =\|Binary\|LINK\|STRIP\|BUILD\|Addons\|Protocols\|Readers\|CardRdrs\|^/' \
-		|sed -u "s/^|/ |/g;s/^LINK/ |  LINK  >/g;s/^STRIP/ |  STRIP >/g;s/^CC\|^BUILD/ |  BUILD >/g;s/^GEN/ |  GEN   >/g;s/WEBIF_//g;s/WITH_//g;s/MODULE_//g;s/CS_//g;s/HAVE_//g;s/_CHARSETS//g;s/CW_CYCLE_CHECK/CWCC/g;s/SUPPORT//g;s/= /: /g;"
+		|grep --line-buffered '^CC\|^HOSTCC\|^GEN\|^CONF\|^RM\|^UPX\|^SIGN\|UseFlags\|  CONF_DIR =\|Binary\|LINK\|STRIP\|BUILD\|Addons\|Protocols\|Readers\|CardRdrs\|^/' \
+		|sed -u "s/^|/ |/g;/^[[:space:]]*[[:digit:]]* ->/ s/./ |  UPX   > &/;s/^RM/ |  REMOVE>/g;s/^CONF/ |  CONFIG>/g;s/^LINK/ |  LINK  >/g;s/^STRIP/ |  STRIP >/g;s/^CC\|^HOSTCC\|^BUILD/ |  BUILD >/g;s/^GEN/ |  GEN   >/g;s/^UPX/ |  UPX   >/g;s/^SIGN/ |  SIGN  >/g;
+		s/WEBIF_//g;s/WITH_//g;s/MODULE_//g;s/CS_//g;s/HAVE_//g;s/_CHARSETS//g;s/CW_CYCLE_CHECK/CWCC/g;s/SUPPORT//g;s/= /: /g;"
 	timer_stop
 	timer_calc
 
@@ -185,20 +180,8 @@ _gui_build(){
 	then
 		rm "$bdir/$oscam_name.debug"
 		printf "\n $txt_delete $oscam_name.debug\n"|tee -a "$ldir/$log_name"
-	fi;) | "$gui" "$st_" --colors --title " -[ Build$(TTAG) ]- " "$pb_" "$_lines" "$_cols"
+	fi;) | "$gui" "$st_" --colors --title " -[ Build$(REPOIDENT) ]- " "$pb_" "$_lines" "$_cols"
 	sleep 2
-
-#COMPRESS
-	if [ ! "$stapi_allowed" == "1" ]
-	then
-
-		if [ "${s3cfg_vars[COMPRESS]}" == "1" ] || [ "${USE_vars[USE_COMPRESS]}" == "USE_COMPRESS=1" ]
-		then
-			(compress_cam_gui "$oscam_name") |tee -a "$ldir/$log_name"| "$gui" "$st_" --title " -[ COMPRESS ]- " "$pb_" 7 50
-			sleep 2
-		fi
-
-	fi
 
 #tar
 	if [ "${USE_vars[USE_TARGZ]}" == "USE_TARGZ=1" ]

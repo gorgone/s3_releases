@@ -82,15 +82,16 @@ _generate_oscam_name(){
 	[ "$(./config.sh --enabled CARDREADER_GXAPI)" == Y ] && echo -gxapi || echo -n $_dvbapi; );_webif=$(
 	[ "$(./config.sh --enabled WEBIF)" == Y ] && echo -webif || printf ''; );_ssl=$(
 	[ "$(./config.sh --enabled WITH_SSL)" == Y ] && echo -ssl || printf ''; );_emu=$(
-	[ "$(./config.sh --enabled WITH_EMU)" == Y ] && echo -emu$(./config.sh --emu-version) || printf ''; );_neon=$(
+	[ "$(./config.sh --enabled WITH_EMU)" == Y ] && echo -emu || printf ''; );_neon=$(
 	[ "$(./config.sh --enabled WITH_ARM_NEON)" == Y ] && "$tcdir/$_toolchainname/bin/$_compiler""gcc" -dumpmachine 2>/dev/null | grep -i -E '(arm|aarch64)' &>/dev/null && echo -neon || printf ''; );_icam=$(
 	[ "$(./config.sh --enabled MODULE_STREAMRELAY)" == Y ] && echo -icam || printf ''; );_ipv6=$(
-	[ "$(./config.sh --enabled IPV6SUPPORT)" == Y ] && echo -ipv6 || printf ''; )
+	[ "$(./config.sh --enabled IPV6SUPPORT)" == Y ] && echo -ipv6 || printf ''; );_signed=$(
+	[ "$(./config.sh --enabled WITH_SIGNING)" == Y ] && echo -signed || printf ''; )
 	[ "${USE_vars[USE_COMPRESS]}" == "USE_COMPRESS=1" ] && _upx="-upx" || _upx=''
 	[ "$1" == "native" ] && _b_name="$(uname -s)-$(uname -m)" || _b_name="$1"
 	if [ "${s3cfg_vars[ADD_PROFILE_NAME]}" == "0" ] || [ $pf_name == "not_set" ]
 	then
-		oscam_name="oscam-${REPO}$(REVISION)$($(USEGIT) && printf "@$(COMMIT)" || printf "")-$_b_name$_webif$_dvbapi$_ssl$_usb$_pcsc$_dvbcsa$_stapi$_stapi5$_emu$_ipv6$_icam$_neon$_upx"
+		oscam_name="oscam-${REPO}$(REVISION)$($(USEGIT) && printf "@$(COMMIT)" || printf "")-$_b_name$_webif$_dvbapi$_ssl$_usb$_pcsc$_dvbcsa$_stapi$_stapi5$_emu$_ipv6$_icam$_neon$2$_upx$_signed"
 	else
 		oscam_name="oscam-${REPO}$(REVISION)$($(USEGIT) && printf "@$(COMMIT)" || printf "")-${pf_name%.*}";
 	fi
@@ -287,7 +288,7 @@ _select_menu(){
 	revision_="$($(USEGIT) && printf "$(COMMIT)" || printf "r$(REVISION)")"
 	_menutext="Simplebuild3 $(version | head -n1 | awk '{print $1}')\n $(REVISION)$($(USEGIT) && printf " @ $(COMMIT) @ $(BRANCH)" || printf " on $(BRANCH)")"
 	smenu=$(
-	"$gui" "$st_" "$bt_" "$title_" "$nc_" --title "-[ $txt_start_menu$(TTAG) ]-" --menu "\n $_menutext" 15 55 7 "Continue" "$txt_firstmenu_continue $revision_" "CHANGE" "$txt_firstmenu_chose" "CEDIT" "$txt_firstmenu_cedit" "TCUPDATE" "$txt_firstmenu_tcupdate" "LANG" "$txt_firstmenu_lang" "EXIT" "$txt_firstmenu_exit")
+	"$gui" "$st_" "$bt_" "$title_" "$nc_" --title "-[ $txt_start_menu$(REPOIDENT) ]-" --menu "\n $_menutext" 15 55 7 "Continue" "$txt_firstmenu_continue $revision_" "CHANGE" "$txt_firstmenu_chose" "CEDIT" "$txt_firstmenu_cedit" "TCUPDATE" "$txt_firstmenu_tcupdate" "LANG" "$txt_firstmenu_lang" "EXIT" "$txt_firstmenu_exit")
 	[ $? = 255 ] && _select_menu
 
 	case $smenu in
@@ -330,9 +331,9 @@ _oscam_extra_menu(){
 	check_smargo
 	unset MENU_OPTIONS
 
-	for e in "${!USE_vars[@]}"
+	for e in $(printf '%s\n' "${!USE_vars[@]}" | sort -u | xargs)
 	do
-		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_COMPRESS" ] && [ ! "$e" == "USE_PATCH" ] && [ ! "$e" == "USE_LIBUSB" ] && [ ! "$e" == "USE_EXTRA" ] && \
+		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_PATCH" ] && [ ! "$e" == "USE_DIAG" ] && [ ! "$e" == "USE_EXTRA" ] && [ ! "$e" == "USE_CONFDIR" ] && [ ! "$e" == "USE_OSCAMNAME" ] && \
 		   [ ! "$e" == "USE_STATIC" ] && [ ! "$e" == "STATIC_LIBCRYPTO" ] && [ ! "$e" == "STATIC_SSL" ] && [ ! "$e" == "STATIC_LIBUSB" ] && [ ! "$e" == "STATIC_PCSC" ] && [ ! "$e" == "STATIC_LIBDVBCSA" ]
 		then
 			if [ "${#USE_vars[$e]}" -gt "4" ]
@@ -344,12 +345,12 @@ _oscam_extra_menu(){
 		fi
 	done
 
-	oextra=$("$gui" "$st_" "$nc_" "$bt_" "$title_" --title "-[ Oscam EXTRA$(TTAG) ]-" "$cl_" " OPTIONS " 19 40 12 ${MENU_OPTIONS[@]});
+	oextra=$("$gui" "$st_" "$nc_" "$bt_" "$title_" --title "-[ Oscam EXTRA$(REPOIDENT) ]-" "$cl_" " OPTIONS " 19 40 12 ${MENU_OPTIONS[@]});
 	[ $? = 255 ] && _toolchain_config_menu
 
-	for e in "${!USE_vars[@]}"
+	for e in $(printf '%s\n' "${!USE_vars[@]}" | sort -u | xargs)
 	do
-		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_COMPRESS" ] && [ ! "$e" == "USE_PATCH" ] && [ ! "$e" == "USE_LIBUSB" ] && [ ! "$e" == "USE_EXTRA" ] && \
+		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_PATCH" ] && [ ! "$e" == "USE_DIAG" ] && [ ! "$e" == "USE_EXTRA" ] && [ ! "$e" == "USE_CONFDIR" ] && [ ! "$e" == "USE_OSCAMNAME" ] && \
 		   [ ! "$e" == "USE_STATIC" ] && [ ! "$e" == "STATIC_LIBCRYPTO" ] && [ ! "$e" == "STATIC_SSL" ] && [ ! "$e" == "STATIC_LIBUSB" ] && [ ! "$e" == "STATIC_PCSC" ] && [ ! "$e" == "STATIC_LIBDVBCSA" ]
 		then
 			ok=0
@@ -376,22 +377,24 @@ _build_extra_menu(){
 	us=
 	check_smargo
 	unset MENU_OPTIONS
-	for e in USE_COMPRESS USE_TARGZ USE_PATCH USE_EXTRA USE_STATIC STATIC_LIBCRYPTO STATIC_SSL STATIC_LIBUSB STATIC_PCSC STATIC_LIBDVBCSA
+	for e in USE_PATCH USE_EXTRA USE_CONFDIR USE_OSCAMNAME USE_TARGZ USE_DIAG USE_STATIC STATIC_LIBCRYPTO STATIC_SSL STATIC_LIBUSB STATIC_PCSC STATIC_LIBDVBCSA
 	do
 		[ "${#USE_vars[$e]}" -gt "4" ] && MENU_OPTIONS+=( "$e" "$e=1" on ) || MENU_OPTIONS+=( "$e" "$e=1" off )
 	done
-	bextra=$("$gui" "$st_" "$nc_" "$bt_" "$title_" --title "-[ Build EXTRA$(TTAG) ]-" "$cl_" " OPTIONS " 17 45 3 ${MENU_OPTIONS[@]})
+	bextra=$("$gui" "$st_" "$nc_" "$bt_" "$title_" --title "-[ Build EXTRA$(REPOIDENT) ]-" "$cl_" " OPTIONS " 17 45 3 ${MENU_OPTIONS[@]})
 	[ $? = 255 ] && _build_extra_menu
-	USE_vars[USE_COMPRESS]=
 	USE_vars[USE_PATCH]=
-	USE_vars[USE_TARGZ]=
-	USE_vars[USE_EXTRA]=
-	USE_vars[USE_STATIC]=
 	USE_vars[STATIC_LIBCRYPTO]=
 	USE_vars[STATIC_SSL]=
 	USE_vars[STATIC_LIBUSB]=
 	USE_vars[STATIC_PCSC]=
 	USE_vars[STATIC_LIBDVBCSA]=
+	USE_vars[USE_STATIC]=
+	USE_vars[USE_EXTRA]=
+	USE_vars[USE_CONFDIR]=
+	USE_vars[USE_OSCAMNAME]=
+	USE_vars[USE_TARGZ]=
+	USE_vars[USE_DIAG]=
 	for bex in $bextra
 	do
 		b=$(echo "$bex" | tr -d '"')
@@ -431,7 +434,7 @@ _pre_main_menu(){
 		fi
 	fi
 
-	out=$("$gui" --help-button --help-label INFO --title "-[ Toolchain Menu $(version | head -n1 | awk '{print $1}')$(TTAG) ]-" --menu "$txt_t_menu1$REVISION" "${COUNT+8}" 75 0 "${MENU_OPTIONS}")
+	out=$("$gui" --help-button --help-label INFO --title "-[ Toolchain Menu $(version | head -n1 | awk '{print $1}')$(REPOIDENT) ]-" --menu "$txt_t_menu1$REVISION" "${COUNT+8}" 75 0 "${MENU_OPTIONS}")
 	IFS=$OIFS
 	first=$(echo "$out" | awk '{printf $1}')
 	tc_info=$(echo "$out" | awk '{printf $2}')
@@ -472,7 +475,7 @@ _gtedit(){
 	if [ -f "$tccfgdir/$_toolchainname" ]
 	then
 		source "$tccfgdir/$_toolchainname"
-		input=$("$gui" "$st_" "$bt_" "$title_" --title " -[ $1 Toolchain$(TTAG) ]- " --inputbox "\n CONF_DIR=$_oscamconfdir_default 'default'\n [ESC] = default\n" 0 0 "$_oscamconfdir_custom")
+		input=$("$gui" "$st_" "$bt_" "$title_" --title " -[ $1 Toolchain$(REPOIDENT) ]- " --inputbox "\n CONF_DIR=$_oscamconfdir_default 'default'\n [ESC] = default\n" 0 0 "$_oscamconfdir_custom")
 		retval=$?
 
 		case $retval in
@@ -510,11 +513,46 @@ check_streamrelay(){
 		fi
 	fi
 }
+check_signing(){
+	if [ -f "$configdir/sign" ]
+	then
+		source "$configdir/sign"
+		if [ -f "$x509cert" ] && [ -f "$privkey" ] && [ -f "$repodir/config.sh" ]
+		then
+			if [ "$("${repodir}/config.sh" --enabled WITH_SIGNING)" == "Y" ]
+			then
+				"${repodir}/config.sh" --add-cert "$x509cert" "$privkey"
+				printf "$YH\n |   SIGNING : use provided $(basename $x509cert) and $(basename $privkey) files"
+			fi
+		fi
+	fi
+}
+set_buildtype(){
+	[ "$_toolchainname" == "native" ] && SEARCHDIR="$(ldconfig -v 2>/dev/null | grep -v ^$'\t' | awk -F':' '{print $1}')" || SEARCHDIR="$SYSROOT"
+	[ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBCRYPTO]}" == "STATIC_LIBCRYPTO=1" ]	&& LIBCRYPTO_LIB="LIBCRYPTO_LIB=$(find $SEARCHDIR -name "libcrypto.a" -type f -print -quit)"	&& ((statcount++))
+	[ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_SSL]}" == "STATIC_SSL=1" ]				&& SSL_LIB="SSL_LIB=$(find $SEARCHDIR -name "libssl.a" -type f -print -quit)"					&& ((statcount++))
+	[ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBUSB]}" == "STATIC_LIBUSB=1" ]		&& { LIBUSB_LIB="LIBUSB_LIB=$(find $SEARCHDIR -name "libusb-1.0.a" -type f -print -quit)"; ((statcount++)); } || { [ "$_androidndkdir" == "1" ] && LIBUSB_LIB="LIBUSB_LIB=-lusb-1.0"; }
+	[ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_PCSC]}" == "STATIC_PCSC=1" ]			&& PCSC_LIB="PCSC_LIB=$(find $SEARCHDIR -name "libpcsclite.a" -type f -print -quit)"			&& ((statcount++))
+	[ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBDVBCSA]}" == "STATIC_LIBDVBCSA=1" ]	&& LIBDVBCSA_LIB="LIBDVBCSA_LIB=$(find $SEARCHDIR -name "libdvbcsa.a" -type f -print -quit)"	&& ((statcount++))
+
+	if [ $statcount -ge 1 -a $statcount -lt $libcount ]
+	then
+		printf "$y_l\n | BUILDTYPE : mixed"
+		buildtype="-mixed"
+	elif [ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o $statcount -ge 1 -a $libcount -ge 1 -a $statcount -eq $libcount ]
+	then
+		printf "$y_l\n | BUILDTYPE : static"
+		buildtype="-static"
+	else
+		printf "$y_l\n | BUILDTYPE : dynamic"
+		buildtype=""
+	fi
+}
 _reset_config(){
 	if [ -f "${repodir}/config.sh" ]
 	then
 		[ -f "$menudir/$_toolchainname.save" ] && rm -rf "$menudir/$_toolchainname.save"
-		if [ ! -f "$workdir/${REPO^^}-IS-PATCHED" ]
+		if [ ! -f "$ispatched" ]
 		then
 			reset_="$("${repodir}/config.sh" -R)"
 		fi
@@ -634,8 +672,8 @@ save_config(){
 	check_smargo
 	enabled=($("${repodir}/config.sh" -s))
 	disabled=($("${repodir}/config.sh" -Z))
-	[ "$_toolchainname" == "sh4" ] && unset USE_vars[USE_COMPRESS]
-	[ "$_toolchainname" == "sh_4" ] && unset USE_vars[USE_COMPRESS]
+	[ "$_toolchainname" == "sh4" ] && silent=$("${repodir}/config.sh" --disable WITH_COMPRESS)
+	[ "$_toolchainname" == "sh_4" ] && silent=$("${repodir}/config.sh" --disable WITH_COMPRESS)
 	unset USE_vars[USE_STAPI]
 	unset USE_vars[USE_STAPI5]
 
@@ -660,7 +698,6 @@ save_config(){
 		printf "usevars=\"$usevars\"\n" >>"$menudir/$_toolchainname.save"
 	fi
 };
-
 load_config(){
 	_stapi=
 	_stapi5=
@@ -685,15 +722,14 @@ load_config(){
 	else
 		_reset_config
 		[ "${s3cfg_vars[USE_TARGZ]}" == "1" ] && USE_vars[USE_TARGZ]="USE_TARGZ=1"
-		[ "${s3cfg_vars[USE_COMPRESS]}" == "1" ] && USE_vars[USE_COMPRESS]="USE_COMPRESS=1"
 		for e in $default_use
 		do
 			USE_vars[$e]="$e=1"
 		done
 	fi
 	check_smargo
-	[ "$_toolchainname" == "sh4" ] && unset USE_vars[USE_COMPRESS]
-	[ "$_toolchainname" == "sh_4" ] && unset USE_vars[USE_COMPRESS]
+	[ "$_toolchainname" == "sh4" ] && silent=$("${repodir}/config.sh" --disable WITH_COMPRESS)
+	[ "$_toolchainname" == "sh_4" ] && silent=$("${repodir}/config.sh" --disable WITH_COMPRESS)
 	USESTRING="$(echo "${USE_vars[@]}"| sed 's@USE_@@g'| sed 's@=1@@g'| tr -s ' ')"
 }
 _get_config_con(){
@@ -747,9 +783,9 @@ _get_config_con(){
 	fi
 }
 check_url(){
-	if [[ ! "$1" =~ "@" ]] && [ "${s3cfg_vars[S3_URL_CHECK]}" == "1" ]
+	if [[ ! "$1" =~ "@" ]] && [ ${s3cfg_vars[S3_URL_CHECK]} -gt 0 ]
 	then
-		if ! http_code=$(curl --output /dev/null --write-out "%{http_code}" --silent --fail "$1")
+		if ! http_code=$(curl --output /dev/null --write-out "%{http_code}" --silent --fail --connect-timeout ${s3cfg_vars[S3_URL_CHECK]} "$1")
 		then
 			if [ ! "$http_code" == "401" ]
 			then
@@ -762,3 +798,6 @@ check_url(){
 version(){
 echo -e "${SIMPLEVERSION}.${VERSIONCOUNTER} by ${DEVELOPER}\n- in memory of gorgone -"
 }
+_log(){
+	cat | tee >(sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" >>"$1"); #remove ansi colors from output
+};

@@ -2,36 +2,78 @@
 
 update_me(){
 	clear;s3logo
+	printf "  s3_git CHECK:\n  -------------\n"
 	local_revision=0
 	online_revision=0
-	s3local="$dldir/s3_github"
-	printf "  s3_git CHECK:\n  -------------\n"
 	check_url "$s3url" || return
 
-	local_revision=$(gitrevision $s3local)
-	online_revision=$(gitrevision $s3url)
+	if [ ! -d $workdir/.git ]; then
+		s3local="$dldir/s3_github"
 
-	if [ ! "$local_revision" == "$online_revision" ]
-	then
-		printf "  update s3_git\n   from Local Revision: $local_revision\n   to  Remote Revision: $online_revision\n"
-		rm -rf "$s3local"; git clone "$s3url" "$s3local" &>/dev/null; cd "$s3local"
-		printf "  updating all files ...\n\n"
-		yes | cp -rf ./s3 "$workdir/s3"
-		yes | cp -rf ./support/* "$workdir/support"
+		local_revision=$(gitrevision $s3local)
+		online_revision=$(gitrevision $s3url)
+
+		if [ ! "$local_revision" == "$online_revision" ]
+		then
+			printf "  update s3_git\n  Local revision: $local_revision\n Online revision: $online_revision\n"
+			rm -rf "$s3local"; git clone "$s3url" "$s3local" &>/dev/null; cd "$s3local"
+			printf "  updating all files ...\n\n"
+			yes | cp -rf ./s3 "$workdir/s3"
+			yes | cp -rf ./support/* "$workdir/support"
+		else
+			printf "  is up to date\n   Online revision: $online_revision\n\n"
+		fi
 	else
-		printf "  is up to date\n   Online Revision: $online_revision\n\n"
+		logfile="$ldir/$(date +%F.%H%M%S)_update_me.log";
+		(
+		cd $workdir
+		GIT_OPT='-c color.ui=always --no-pager'
+		GIT_BRANCH="$(git branch | tail -n1 | tr -d ' *')"
+		git $GIT_OPT fetch --prune
+		ahead=$(git rev-list origin/$GIT_BRANCH..HEAD --count) #local commits made or forced pushes on remote branch
+		behind=$(git rev-list HEAD..origin/$GIT_BRANCH --count)
+		local_revision=$(git rev-list HEAD --count)
+		local_commit=$(git --no-pager log HEAD -n1 --oneline)
+		online_revision=$(git rev-list origin/$GIT_BRANCH --count)
+		online_commit=$(git --no-pager log origin/$GIT_BRANCH -n1 --oneline)
+		if [ $behind -eq 0 -a $ahead -eq 0 ]; then
+			printf "${p_l}STATUS: s3 is up to date${re_}\n Local = Online revision $local_revision: $local_commit\n\n"
+		else
+			git $GIT_OPT status
+			printf "\n${p_l}START: s3 updates pending${re_}\n  Local revision $local_revision: $local_commit\n Online revision $online_revision: $online_commit\n\n"
+			git $GIT_OPT log HEAD..origin/$GIT_BRANCH --oneline
+			sleep 1
+
+			if [ $ahead -gt 0 ]; then
+				printf "\n${p_l}STAGE 1: Try pull with reset (forced pushes on remote)...${re_}\n\n"
+				git reset origin/$GIT_BRANCH --hard
+			else
+				printf "\n${p_l}STAGE 1: Try simple pull (auto-merge)...${re_}\n\n"
+			fi
+
+			if ! git $GIT_OPT pull; then
+				printf "\n${p_l}STAGE 2: Reset conflicting tracked files/folders...${re_}\n\n"
+				if ! git $GIT_OPT pull |& grep '^[[:blank:]]' | xargs git checkout; then
+					printf "\n${p_l}STAGE 3: Stash conflicting tracked files/folders...${re_}\n\n"
+					git $GIT_OPT stash
+					printf "\n${p_l}STAGE 4: Remove conflicting untracked files/folders...${re_}\n\n"
+					git $GIT_OPT pull |& grep '^[[:blank:]]' | xargs rm -rf
+				fi
+				git $GIT_OPT pull
+				git $GIT_OPT stash clear
+			fi
+			printf "\n${p_l}UPDATE finished.${re_}\n\n"
+		fi
+		) |& _log "$logfile"
 	fi
-	sleep 1
+	sleep 2
 }
 
 fix_me(){
 	clear
 	s3logo
 	s3local="$dldir/s3_github"
-	emulocal="$dldir/emu_github"
 
 	[ -d "$s3local" ] && rm -rf $s3local
 	update_me
-	[ -d "$emulocal" ] && rm -rf $emulocal
-	update_emu
 }

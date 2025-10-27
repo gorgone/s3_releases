@@ -40,7 +40,7 @@ auto_langset(){
 lang_select(){
 	lng="none"
 	[ -f "$configdir/force_lang" ] && lng=$(head -n 1 "$configdir/force_lang")
-	
+
 	unset MENU_OPTIONS
 	COUNT=0
 

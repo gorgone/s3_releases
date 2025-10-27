@@ -9,11 +9,10 @@ _help_toolchain(){
 helpline0(){
 	ll=0
 	printf "  ";
-	for s in "$@"
+	for s in $(echo "$@" | xargs -n1 | sort -u | xargs)
 	do
 
-		if [ ! "$s" == "USE_SSL" ] \
-		&& [ ! "$s" == "USE_MCA" ] \
+		if [ ! "$s" == "USE_MCA" ] \
 		&& [ ! "$s" == "USE_LIBUSB" ] \
 		&& [ ! "$s" == "USE_CONFDIR" ]
 		then
@@ -33,7 +32,7 @@ helpline0(){
 helpline1(){
 	ll=0
 	printf "  "
-	for s in "$@"
+	for s in $(echo "$@" | xargs -n1 | sort -u | xargs)
 	do
 
 		ll=$((ll + (${#s} + 4)))
@@ -58,11 +57,11 @@ _help(){
 	printf "$w_l\n  toolchains :\n  ------------$g_n\n"
 	helpline1 "${AVAI_TCLIST[@]}\n"
 
-	printf "$w_l\n  simplebuild options :\n  ---------------------$c_n\n"
+	printf "$w_l\n\n  simplebuild options :\n  ---------------------$c_n\n"
 	helpline1 "${s3opts[@]}"
 	_wait
 
-	printf "\r$w_l  config_cases:\n  -------------$c_n\n"
+	printf "\r$w_l\n  config_cases :\n  --------------$c_n\n"
 	helpline0 "${config_cases[@]}"
 
 	printf "$w_l\n\n  addons :\n  --------$p_l\n"
@@ -72,7 +71,7 @@ _help(){
 	printf "\n$w_l  protocols :\n  -----------$y_l\n"
 	helpline0 "${SHORT_PROTOCOLS[@]}"
 
-	printf "$w_l\n  readers :\n  ---------$r_l\n"
+	printf "$w_l\n\n  readers :\n  ---------$r_l\n"
 	helpline0 "${SHORT_READERS[@]}"
 	_wait
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #simplebuild_plugin tcupdate
-pversion="0.25.3";
+pversion="0.26.2";
 pname="s3.TUP";
 pdesc="Plugin $pname v$pversion";
 tc_url="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLw==";
@@ -13,7 +13,6 @@ ctngsrcdir="$ctdir/crosstool-ng";
 fngsrcdir="$ctdir/freetz-ng";
 andksrcdir="$ctdir/android-ndk";
 cpus="$(getconf _NPROCESSORS_ONLN)";
-s3_update_required=0;
 
 tcupdate(){
 	[ -f "$workdir/DEVELOPMENT" ] && disable_syscheck="1" && disable_template_versioning="1" && source "$workdir/DEVELOPMENT" ; # DEVELOPMENT should contain a CURL_GITHUB_TOKEN to avoid github rate limiting
@@ -26,18 +25,6 @@ tcupdate(){
 
 	#check/install prerequisites
 	[[ -z "$4" || "$FLAG" -gt 0 ]] && [ -z "$disable_syscheck" ] && _check_pkg;
-
-	#update plugin
-	if [ "$CMDTC" == "-u" ] || [ "$CMDTC" == "--update_me" ];then
-		echo -e "${y_l}UPDATE -> ${pdesc} ${txt_s3tup_msg_update_hint}${re_}\n";
-		if ! _s3tup_update;then
-			_paktc_timer 5 "${txt_s3tup_msg_update_restart}" && printf "${re_}";
-			tcupdate "$force_reset";
-		else
-			printf "${g_l}\n\n" && _paktc_timer 5 "${pdesc} ${txt_s3tup_msg_update_current}" && printf "${re_}"; clear;
-		fi;
-		CMDTC=""
-	fi;
 
 	#some migrations to upgrade older s3.TUP versions
 	# DISABLED, because slow and currently not needed
@@ -143,11 +130,13 @@ tcupdate(){
 						unset icolor;
 						source "$tccfgdir/$i" && tcdate="";
 						tcdate=" $(_get_toolchain_date "$i")" && [ "${#tcdate}" -eq 1 ] && tcdate="";
-						cd "$tcdir/$i/bin" && tcarch="$(_get_compiler_arch host)";
+						cd "$tcdir/$i/bin" 2>/dev/null && tcarch="$(_get_compiler_arch host)";
 						[ -z "$tcarch" ] && tcarch="unknown";
 						if echo "${tcarch//-/_}" | grep -qv "$(uname -m)"; then
-							icolor="\Zr\Z1";
-							txtcomp="\n\Zr\Z1${txt_s3tup_menu_toolchain_notsupported}\Zn";
+							if [ ! "$(uname -m)" == "x86_64" ] || [[ ! $tcarch =~ 386 ]];then
+								icolor="\Zr\Z1";
+								txtcomp="\n\Zr\Z1${txt_s3tup_menu_toolchain_notsupported}\Zn";
+							fi
 						fi
 						MENU_OPTIONS+=("$_toolchainname" "$icolor$_description\Zn\Z2$tcdate\Zn" "${txt_s3tup_menu_toolchain_arch}${tcarch//-/_} | ${txt_s3tup_menu_toolchain_folder}$tcdir/$i");
 						counter;
@@ -435,7 +424,7 @@ _create_tc(){
 							libkeys="$(echo "${libkeys%?}" | xargs)";
 						fi;
 
-						logfile="$ldir/$(date +%F.%H%M%S)_tup_crosstoolchain_"$tpl".log"; ((i++)); 
+						logfile="$ldir/$(date +%F.%H%M%S)_tup_crosstoolchain_"$tpl".log"; ((i++));
 
 						clear;
 						sp=$(printf '%*s' 80 | tr ' ' '=');
@@ -494,20 +483,20 @@ _create_tc(){
 							#print out crosstool version and generate build command list
 							unset buildtasks;
 							case "$tpl_type" in
-								"CTNG") 
+								"CTNG")
 										echo -e "${g_l}\n$(./ct-ng | grep 'crosstool-NG version' &2>/dev/null | tail -1)\n${re_}" | _log "$logfile";
 										for task in "${CTNG_BUILD_tasks[@]}";do
 											task=$(_replace_tokens "$task");	#replace tokens
 											buildtasks+=("$task");
 										done;;
-								"FNG")  
+								"FNG")
 										echo -e "${g_l}\n$([ -f "tools/freetz-revision" ] && tools/freetz-revision || tools/freetz_revision 2>&1 | tail -1)\n${re_}" | _log "$logfile";
 										[[ ! $(umask) == 0022 ]] && umask 0022;
 										for task in "${FNG_BUILD_tasks[@]}";do
 											task=$(_replace_tokens "$task");	#replace tokens
 											buildtasks+=("$task");
 										done;;
-								"ANDK") 
+								"ANDK")
 										echo -e "${g_l}\n$(grep '^Pkg.Desc =' "source.properties" | awk -F'=' '{print $2}' | xargs) $(grep '^Pkg.Revision =' "source.properties" | awk -F'=' '{print $2}' | xargs)\n${re_}" | _log "$logfile";
 										for task in "${ANDK_BUILD_tasks[@]}";do
 											task=$(_replace_tokens "$task");	#replace tokens
@@ -578,7 +567,7 @@ _create_tc(){
 								cflags=$(echo "$props" | awk -F'^' '{print $3}' | xargs);
 								[ -z "$ldf" ] && ldf=$(echo "$props" | awk -F'^' '{print $4}' | xargs);
 
-								_create_toolchaincfg "$tcdir/$tpl" "$tpl" "$target" "$sysroot" "" "$desc" "" "$dldir/$(decode "$_t1e")$tpl.tar.xz" "yes" "$tpl_type_name" "$use" "$cflags" "$ldf" "$tpl_type";
+								_create_toolchaincfg "$tcdir/$tpl" "$tpl" "$target" "$sysroot" "" "$desc" "" "$dldir/$(decode "$_t1e")$tpl.tar.xz" "yes" "$tpl_type_name" "$use" "" "$ldf" "$cflags" "0" "$tpl_type" "";
 							else
 								_paktc_timer 10;
 							fi;
@@ -673,8 +662,8 @@ _backup(){
 	template_type="$(_get_template_type "$cttpldir/$src")";
 	tpl_type="$(echo "$template_type" | awk -F';' '{print $1}' | xargs)";
 	tpl_type_name="$(echo "$template_type" | awk -F';' '{print $2}' | xargs)";
-	source "$tccfgdir/$src" && target="${_compiler%?}" && sysroot="$_sysroot" && lsd="$_libsearchdir" && desc="$_description" && info="$_tc_info" && sb="$_self_build" && eu="$extra_use" && ec="$extra_cc" && el="$extra_ld";
-	_create_toolchaincfg "$tcdir/$src" "$dest" "$target" "$sysroot" "$lsd" "$desc" "$info" "$xzfile" "$sb" "tpl_type_name" "$eu" "$ec" "$el" "$tpl_type";
+	source "$tccfgdir/$src" && target="${_compiler%?}" && sysroot="$_sysroot" && lsd="$_libsearchdir" && desc="$_description" && info="$_tc_info" && sb="$_self_build" && eu="$extra_use" && ecc="$extra_cc" && el="$extra_ld"  && ec="$extra_c" && estrip="$_extract_strip";
+	_create_toolchaincfg "$tcdir/$src" "$dest" "$target" "$sysroot" "$lsd" "$desc" "$info" "$xzfile" "$sb" "tpl_type_name" "$eu" "$ecc" "$el" "$ec" "$estrip" "$tpl_type" "$_toolchainfilename";
 	) | "$gui" "$st_" "$bt_" "$title_ \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_backup_title} ${src} ${txt_to} $(basename "$xzfile") ]- " "$pb_" "$_lines" "$_cols";
 	[ -f "$newtccfgfile" ] && echo "$dest";
 };
@@ -984,17 +973,16 @@ _get_toolchain_properties(){
 	else
 		arch=""; bitness=""; api="";
 	fi;
-	
+
 	#get additional optimization flags needed by some libraries
-	slice="$($compilername --target-help 2>&1 | grep -iw "altivec"							&>/dev/null && echo "altivec")"	&& size="128";
+	_check_compiler_capability "altivec" "$hostname"												   && slice="altivec"	&& size="128";
 	[ -z "$slice" ] && slice="$($compilername --target-help 2>&1 | grep -iw "avx2"			&>/dev/null && echo "avx2")"	&& size="256";
 	[ -z "$slice" ] && slice="$($compilername --target-help 2>&1 | grep -iw "ssse3"			&>/dev/null && echo "ssse3")"	&& size="128";
 	[ -z "$slice" ] && slice="$($compilername --target-help 2>&1 | grep -iw "sse2"			&>/dev/null && echo "sse2")"	&& size="128";
 	[ -z "$slice" ] && slice="$($compilername --target-help 2>&1 | grep -iw "mmx"			&>/dev/null && echo "mmx")"		&& size="64";
-	[ -z "$slice" ] && slice="$($compilername --target-help 2>&1 | grep -iw "neon\|simd"	&>/dev/null && echo "neon")"	&& size="128";
-	[ -z "$slice" ] && [ -n "$(find "$tcdir/$tc/" -name "arm_neon.h" -type f -print -quit)" ] && slice="neon"				&& size="128";
+	[ -z "$slice" ] && _check_compiler_capability "neon" "$hostname"								   && slice="neon"		&& size="128";
 	if [ -z "$slice" ]; then
-		if [[ "$sysrootdir" =~ aarch64 ]]; then
+		if [[ "$hostname" =~ aarch64 ]]; then
 			slice="uint64"
 		else
 			slice="uint32"
@@ -1044,7 +1032,7 @@ _get_toolchain_libs(){
 							fi;
 						fi;
 					fi;
-					
+
 				done;
 			done;
 		fi;
@@ -1150,7 +1138,7 @@ _get_template_properties(){
 		else
 			desc="$2";
 		fi;
-		[ -z "$desc" ] && desc="${txt_s3tup_msg_gtp_missing}"; 
+		[ -z "$desc" ] && desc="${txt_s3tup_msg_gtp_missing}";
 
 		#extract template properties based on template type
 		tpl_type="$(_get_template_type "$1" | awk -F';' '{print $1}' | xargs)";
@@ -1296,14 +1284,13 @@ _check_lib(){
 	esac;
 };
 _check_pkg(){
-	pkgs=( git patch curl jq gcc g++ gperf bison flex makeinfo help2man make file cmp \
-		  python3-config autoconf automake libtoolize libtool gawk wget bzip2 xz unzip rsync \
-		  composite inkscape pkg-config python3 gettext ruby );
+	pkgs=( gperf bison flex makeinfo help2man file cmp python3-config libtoolize gawk \
+		   wget bzip2 unzip rsync composite inkscape pkg-config python3 gettext ruby );
 	headers=( ncurses libacl.h sys/capability.h readline.h glib-2.0/glib.h );
 	libs=( libstdc++.so.6 libstdc++.a libc\\.a );
 	echo -e "${y_l}SYSCHECK -> ${txt_s3tup_msg_syscheck1}${re_}";
 	if syscheck "" "" "${pkgs[*]}" "${headers[*]}" "${libs[*]}";then
-		echo -e "${r_l}\nSYSCHECK -> ${txt_s3tup_msg_syscheck2}\n${y_l}${prefix} install${packages}\n${re_}" && _paktc_timer 10;
+		echo -e "${r_l}\nSYSCHECK -> ${txt_s3tup_msg_syscheck2}\n${y_l}${prefix} apt install ${packages}\n${re_}" && _paktc_timer 10;
 	fi;
 
 	dialog_ver="$(dialog --version | awk -F' |-' '{printf $2}')" && [ -z $dialog_ver ] && dialog_ver="0"
@@ -1418,66 +1405,11 @@ _create_config(){
 		for prop in $props;
 		do
 			prop="${lib}_${prop}"; expr="$(grep "^${prop}=" "$configname")"; eval "$expr";
-			_change_config "$prop" "${!prop}" "1"; 
+			_change_config "$prop" "${!prop}" "1";
 		done;
 	done;
 
 	return 0;
-};
-_s3tup_update(){
-	local dc=0 ver="$pversion" logfile="$ldir/$(date +%F.%H%M%S)_tup_update.log" proto repo branch diff_cmd update_cmd nl;
-	local s3tup_ffs="support/configs/plugin_update_toolchain.config.template \
-					 support/crosstool \
-					 support/functions/_plugin_update_toolchain \
-					 support/translation \
-					";
-	echo -e "$pdesc - ${txt_s3tup_msg_update_log} - $(date +"%F %T")" > "$logfile";
-
-	(
-		#break if simplebuild3 update is required
-		[ "$s3_update_required" -eq 1 ] && printf "${r_l}\n${txt_s3tup_msg_update_s3update_required}${re_}" && return;
-
-		#check git repository
-		cd "$workdir";
-		[ "$(git status 2>/dev/null | wc -l)" -eq 0 ] && printf "${r_l}\n${txt_s3tup_msg_update_directory_unversioned}${re_}" && return;
-		
-		#prepare GIT commands
-		repo="$(git config --get remote.origin.url)"; #get remote url
-		proto="$(printf "$repo" | awk -F':' '{print $1}')"; #get protocol of remote url
-		branch="$(git branch --show-current)"; #get branch name
-		diff_cmd='git diff --cached --stat remotes/origin/HEAD "$ff"'; #diff command
-		update_cmd='git checkout --progress origin/"$(git branch --show-current)" -- "$ff"'; #update command
-		
-		#get remote updates
-		check_url "$repo" && git remote update >/dev/null || return;
-
-		printf "\n ${txt_repo}: ${c_l}${repo}${re_} ${txt_branch}: ${c_l}${branch}${re_} ${txt_proto}: ${c_l}${proto}\n${re_}";
-
-		#check for remote updates and apply them
-		for ff in $s3tup_ffs;do
-			printf "${y_l}\n ${txt_checking}: ${b_l}${ff}${re_}";
-			diff_count=$(eval "$diff_cmd" | wc -l); #get the number of diff lines
-
-			if [ "$diff_count" -gt 0 ];then
-					printf "${p_l} -> ${txt_s3tup_msg_update_pending}\n${re_}" && nl="\n";
-					eval "$diff_cmd"; #output summarized diff of changes
-					eval "$update_cmd"; #update the working copy path/file
-					[[ "$ff" == *plugin_update_toolchain.config.template ]] && force_reset="--reset" #set force reset config flag
-					[[ "$ff" == *_plugin_update_toolchain ]] && ver="$(grep 'pversion=' "$ff" | awk -F'"' '{print $2}')"; #grep new plugin version
-			else
-				printf "${y_l} -> ${g_l}${txt_s3tup_msg_update_not_required}${re_}" && nl="\n\n";
-			fi;
-
-			dc=$((dc+diff_count))
-		done;
-
-		[ "$dc" -gt 0 ] && printf "${g_l}${nl}${txt_s3tup_msg_update_finished} ${p_l}${ver}${g_l}\n";
-	) | _log "$logfile";
-
-	return $dc; #return number of diff lines
-};
-_log(){
-	cat | tee >(sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" >>"$1"); #remove ansi colors from output
 };
 _create_toolchaincfg(){
 	cd "$1/bin";
@@ -1487,15 +1419,15 @@ _create_toolchaincfg(){
 	if [ "${#sr}" -eq 0 ];then
 		sysroot="$4";
 	else
-		sysroot="${sr#"$1/"}";
+		sysroot="${sr#$(realpath "$1")/}";
 	fi;
 
-	[ "${14}" == "ANDK" ] && andk_vars='_oscamconfdir_custom="/data/plugin/oscam";
+	[ "${16}" == "ANDK" ] && andk_vars='_oscamconfdir_custom="/data/plugin/oscam";
 _androidndkdir="1";
 stapi_lib_custom="libwi.a";
 stapi_allowed="1";' || andk_vars='_oscamconfdir_custom="";';
 
-	tfn=$(echo "$(decode "$tc_url")\${pversion}/$(basename "$8")" | base64 -w0)
+	[ "${16}" == "LGCY" ] && tfn="${17}" || tfn=$(echo "$(decode "$tc_url")\${pversion}/$(basename "$8")" | base64 -w0)
 	[ "${#5}" -gt 0 ] && lsd="$5" || lsd="/usr/lib";
 	[ "${#7}" -gt 0 ] && info="$7" || info="$(echo -e "\\\n
 !!! ${10} Toolchain !!!\\\n
@@ -1510,16 +1442,18 @@ default_use="USE_LIBCRYPTO";
 extra_use="${11}";
 extra_cc="${12}";
 extra_ld="${13}";
-_description="$(echo "$6" | awk -F'[()]' '{print $1}' | xargs)";
+extra_c="${14}";
+_description="$([ "${16}" == "LGCY" ] && echo "$6" || echo "$6" | awk -F'[()]' '{print $1}' | xargs)";
 _oscamconfdir_default="/etc/tuxbox/config";
 $andk_vars
 _self_build="$([ ! "$9" == "yes" ] && echo "no" || echo "$9")";
 _compiler="$3-";
 _sysroot="$sysroot";
 _libsearchdir="$lsd";
+_extract_strip="$([ -z "${15}" ] && echo "0" || echo "${15}")";
 _toolchainfilename="$tfn";
 _md5sum="$(cd "$dldir" && md5sum $(basename "$8"))";
 _tc_info="$info";
-_tc_infolines="5";
+_tc_infolines="$(echo "$_tc_info" | wc -l)";
 EOF
 };
