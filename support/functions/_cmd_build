@@ -235,7 +235,7 @@ fi
 	"CONF_DIR=$CONFDIR" \
 	"OSCAM_BIN=$bdir/$oscam_name" \
 	"CC_OPTS=$co $cc_opts $extra_cc" \
-	"CC_WARN=$cc_warn" \
+	"EXTRA_CC_WARN=$cc_warn" \
 	"EXTRA_LDFLAGS=$extra_ld" \
 	"EXTRA_CFLAGS=$extra_c" \
 	$EXTRA_USE \

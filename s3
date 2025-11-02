@@ -127,7 +127,7 @@ loadprofile="no"
 s3cfg="$configdir/simplebuild.config"
 
 # Compiler settings
-cc_warn="-W -Wall -Wshadow -Wredundant-decls -Wstrict-prototypes -Wold-style-definition"
+cc_warn="-W -Wall -Wshadow -Wstrict-prototypes -Wold-style-definition"
 #compiling options for minimize cpu load
 cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections -fomit-frame-pointer -fno-schedule-insns"
 #compiling options for compatibility
