@@ -69,46 +69,34 @@ _cmd_build(){
 		_apply_consolepatch
 	fi
 
-#get enable and disable modules
+# do enable and disable modules
 	build_cmds+=($'\n#enable/disable options')
-	enable_list=()
-	disable_list=()
+
 	for am in "${all_cc[@]}"; do
 		if [[ "${am: -3}" == "_on" ]]; then
 			e="${am:0:-3}"
-			enable_list+=("$e")
-		elif [[ "${am: -4}" == "_off" ]]; then
-			d="${am:0:-4}"
-			disable_list+=("$d")
+			cmd=("${repodir}/config.sh" -E "$e")
+			"${cmd[@]}" | awk '{printf "\033[1;37m |    %s : \033[1;32m%s\033[0m\n", $1, $2}'
+			build_cmds+=("$(printf "%q " "${cmd[@]}")")
 		fi
-	done
 
-#do enable and disable modules
-	specs=(
-	  "-D:31:${disable_list[*]}"
-	  "-E:32:${enable_list[*]}"
-	)
-
-	for spec in "${specs[@]}"; do
-		IFS=":" read -r opt color modules <<< "$spec"
-		mods=($modules)   # rebuild array
-
-		if (( ${#mods[@]} > 0 )); then
-			cmd=("./config.sh" "$opt" "${mods[@]}")
-			"${cmd[@]}" | awk -v c="$color" '{printf "\033[1;37m |    %s : \033[1;" c "m%s\033[0m\n", $1, $2}'
+		if [[ "${am: -4}" == "_off" ]]; then
+			d="${am:0:-4}"
+			cmd=("${repodir}/config.sh" -D "$d")
+			"${cmd[@]}" | awk '{printf "\033[1;37m |    %s : \033[1;31m%s\033[0m\n", $1, $2}'
 			build_cmds+=("$(printf "%q " "${cmd[@]}")")
 		fi
 	done
 	echo -en "\e[1A"
 
 #fix smargo case
-	if [[ "$(./config.sh -e CARDREADER_SMARGO)" == "Y" || "${USE_vars[$e]}" == "USE_LIBUSB=1" ]]; then
+	if [[ "$(${repodir}/config.sh -e CARDREADER_SMARGO)" == "Y" || "${USE_vars[$e]}" == "USE_LIBUSB=1" ]]; then
 		opt="-E"
 	else
 		opt="-D"
 	fi
 
-	cmd=("./config.sh" "$opt" CARDREADER_SMARGO)
+	cmd=("${repodir}/config.sh" "$opt" CARDREADER_SMARGO)
 	silent=$("${cmd[@]}")
 	build_cmds+=("$(printf "%q " "${cmd[@]}")")
 	check_smargo
