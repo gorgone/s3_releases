@@ -88,10 +88,15 @@ _generate_oscam_name(){
 	[ "$(./config.sh --enabled IPV6SUPPORT)" == Y ] && echo -ipv6 || printf ''; );_signed=$(
 	[ "$(./config.sh --enabled WITH_SIGNING)" == Y ] && echo -signed || printf ''; )
 	[ "${USE_vars[USE_COMPRESS]}" == "USE_COMPRESS=1" ] && _upx="-upx" || _upx=''
+	if grep -q "USE_OPENSSL=1" "$repodir/Makefile" 2>/dev/null; then
+		[ "${USE_vars[USE_OPENSSL]}" == "USE_OPENSSL=1" ] && _backend="-openssl" || _backend='-mbedtls'
+	else
+		_backend=''
+	fi
 	[ "$1" == "native" ] && _b_name="$(uname -s)-$(uname -m)" || _b_name="$1"
 	if [ "${s3cfg_vars[ADD_PROFILE_NAME]}" == "0" ] || [ $pf_name == "not_set" ]
 	then
-		oscam_name="oscam-${REPO}$(REVISION)$($(USEGIT) && printf "@$(COMMIT)" || printf "")-$_b_name$_webif$_dvbapi$_ssl$_usb$_pcsc$_dvbcsa$_stapi$_stapi5$_emu$_ipv6$_icam$_neon$2$_upx$_signed"
+		oscam_name="oscam-${REPO}$(REVISION)$($(USEGIT) && printf "@$(COMMIT)" || printf "")-$_b_name$_backend$_webif$_dvbapi$_ssl$_usb$_pcsc$_dvbcsa$_stapi$_stapi5$_emu$_ipv6$_icam$_neon$2$_upx$_signed"
 	else
 		oscam_name="oscam-${REPO}$(REVISION)$($(USEGIT) && printf "@$(COMMIT)" || printf "")-${pf_name%.*}";
 	fi
