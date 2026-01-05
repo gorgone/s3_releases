@@ -45,6 +45,13 @@ _cmd_build(){
 		fi
 	done
 
+#export USE_FLAGS for config.sh (needed for CARDREADER_INTERNAL_* selection)
+	_active_use_flags=""
+	for _key in "${!USE_vars[@]}"; do
+		[ -n "${USE_vars[$_key]}" ] && _active_use_flags="$_active_use_flags $_key"
+	done
+	export USE_FLAGS="$_active_use_flags"
+
 #change directory
 	build_cmds+=($'\n#jump into oscam directory')
 	cmd=(cd "${repodir}")
