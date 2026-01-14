@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="83";
+S3TUP_CONFIG_VERSION="84";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -649,10 +649,12 @@ LIB_DVBC32_tasks+=('mkdir "${LIB_DVBC32_name}-${LIB_DVBC32_version}" && find "@P
 LIB_ZLIB="1";
 LIB_ZLIB_beta="0";
 LIB_ZLIB_name="zlib";
-LIB_ZLIB_tag="$(git ls-remote --sort=-version:refname https://github.com/madler/zlib.git --tags v*.* | grep -v 'alpha\|beta\|\-pre\|\-rc\|\^' | awk -F'/' 'NR==1 {print $NF}')";
+LIB_ZLIB_tag="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/madler/zlib/releases" | jq -r '[.[]? | select(.tag_name? | test("^v[0-9]+\\.[0-9]+")?) | select(.tag_name? | test("alpha|beta|pre|rc") | not) | select(.draft? == false and .prerelease? == false)] | .[0].tag_name? // empty')";
+LIB_ZLIB_tag="${LIB_ZLIB_tag:-$(git ls-remote --sort=-version:refname https://github.com/madler/zlib.git --tags 'v*.*' | grep -v 'alpha\|beta\|\-pre\|\-rc\|\^' | awk -F'/' 'NR==1 {print $NF}')}";
 LIB_ZLIB_version="$(printf "$LIB_ZLIB_tag" | sed -e 's#v##g; s#_#.#g; s#\"##g')";
 LIB_ZLIB_check="zlib.pc";
-LIB_ZLIB_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/madler/zlib/releases/tags/$LIB_ZLIB_tag" | jq -r '.assets | .[] | select( .name | endswith(".tar.xz")) | .browser_download_url' | sed -e 's#\"##g')";
+LIB_ZLIB_url="$(curl --silent $CURL_GITHUB_TOKEN "https://api.github.com/repos/madler/zlib/releases/tags/$LIB_ZLIB_tag" | jq -r '.assets[]? | select(.name? | test("tar\\.(xz|gz)$")?) | .browser_download_url?' | head -1)";
+LIB_ZLIB_url="${LIB_ZLIB_url:-https://github.com/madler/zlib/archive/refs/tags/${LIB_ZLIB_tag}.tar.gz}";
 LIB_ZLIB_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_ZLIB_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_ZLIB_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@" || export CFLAGS="-fPIC";');
