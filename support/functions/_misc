@@ -505,13 +505,23 @@ check_signing(){
 		fi
 	fi
 }
+# Helper function to find static library, preferring sysroot paths (*/usr/lib/*)
+_find_static_lib(){
+	local libname="$1"
+	local result
+	# First try to find in sysroot/usr/lib path (preferred)
+	result=$(find $SEARCHDIR -path "*/usr/lib/*" -name "$libname" -type f -print -quit 2>/dev/null)
+	# Fallback to any location if not found in sysroot
+	[ -z "$result" ] && result=$(find $SEARCHDIR -name "$libname" -type f -print -quit 2>/dev/null)
+	printf "%s" "$result"
+}
 set_buildtype(){
 	[ "$_toolchainname" == "native" ] && SEARCHDIR="$(ldconfig -v 2>/dev/null | grep -v ^$'\t' | awk -F':' '{print $1}')" || SEARCHDIR="$SYSROOT"
-	[ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBCRYPTO]}" == "STATIC_LIBCRYPTO=1" ]	&& LIBCRYPTO_LIB="LIBCRYPTO_LIB=$(find $SEARCHDIR -name "libcrypto.a" -type f -print -quit)"	&& ((statcount++))
-	[ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_SSL]}" == "STATIC_SSL=1" ]				&& SSL_LIB="SSL_LIB=$(find $SEARCHDIR -name "libssl.a" -type f -print -quit)"					&& ((statcount++))
-	[ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBUSB]}" == "STATIC_LIBUSB=1" ]		&& { LIBUSB_LIB="LIBUSB_LIB=$(find $SEARCHDIR -name "libusb-1.0.a" -type f -print -quit)"; ((statcount++)); } || { [ "$_androidndkdir" == "1" ] && LIBUSB_LIB="LIBUSB_LIB=-lusb-1.0"; }
-	[ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_PCSC]}" == "STATIC_PCSC=1" ]			&& PCSC_LIB="PCSC_LIB=$(find $SEARCHDIR -name "libpcsclite.a" -type f -print -quit)"			&& ((statcount++))
-	[ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBDVBCSA]}" == "STATIC_LIBDVBCSA=1" ]	&& LIBDVBCSA_LIB="LIBDVBCSA_LIB=$(find $SEARCHDIR -name "libdvbcsa.a" -type f -print -quit)"	&& ((statcount++))
+	[ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBCRYPTO]}" == "STATIC_LIBCRYPTO=1" ]	&& LIBCRYPTO_LIB="LIBCRYPTO_LIB=$(_find_static_lib "libcrypto.a")"	&& ((statcount++))
+	[ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_SSL]}" == "STATIC_SSL=1" ]				&& SSL_LIB="SSL_LIB=$(_find_static_lib "libssl.a")"					&& ((statcount++))
+	[ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBUSB]}" == "STATIC_LIBUSB=1" ]		&& { LIBUSB_LIB="LIBUSB_LIB=$(_find_static_lib "libusb-1.0.a")"; ((statcount++)); } || { [ "$_androidndkdir" == "1" ] && LIBUSB_LIB="LIBUSB_LIB=-lusb-1.0"; }
+	[ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_PCSC]}" == "STATIC_PCSC=1" ]			&& PCSC_LIB="PCSC_LIB=$(_find_static_lib "libpcsclite.a")"			&& ((statcount++))
+	[ "${USE_vars[USE_STATIC]}" == "USE_STATIC=1" -o "${USE_vars[STATIC_LIBDVBCSA]}" == "STATIC_LIBDVBCSA=1" ]	&& LIBDVBCSA_LIB="LIBDVBCSA_LIB=$(_find_static_lib "libdvbcsa.a")"	&& ((statcount++))
 
 	if [ $statcount -ge 1 -a $statcount -lt $libcount ]
 	then
