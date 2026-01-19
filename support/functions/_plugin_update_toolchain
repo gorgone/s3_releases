@@ -830,20 +830,42 @@ _andk_setup(){
 	) | _log "$logfile" | "$gui" "$st_" "$bt_" "$title_ \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_andk_setup_title} Android-NDK ]- " "$pb_" "$_lines" "$_cols";
 };
 _dl(){
-	[ -d "$dldir/#tmp" ] && rm -rf "$dldir/#tmp"
-	mkdir --parents "$dldir/#tmp";
-	cd "$dldir/#tmp";
-	wget --content-disposition "$1" 2>&1 | stdbuf -o0 awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | "$gui" "$st_" "$bt_" "$title_ \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_download_title} $2 ]- " --gauge "  $txt_loading $txt_wait" 6 74;
-	if [ $? -eq 0 ];then
-		fname="$(ls -t | head -n1)"; md5file="$fname.md5";
-		md5sum "$fname" > "$md5file";
-		cd "$dldir";
-		answer=$(md5sum -c "$md5file" 2>/dev/null | awk -F: '{printf $2}');
-		[ ! "$answer" == "OK" ] && mv -f "$dldir/#tmp/$fname" "$dldir/$fname";
-		rm -rf "$dldir/#tmp";
-	fi;
-	[ -f "$dldir/$fname" ] && echo "$dldir/$fname";
-	exit;
+	local url="$1"
+	local desc="$2"
+	local fname=""
+
+	# Check if filename is in URL (ends with known archive extension)
+	if [[ "$url" =~ .*/(.*\.(zip|tar\.gz|tar\.xz|tar\.bz2|tgz|txz|tbz2))(\?.*)?$ ]]; then
+		fname="${BASH_REMATCH[1]}"
+
+		if [ -f "$dldir/$fname" ]; then
+			# File exists: check if server is reachable before downloading
+			if wget --spider --timeout=10 "$url" 2>/dev/null; then
+				cd "$dldir"
+				wget -N "$url" 2>&1 | stdbuf -o0 awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | "$gui" "$st_" "$bt_" "$title_ \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_download_title} $desc ]- " --gauge "  $txt_loading $txt_wait" 6 74
+			fi
+			# Server not reachable: keep existing local file
+		else
+			# File does not exist: download
+			cd "$dldir"
+			wget -N "$url" 2>&1 | stdbuf -o0 awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | "$gui" "$st_" "$bt_" "$title_ \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_download_title} $desc ]- " --gauge "  $txt_loading $txt_wait" 6 74
+		fi
+	else
+		# Filename not in URL: use --content-disposition
+		[ -d "$dldir/#tmp" ] && rm -rf "$dldir/#tmp"
+		mkdir --parents "$dldir/#tmp"
+		cd "$dldir/#tmp"
+		wget --content-disposition "$url" 2>&1 | stdbuf -o0 awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | "$gui" "$st_" "$bt_" "$title_ \Z0$pdesc\Zn" "--colors" "--title" " -[ ${txt_s3tup_menu_download_title} $desc ]- " --gauge "  $txt_loading $txt_wait" 6 74
+
+		if [ $? -eq 0 ]; then
+			fname="$(ls -t | head -n1)"
+			mv -f "$dldir/#tmp/$fname" "$dldir/$fname"
+			rm -rf "$dldir/#tmp"
+		fi
+	fi
+
+	[ -f "$dldir/$fname" ] && echo "$dldir/$fname"
+	exit
 };
 _compress(){
 	#generate xz-file

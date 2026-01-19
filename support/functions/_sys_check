@@ -146,7 +146,7 @@ then
 	x=(*)
 	for i in "${x[@]}"
 	do
-		source "$i"
+		[ -f "$i" ] && source "$i"
 	done
 fi
 
