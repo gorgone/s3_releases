@@ -1,0 +1,19 @@
+_toolchainname="oe20_sh4";
+default_use="USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="";
+_description="OpenEmbedded 2.0 STBs";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="sh4-oe20-linux-gnu-";
+_sysroot="sh4-oe20-linux-gnu/sysroot";
+_libsearchdir="/usr/lib";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1vZTIwX3NoNC50YXIueHoK";
+_md5sum="f7fa9ee20c8e2c1f7fd9b533b49a1a27  Toolchain-oe20_sh4.tar.xz";
+_tc_info="\n
+!!! crosstool-NG Toolchain !!!\n
+\n
+OpenEmbedded 2.0 STBs\n
+sh sh4 32-bit LE, glibc 2.25, gcc 13.2.0, linux 6.5.5\n";
+_tc_infolines="5";

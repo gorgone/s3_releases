@@ -1,0 +1,12 @@
+#toolchain template: FRITZ!Box 7590|7490 6.9x
+#toolchain template version: 3
+#toolchain template migrate: fritzOS-uClibc-69x_mips
+#toolchain template updated: 2021-02-16 21:37:12
+FREETZ_USER_LEVEL_EXPERT=y
+FREETZ_SHOW_ADVANCED=y
+FREETZ_SHOW_EXPERT=y
+FREETZ_TYPE_7590=y
+FREETZ_TYPE_FIRMWARE_06_9X=y
+FREETZ_TYPE_FIRMWARE_FINAL=y
+FREETZ_BUILD_TOOLCHAIN=y
+FREETZ_TOOLCHAIN_CCACHE=n

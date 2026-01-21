@@ -1,0 +1,19 @@
+_toolchainname="owrt_mediatek_armv8";
+default_use="USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="";
+_description="OpenWrt 19.07|21.02 mediatek, GLinet Brume2 devices";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="aarch64-mediatek-linux-musl-";
+_sysroot="aarch64-mediatek-linux-musl/sysroot";
+_libsearchdir="/usr/lib";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1vd3J0X21lZGlhdGVrX2FybXY4LnRhci54ego=";
+_md5sum="e4869d80b549c0415b52a74545065c54  Toolchain-owrt_mediatek_armv8.tar.xz";
+_tc_info="\n
+!!! crosstool-NG Toolchain !!!\n
+\n
+OpenWrt 19.07|21.02 mediatek, GLinet Brume2 devices\n
+aarch64 cortex-a53 64-bit LE, musl 1.1.24, gcc 13.2.0, linux 6.5.5\n";
+_tc_infolines="5";

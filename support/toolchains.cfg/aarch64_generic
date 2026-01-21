@@ -1,0 +1,26 @@
+_toolchainname="aarch64_generic";
+default_use="USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="";
+extra_c="";
+_description="aarch64 stb's (generic)";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="aarch64-buildroot-linux-gnu-";
+_sysroot="aarch64-buildroot-linux-gnu/sysroot";
+_libsearchdir="/usr/lib";
+_extract_strip="1";
+_toolchainfilename="aHR0cHM6Ly90b29sY2hhaW5zLmJvb3RsaW4uY29tL2Rvd25sb2Fkcy9yZWxlYXNlcy90b29sY2hhaW5zL2FhcmNoNjQvdGFyYmFsbHMvYWFyY2g2NC0tZ2xpYmMtLXN0YWJsZS0yMDE4LjExLTEudGFyLmJ6Mg==";
+_md5sum="3dabef3ced22e58bc061be2f74dfae85  aarch64--glibc--stable-2018.11-1.tar.bz2";
+_tc_info="!!! Bootlin Stable Toolchain 2018.11-1 !!!\n
+\n
+generic cross toolchain for aarch64 devices\n
+\n
+arch aarch64\n
+glibc 2.27\n
+gcc 7.3.0\n
+gdb 7.12.1\n
+linux 4.1.52\n
+binutils 2.29.1\n";
+_tc_infolines="10";

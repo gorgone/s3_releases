@@ -1,0 +1,9 @@
+PATCHURL="https://raw.githubusercontent.com/gorgone/s3_releases/master/support/patches/no.patch"
+PATCHNAME="no.patch"
+#PATCHCOUNT=3
+#PATCHURL1="https://raw.githubusercontent.com/gorgone/s3_releases/master/support/patches/no.patch"
+#PATCHNAME1="no1.patch"
+#PATCHURL2="https://raw.githubusercontent.com/gorgone/s3_releases/master/support/patches/no.patch"
+#PATCHNAME2="no2.patch"
+#PATCHURL3="https://raw.githubusercontent.com/gorgone/s3_releases/master/support/patches/no.patch"
+#PATCHNAME3="no3.patch"

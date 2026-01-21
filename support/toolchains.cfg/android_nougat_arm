@@ -1,0 +1,24 @@
+_toolchainname="android_nougat_arm";
+default_use="USE_LIBCRYPTO";
+extra_use="LIB_RT= LIB_PTHREAD=";
+extra_cc="";
+extra_ld="";
+extra_c="-march=armv7-a -mtune=cortex-a9 -mfloat-abi=softfp -mfpu=vfpv3-d16 -U__ANDROID_API__ -DANDROID -D__ANDROID_API__=24 -fpic -fno-addrsig -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wno-unused-but-set-variable -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -Wno-ignored-optimization-argument";
+_description="Android 7.x Nougat STBs";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="/data/plugin/oscam";
+_androidndkdir="1";
+stapi_lib_custom="libwi.a";
+stapi_allowed="1";
+_compiler="arm-linux-androideabi-";
+_sysroot="sysroot";
+_libsearchdir="/usr/lib";
+_extract_strip="0";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1hbmRyb2lkX25vdWdhdF9hcm0udGFyLnh6Cg==";
+_md5sum="8024786b165ebd2e779ab48e2e834d94  Toolchain-android_nougat_arm.tar.xz";
+_tc_info="\n
+!!! Android-NDK Toolchain !!!\n
+\n
+Android 7.x Nougat STBs\n
+arm armeabi-v7a 32-bit LE, libc++ API 24, clang 18.0.2, Linux 6.8.0\n";
+_tc_infolines="5";

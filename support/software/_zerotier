@@ -1,0 +1,82 @@
+#!/bin/bash
+
+#simplebuild_plugin zerotier
+
+build_zerotier() {
+clear
+source "$tccfgdir/$1"
+stable="https://github.com/zerotier/ZeroTierOne/archive/1.6.5.tar.gz"
+cd $dldir
+slogo
+[ -d ZeroTierOne-1.6.5 ] && rm -rf ZeroTierOne-1.6.5 #remove build dir
+[ -f 1.6.5.tar.gz ] && rm -f 1.6.5.tar.gz #remove download
+echo -en "\nZeroTierOne\n===========\ndownload please wait ... "
+wget $stable --progress=dot -q --show-progress 2>&1 |
+awk 'NF>2 && $(NF-2) ~ /%/{printf "\rdownload please wait ... %s",$(NF-2)} END{print "\rdownload please wait ... Done!"}' #download stable package
+echo -e "extracting please wait ... "
+tar -zxf 1.6.5.tar.gz #extract source
+cd ZeroTierOne-1.6.5
+sed "11a\\override CC=$tcdir/$_toolchainname/bin/$_compiler"gcc""      -i make-linux.mk
+sed "12a\\override CXX=$tcdir/$_toolchainname/bin/$_compiler"g++""     -i make-linux.mk
+sed "13a\\override STRIP=$tcdir/$_toolchainname/bin/$_compiler"strip"" -i make-linux.mk
+
+#build software
+make -j16 -w 2>&1 |grep --line-buffered -v "struct\|pp\:\|one.o\|warning\|~\|In\|note\|if\|int\|\^\|)" |awk -F "/" '{print "compile -> " "\033[32m" $NF "\033[0m" }'
+upx -9 -q zerotier-one |grep zerotier  |awk '{print "compress -> " $1" "$3" "$4 }'
+
+#copy binarys
+[ $1 = "native" ] && _toolchainname=$(uname -m)
+[ -d "$sodir/ZeroTierOne-1.6.5.$_toolchainname" ] && rm -rf "$sodir/ZeroTierOne-1.6.5.$_toolchainname"
+mkdir -p "$sodir/ZeroTierOne-1.6.5.$_toolchainname"
+mv {zerotier-cli,zerotier-idtool,zerotier-one} "$sodir/ZeroTierOne-1.6.5.$_toolchainname"
+}
+
+deb_package() {
+clear
+slogo
+mkdir -p "$sodir/ZeroTierOne-1.6.5.$_toolchainname/DEBIAN"
+mkdir -p "$sodir/ZeroTierOne-1.6.5.$_toolchainname/usr/local/bin"
+cd "$sodir/ZeroTierOne-1.6.5.$_toolchainname"
+mv {zerotier-cli,zerotier-idtool,zerotier-one} "$sodir/ZeroTierOne-1.6.5.$_toolchainname/usr/local/bin"
+printf "\nPackage Info\n============\n"
+echo "Package: zerotierone
+Version: 1.6.5
+Section: custom
+Priority: optional
+Architecture: all
+Essential: no
+Installed-Size: 1024
+Maintainer: https://github.com/zerotier/ZeroTierOne
+Description: virtual network card">"$sodir/ZeroTierOne-1.6.5.$_toolchainname/DEBIAN/control"
+echo "ZeroTierOne-1.6.5.$_toolchainname"
+cat "$sodir/ZeroTierOne-1.6.5.$_toolchainname/DEBIAN/control"
+cd "$sodir"
+printf "\n"
+dpkg-deb --build "ZeroTierOne-1.6.5.$_toolchainname"
+[ -f "ZeroTierOne-1.6.5.$_toolchainname".deb ] && mv "ZeroTierOne-1.6.5.$_toolchainname".deb $adir
+printf "\n"
+exit
+}
+
+if [ "$1" = "zerotier" ]; then
+  if [ -z $2 ]; then
+    clear
+    slogo
+    printf "\n  plase add toolchain\n\n"
+    exit
+  else
+      if [ -f "$tccfgdir/$2" ]; then
+        buildtc="$2"
+      else
+        clear
+        slogo
+        printf "\n  $2 toolchain not installed\n\n"
+        exit
+      fi
+  fi
+  build_zerotier $buildtc
+fi
+
+if [ "$3" = "makedeb" ]; then
+  deb_package
+fi

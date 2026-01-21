@@ -1,0 +1,19 @@
+_toolchainname="ubnt_mips64";
+default_use="USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="";
+_description="Ubiquiti Networks devices, USG|USG-Pro";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="mips-ubnt-linux-gnu-";
+_sysroot="mips-ubnt-linux-gnu/sysroot";
+_libsearchdir="/usr/lib";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi11Ym50X21pcHM2NC50YXIueHoK";
+_md5sum="a8be217a49ca688051ae1c5d166260d3  Toolchain-ubnt_mips64.tar.xz";
+_tc_info="\n
+!!! crosstool-NG Toolchain !!!\n
+\n
+Ubiquiti Networks devices, USG|USG-Pro\n
+mips mips64r2 32-bit BE, glibc 2.17, gcc 13.2.0, linux 6.5.5\n";
+_tc_infolines="5";

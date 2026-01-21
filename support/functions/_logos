@@ -16,9 +16,10 @@ bye(){
 s3logo(){
 echo -e $C"
     _________________
-   /   _____/\\_____  \\   ===============
-   \_____  \\   _(__  <  $w_l Ver. $VERSIONCOUNTER$g_l $SIMPLEVERSION$C
-   /        \\ /       \\  ===============
-  /_______  //______  / $y_l by gorgone$p_l 2020$C
-          \\/        \/   ===============\n$W";
+   /   _____/\\_____  \\   ===========================
+   \_____  \\   _(__  <   $(printf '%-6s %29s' "$w_l"'Version' "$g_l$(version | head -n1 | awk '{print $1}')")$C
+   /        \\ /       \\  ===========================
+  /_______  //______  / $p_l by$y_l Gorgone$p_l 2021$C,$y_l WXbet$p_l 2023$C
+          \\/        \/   ===========================$C
+  $(printf "$SOURCE ${txt_repo::4}:" | xargs) $w_l$(basename ${repodir}) $($(REPOURLDIRTY) && printf "$r_l($txt_wc_deviation)")\n$W";
 };

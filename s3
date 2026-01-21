@@ -1,16 +1,18 @@
 #!/bin/bash
 
-VERSIONCOUNTER=310
-SIMPLEVERSION="-NEXT-"
+SIMPLEVERSION="2024.07"
+VERSIONCOUNTER="$(git rev-list --count HEAD 2>/dev/null || printf "$(echo "$SIMPLEVERSION" | sed -e 's/\(.\)/\1\+0/g' | bc)_non-git")"
+DEVELOPER="Gorgone, WXbet"
 OIFS=$IFS
 export NCURSES_NO_UTF8_ACS=1
 
-#set dir_vars
-workdir="$(pwd)"
- bindir="$sdir/upx"
-   PATH="$bindir:$PATH"
-   sdir="$workdir/support"
+here_=$(pwd)
+realdir=$(readlink -f $0)
+cd "$(dirname $realdir)"
 
+#set dir_vars
+  workdir="$(pwd)"
+     sdir="$workdir/support"
     osdir="$sdir/os"
      ldir="$sdir/logs"
      adir="$sdir/archive"
@@ -18,31 +20,44 @@ configdir="$sdir/configs"
      pdir="$sdir/patches"
   profdir="$sdir/profiles"
      bdir="$sdir/binaries"
+    sodir="$sdir/software"
     dldir="$sdir/downloads"
      fdir="$sdir/functions"
   menudir="$sdir/menu_save"
-     bsvn="$sdir/backup_svn"
+    brepo="$sdir/backup_repo"
     tcdir="$sdir/toolchains"
      tdir="$sdir/translation"
-   svndir="$workdir/oscam-svn"
  tccfgdir="$sdir/toolchains.cfg"
 
 # create folders
 mkdir -p "$tcdir/native/bin" 2>/dev/null
-mkdir -p support/{archive,binaries,downloads,logs,patches,backup_svn,menu_save,upx} 2>/dev/null
+mkdir -p $sdir/{archive,binaries,downloads,software,logs,patches,backup_repo,menu_save} 2>/dev/null
+[ -f $sdir/patches/no.patch ] && rm -f $sdir/patches/no.patch 2>/dev/null
+
+# some migrations of deprecated directories
+for migdir in backup_svn backup_git
+do
+	if [ -d "$sdir/$migdir" ]; then
+		mv -f "$sdir/$migdir"/{*,.*} "$brepo/" 2>/dev/null
+		mv "$brepo/last.tar.gz" "$brepo/last${migdir: -3}.tar.gz" 2>/dev/null
+		ln -fs "$(readlink "$brepo/last${migdir: -3}.tar.gz" | awk -F'/' '{ print $NF }')" "$brepo/last${migdir: -3}.tar.gz"
+		rm -d "$sdir/$migdir"
+	fi
+done
 
 # create links
 [ ! -d "$ldir" ] && clear && echo -e "\n folder creation error\n\n" && exit
-[ -L "$workdir/logs" ]     || ln -sf "$ldir" "$workdir/logs"     2>/dev/null
-[ -L "$workdir/archive" ]  || ln -sf "$adir" "$workdir/archive"  2>/dev/null
-[ -L "$workdir/patches" ]  || ln -sf "$pdir" "$workdir/patches"  2>/dev/null
-[ -L "$workdir/binaries" ] || ln -sf "$bdir" "$workdir/binaries" 2>/dev/null
-[ -L "$workdir/profiles" ] || ln -sf "$profdir" "$workdir/profiles" 2>/dev/null
+[ -L "$workdir/logs" ]     || ln -frs "$ldir" "$workdir/logs"     2>/dev/null
+[ -L "$workdir/archive" ]  || ln -frs "$adir" "$workdir/archive"  2>/dev/null
+[ -L "$workdir/patches" ]  || ln -frs "$pdir" "$workdir/patches"  2>/dev/null
+[ -L "$workdir/binaries" ] || ln -frs "$bdir" "$workdir/binaries" 2>/dev/null
+[ -L "$workdir/software" ] || ln -frs "$sodir" "$workdir/software" 2>/dev/null
+[ -L "$workdir/profiles" ] || ln -frs "$profdir" "$workdir/profiles" 2>/dev/null
 
 #set arrays
 array_names_a=( SHORT_PROTOCOLS SHORT_READERS SHORT_CARD_READERS AVAI_TCLIST
-				MISS_TCLIST SHORT_ADDONS DISABLED_MODULES SHORT_MODULENAMES
-				ALL_MODULES_LONG  ENABLED_MODULES INST_TCLIST SSH_CONF_CONTENT )
+		MISS_TCLIST SHORT_ADDONS DISABLED_MODULES SHORT_MODULENAMES
+		ALL_MODULES_LONG  ENABLED_MODULES INST_TCLIST SSH_CONF_CONTENT )
 array_names_A=( INTERNAL_MODULES USE_vars USE_vars_disable s3cfg_vars )
 
 for a_n in "${array_names_a[@]}"
@@ -57,38 +72,47 @@ do
 	declare -A $a_n
 done
 
+USE_vars[USE_DIAG]=;
 USE_vars[USE_TARGZ]=;
 USE_vars[USE_PATCH]=;
 USE_vars[USE_STAPI]=;
 USE_vars[USE_STAPI5]=;
 USE_vars[USE_CONFDIR]=;
-USE_vars[USE_COMPRESS]=;
+USE_vars[USE_EXTRA]=;
+USE_vars[USE_STATIC]=;
+USE_vars[STATIC_LIBCRYPTO]=;
+USE_vars[STATIC_SSL]=;
+USE_vars[STATIC_LIBUSB]=;
+USE_vars[STATIC_PCSC]=;
+USE_vars[STATIC_LIBDVBCSA]=;
+USE_vars[USE_OSCAMNAME]=;
 
 s3cfg_vars[USE_TARGZ]=0
 s3cfg_vars[DIRECTMENU]=0
+s3cfg_vars[NO_REPO_AUTOUPDATE]=0
 s3cfg_vars[USE_VERBOSE]=0
-s3cfg_vars[USE_COMPRESS]=0
 s3cfg_vars[S3_UPDATE_CHECK]=1
+s3cfg_vars[S3_URL_CHECK]=1
+s3cfg_vars[INSTALL_NATIVE_LIBDVBCSA]=1
+s3cfg_vars[PATCH_WEBIF]=1
 s3cfg_vars[SAVE_LISTSMARGO]=1
 s3cfg_vars[ADD_PROFILE_NAME]=0
-s3cfg_vars[NO_SVN_AUTOUPDATE]=0
+s3cfg_vars[NO_REPO_AUTOUPDATE]=0
 s3cfg_vars[delete_oscamdebugbinary]=1
 
 #filled arrays
 config_cases=( all addons protocols readers card_readers );
-s3opts=( cedit checkout clean enable_emu fix_me get_patch help lang_select loadonly\
-		 menu profiles ssh_profiles svnpatch svnrestore svnup syscheck sysinfo tccheck\
-		 tcrepair tedit update update_emu update_me upload ) # extendable with plugins
+s3opts=( cedit checkout clean fix_me get_patch help lang_select loadonly\
+	menu profiles ssh_profiles repoclean repopatch reporestore repoup syscheck sysinfo tccheck\
+	tcrepair tedit update update_me upload version ) # extendable with plugins
 
 CUSTOM_CONFDIR="not_set"
 pf_name="not_set"
-UPX="not_set"
 
 #internal vars
 OPENBOX=0
 UFS916003=0
 _t1e="VG9vbGNoYWluLQ=="
-_u1e="aHR0cHM6Ly9maWxlcy5zdHJlYW1ib2FyZC50di90b29sY2hhaW5z"
 
 run="0"
 cposx=0
@@ -103,14 +127,25 @@ loadprofile="no"
 s3cfg="$configdir/simplebuild.config"
 
 # Compiler settings
-cc_warn="-W -Wall -Wshadow -Wredundant-decls -Wstrict-prototypes -Wold-style-definition";
-cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections";
+cc_warn="-W -Wall -Wshadow -Wstrict-prototypes -Wold-style-definition"
+#compiling options for minimize cpu load
+cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections -fomit-frame-pointer -fno-schedule-insns"
+#compiling options for compatibility
+#cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections -o nodeadcode"
+#compiling options for optimizing
+#cc_opts="-ggdb -pipe -ffunction-sections -fdata-sections -o nodeadcode -ffast-math -fomit-frame-pointer -fthread-jumps -foptimize-strlen --no-inline"
 
-#default url
-trunkurl="http://www.streamboard.tv/svn/oscam/trunk";
-#trunkurl="http://www.streamboard.tv/svn/oscam-addons/modern";
+#load default urls
+source "$configdir/urls"
 
-[ -f "$workdir/oscamsource.url" ] && source "$workdir/oscamsource.url";
+#load custom urls
+[ -f "$workdir/oscamsource.url" ] && source "$workdir/oscamsource.url"
+
+# switch trunkurl based on environment variable SOURCE
+# needs an existing oscamsource.url file containing trunkurl<SOURCE>="some url"
+# e.q. to force s3 to use trunkurlsvn which was defined in oscamsource.url, simply run: SOURCE=svn ./s3 menu
+forcedurl="trunkurl$SOURCE"
+[ -v trunkurl$SOURCE ] && trunkurl="${!forcedurl}" || unset SOURCE
 
 #load translationlist
 cd "$tdir"
@@ -131,9 +166,31 @@ else
 	echo "fail functions"
 fi
 
+#set additional dir_vars
+REPO="$(REPOTYPE)"
+ID="$(echo "$(REPOIDENT)" | tr ' ' '-')"
+repodir="$workdir/oscam-${REPO}${ID}"
+ispatched="$workdir/${REPO^^}${ID}-IS-PATCHED"
+
+#software build support
+if [ -d "$sodir" ]
+then
+	cd "$sodir"
+	x=(*)
+	for i in "${x[@]}"
+	do
+		if [ -f "$i" ]; then
+			source "$i"
+			plugin=$(awk '/^#simplebuild_plugin/ {printf $2}' $i)
+			[ -z "$plugin" ] || s3opts+=($plugin)
+		fi
+	done
+fi
+
 #initialize simplebuild
 initializeANSI	# load colors
 auto_langset	# echo "info $txt_load_ok";
+read_s3cfg		# read simplebuild config
 
 # check system #########################################################
 syscheck
@@ -143,10 +200,9 @@ syscheck
 _create_native_profile	# put native datas to toolchains and configs
 _get_config_con "$1"	# echo $addons;exit;
 _create_module_arrays	# fill module arrays
-_fill_tc_array			# get # AVAI_TCLIST # INST_TCLIST # MISS_TCLIST
-read_s3cfg				# read simplebuild config
-_set_dialog_types		# fill $gui vars
-_systype				# check used uname
+_fill_tc_array		# get # AVAI_TCLIST # INST_TCLIST # MISS_TCLIST
+_set_dialog_types	# fill $gui vars
+_systype		# check used uname
 
 if [ -z "$1" ]
 then
@@ -163,7 +219,7 @@ else
 
 			case $e in
 
-			fix_me|checkout|update_me|update_emu|svnrestore|enable_emu|upload_cam)
+			fix_me|checkout|update_me|reporestore|upload_cam)
 				if [ ! -n "$2" ]
 				then
 					eval "$e"
@@ -305,6 +361,8 @@ else
 		if [ "$t" == "$1" ]
 		then
 
+			[ "${2:0:4}" == "here" ] && EXTRA_COPY_DIR=1 || EXTRA_COPY_DIR=0
+
 			if [ "${2:0:3}" == "-p=" ] || [ "${2:0:3}" == "-P=" ]
 			then
 				if [ -f "$profdir/${2#*=}" ]
@@ -323,17 +381,6 @@ else
 				fi
 			fi
 
-			if [ "${2:0:5}" == "-upx=" ] || [ "${2:0:5}" == "-UPX=" ]
-			then
-				UPX=${2#*=};USE_vars[USE_COMPRESS]="USE_COMPRESS=1"
-			fi
-
-			if [ "${3:0:5}" == "-upx=" ] || [ "${3:0:5}" == "-UPX=" ]
-			then
-				UPX=${2#*=}
-				USE_vars[USE_COMPRESS]="USE_COMPRESS=1"
-			fi
-
 			[ "$pf" == "empty" ] && c_m_d="$*" || c_m_d="all_off $pf $*"; # set only active module with profiles
 			for cmd in $c_m_d
 			do
@@ -343,10 +390,9 @@ else
 					CUSTOM_CONFDIR="${cmd#*=}"
 				fi
 
-				if [ "${cmd:0:5}" == "-upx=" ] || [ "${cmd:0:5}" == "-UPX=" ]
+				if [ "${cmd:0:11}" == "-oscamname=" ]
 				then
-					UPX="${cmd#*=}"
-					USE_vars[USE_COMPRESS]="USE_COMPRESS=1"
+					USE_vars[USE_OSCAMNAME]="USE_OSCAMNAME=${cmd#*=}"
 				fi
 
 				for cc in "${config_cases[@]}"

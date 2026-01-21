@@ -27,6 +27,7 @@ txt_profiles='Profielen';
 txt_conf='Configuratie';
 txt_parameter='Parameter';
 txt_extracting=' uitpakken'; #10
+txt_checking='checking';
 txt_wait='momentje...';
 txt_existing='bestaande';
 txt_ssh_profiles='SSH $txt_profiles';
@@ -42,11 +43,16 @@ txt_save='opslaan';
 txt_filename='Bestandsnaam';
 txt_LOAD="UPLOAD";
 txt_tc="Toolchain";
+txt_tpl="Sjabloon"
+txt_lib="Bibliotheek"
+txt_repo="Repository"
+txt_branch="Branch"
+txt_proto="Protocol"
 
 # menu txt
 txt_remove_menu='$txt_tc verwijderen';
 txt_add_menu='$txt_tc toevoegen';
-txt_main_revision="\n De actuele SVN versie is : r";
+txt_main_revision="\n De actuele ${REPO^^} versie is : r";
 txt_bmenu_title="Buildmenü";
 
 # help txt
@@ -55,8 +61,8 @@ txt_help2="Opdrachtregel parameters zijn"
 txt_help3="Druk op [ENTER] om door te gaan..."
 
 # firstmenu ################################################
-txt_firstmenu_continue="Doorgaan met lokale SVN";
-   txt_firstmenu_chose="Andere SVN versie (7000+) laden";
+txt_firstmenu_continue="Doorgaan met lokale ${REPO^^}";
+   txt_firstmenu_chose="Andere ${REPO^^} Revision laden";
    txt_firstmenu_cedit="$txt_conf""s Editor starten";
     txt_firstmenu_lang="Taal handmatig $txt_sel";
     txt_firstmenu_exit="Afsluiten";
@@ -65,8 +71,9 @@ txt_firstmenu_continue="Doorgaan met lokale SVN";
      txt_config_menu="$txt_conf $txt_menu";
       txt_back_build="$txt_back naar $txt_bmenu_title";
 txt_module_configure="Oscam module $txt_sel";
-     txt_oscam_extra="Oscam extra's USB/PCSC $txt_sel";
-     txt_build_extra="build Extra's Compress/Patch $txt_sel";
+     txt_oscam_extra="Oscam extra's libraries/features $txt_sel";
+     txt_build_extra="build Extra's Patch/Static $txt_sel";
+     txt_stapi="STAPI variant $txt_sel"
       txt_build_load="Laatste $txt_conf laden";
       txt_build_save="$txt_conf bewaren";
      txt_build_reset="$txt_conf $txt_back zetten";
@@ -98,10 +105,10 @@ txt_menu_back="Naar $txt_tc $txt_menu";
 
 # _dialog_checkout
 txt_verify_syscheck='Systeem controleren       :';
-     txt_verify_svn='Huidige SVN controleren   :';
-     txt_update_svn="SVN $txt_update           :";
-    txt_prepare_svn="SVN controle voorbereiden :";
-         txt_latest="Nieuwste SVN";
+     txt_verify_svn="Huidige ${REPO^^} controleren   :";
+     txt_update_svn="${REPO^^} $txt_update           :";
+    txt_prepare_svn="${REPO^^} controle voorbereiden :";
+         txt_latest="Nieuwste ${REPO^^}";
 
 # _load_profile ###########################################
   txt_select_profile_title="Beschikbare $txt_profiles";
@@ -112,3 +119,131 @@ txt_confirm_profile_select="Bevestig a.u.b. de keuze van:";
 # _upload_cam #############################################
 txt_upload_cam1="ssh $txt_profile bestaat niet";
 txt_upload_cam2="ssh $txt_profiles gevonden";
+
+# _plugin_update_toolchain #############################################
+txt_s3tup_menu_command_label_exit="Exit"
+txt_s3tup_menu_command_label_back="Back"
+txt_s3tup_menu_command_label_create="Create"
+txt_s3tup_menu_command_label_update="Update"
+txt_s3tup_menu_command_label_backup="Backup"
+txt_s3tup_menu_command_label_start="Start"
+txt_s3tup_menu_command_label_info="Info"
+txt_s3tup_menu_command_label_setup="Setup"
+txt_s3tup_menu_command_label_edit="Edit"
+txt_s3tup_menu_command_label_yes="Yes"
+txt_s3tup_menu_command_label_no="No"
+
+txt_s3tup_msg_update_hint="is being updated..."
+txt_s3tup_msg_update_restart="Restarting"
+txt_s3tup_msg_update_current="is up to date"
+txt_s3tup_msg_update_s3update_required="Please update your simplebuild3 installation first!"
+txt_s3tup_msg_update_directory_unversioned="Update not possible because the installation directory is not ${REPO^^} or ${REPO^^} versioned!"
+txt_s3tup_msg_update_pending="update pending"
+txt_s3tup_msg_update_not_required="no update required"
+txt_s3tup_msg_update_finished="Update completed to version:"
+txt_s3tup_msg_update_log="updating plugin log"
+txt_s3tup_msg_syscheck1="Please wait while performing checks of required tools and dependencies..."
+txt_s3tup_msg_syscheck2="You need to manually install the following packages to use this plugin properly:"
+txt_s3tup_msg_syscheck3="Your dialog binary seems to be outdated, this plugin requires dialog >= 1.3 to display menus correctly. If your distribution does not provide a recent version, please compile and update it manually as follows:\n"
+txt_s3tup_msg_reset_config1="Moving existing config file..."
+txt_s3tup_msg_reset_config2="config file backup="
+txt_s3tup_msg_reset_config3="Creating new config file. Please wait..."
+txt_s3tup_msg_reset_config4="config file="
+txt_s3tup_msg_reset_config5="You can change/extend them to fit your needs."
+txt_s3tup_msg_buildasroot_error1="The cross ${txt_tc,,} build process was aborted because it must not run as root!"
+txt_s3tup_msg_buildasroot_error2="If you are aware of the danger of building ${txt_tc,,}s as root and you know what you are doing,\n         you can force it with the following command:"
+txt_s3tup_msg_toolchain_exists="${txt_tc} already exists!"
+txt_s3tup_msg_library_not_found="${txt_lib} not found in config file!"
+txt_s3tup_msg_cross_toolchain_log="creating cross ${txt_tc,,} log"
+txt_s3tup_msg_cross_toolchain_commandlist="command list for cross ${txt_tc,,} creation"
+txt_s3tup_msg_cross_toolchain_library_detection="The following libraries were detected in the existing ${txt_tc,,}:"
+txt_s3tup_msg_cross_toolchain_library_integration="The following libraries will now be integrated into the ${txt_tc,,}:"
+txt_s3tup_msg_cross_migrations_renamed="was renamed to"
+txt_s3tup_msg_cross_migrations_remove="Remove ${txt_tc}"
+txt_s3tup_msg_cross_migrations_outdated="The following cross ${txt_tc,,}s are out of date due to the renaming of cross ${txt_tc,,} ${txt_tpl,,}s:"
+txt_s3tup_msg_cross_migrations_outdated2="The following ${txt_tc,,} ${txt_conf}s are out of date due to the correction of some parameters and are corrected automatically:"
+txt_s3tup_msg_cross_migrations_hint="You can still use the ${y_l}old cross ${txt_tc,,}s${re_} from above, but it's better to create new ones based on the ${p_l}new cross ${txt_tc,,} ${txt_tpl,,}s${re_} to get future ${txt_tpl,,} updates.\nThe ${y_l}old cross ${txt_tc,,}s${re_} can be removed manually as follows:"
+txt_s3tup_msg_build_library_log="updating ${txt_lib,,} log"
+txt_s3tup_msg_build_library_commandlist="build command list for"
+txt_s3tup_msg_build_library_error="ERRORS on build found, details:"
+txt_s3tup_msg_ctng_setup_log="installing crosstool-NG log"
+txt_s3tup_msg_ctng_setup_commandlist="build command list for"
+txt_s3tup_msg_ctng_setup_cleanup="Cleanup source directory"
+txt_s3tup_msg_fng_setup_log="installing freetz-NG log"
+txt_s3tup_msg_fng_setup_commandlist="${txt_s3tup_msg_ctng_setup_commandlist}"
+txt_s3tup_msg_fng_setup_cleanup="${txt_s3tup_msg_ctng_setup_cleanup}"
+txt_s3tup_msg_andk_setup_log="installing Android NDK log"
+txt_s3tup_msg_andk_setup_commandlist="${txt_s3tup_msg_ctng_setup_commandlist}"
+txt_s3tup_msg_andk_setup_cleanup="${txt_s3tup_msg_ctng_setup_cleanup}"
+txt_s3tup_msg_extract_file_unreadable="file is unreadable:"
+txt_s3tup_msg_extract_extension_unknown="unrecognized file extension:"
+txt_s3tup_msg_gtp_missing="missing description"
+txt_s3tup_msg_gtp_info="run \Zr<${txt_s3tup_menu_command_label_setup}>\ZR to show details"
+txt_s3tup_msg_paktc="Press any key to continue"
+txt_s3tup_msg_check_toolchain_empty="Parameter${w_l} ${txt_tc} not set!"
+txt_s3tup_msg_check_toolchain_not_supported="${txt_tc} ${txt_lib,,} update not supported!"
+txt_s3tup_msg_check_library_info1="Check for PCSC header files and try to symlink to the correct PCSC header files if the last compiler include path points to the wrong location..."
+txt_s3tup_msg_check_library_info2a="Symlink to the correct PCSC header files created."
+txt_s3tup_msg_check_library_info2b="No PCSC header files found in following folder and it's sub directories:"
+txt_s3tup_msg_check_library_info3a="PCSC header files are in the correct location:"
+txt_s3tup_msg_check_library_info3b="Compiler returns no include directories!"
+txt_s3tup_msg_github_api_limits_info1="Your ${r_l}Github API rate limit has been exceeded${y_l} and will be reset at the following time:"
+txt_s3tup_msg_github_api_limits_info2="Please wait until you reset your configuration file. The most recent versions and download links for the libraries are determined dynamically via the Github API. Exceeding the rate limit of the Github API will result in failures on generationg the configuration file. For ${b_l}unauthenticated requests${y_l}, the rate limit allows ${b_l}up to 60 requests per hour${y_l}. Unauthenticated requests are associated with the originating IP address, and not the user making requests."
+txt_s3tup_msg_check_crosstool_setup_info="is not setup correctly. Try to fix it automatically..."
+txt_s3tup_msg_check_config_info1="Your config file seems to be outdated:"
+txt_s3tup_msg_check_config_info2="Please restart s3 as follows to recreate an updated config file:"
+txt_s3tup_msg_change_config_error="variable does not exist in the configuration file!"
+txt_s3tup_msg_change_config_info="Variable changed to:"
+txt_s3tup_msg_create_config_template_not_found="Template file not found. Please make a clean checkout of simplebuild 3!"
+txt_s3tup_msg_create_config_jq_not_found="Without the package 'jq' automatic config file generation is not possible. Please install it first:"
+txt_s3tup_msg_table_header_libs_col_key="Current ${txt_lib,,} keys"
+txt_s3tup_msg_table_header_libs_col_update="Updatable"
+txt_s3tup_msg_table_header_libs_col_downgrade="Downgradable"
+txt_s3tup_msg_table_header_libsversion_col_key="${txt_lib} key"
+txt_s3tup_msg_table_header_libsversion_col_curversion="Current version"
+txt_s3tup_msg_table_header_libsversion_col_newversion="New version"
+txt_s3tup_msg_table_header_libsversion_col_update="${txt_s3tup_msg_table_header_libs_col_update}"
+txt_s3tup_msg_table_header_libsversion_col_downgrade="${txt_s3tup_msg_table_header_libs_col_downgrade}"
+
+txt_s3tup_menu_toolchain_title="${txt_tc} Menu"
+txt_s3tup_menu_toolchain_text1="Select one of the"
+txt_s3tup_menu_toolchain_text2="installed cross ${txt_tc,,}s that you want to update:"
+txt_s3tup_menu_toolchain_notsupported="${txt_tc} may not be supported by this build system ($(uname -m)) due to architecture mismatch!"
+txt_s3tup_menu_toolchain_arch="$txt_tc host arch:"
+txt_s3tup_menu_toolchain_notfound="no ${txt_tc,,}s found"
+txt_s3tup_menu_toolchain_folder="$txt_tc folder:"
+txt_s3tup_menu_toolchain_config="config file:"
+
+txt_s3tup_menu_library_title="${txt_lib} Update Menu"
+txt_s3tup_menu_library_text1="Select all libraries to update in ${txt_tc,,}'s SYSROOT folder:"
+txt_s3tup_menu_library_text2="         ${txt_lib,,}   version NEW                   CURRENT" #56 chars
+txt_s3tup_menu_library_notsupported="${txt_lib} is not supported by this ${txt_tc,,} due to lack of compiler capabilities!"
+txt_s3tup_menu_library_notfound="no libraries found"
+txt_s3tup_menu_library_wrong_selection="Don't integrate the same library with different versions!"
+
+txt_s3tup_menu_template_title="Cross ${txt_tc} ${txt_tpl} Menu"
+txt_s3tup_menu_template_text1="Select one of the"
+txt_s3tup_menu_template_text2="${txt_tpl,,}s to create the cross ${txt_tc,,} you want:"
+txt_s3tup_menu_template_text3="NOTE:"
+txt_s3tup_menu_template_text4="If you create a cross ${txt_tc,,} from a ${txt_tpl,,} with a red colored description, an existing one with the same name will be replaced without asking!"
+txt_s3tup_menu_template_text5="Dark red colored descriptions indicates that the version of the ${txt_tpl,,} is higher than the existing ${txt_tc,,}. An update could make sense."
+txt_s3tup_menu_template_notfound="no ${txt_tpl,,}s found"
+
+txt_s3tup_menu_info_toolchain="${txt_tc}: " #11 chars
+txt_s3tup_menu_info_compiler="Compiler:  "  #11 chars
+txt_s3tup_menu_info_sysroot="Sysroot:   "   #11 chars
+txt_s3tup_menu_info_prefix="Prefix:    "    #11 chars
+txt_s3tup_menu_info_include="Include:   "   #11 chars
+txt_s3tup_menu_info_library="Configuration:"
+txt_s3tup_menu_info_build="command list:"
+
+txt_s3tup_menu_edit_title="Save Cross ${txt_tc} ${txt_tpl}"
+txt_s3tup_menu_edit_text="Would you like to \ZrSAVE\ZR this ${txt_tc,,} ${txt_tpl,,} \Zrnow\ZR?"
+
+txt_s3tup_menu_backup_title="$txt_s3tup_menu_command_label_backup"
+txt_s3tup_menu_build_library_title="Build"
+txt_s3tup_menu_ctng_setup_title="$txt_s3tup_menu_command_label_setup"
+txt_s3tup_menu_fng_setup_title="$txt_s3tup_menu_command_label_setup"
+txt_s3tup_menu_andk_setup_title="$txt_s3tup_menu_command_label_setup"
+txt_s3tup_menu_download_title="Downloading"
+txt_s3tup_menu_compress_title="Compress cross ${txt_tc,,}"

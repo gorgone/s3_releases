@@ -9,20 +9,45 @@ _get_patch(){
 	printf $C
 	ologo
 	printf $WH;
-	[ -f $PATCHNAME ] && printf "$Y $PATCHNAME $txt_found\n $txt_delete $P$PATCHNAME" && rm -f $PATCHNAME
-	printf $W"\n $txt_load $PATCHNAME"
-
-	if [[ `wget -S --spider $PATCHURL  2>&1 | grep 'HTTP/1.1 200 OK'` ]]
+	if [ -f patch.url.template -a ! -f patch.url ]
 	then
-		wget -q -O$PATCHNAME $PATCHURL
-		[ -f $PATCHNAME ] && printf $G" ok$W\n\n"
-	else
-		printf $R"\n\n $PATCHURL\n\n >> $txt_not_found <<$W\n\n"
+		printf "${Y}To load custom patches,\nyou have to rename the file ${P}patch.url.template${Y} to ${G}patch.url${Y}\nand adjust accordingly.${W}\n\n"
+		exit
 	fi
+	[ ! -z "$PATCHCOUNT" ] && loop="$(eval echo "{1..$PATCHCOUNT}")"
+	for c in '' $loop; do
+		DP="PATCHNAME$c"; PATCHNAME=${!DP}
+		DU="PATCHURL$c"; PATCHURL=${!DU}
+		if [ ! -z "$PATCHNAME" -a ! -z "$PATCHURL" ]
+		then
+			[ -f $PATCHNAME ] && printf "$Y $PATCHNAME $txt_found\n $txt_delete $P$PATCHNAME" && rm -f $PATCHNAME
+			printf $W"\n $txt_load $PATCHNAME"
+
+			if [[ `wget -S --spider $PATCHURL  2>&1 | grep 'HTTP/1.1 200 OK'` ]]
+			then
+				wget -q -O$PATCHNAME $PATCHURL
+				[ -f $PATCHNAME ] && printf $G" ok$W\n\n"
+			else
+				printf $R"\n\n $PATCHURL\n\n >> $txt_not_found <<$W\n\n"
+			fi
+		fi
+	done
+}
+
+_patch_style(){
+	local ret=1 style='-p1'
+	if [ -e "$1" ]; then
+		PATCHEDFILES=$(grep -e '^\(---\|+++\) ' -i "$1" | grep -v /dev/null | awk '{print $2}' | sort | uniq)
+		for f in ${PATCHEDFILES[@]}; do
+			[[ -e "${repodir}/$f" ]] && { style='-p0'; ret=0; break; }
+		done
+	fi
+	printf -- "$style"
+	return $ret
 }
 
 _apply_menupatch(){
-	[ -f "$workdir/SVN-IS-PATCHED" ] && quicksvnrestore $_toolchainname 2>/dev/null
+	[ -f "$ispatched" ] && quickreporestore $_toolchainname 2>/dev/null
 		cd "$pdir"
 			(if [ "$(ls -1 "$pdir"/*.patch 2>/dev/null | wc -l)" -gt "0" ]
 			then
@@ -36,9 +61,17 @@ _apply_menupatch(){
 				do
 
 					_w="ok"
-					cd "$svndir"
-					printf "PATCH : apply $e"
-					patch -f -p1 < "$pdir/$e" >>"$patchlog" 2>/dev/null
+					cd "${repodir}"
+					echo -e "\n$e" >> "$patchlog"
+					PATCHSTYLE=$(_patch_style "$pdir/$e")
+					printf "PATCH : applying ${PATCHSTYLE:1}-patch $e"
+
+					if grep 'GIT binary patch' "$pdir/$e" &>/dev/null; then
+						printf "PATCH : binary patch detected, using 'git apply' for $e"
+						git apply --verbose $PATCHSTYLE < "$pdir/$e" &>>"$patchlog"
+					else
+						patch -f $PATCHSTYLE < "$pdir/$e" &>>"$patchlog"
+					fi
 					hunks=$(grep -c1 '^Hunk' "$patchlog")
 					fails=$(grep -c1 'hunks FAILED' "$patchlog")
 
@@ -58,27 +91,25 @@ _apply_menupatch(){
 
 				case $_w in
 					ok)
-							printf "PATCH : done all ok"
-							touch "$workdir/SVN-IS-PATCHED";;
+							printf "PATCH : done all ok";;
 					hunk)
 							printf "PATCH : done with warnings save $e.log"
 							cp -f $patchlog "$ldir/$e.log"
-							ln -sf "$ldir/$e.log" "$workdir/lastpatch.log"
-							touch "$workdir/SVN-IS-PATCHED";;
+							ln -frs "$ldir/$e.log" "$workdir/lastpatch.log";;
 					fail)
 							printf "PATCH : break build save $e.log"
 							cp -f $patchlog "$ldir/$e.log"
-							ln -sf "$ldir/$e.log" "$workdir/lastpatch.log"
-							touch "$workdir/SVN-IS-PATCHED";;
+							ln -frs "$ldir/$e.log" "$workdir/lastpatch.log";;
 				esac
 
+				mark_patched
 				rm -rf "$patchlog"
 			fi;)|"$gui" "$st_" "$bt_" "$title_" "$pb_" 12 62
 				sleep 2
 }
 
 _apply_consolepatch(){
-	if [ ! -f "$workdir/SVN-IS-PATCHED" ]
+	if [ ! -f "$ispatched" ]
 	then
 
 		cd "$pdir"
@@ -91,11 +122,22 @@ _apply_consolepatch(){
 			do
 
 				_w=0
-				cd "$svndir"
-				printf "$y_l\n |     PATCH : apply $e"
-				patch -F 10 -f -p1 < "$pdir/$e" >>"$patchlog" 2>/dev/null
+				cd "${repodir}"
+				echo -e "\n$e" >> "$patchlog"
+				PATCHSTYLE=$(_patch_style "$pdir/$e")
+				printf "$y_l\n |     PATCH : applying ${PATCHSTYLE:1}-patch $e\n"
+
+				if grep 'GIT binary patch' "$pdir/$e" &>/dev/null; then
+					printf "$y_l\n |     PATCH : binary patch detected, using 'git apply' for $e\n"
+					git apply --verbose $PATCHSTYLE < "$pdir/$e" &>>"$patchlog"
+				else
+					patch -F 10 -f $PATCHSTYLE < "$pdir/$e" &>>"$patchlog"
+				fi
 				hunks=$(grep -c1 "^Hunk" "$patchlog")
 				fails=$(grep -c1 "hunks FAILED" "$patchlog")
+
+				cat $patchlog >"$ldir/$e.log";
+				ln -frs "$ldir/$e.log" "$workdir/lastpatch.log";
 
 				if [ "$hunks" -gt "0" ]
 				then
@@ -106,18 +148,15 @@ _apply_consolepatch(){
 				if [ "$fails" -gt "0" ]
 				then
 					printf "$y_l\n |     PATCH :$r_n FAIL (breaking Build) = $fails"
-					printf "$w_l\n |   RESTORE :$c_w LAST SVN BACKUP in "
+					printf "$w_l\n |   RESTORE :$c_w LAST ${REPO^^} BACKUP in "
 					for (( i=6; i>0; i--))
 					do
 						sleep 1 & echo -en "$i\b"
 						wait
 					done
-					svnrestore lastsvn;
+					reporestore lastrepo;
 					exit
 				fi
-
-				cat $patchlog >"$ldir/$e.log";
-				ln -sf "$ldir/$e.log" "$workdir/lastpatch.log";
 			done
 
 			rm -rf "$patchlog"
@@ -125,14 +164,39 @@ _apply_consolepatch(){
 			if [ "$_w" -gt "0" ]
 			then
 				printf "$y_l\n |     PATCH : done with warnings"
-				touch  "$workdir/SVN-IS-PATCHED"
 			else
 				printf "$y_l\n |     PATCH :$g_l done all ok$rs_"
-				touch  "$workdir/SVN-IS-PATCHED"
 			fi
+			mark_patched
 
 		else
 			printf "$y_l\n |     PATCH : no patch found\n"
 		fi
+	fi
+}
+
+mark_patched(){
+	patches="$(echo "${patchlist[@]}" | xargs | sed 's/ /\\n\\t\\t/g')"
+
+	#mark oscam-${REPO} as patched
+	echo "$patches" > "$ispatched"
+}
+
+patch_webif(){
+	if [ -f "$ispatched" ] && [ "${s3cfg_vars[PATCH_WEBIF]}" == "1" ]
+	then
+		if [ -s "$ispatched" ]
+		then
+			#format should be: patchname1.patch\n\t\tpatchname2.patch\n\t\tpatchname3.patch
+			patches="yes\\n\\t\\t$(cat "$ispatched")"
+		else
+			patches='yes'
+		fi
+
+		#show patch file information in oscam WebIf
+		sed -i '/^#define S3PATCHED/d' "${repodir}/config.h"
+		sed -i "/^#endif \/\/OSCAM_CONFIG_H_/s/^/#define S3PATCHED \""$(printf '%q' $patches)"\"\n/" "${repodir}/config.h"
+		sed -i '/#ifdef S3PATCHED/,+3d' "${repodir}/oscam.c"
+		sed -i "/fprintf(fp, \"WebifPort:.*/s/$/\n#endif\n\n#ifdef S3PATCHED\n\tfprintf(fp, \"Patched:\\\t\%s\\\n\", S3PATCHED)\;/" "${repodir}/oscam.c"
 	fi
 }

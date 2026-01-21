@@ -70,7 +70,7 @@ _load_profile(){
 		if [ -f "$profdir/$pselect" ]
 		then
 			profile_vars=$(cat "$profdir/$pselect";)
-			reset_="$("$svndir/config.sh" -D all)"
+			reset_="$("${repodir}/config.sh" -D all)"
 
 			for e in "${!USE_vars[@]}"
 			do
@@ -92,7 +92,7 @@ _load_profile(){
 				done
 			done
 
-			_set_=$("$svndir/config.sh" -E $_em_)
+			_set_=$("${repodir}/config.sh" -E $_em_)
 			USESTRING="$(echo "${USE_vars[@]}"| sed 's@USE_@@g' | sed 's@=1@@g'| tr -s ' ')"
 			loadprofile="yes"
 		fi
@@ -106,17 +106,37 @@ _create_native_profile(){
 
 	[ ! -d "$tcdir/native/bin" ] && mkdir -p "$tcdir/native/bin"
 	cd "$tcdir/native/bin"
-	g="$(which gcc)"
-	stripvar="$(which strip)"
-	strip_link="$($g -dumpmachine)-strip"
-	compiler_link="$($g -dumpmachine)-gcc"
-	[ -L "$compiler_link" ] || ln -sf "$g"     "$compiler_link"
-	[ -L "$strip_link" ]    || ln -sf "$stripvar" "$strip_link"
+	g="$(type -pf gcc)"
+	gpp="$(type -pf g++)"
+	stripvar="$(type -pf strip)"
+	objcopy="$(type -pf objcopy)"
+	objdump="$(type -pf objdump)"
+	if [ -f $g ]; then
+		compiler_link="$($g -dumpmachine)-gcc"
+		[ -L "$compiler_link" ] || ln -sf "$g" "$compiler_link"
+	fi
+	if [ -f $gpp ]; then
+		gpp_link="$($g -dumpmachine)-g++"
+		[ -L "$gpp_link" ]      || ln -sf "$gpp" "$gpp_link"
+	fi
+	if [ -f $stripvar ]; then
+		strip_link="$($g -dumpmachine)-strip"
+		[ -L "$strip_link" ]    || ln -sf "$stripvar" "$strip_link"
+	fi
+	if [ -f $objcopy ]; then
+		objcopy_link="$($g -dumpmachine)-objcopy"
+		[ -L "$objcopy_link" ]  || ln -sf "$objcopy" "$objcopy_link"
+	fi
+	if [ -f $objdump ]; then
+		objdump_link="$($g -dumpmachine)-objdump"
+		[ -L "$objdump_link" ]  || ln -sf "$objdump" "$objdump_link"
+	fi
 	cd "$tccfgdir"
 
-	cat << EOF > native
+	if [ ! -f native ]; then
+		cat << EOF > native
 _toolchainname="native";
-default_use="USE_UTF8 USE_LIBCRYPTO";
+default_use="USE_LIBCRYPTO";
 _oscamconfdir_default="/usr/local/etc";
 _oscamconfdir_custom="not_set";
 _compiler="$($g -dumpmachine)-";
@@ -126,6 +146,8 @@ _libsearchdir="/lib";
 _menuname="native";
 _sysroot="/usr/include";
 EOF
+	fi
+
 cd "$workdir"
 
 }

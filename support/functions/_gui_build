@@ -17,14 +17,31 @@ _gui_build(){
 	[ -f "$configdir/max_cpus" ] && cpus="$(cat "$configdir/max_cpus")" || cpus="$(CPUS)"
 
 	CROSS="$tcdir/$_toolchainname/bin/$_compiler"
+	SYSROOT="$(realpath -sm $tcdir/$_toolchainname/$_sysroot)"
+	_make="make"
 
 	[ "$_stagingdir" == "1" ] && export STAGING_DIR="$tcdir/$_toolchainname"
+	[ "$_androidndkdir" == "1" ] && export ANDROID_NDK="$tcdir/$_toolchainname"
 	[ -f "$configdir/compiler_option" ] && co=$(cat "$configdir/compiler_option") || co="-O2"
 
 #make clean
-	cd "$svndir"
+	cd "${repodir}"
 	make distclean > /dev/null 2>&1
 	USESTRING_=''
+	EXTRA_USE=''
+	buildtype=""
+	libcount=0
+	statcount=0
+
+#fix streamrelay case
+	check_streamrelay
+
+#export USE_FLAGS for config.sh (needed for CARDREADER_INTERNAL_* selection)
+	_active_use_flags=""
+	for _key in "${!USE_vars[@]}"; do
+		[ -n "${USE_vars[$_key]}" ] && _active_use_flags="$_active_use_flags $_key"
+	done
+	export USE_FLAGS="$_active_use_flags"
 
 #do use_vars
 	for e2 in $USESTRING
@@ -48,32 +65,73 @@ _gui_build(){
 	for e in $_us
 	do
 
-		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_COMPRESS" ] && [ ! "$e" == "USE_PATCH" ]
+		if [ ! "$e" == "USE_TARGZ" ] && [ ! "$e" == "USE_PATCH" ]  && [ ! "$e" == "USE_EXTRA" ] && [ ! "$e" == "USE_STATIC" ]
 		then
 			USESTRING_="$e=1 $USESTRING_"
 		fi
 
 	done
 
-	if [ "${USE_vars[USE_PCSC]}" == "USE_PCSC=1" ]
+	if [ "${USE_vars[USE_LIBCRYPTO]}" == "USE_LIBCRYPTO=1" ]
 	then
-		_pcsc="-pcsc"
-	else
-		_pcsc=
+		((libcount++))
+	fi
+
+	if [ "${USE_vars[USE_SSL]}" == "USE_SSL=1" ]
+	then
+		((libcount++))
 	fi
 
 	if [ "${USE_vars[USE_LIBUSB]}" == "USE_LIBUSB=1" ]
 	then
+		((libcount++))
 		_usb="-libusb"
 	else
 		_usb=
 	fi
 
-	USESTRING_=${USE_vars[@]}
+	if [ "${USE_vars[USE_PCSC]}" == "USE_PCSC=1" ]
+	then
+		((libcount++))
+		_pcsc="-pcsc"
+	else
+		_pcsc=
+	fi
+
+	if [ "${USE_vars[USE_LIBDVBCSA]}" == "USE_LIBDVBCSA=1" ]
+	then
+		((libcount++))
+		_dvbcsa="-libdvbcsa"
+	else
+		_dvbcsa=
+	fi
+
+#IF SVN is Patched
+	if [ -f "$ispatched" ]
+	then
+		patch_webif
+	fi
+
+#prepare extra_* variables
+	if [ ! "${USE_vars[USE_EXTRA]}" == "USE_EXTRA=1" ]
+	then
+		unset extra_use extra_cc extra_ld extra_c
+	else
+		extra="-extra"
+	fi
+
+#dynamic, static, mixed build
+	set_buildtype &>/dev/null
 
 #todo add switch for verbose
-	_generate_oscam_name "$_toolchainname"
+	_generate_oscam_name "$_toolchainname" "$extra$buildtype"
 	targztmp="$(mktemp)"
+
+	if [[ $oscam_name =~ -upx ]]
+	then
+		[ -f "$configdir/upx_option" ] && source "$configdir/upx_option"
+		COMP_LEVEL="COMP_LEVEL=$upx_c"
+	fi
 
 	if [ ! "${USE_vars[USE_TARGZ]}" == "USE_TARGZ=1" ]
 	then
@@ -81,35 +139,41 @@ _gui_build(){
 	fi
 	check_smargo
 
+#signing case
+	check_signing &>/dev/null
+
 #build
 	_sz
 	(ologo; _nl
+	USESTRING_=${USE_vars[@]}
+	EXTRA_USE=$extra_use
 	timer_start
-	make -j"$cpus" \
-		"CONF_DIR=$_oscamconfdir_default" "OSCAM_BIN=$bdir/$oscam_name" "CC_OPTS=$co $cc_opts" "CC_WARN=$cc_warn" "CROSS=$CROSS" $stapivar $USESTRING_ 2>&1 \
+	$_make -j"$cpus" \
+		"CONF_DIR=$_oscamconfdir_default" "OSCAM_BIN=$bdir/$oscam_name" "CC_OPTS=$co $cc_opts $extra_cc" "EXTRA_CC_WARN=$cc_warn" "EXTRA_LDFLAGS=$extra_ld" "EXTRA_CFLAGS=$extra_c" $EXTRA_USE $COMP_LEVEL "CROSS=$CROSS" $stapivar $USESTRING_ $LIBCRYPTO_LIB $SSL_LIB $LIBUSB_LIB $PCSC_LIB $LIBDVBCSA_LIB 2>&1 \
 		|tee "$ldir/$log_name" \
 		|grep --line-buffered -v 'BFD\|^/' \
-		|grep --line-buffered '^CC\|^GEN\|UseFlags\|  CONF_DIR =\|Binary\|LINK\|STRIP\|BUILD\|Addons\|Protocols\|Readers\|CardRdrs\|^/' \
-		|sed -u "s/^|/ |/g;s/^LINK/ |  LINK  >/g;s/^STRIP/ |  STRIP >/g;s/^CC\|^BUILD/ |  BUILD >/g;s/^GEN/ |  GEN   >/g;s/WEBIF_//g;s/WITH_//g;s/MODULE_//g;s/CS_//g;s/HAVE_//g;s/_CHARSETS//g;s/CW_CYCLE_CHECK/CWCC/g;s/SUPPORT//g;s/= /: /g;"
+		|grep --line-buffered '^CC\|^HOSTCC\|^GEN\|^WIKI\|^CONF\|^RM\|^UPX\|^SIGN\|UseFlags\|submodule\|  CONF_DIR =\|Binary\|LINK\|STRIP\|BUILD\|Addons\|Protocols\|Readers\|CardRdrs\|^/' \
+		|sed -u "s/^|/ |/g;/^[[:space:]]*[[:digit:]]* ->/ s/./ |  UPX   > &/;s/^RM/ |  REMOVE>/g;s/^CONF/ |  CONFIG>/g;s/^LINK/ |  LINK  >/g;s/^STRIP/ |  STRIP >/g;s/^CC\|^HOSTCC\|^BUILD/ |  BUILD >/g;s/^GEN/ |  GEN   >/g;s/^WIKI/ |  WIKI  >/g;s/^UPX/ |  UPX   >/g;s/^SIGN/ |  SIGN  >/g;
+		s/WEBIF_//g;s/WITH_//g;s/MODULE_//g;s/CS_//g;s/HAVE_//g;s/_CHARSETS//g;s/CW_CYCLE_CHECK/CWCC/g;s/SUPPORT//g;s/= /: /g;"
 	timer_stop
 	timer_calc
 
 #save list_smargo
-	cd "$svndir/Distribution"
+	cd "${repodir}/Distribution"
 	lsmn="$(ls list_smargo* 2> /dev/null)"
 
-	if [ "${s3cfg_vars[SAVE_LISTSMARGO]}" == "1" ] && [ -f "$svndir/Distribution/$lsmn" ]
+	if [ "${s3cfg_vars[SAVE_LISTSMARGO]}" == "1" ] && [ -f "${repodir}/Distribution/$lsmn" ]
 	then
 
 		if [ "$_toolchainname" == "native" ]
 		then
-			printf "SAVE\t$lsmn $txt_as oscam-svn$(REVISION)-$(hostname)-list_smargo"| tee -a "$ldir/$log_name"
-			mv -f "$lsmn" "$bdir/oscam-svn$(REVISION)-$(hostname)-list_smargo"
-			printf "oscam-svn$(REVISION)-$(hostname)-list_smargo" >"$targztmp"
+			printf "SAVE\t$lsmn $txt_as oscam-${REPO}$(REVISION)$($(USEGIT) && printf "@$(COMMIT)" || printf "")-$(hostname)-list_smargo"| tee -a "$ldir/$log_name"
+			mv -f "$lsmn" "$bdir/oscam-${REPO}$(REVISION)$($(USEGIT) && printf "@$(COMMIT)" || printf "")-$(hostname)-list_smargo"
+			printf "oscam-${REPO}$(REVISION)$($(USEGIT) && printf "@$(COMMIT)" || printf "")-$(hostname)-list_smargo" >"$targztmp"
 		else
-			printf -e "SAVE\t$lsmn $txt_as oscam-svn$(REVISION)-$_toolchainname-list_smargo"|tee -a "$ldir/$log_name"
-			mv -f "$lsmn" "$bdir/oscam-svn$(REVISION)-$_toolchainname-list_smargo"
-			printf "oscam-svn$(REVISION)-$_toolchainname-list_smargo" >"$targztmp\n"
+			printf "SAVE\t$lsmn $txt_as oscam-${REPO}$(REVISION)$($(USEGIT) && printf "@$(COMMIT)" || printf "")-$_toolchainname-list_smargo"|tee -a "$ldir/$log_name"
+			mv -f "$lsmn" "$bdir/oscam-${REPO}$(REVISION)$($(USEGIT) && printf "@$(COMMIT)" || printf "")-$_toolchainname-list_smargo"
+			printf "oscam-${REPO}$(REVISION)$($(USEGIT) && printf "@$(COMMIT)" || printf "")-$_toolchainname-list_smargo" >"$targztmp\n"
 		fi
 
 	fi
@@ -123,20 +187,8 @@ _gui_build(){
 	then
 		rm "$bdir/$oscam_name.debug"
 		printf "\n $txt_delete $oscam_name.debug\n"|tee -a "$ldir/$log_name"
-	fi;) | "$gui" "$st_" --colors --title " -[ Build ]- " "$pb_" "$_lines" "$_cols"
+	fi;) | "$gui" "$st_" --colors --title " -[ Build$(REPOIDENT) ]- " "$pb_" "$_lines" "$_cols"
 	sleep 2
-
-#COMPRESS
-	if [ ! "$stapi_allowed" == "1" ]
-	then
-
-		if [ "${s3cfg_vars[COMPRESS]}" == "1" ] || [ "${USE_vars[USE_COMPRESS]}" == "USE_COMPRESS=1" ]
-		then
-			(compress_cam_gui "$oscam_name") |tee -a "$ldir/$log_name"| "$gui" "$st_" --title " -[ COMPRESS ]- " "$pb_" 7 50
-			sleep 2
-		fi
-
-	fi
 
 #tar
 	if [ "${USE_vars[USE_TARGZ]}" == "USE_TARGZ=1" ]
@@ -146,6 +198,6 @@ _gui_build(){
 	fi
 
 #link log
-	ln -sf "$ldir/$log_name" "$workdir/lastbuild.log"
+	ln -frs "$ldir/$log_name" "$workdir/lastbuild.log"
 	[ -f "$targztmp" ] && rm -rf "$targztmp"
 }

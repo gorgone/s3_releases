@@ -1,0 +1,18 @@
+_toolchainname="csky";
+default_use="USE_GXAPI";
+extra_use="";
+extra_cc="";
+extra_ld="";
+_description="GX-API Box";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="csky-linux-";
+_sysroot="csky-linux/libc";
+_libsearchdir="/usr/lib";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1jc2t5LnRhci54ego=";
+_md5sum="5d7ffc30feb1aa76dcf1a0d6c4429e19  Toolchain-csky.tar.xz";
+_tc_info="\n
+!!! csky-linux Toolchain !!!\n
+\n
+GX-API Box (needs special oscam patches to work)\n";
+_tc_infolines="5";
