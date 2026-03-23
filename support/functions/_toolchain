@@ -213,7 +213,7 @@ _toolchain_check(){
 		[ ${#_realcompiler} -gt 4 ] && compilername="$_realcompiler"
 		version=$("./$compilername" -dumpversion)
 		[ "$_androidndkdir" == "1" ] && sr="$tcdir/$1/sysroot" || sr=$("./$compilername" -print-sysroot 2>/dev/null)
-		[ ! -d "$sr" ] && [ -d "$tcdir/$1/$_sysroot" ] && sr="$tcdir/$1/$_sysroot"
+		[ -n "$sr" ] && [ ! -d "$sr" ] && [ -d "$tcdir/$1/$_sysroot" ] && sr="$tcdir/$1/$_sysroot"
 		sysroot=$(realpath -sm "$sr" --relative-to="$tcdir/$1")
 		compilerpath=$(realpath -sm "./$compilername" --relative-to="$tcdir/$1")
 		printf "$fmtg" "GCC Version :" "$version"

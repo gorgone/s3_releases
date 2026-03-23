@@ -971,7 +971,7 @@ _get_toolchain_properties(){
 	[ "$tc_type" == "android-ndk" ] && hostname="${_compiler%?}" || hostname="$("$compilername" -dumpmachine 2>/dev/null)";
 	includedir=$(realpath -s $(echo | "$compilername" -Wp,-v -xc - -fsyntax-only 2>&1 | grep include$ | tail -n 1 | xargs) 2>/dev/null)
 	sysrootdir="$("$compilername" -print-sysroot 2>/dev/null)";[ -z "$sysrootdir" ] && sysrootdir="$tcdir/$tc/$_sysroot";
-	[ ! -d "$sysrootdir" ] && [ -d "$tcdir/$tc/$_sysroot" ] && sysrootdir="$tcdir/$tc/$_sysroot";
+	[ -n "$sysrootdir" ] && [ ! -d "$sysrootdir" ] && [ -d "$tcdir/$tc/$_sysroot" ] && sysrootdir="$tcdir/$tc/$_sysroot";
 	sysrootdir="$(realpath -sm "$sysrootdir")";
 
 	if [ "${#sysrootdir}" -gt "${#tcdir}" ];then

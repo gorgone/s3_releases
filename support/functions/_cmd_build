@@ -211,9 +211,9 @@ printf "$y_l\n |       set : ${cdtag}$w_l"
 		unset extra_use extra_cc extra_ld extra_c
 	fi
 
-	# auto-inject --sysroot if compiler's built-in sysroot is invalid
+	# auto-inject --sysroot if compiler's built-in sysroot is invalid (skip native/empty)
 	_gcc_sysroot="$(${CROSS}gcc -print-sysroot 2>/dev/null)"
-	if [ ! -d "$_gcc_sysroot" ]; then
+	if [ -n "$_gcc_sysroot" ] && [ ! -d "$_gcc_sysroot" ]; then
 		[[ "${extra_cc:-}" != *"--sysroot"* ]] && extra_cc="${extra_cc:-} --sysroot=$SYSROOT"
 		CROSS_SYSROOT="--sysroot=$SYSROOT"
 	fi
