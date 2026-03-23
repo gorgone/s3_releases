@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="87";
+S3TUP_CONFIG_VERSION="88";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -66,6 +66,28 @@ ANDK_SETUP_tasks=('pushd "$dldir" >/dev/null && [ ! "$(sha1sum "$(basename "$AND
 ANDK_SETUP_tasks+=('unzip -o -d "$ctdir" "$(basename "$ANDK_PKG_URL")" && popd >/dev/null;'); # setup command1
 ANDK_SETUP_tasks+=('mv --force "$(basename "$ANDK_PKG_URL" | cut -d "-" -f 1-3)" "@ANDKSOURCE@";'); # setup command2
 ANDK_SETUP_tasks+=('chmod -R 755 "@ANDKSOURCE@";'); # setup command3
+
+# Open Embedded SDK toolchain build settings
+OESDK_CONFIG_tasks=('clear; editor ".config"; echo -e "${y_l}${txt_s3tup_menu_edit_text}${re_}";');
+OESDK_BUILD_tasks=('cd "@OESDKSOURCE@";');
+OESDK_BUILD_tasks+=('if [ -z "$OESDK_OEM" ]; then OESDK_OEM=$(make list 2>/dev/null | awk -v mb="$OESDK_MACHINE" "\$2 == mb {print \$3}"); fi;');
+OESDK_BUILD_tasks+=('if [ -z "$OESDK_OEM" ]; then _oem=$(awk "/^else ifeq .\\$\\(MACHINEBUILD\\),${OESDK_MACHINE}\\)/{getline; print}" Makefile | sed "s/MACHINE=//;s/[[:space:]]//g"); [ -n "$_oem" ] && OESDK_OEM="$_oem"; fi;');
+OESDK_BUILD_tasks+=('[ -z "$OESDK_OEM" ] && OESDK_OEM="$OESDK_MACHINE";');
+OESDK_BUILD_tasks+=('echo "OE-SDK: MACHINE=$OESDK_MACHINE OEM=$OESDK_OEM DISTRO=$OESDK_DISTRO LOCATION=@OESDKSOURCE@" | tee -a "@LOGFILE@";');
+OESDK_BUILD_tasks+=('MACHINE="$OESDK_OEM" DISTRO="$OESDK_DISTRO" DISTRO_TYPE=release make init 2>&1 | tee -a "@LOGFILE@";');
+OESDK_BUILD_tasks+=('_builddir=$(grep -r "^TOPDIR" @OESDKSOURCE@/builds/*/release/$OESDK_OEM/conf/*.conf @OESDKSOURCE@/build/conf/*.conf 2>/dev/null | head -1 | sed "s/.*= *\"\\{0,1\\}//;s/\".*//");');
+OESDK_BUILD_tasks+=('[ -z "$_builddir" ] && _builddir=$(find "@OESDKSOURCE@" -maxdepth 5 -path "*/conf/local.conf" -exec grep -l "." {} \; 2>/dev/null | head -1 | xargs dirname | xargs dirname);');
+OESDK_BUILD_tasks+=('echo "OE-SDK: Build directory: $_builddir" | tee -a "@LOGFILE@";');
+OESDK_BUILD_tasks+=('source "@OESDKSOURCE@/openembedded-core/oe-init-build-env" "$_builddir";');
+OESDK_BUILD_tasks+=('[ -f "$_builddir/env.source" ] && source "$_builddir/env.source";');
+OESDK_BUILD_tasks+=('export MACHINE="$OESDK_OEM";');
+OESDK_BUILD_tasks+=('echo "TOOLCHAIN_TARGET_TASK:append = \" $OESDK_SDK_EXTRAS\"" > ./sdk-extras.conf;');
+OESDK_BUILD_tasks+=('bitbake meta-toolchain -R ./sdk-extras.conf 2>&1 | tee -a "@LOGFILE@" || exit 1;');
+OESDK_BUILD_tasks+=('./tmp/deploy/sdk/*.sh -d "@TOOLCHAIN@" -y 2>&1 | tee -a "@LOGFILE@" || exit 1;');
+OESDK_BUILD_tasks+=('OESDK_TARGET_PREFIX=$(grep "^export TARGET_PREFIX=" "@TOOLCHAIN@"/environment-setup-* | sed "s/.*=//;s/-$//");');
+OESDK_BUILD_tasks+=('ln -sf "sysroots/x86_64-oesdk-linux/usr/bin/$OESDK_TARGET_PREFIX" "@TOOLCHAIN@/bin";');
+OESDK_SETUP_tasks=('git clone --progress -b "$OESDK_REPO_BRANCH" "$OESDK_REPO_URL" "@OESDKSOURCE@";');
+OESDK_SETUP_tasks+=('cd "@OESDKSOURCE@" && make update 2>&1;');
 
 # Library build settings
 LIBS=(SSL_360 SSL_350 SSL_340 SSL_330 SSL_320 SSL_310 SSL_300 SSL_111 SSL_110 SSL_102 SSL_102B SSL_100 SSL_098 LIB_CURL LIB_USB LIB_USBB LIB_USB0 LIB_PCSC LIB_PCSCB LIB_CCID LIB_CCIDB LIB_DVBCSA LIB_DVBC64 LIB_DVBC32 LIB_ZLIB); # List of ordered libraries. Only libraries in this list are available

@@ -1,0 +1,9 @@
+#toolchain template: OpenPLi 10.0 ABcom PULSe 4K MINI
+#toolchain template version: 1
+OESDK_MACHINE="pulse4kmini"
+OESDK_OEM=""
+OESDK_DISTRO="openpli"
+OESDK_REPO_URL="https://github.com/OpenPLi/openpli-oe-core.git"
+OESDK_REPO_BRANCH="scarthgap"
+OESDK_REPO_LOCATION="oe-sdk_${OESDK_DISTRO}_${OESDK_REPO_BRANCH}"
+OESDK_SDK_EXTRAS="openssl-dev libusb1-dev libdvbcsa-dev pcsc-lite-dev curl-dev"

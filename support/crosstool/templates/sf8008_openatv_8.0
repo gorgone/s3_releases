@@ -1,0 +1,9 @@
+#toolchain template: OpenATV 8.0.0 Octagon SF8008
+#toolchain template version: 1
+OESDK_MACHINE="sf8008"
+OESDK_OEM=""
+OESDK_DISTRO="openatv"
+OESDK_REPO_URL="https://github.com/oe-alliance/build-enviroment.git"
+OESDK_REPO_BRANCH="6.0"
+OESDK_REPO_LOCATION="oe-sdk_${OESDK_DISTRO}_${OESDK_REPO_BRANCH}"
+OESDK_SDK_EXTRAS="openssl-dev libusb1-dev libdvbcsa-dev pcsc-lite-dev curl-dev"
