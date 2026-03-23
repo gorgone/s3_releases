@@ -120,6 +120,13 @@ _gui_build(){
 		extra="-extra"
 	fi
 
+	# auto-inject --sysroot if compiler's built-in sysroot is invalid
+	_gcc_sysroot="$(${CROSS}gcc -print-sysroot 2>/dev/null)"
+	if [ ! -d "$_gcc_sysroot" ]; then
+		[[ "${extra_cc:-}" != *"--sysroot"* ]] && extra_cc="${extra_cc:-} --sysroot=$SYSROOT"
+		CROSS_SYSROOT="--sysroot=$SYSROOT"
+	fi
+
 #dynamic, static, mixed build
 	set_buildtype &>/dev/null
 
@@ -149,7 +156,7 @@ _gui_build(){
 	EXTRA_USE=$extra_use
 	timer_start
 	$_make -j"$cpus" \
-		"CONF_DIR=$_oscamconfdir_default" "OSCAM_BIN=$bdir/$oscam_name" "CC_OPTS=$co $cc_opts $extra_cc" "EXTRA_CC_WARN=$cc_warn" "EXTRA_LDFLAGS=$extra_ld" "EXTRA_CFLAGS=$extra_c" $EXTRA_USE $COMP_LEVEL "CROSS=$CROSS" $stapivar $USESTRING_ $LIBCRYPTO_LIB $SSL_LIB $LIBUSB_LIB $PCSC_LIB $LIBDVBCSA_LIB 2>&1 \
+		"CONF_DIR=$_oscamconfdir_default" "OSCAM_BIN=$bdir/$oscam_name" "CC_OPTS=$co $cc_opts $extra_cc" "EXTRA_CC_WARN=$cc_warn" "EXTRA_LDFLAGS=$extra_ld" "EXTRA_CFLAGS=$extra_c" $EXTRA_USE $COMP_LEVEL "CROSS=$CROSS" ${CROSS_SYSROOT:+"CC=${CROSS}gcc $CROSS_SYSROOT"} $stapivar $USESTRING_ $LIBCRYPTO_LIB $SSL_LIB $LIBUSB_LIB $PCSC_LIB $LIBDVBCSA_LIB 2>&1 \
 		|tee "$ldir/$log_name" \
 		|grep --line-buffered -v 'BFD\|^/' \
 		|grep --line-buffered '^CC\|^HOSTCC\|^GEN\|^WIKI\|^CONF\|^RM\|^UPX\|^SIGN\|UseFlags\|submodule\|  CONF_DIR =\|Binary\|LINK\|STRIP\|BUILD\|Addons\|Protocols\|Readers\|CardRdrs\|^/' \

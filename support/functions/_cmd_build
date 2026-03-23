@@ -211,6 +211,13 @@ printf "$y_l\n |       set : ${cdtag}$w_l"
 		unset extra_use extra_cc extra_ld extra_c
 	fi
 
+	# auto-inject --sysroot if compiler's built-in sysroot is invalid
+	_gcc_sysroot="$(${CROSS}gcc -print-sysroot 2>/dev/null)"
+	if [ ! -d "$_gcc_sysroot" ]; then
+		[[ "${extra_cc:-}" != *"--sysroot"* ]] && extra_cc="${extra_cc:-} --sysroot=$SYSROOT"
+		CROSS_SYSROOT="--sysroot=$SYSROOT"
+	fi
+
 #dynamic, static, mixed build
 	set_buildtype
 
@@ -257,7 +264,7 @@ fi
 	"EXTRA_CFLAGS=$extra_c" \
 	$EXTRA_USE \
 	$COMP_LEVEL \
-	"CROSS=$CROSS" $STAPI_LIB $USESTRING $LIBCRYPTO_LIB $SSL_LIB $LIBUSB_LIB $PCSC_LIB $LIBDVBCSA_LIB)
+	"CROSS=$CROSS" ${CROSS_SYSROOT:+"CC=${CROSS}gcc $CROSS_SYSROOT"} $STAPI_LIB $USESTRING $LIBCRYPTO_LIB $SSL_LIB $LIBUSB_LIB $PCSC_LIB $LIBDVBCSA_LIB)
 
 	"${cmd[@]}" 2>&1 \
 	|tee -a "$ldir/$log_name" \

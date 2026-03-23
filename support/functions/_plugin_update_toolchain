@@ -181,6 +181,9 @@ _integrate_libs(){
 		_nl && sleep 2 && return;
 	fi;
 
+	#load toolchain config for sysroot fallback and compiler capability checks
+	[ -f "$tccfgdir/$tc" ] && source "$tccfgdir/$tc";
+
 	#get toolchain properties
 	props=$(_get_toolchain_properties "$tc");
 	compilername=$(echo "$props" | awk -F';' '{print $1}' | xargs);
@@ -966,8 +969,9 @@ _get_toolchain_properties(){
 	compilername="${_compiler}gcc";compilername=$(realpath -s $compilername);
 	ranlibname="${_compiler}ranlib";ranlibname=$(realpath -s $ranlibname);
 	[ "$tc_type" == "android-ndk" ] && hostname="${_compiler%?}" || hostname="$("$compilername" -dumpmachine 2>/dev/null)";
-	includedir=$(realpath -s $(echo | "$compilername" -Wp,-v -xc - -fsyntax-only 2>&1 | grep include$ | tail -n 1 | xargs))
+	includedir=$(realpath -s $(echo | "$compilername" -Wp,-v -xc - -fsyntax-only 2>&1 | grep include$ | tail -n 1 | xargs) 2>/dev/null)
 	sysrootdir="$("$compilername" -print-sysroot 2>/dev/null)";[ -z "$sysrootdir" ] && sysrootdir="$tcdir/$tc/$_sysroot";
+	[ ! -d "$sysrootdir" ] && [ -d "$tcdir/$tc/$_sysroot" ] && sysrootdir="$tcdir/$tc/$_sysroot";
 	sysrootdir="$(realpath -sm "$sysrootdir")";
 
 	if [ "${#sysrootdir}" -gt "${#tcdir}" ];then
@@ -1045,8 +1049,11 @@ _get_toolchain_libs(){
 					libcheckcc="$key"_checkcc; libcheckcc="$(_replace_tokens "${!libcheckcc}")";
 					libversion="$key"_version; libversion="$(_replace_tokens "${!libversion}")";
 					libversioncompare=$(_compare_version $libversion $ver);
+					_matched=0;
+					[[ "$pkg $ver" =~ ^${libcheck}.* ]] && _matched=1; #regex match, don't quote the right side
+					[[ "$_matched" == "0" ]] && [[ "${libcheck}" =~ ^"$pkg $ver".* ]] && _matched=1 && libversioncompare="="; #reverse match: installed base version is prefix of expected, treat as equal
 
-					if [[ "$pkg $ver" =~ ^${libcheck}.* ]];then #regex match, don't quote the right side
+					if [[ "$_matched" == "1" ]];then
 						if [ -n "$libchecklib" -a -f "$pkgconfigdir/../$libchecklib" -o -z "$libchecklib" ];then #check existance of special libs
 							if [ -n "$libcheckcc" ] && _check_compiler_capability "$libcheckcc" || [ -z "$libcheckcc" ];then #check compiler capabilities
 								libs+="$pkg\|$ver\|$key\|$libversion\|$libversioncompare\|$name;";
