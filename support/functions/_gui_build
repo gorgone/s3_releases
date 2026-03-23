@@ -197,6 +197,13 @@ _gui_build(){
 	fi;) | "$gui" "$st_" --colors --title " -[ Build$(REPOIDENT) ]- " "$pb_" "$_lines" "$_cols"
 	sleep 2
 
+#post-build QEMU smoke test
+	error_on_build=$(grep -Ec1 'error( |:)' "$ldir/$log_name")
+	if [ "$error_on_build" -eq "0" ]; then
+		(_postbuild_qemu_test "$bdir/$oscam_name" "$ldir/$log_name" "gui") | tee -a "$ldir/$log_name" | "$gui" "$st_" --colors --title " -[ QEMU Smoke Test ]- " "$pb_" "$_lines" "$_cols"
+		sleep 2
+	fi
+
 #tar
 	if [ "${USE_vars[USE_TARGZ]}" == "USE_TARGZ=1" ]
 	then

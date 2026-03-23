@@ -99,6 +99,10 @@ s3cfg_vars[SAVE_LISTSMARGO]=1
 s3cfg_vars[ADD_PROFILE_NAME]=0
 s3cfg_vars[NO_REPO_AUTOUPDATE]=0
 s3cfg_vars[delete_oscamdebugbinary]=1
+s3cfg_vars[POSTBUILD_QEMU_TEST]=0
+s3cfg_vars[POSTBUILD_QEMU_TIMEOUT]=5
+s3cfg_vars[POSTBUILD_QEMU_PARAM]=""
+s3cfg_vars[POSTBUILD_QEMU_EXPECT]="Server running"
 
 #filled arrays
 config_cases=( all addons protocols readers card_readers );

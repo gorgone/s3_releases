@@ -331,6 +331,18 @@ fi
 #build error message
 	error_on_build=$(grep -Ec1 'error( |:)' "$ldir/$log_name")
 	[ "$error_on_build" -gt "0" ] && printf "$r_l\terrors on build found\n$w_l"
+
+#post-build QEMU smoke test
+	if [ "$error_on_build" -eq "0" ]; then
+		_postbuild_qemu_test "$bdir/$oscam_name" "$ldir/$log_name" "cli"
+		if [ "${s3cfg_vars[POSTBUILD_QEMU_TEST]}" == "1" ]; then
+			_qemu_arch="$(${CROSS}gcc -dumpmachine 2>/dev/null | awk -F'-' '{print $1}')"
+			build_cmds+=("")
+			build_cmds+=("#post-build QEMU smoke test")
+			build_cmds+=("timeout ${s3cfg_vars[POSTBUILD_QEMU_TIMEOUT]:-5} qemu-${_qemu_arch} -L \"$SYSROOT\" \"$bdir/$oscam_name\" ${s3cfg_vars[POSTBUILD_QEMU_PARAM]}")
+		fi
+	fi
+
 	printf "$re_$w_l"
 
 
