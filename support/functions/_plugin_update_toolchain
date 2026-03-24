@@ -400,9 +400,6 @@ _create_tc(){
 				tpl=$(echo "$opts" | awk '{printf $2}';);
 				_tpl_editor "$(_get_template_type "$cttpldir/$tpl" | awk -F';' '{print $1}' | xargs)" "$tpl";;
 			3) #Start - Build cross toolchain
-				#Setup crosstool-NG, Freetz-NG, Android-NDK automatically if not installed
-				_check_crosstool_setup;
-
 				#Build cross toolchains
 				icount=$(echo $opts | wc -w);i=0;
 				for tpl in $opts;do
@@ -442,15 +439,12 @@ _create_tc(){
 						template_type="$(_get_template_type "$cttpldir/$tpl")";
 						tpl_type="$(echo "$template_type" | awk -F';' '{print $1}' | xargs)";
 						tpl_type_name="$(echo "$template_type" | awk -F';' '{print $2}' | xargs)";
-						#OESDK: resolve oesdksrcdir from template before ctsrcdir lookup
+						#setup builder if not installed (type-specific)
 						if [ "$tpl_type" == "OESDK" ];then
 							source "$cttpldir/$tpl";
 							[[ "$OESDK_REPO_LOCATION" == /* ]] && oesdksrcdir="$OESDK_REPO_LOCATION" || oesdksrcdir="$ctdir/$OESDK_REPO_LOCATION";
-							#clone repo if not present
-							if [ ! -f "$oesdksrcdir/Makefile" ];then
-								_check_crosstool_setup "OESDK";
-							fi;
 						fi;
+						_check_crosstool_setup "$tpl_type";
 						ctsrcdir="${tpl_type,,}srcdir";ctsrcdir="${!ctsrcdir}";
 
 						#copy template
@@ -740,7 +734,7 @@ _build_library(){
 _tpl_editor(){
 	tc="$2";tpl="$tc";unset TASKS;unset configtasks;local i=0;
 
-	_check_crosstool_setup;
+	_check_crosstool_setup "$1";
 
 	props=$(_get_template_properties "$cttpldir/$tpl");
 	desc=$(echo "$props" | awk -F'(' '{print $1}' | xargs);
