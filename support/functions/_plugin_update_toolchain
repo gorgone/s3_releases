@@ -569,6 +569,7 @@ _create_tc(){
 											sysroot_dir=$(basename $(grep '^export SDKTARGETSYSROOT=' "$tcdir/$tpl"/environment-setup-* | sed 's/.*sysroots\///;s/"//g'));
 											sysroot="sysroots/$sysroot_dir";
 											tune_ccargs=$(grep '^export OECORE_TUNE_CCARGS=' "$tcdir/$tpl"/environment-setup-* | sed 's/.*="//;s/"$//');
+											[ -z "$tune_ccargs" ] && tune_ccargs=$(grep '^export CC=' "$tcdir/$tpl"/environment-setup-* | sed 's/.*gcc //;s/ --sysroot.*//');
 											cflags="$tune_ccargs";
 
 											#detect dynamic linker path from sysroot
