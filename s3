@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SIMPLEVERSION="2024.07"
+SIMPLEVERSION="2026.03"
 VERSIONCOUNTER="$(git rev-list --count HEAD 2>/dev/null || printf "$(echo "$SIMPLEVERSION" | sed -e 's/\(.\)/\1\+0/g' | bc)_non-git")"
 DEVELOPER="Gorgone, WXbet"
 OIFS=$IFS
