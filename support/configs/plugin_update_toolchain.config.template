@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="90";
+S3TUP_CONFIG_VERSION="91";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -508,7 +508,7 @@ LIB_PCSC_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_PCSC_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_PCSC_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 LIB_PCSC_tasks+=('export CC=@CC@;');
-LIB_PCSC_tasks+=('export PKG_CONFIG_PATH="$(find @PREFIX@ -name "pkgconfig" -type d)";');
+LIB_PCSC_tasks+=('export PKG_CONFIG_PATH="$(find @PREFIX@ -name "pkgconfig" -type d | tr "\\n" ":")";');
 LIB_PCSC_tasks+=('LIBUSB_LIBS="$(PKG_CONFIG_LIBDIR=@PREFIX@/lib/pkgconfig $PKG_CONFIG_BIN --libs libusb-1.0)";');
 LIB_PCSC_tasks+=('LIBUSB_CFLAGS="$(PKG_CONFIG_LIBDIR=@PREFIX@/lib/pkgconfig $PKG_CONFIG_BIN --cflags libusb-1.0)";');
 LIB_PCSC_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
@@ -539,7 +539,7 @@ LIB_PCSCB_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_PCSCB_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_PCSCB_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 LIB_PCSCB_tasks+=('export CC=@CC@;');
-LIB_PCSCB_tasks+=('export PKG_CONFIG_PATH="$(find @PREFIX@ -name "pkgconfig" -type d)";');
+LIB_PCSCB_tasks+=('export PKG_CONFIG_PATH="$(find @PREFIX@ -name "pkgconfig" -type d | tr "\\n" ":")";');
 LIB_PCSCB_tasks+=('LIBUSB_LIBS="$(PKG_CONFIG_LIBDIR=@PREFIX@/lib/pkgconfig $PKG_CONFIG_BIN --libs libusb-1.0)";');
 LIB_PCSCB_tasks+=('LIBUSB_CFLAGS="$(PKG_CONFIG_LIBDIR=@PREFIX@/lib/pkgconfig $PKG_CONFIG_BIN --cflags libusb-1.0)";');
 LIB_PCSCB_tasks+=('[ "@TYPE@" == "android-ndk" ] && export ANDROID_NDK="@TOOLCHAIN@";');
@@ -569,7 +569,7 @@ LIB_CCID_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_CCID_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_CCID_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 LIB_CCID_tasks+=('export CC=@CC@;');
-LIB_CCID_tasks+=('export PKG_CONFIG_PATH="$(find @PREFIX@ -name "pkgconfig" -type d)";');
+LIB_CCID_tasks+=('export PKG_CONFIG_PATH="$(find @PREFIX@ -name "pkgconfig" -type d | tr "\\n" ":")";');
 LIB_CCID_tasks+=('LIBUSB_LIBS="$(PKG_CONFIG_LIBDIR=@PREFIX@/lib/pkgconfig $PKG_CONFIG_BIN --libs libusb-1.0)";');
 LIB_CCID_tasks+=('LIBUSB_CFLAGS="$(PKG_CONFIG_LIBDIR=@PREFIX@/lib/pkgconfig $PKG_CONFIG_BIN --cflags libusb-1.0)";');
 LIB_CCID_tasks+=('PCSC_LIBS="$(PKG_CONFIG_LIBDIR=@PREFIX@/lib/pkgconfig $PKG_CONFIG_BIN --libs libpcsclite)";');
@@ -599,7 +599,7 @@ LIB_CCIDB_tasks=('export TOOLCHAIN=@TOOLCHAIN@;');
 LIB_CCIDB_tasks+=('export PATH="$TOOLCHAIN/bin:$PATH";');
 LIB_CCIDB_tasks+=('[ -n "@CFLAGS@" ] && export CFLAGS="@CFLAGS@";');
 LIB_CCIDB_tasks+=('export CC=@CC@;');
-LIB_CCIDB_tasks+=('export PKG_CONFIG_PATH="$(find @PREFIX@ -name "pkgconfig" -type d)";');
+LIB_CCIDB_tasks+=('export PKG_CONFIG_PATH="$(find @PREFIX@ -name "pkgconfig" -type d | tr "\\n" ":")";');
 LIB_CCIDB_tasks+=('LIBUSB_LIBS="$(PKG_CONFIG_LIBDIR=@PREFIX@/lib/pkgconfig $PKG_CONFIG_BIN --libs libusb-1.0)";');
 LIB_CCIDB_tasks+=('LIBUSB_CFLAGS="$(PKG_CONFIG_LIBDIR=@PREFIX@/lib/pkgconfig $PKG_CONFIG_BIN --cflags libusb-1.0)";');
 LIB_CCIDB_tasks+=('PCSC_LIBS="$(PKG_CONFIG_LIBDIR=@PREFIX@/lib/pkgconfig $PKG_CONFIG_BIN --libs libpcsclite)";');

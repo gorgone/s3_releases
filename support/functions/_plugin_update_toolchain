@@ -996,7 +996,7 @@ _replace_tokens(){
 						s#@CFLAGS@#$cflags#g; \
 						s#@LDFLAGS@#$ldflags#g; \
 						s#@CPUS@#$cpus#g; \
-						s#@CC@#$compilername#g; \
+						s#@CC@#\"$compilername$([ "$type" == "oe-sdk" ] && echo " $cflags")\"#g; \
 						s#@RANLIB@#$ranlibname#g; \
 						s#@PREFIX@#$prefixdir#g; \
 						s#@HOST@#$hostname#g; \
