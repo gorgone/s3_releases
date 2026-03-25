@@ -1410,7 +1410,7 @@ _check_lib(){
 };
 _check_pkg(){
 	pkgs=( gperf bison flex makeinfo help2man file cmp python3-config libtoolize gawk \
-		   wget bzip2 unzip rsync composite inkscape pkg-config python3 gettext ruby patchelf );
+		   wget bzip2 unzip rsync composite inkscape pkg-config python3 gettext ruby );
 	headers=( ncurses libacl.h sys/capability.h readline.h glib-2.0/glib.h );
 	libs=( libstdc++.so.6 libstdc++.a libc\\.a );
 	echo -e "${y_l}SYSCHECK -> ${txt_s3tup_msg_syscheck1}${re_}";

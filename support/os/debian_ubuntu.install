@@ -44,6 +44,9 @@ do
 		cmp)
 			inst="diffutils";
 			;;
+		qemu-*)
+			inst="qemu-user-binfmt";
+			;;
 		esac;
 		printf -v pad %40s; e=$e$pad; e=${e:0:15};
 		echo -e "$w_l  select $g_l$e$y_l from: $inst$build";

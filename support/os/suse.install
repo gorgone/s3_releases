@@ -75,6 +75,9 @@ do
 		cmp)
 			inst="diffutils";
 			;;
+		qemu-*)
+			inst="qemu-linux-user";
+			;;
 		esac;
 		echo -e "$w_l  select $g_l$e$y_l\tfrom: $inst$build";
 		packages+=" $inst";

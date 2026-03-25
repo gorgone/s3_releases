@@ -572,7 +572,8 @@ _oesdk_relocate(){
 	[ -z "$_gcc" ] && return
 	local _interp=$(readelf -l "$_gcc" 2>/dev/null | grep 'interpreter' | sed 's/.*: //;s/]//')
 	[ -n "$_interp" ] && [ -f "$_interp" ] && return
-	# relocate needed
+	# relocate needed - ensure patchelf is installed
+	command -v patchelf >/dev/null 2>&1 || syscheck "" "" "patchelf"
 	local _sdk_loader=$(find "$_nss/lib" -name "ld-linux*" -not -name "*.p" 2>/dev/null | head -1)
 	if [ -n "$_sdk_loader" ] && command -v patchelf >/dev/null 2>&1; then
 		printf "$w_l  relocating  :$y_l patching interpreter to $_sdk_loader\n"
@@ -589,9 +590,12 @@ _postbuild_qemu_test(){
 	local _qemu_bin="qemu-${_qemu_arch}"
 
 	if ! command -v "$_qemu_bin" &>/dev/null; then
-		[ "$mode" == "cli" ] && printf "$y_l"" QEMU ------->  SKIP ($r_l$_qemu_bin not found$w_l)\n"
-		[ "$mode" == "gui" ] && echo "QEMU: SKIP ($_qemu_bin not found)"
-		return
+		syscheck "" "" "$_qemu_bin"
+		if ! command -v "$_qemu_bin" &>/dev/null; then
+			[ "$mode" == "cli" ] && printf "$y_l"" QEMU ------->  SKIP ($r_l$_qemu_bin not found$w_l)\n"
+			[ "$mode" == "gui" ] && echo "QEMU: SKIP ($_qemu_bin not found)"
+			return
+		fi
 	fi
 
 	local _qemu_sysroot="$(realpath -sm "$SYSROOT" 2>/dev/null)"
