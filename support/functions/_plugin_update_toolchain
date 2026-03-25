@@ -1387,6 +1387,7 @@ _check_toolchain(){
 		echo -e "\n\n${r_l}  ${txt_error}:${y_l} ${1}${w_l} ${txt_tc} ${txt_n_installed}${rs_}";
 		return 1;
 	else
+		_oesdk_relocate "$tcdir/$1";
 		return 0;
 	fi;
 };

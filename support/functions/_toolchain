@@ -196,6 +196,8 @@ _toolchain_check(){
 	fmtg="  ${w_l}%-16s ${y_l}%-20s ${g_l}%-8s $p_l%-20s %-17s ${g_l}%s\n";
 	fmtb="  ${w_l}%-16s ${y_l}%-20s ${r_l}%s\n";
 
+	_oesdk_relocate "$tcdir/$1"
+
 	if [ -d "$tcdir/$1/bin" ]
 	then
 		cd "$tcdir/$1/bin"
@@ -559,6 +561,23 @@ _get_compiler_arch(){
 			ret="$("./$compilername" -dumpmachine | awk -F'-' '{print $1}' | xargs)";;
 	esac;
 	printf "$ret"
+}
+
+_oesdk_relocate(){
+	local _tcpath="$1"
+	local _nss="$_tcpath/sysroots/x86_64-oesdk-linux"
+	[ ! -d "$_nss" ] && return
+	# check if interpreter path in gcc binary is valid, if not relocate
+	local _gcc=$(find "$_nss/usr/bin" -name "*-gcc" -not -name "*++*" 2>/dev/null | head -1)
+	[ -z "$_gcc" ] && return
+	local _interp=$(readelf -l "$_gcc" 2>/dev/null | grep 'interpreter' | sed 's/.*: //;s/]//')
+	[ -n "$_interp" ] && [ -f "$_interp" ] && return
+	# relocate needed
+	local _sdk_loader=$(find "$_nss/lib" -name "ld-linux*" -not -name "*.p" 2>/dev/null | head -1)
+	if [ -n "$_sdk_loader" ] && command -v patchelf >/dev/null 2>&1; then
+		printf "$w_l  relocating  :$y_l patching interpreter to $_sdk_loader\n"
+		find "$_nss" -type f -executable -exec patchelf --set-interpreter "$_sdk_loader" {} 2>/dev/null \;
+	fi
 }
 
 _postbuild_qemu_test(){
