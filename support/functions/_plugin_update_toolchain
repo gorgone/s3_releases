@@ -564,12 +564,13 @@ _create_tc(){
 											#compress log file
 											cp -f "$logfile" "$tcdir/$tpl/android-ndk.log";
 											bzip2 -zf9 "$tcdir/$tpl/android-ndk.log";;
-									"OESDK") #get target and sysroot from SDK environment-setup script
-											target=$(grep '^export TARGET_PREFIX=' "$tcdir/$tpl"/environment-setup-* | sed 's/.*=//;s/-$//');
-											sysroot_dir=$(basename $(grep '^export SDKTARGETSYSROOT=' "$tcdir/$tpl"/environment-setup-* | sed 's/.*sysroots\///;s/"//g'));
+									"OESDK") #get target and sysroot from SDK environment-setup script (filter out multilib/lib32)
+											_env_script=$(ls "$tcdir/$tpl"/environment-setup-* | grep -v 'lib32\|multilib' | head -1);
+											target=$(grep '^export TARGET_PREFIX=' "$_env_script" | sed 's/.*=//;s/-$//');
+											sysroot_dir=$(basename $(grep '^export SDKTARGETSYSROOT=' "$_env_script" | sed 's/.*sysroots\///;s/"//g'));
 											sysroot="sysroots/$sysroot_dir";
-											tune_ccargs=$(grep '^export OECORE_TUNE_CCARGS=' "$tcdir/$tpl"/environment-setup-* | sed 's/.*="//;s/"$//' | xargs);
-											[ -z "$tune_ccargs" ] && tune_ccargs=$(grep '^export CC=' "$tcdir/$tpl"/environment-setup-* | sed 's/.*gcc //;s/ --sysroot.*//' | xargs);
+											tune_ccargs=$(grep '^export OECORE_TUNE_CCARGS=' "$_env_script" | sed 's/.*="//;s/"$//' | xargs);
+											[ -z "$tune_ccargs" ] && tune_ccargs=$(grep '^export CC=' "$_env_script" | sed 's/.*gcc //;s/ --sysroot.*//' | xargs);
 											cflags="$tune_ccargs";
 
 											#detect dynamic linker path from sysroot
@@ -1311,7 +1312,7 @@ _get_template_properties(){
 					kernel="linux";
 					local _tplname="$(basename "$1")";
 					if [ -d "$tcdir/$_tplname" ] && ls "$tcdir/$_tplname"/environment-setup-* &>/dev/null;then
-						env_script=$(ls "$tcdir/$_tplname"/environment-setup-* 2>/dev/null | head -1);
+						env_script=$(ls "$tcdir/$_tplname"/environment-setup-* 2>/dev/null | grep -v 'lib32\|multilib' | head -1);
 						sysroot_dir=$(basename $(grep '^export SDKTARGETSYSROOT=' "$env_script" | sed 's/.*sysroots\///;s/"//g'));
 						local _sr="$tcdir/$_tplname/sysroots/$sysroot_dir";
 						local _tp=$(grep '^export TARGET_PREFIX=' "$env_script" | sed 's/.*=//;s/-$//');
@@ -1319,7 +1320,8 @@ _get_template_properties(){
 						ccv=$("$tcdir/$_tplname/bin/${_tp}-gcc" --version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1);
 						libcv=$(strings "$_sr/lib/libc.so.6" 2>/dev/null | grep -oE 'GLIBC_[0-9]+\.[0-9]+' | sort -V | tail -1 | sed 's/GLIBC_//');
 						kernelv=$(_linux_version "$_sr/usr/include/linux/" | awk -F';' '{print $2}');
-						cpu="";aarch="";bitness="32";endianness="LE";
+						cpu="";aarch="";endianness="LE";
+						[[ "$arch" == "aarch64" || "$arch" == "x86_64" || "$arch" == "mips64" ]] && bitness="64" || bitness="32";
 					else
 						setup=0;
 						desc="$desc ($(printf '%q' "${txt_s3tup_msg_gtp_info}"))";
@@ -1585,6 +1587,6 @@ _extract_strip="$([ -z "${15}" ] && echo "0" || echo "${15}")";
 _toolchainfilename="$tfn";
 _md5sum="$(cd "$dldir" && md5sum $(basename "$8"))";
 _tc_info="$info";
-_tc_infolines="$(echo "$_tc_info" | wc -l)";
+_tc_infolines="$(echo -e "$_tc_info" | wc -l)";
 EOF
 };

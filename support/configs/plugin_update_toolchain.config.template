@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="91";
+S3TUP_CONFIG_VERSION="92";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -87,7 +87,7 @@ OESDK_BUILD_tasks+=('export MACHINE="$OESDK_OEM";');
 OESDK_BUILD_tasks+=('_bb_major=$(bitbake --version 2>/dev/null | grep -oE "[0-9]+" | head -1); [ "$_bb_major" -ge 2 ] && _sep=":" || _sep="_"; echo "TOOLCHAIN_TARGET_TASK${_sep}append = \" $OESDK_SDK_EXTRAS\"" > ./sdk-extras.conf;');
 OESDK_BUILD_tasks+=('bitbake meta-toolchain -R ./sdk-extras.conf 2>&1 | tee -a "@LOGFILE@" || exit 1;');
 OESDK_BUILD_tasks+=('_sdk_sh=$(find . -path "*/deploy/sdk/*.sh" -name "*.sh" 2>/dev/null | head -1); echo "OE-SDK: SDK installer: $_sdk_sh"; "$_sdk_sh" -d "@TOOLCHAIN@" -y 2>&1 | tee -a "@LOGFILE@" || exit 1;');
-OESDK_BUILD_tasks+=('OESDK_TARGET_PREFIX=$(grep "^export TARGET_PREFIX=" "@TOOLCHAIN@"/environment-setup-* | sed "s/.*=//;s/-$//");');
+OESDK_BUILD_tasks+=('OESDK_TARGET_PREFIX=$(grep "^export TARGET_PREFIX=" "@TOOLCHAIN@"/environment-setup-* | grep -v "lib32\|multilib" | head -1 | sed "s/.*=//;s/-$//");');
 OESDK_BUILD_tasks+=('ln -sf "sysroots/x86_64-oesdk-linux/usr/bin/$OESDK_TARGET_PREFIX" "@TOOLCHAIN@/bin";');
 OESDK_BUILD_tasks+=('echo "OE-SDK: Stripping SDK to reduce size..." | tee -a "@LOGFILE@";');
 OESDK_BUILD_tasks+=('_hsys="@TOOLCHAIN@/sysroots/x86_64-oesdk-linux";');
