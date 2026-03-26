@@ -632,7 +632,7 @@ _postbuild_qemu_test(){
 		# stream new output lines
 		local _qemu_newlines=$(wc -l < "$_qemu_output" 2>/dev/null || echo 0)
 		if [ "$_qemu_newlines" -gt "$_qemu_lastline" ]; then
-			tail -n +$((_qemu_lastline + 1)) "$_qemu_output" | head -n $((_qemu_newlines - _qemu_lastline)) | while IFS= read -r _line; do
+			tail -n +$((_qemu_lastline + 1)) "$_qemu_output" | head -n $((_qemu_newlines - _qemu_lastline)) | grep -v "^qemu: Unsupported syscall" | while IFS= read -r _line; do
 				[ "$mode" == "cli" ] && printf "          %s\n" "$_line"
 				[ "$mode" == "gui" ] && echo "$_line"
 			done
@@ -654,7 +654,7 @@ _postbuild_qemu_test(){
 	# flush remaining output
 	local _qemu_finallines=$(wc -l < "$_qemu_output" 2>/dev/null || echo 0)
 	if [ "$_qemu_finallines" -gt "$_qemu_lastline" ]; then
-		tail -n +$((_qemu_lastline + 1)) "$_qemu_output" | while IFS= read -r _line; do
+		tail -n +$((_qemu_lastline + 1)) "$_qemu_output" | grep -v "^qemu: Unsupported syscall" | while IFS= read -r _line; do
 			[ "$mode" == "cli" ] && printf "          %s\n" "$_line"
 			[ "$mode" == "gui" ] && echo "$_line"
 		done
