@@ -206,6 +206,7 @@ _pre_build(){
 	_oscamconfdir_default=""
 	_oscamconfdir_custom=""
 	_extract_strip="0"
+	_oesdk_relocate "$tcdir/$1"
 	source "$tccfgdir/$1"
 	clear
 	_nl

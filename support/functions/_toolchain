@@ -567,18 +567,32 @@ _oesdk_relocate(){
 	local _tcpath="$1"
 	local _nss="$_tcpath/sysroots/x86_64-oesdk-linux"
 	[ ! -d "$_nss" ] && return
-	# check if interpreter path in gcc binary is valid, if not relocate
-	local _gcc=$(find "$_nss/usr/bin" -name "*-gcc" -not -name "*++*" 2>/dev/null | head -1)
-	[ -z "$_gcc" ] && return
-	local _interp=$(readelf -l "$_gcc" 2>/dev/null | grep 'interpreter' | sed 's/.*: //;s/]//')
-	[ -n "$_interp" ] && [ -f "$_interp" ] && return
-	# relocate needed - ensure patchelf is installed
-	command -v patchelf >/dev/null 2>&1 || syscheck "" "" "patchelf"
-	local _sdk_loader=$(find "$_nss/lib" -name "ld-linux*" -not -name "*.p" 2>/dev/null | head -1)
-	if [ -n "$_sdk_loader" ] && command -v patchelf >/dev/null 2>&1; then
-		printf "$w_l  relocating  :$y_l patching interpreter to $_sdk_loader\n"
-		find "$_nss" -type f -executable -exec patchelf --set-interpreter "$_sdk_loader" {} 2>/dev/null \;
-	fi
+	# 1. read interpreter (loader) path from gcc binary
+	local _gcc _interp
+	for _gcc in $(find "$_nss/usr/bin" -name "*-gcc" -not -name "*++*" 2>/dev/null); do
+		_interp=$(readelf -l "$_gcc" 2>/dev/null | grep 'interpreter' | sed 's/.*: //;s/]//')
+		[ -n "$_interp" ] && break
+	done
+	[ -z "$_interp" ] && return
+	# 2. check if loader exists at that path — if yes, no relocate needed
+	[ -f "$_interp" ] && return
+	# 3. derive old prefix from interpreter path and update relocate_sdk.py
+	local _rpy="$_tcpath/relocate_sdk.py"
+	[ ! -f "$_rpy" ] && return
+	local _old_prefix=$(echo "$_interp" | sed 's|/sysroots/.*||')
+	local _sdk_loader="$_nss/lib/$(basename "$_interp")"
+	[ ! -f "$_sdk_loader" ] && return
+	sed -i "s|old_prefix = .*|old_prefix = re.compile(b(\"${_old_prefix}\"))|" "$_rpy"
+	# 4. relocate all executables
+	local _exf=$(find "$_nss" -type f \( -perm -0100 -o -perm -0010 -o -perm -0001 \) -printf "'%h/%f' " 2>/dev/null)
+	[ -z "$_exf" ] && return
+	printf "$w_l  relocating  :$y_l relocating SDK to $_tcpath\n"
+	python3 "$_rpy" "$_tcpath" "$_sdk_loader" $(eval echo $_exf) 2>/dev/null
+	sleep 2
+	# 5. update toolchain.cfg if name changed
+	local _old_name=$(basename "$_old_prefix")
+	local _new_name=$(basename "$_tcpath")
+	[ "$_old_name" != "$_new_name" ] && [ -f "$tccfgdir/$_new_name" ] && sed -i "s/$_old_name/$_new_name/g" "$tccfgdir/$_new_name"
 }
 
 _postbuild_qemu_test(){
