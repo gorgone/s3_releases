@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="94";
+S3TUP_CONFIG_VERSION="95";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -84,7 +84,7 @@ OESDK_BUILD_tasks+=('echo "OE-SDK: Build directory: $_builddir" | tee -a "@LOGFI
 OESDK_BUILD_tasks+=('if [ -f "$_builddir/env.source" ]; then source "@OESDKSOURCE@/openembedded-core/oe-init-build-env" "$_builddir" 2>/dev/null; source "$_builddir/env.source"; elif [ -f "@OESDKSOURCE@/bitbake.env" ]; then source "@OESDKSOURCE@/bitbake.env"; cd "$_builddir"; elif [ -f "@OESDKSOURCE@/openembedded-core/oe-init-build-env" ]; then source "@OESDKSOURCE@/openembedded-core/oe-init-build-env" "$_builddir"; fi;');
 OESDK_BUILD_tasks+=('command -v bitbake >/dev/null 2>&1 || export PATH="@OESDKSOURCE@/openembedded-core/scripts:@OESDKSOURCE@/bitbake/bin:$PATH";');
 OESDK_BUILD_tasks+=('export MACHINE="$OESDK_OEM";');
-OESDK_BUILD_tasks+=('_bb_major=$(bitbake --version 2>/dev/null | grep -oE "[0-9]+" | head -1); [ "$_bb_major" -ge 2 ] && _sep=":" || _sep="_"; echo "TOOLCHAIN_TARGET_TASK${_sep}append = \" $OESDK_SDK_EXTRAS\"" > ./sdk-extras.conf;');
+OESDK_BUILD_tasks+=('_bb_major=$(bitbake --version 2>/dev/null | grep -oE "[0-9]+" | head -1); [ "$_bb_major" -ge 2 ] && _sep=":" || _sep="_"; echo "TOOLCHAIN_TARGET_TASK${_sep}append = \" $OESDK_SDK_EXTRAS\"" > ./sdk-extras.conf; for _pkg in $OESDK_SDK_EXTRAS; do case "$_pkg" in *-staticdev) _pn="${_pkg%-staticdev}"; echo "DISABLE_STATIC${_sep}pn-${_pn} = \"\"" >> ./sdk-extras.conf;; esac; done;');
 OESDK_BUILD_tasks+=('bitbake meta-toolchain -R ./sdk-extras.conf 2>&1 | tee -a "@LOGFILE@" || exit 1;');
 OESDK_BUILD_tasks+=('[ -d "@TOOLCHAIN@/sysroots" ] && rm -rf "@TOOLCHAIN@";');
 OESDK_BUILD_tasks+=('_sdk_sh=$(find . -path "*/deploy/sdk/*.sh" -name "*-${OESDK_OEM}-*" 2>/dev/null | head -1); [ -z "$_sdk_sh" ] && _sdk_sh=$(find . -path "*/deploy/sdk/*.sh" -name "*.sh" 2>/dev/null | head -1); echo "OE-SDK: SDK installer: $_sdk_sh"; "$_sdk_sh" -d "@TOOLCHAIN@" -y 2>&1 | tee -a "@LOGFILE@" || exit 1;');

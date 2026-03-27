@@ -1588,6 +1588,6 @@ _extract_strip="$([ -z "${15}" ] && echo "0" || echo "${15}")";
 _toolchainfilename="$tfn";
 _md5sum="$(cd "$dldir" && md5sum $(basename "$8"))";
 _tc_info="$info";
-_tc_infolines="$(echo -e "$_tc_info" | wc -l)";
+_tc_infolines="$(echo "$info" | wc -l)";
 EOF
 };
