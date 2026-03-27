@@ -1,0 +1,10 @@
+#toolchain template: Android 15 STBs
+#toolchain template version: 1
+#toolchain template cflags: -march=armv7-a -mtune=cortex-a9 -mfloat-abi=softfp -mfpu=vfpv3-d16 -U__ANDROID_API__ -DANDROID -D__ANDROID_API__=35 -fpic -fno-addrsig -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wno-unused-but-set-variable -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -Wno-ignored-optimization-argument
+#toolchain template updated: 2024-09-08 21:23:47
+ANDK_API="35" #https://source.android.com/setup/start/build-numbers?hl=en
+ANDK_ABI="armeabi-v7a"
+ANDK_ARCH="arm"
+ANDK_ARCH_BITNESS="32"
+ANDK_HOST="arm-linux-androideabi"
+ANDK_SSL_TARGET="android-arm" #android-arm, android-arm64, android-x86, android-x86

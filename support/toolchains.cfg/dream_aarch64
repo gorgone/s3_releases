@@ -1,0 +1,19 @@
+_toolchainname="dream_aarch64";
+default_use="USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="";
+_description="Dreambox ONE|TWO";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="aarch64-dreambox-linux-gnu-";
+_sysroot="aarch64-dreambox-linux-gnu/sysroot";
+_libsearchdir="/usr/lib";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1kcmVhbV9hYXJjaDY0LnRhci54ego=";
+_md5sum="1a2bb4d8c63dd1014f66f4136d258b65  Toolchain-dream_aarch64.tar.xz";
+_tc_info="\n
+!!! crosstool-NG Toolchain !!!\n
+\n
+Dreambox ONE|TWO\n
+aarch64 64-bit LE, glibc 2.25, gcc 13.2.0, linux 6.5.5\n";
+_tc_infolines="5";

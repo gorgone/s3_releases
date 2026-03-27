@@ -1,0 +1,19 @@
+_toolchainname="qnap_armv5";
+default_use="USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="";
+_description="QNAP Marvell 628x devices, QNAP TS-119P II";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="arm-qnap-linux-gnueabi-";
+_sysroot="arm-qnap-linux-gnueabi/sysroot";
+_libsearchdir="/usr/lib";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1xbmFwX2FybXY1LnRhci54ego=";
+_md5sum="ac3b6d54a43cff0229658665211024af  Toolchain-qnap_armv5.tar.xz";
+_tc_info="\n
+!!! crosstool-NG Toolchain !!!\n
+\n
+QNAP Marvell 628x devices, QNAP TS-119P II\n
+arm armv5te 32-bit LE, glibc 2.35, gcc 13.2.0, linux 6.5.5\n";
+_tc_infolines="5";
