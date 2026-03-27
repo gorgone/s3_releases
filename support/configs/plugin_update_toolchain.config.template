@@ -1,6 +1,6 @@
 # List of setup, build and config commands below. All commands are executed in the context of the current user.
 # Pay attention to the SEMICOLON at the end of EACH command and the correct quoting (' or ") for or to avoid expansion of variables.
-S3TUP_CONFIG_VERSION="95";
+S3TUP_CONFIG_VERSION="96";
 
 # Tokens that are replaced automatically:
 # @CTNGSOURCE@		crosstool-NG source folder; support/crosstool/crosstool-ng
@@ -75,7 +75,7 @@ OESDK_BUILD_tasks+=('if [ -z "$OESDK_OEM" ]; then OESDK_OEM=$(make list 2>/dev/n
 OESDK_BUILD_tasks+=('if [ -z "$OESDK_OEM" ]; then _oem=$(awk "/^else ifeq .\\$\\(MACHINEBUILD\\),${OESDK_MACHINE}\\)/{getline; print}" Makefile | sed "s/MACHINE=//;s/[[:space:]]//g"); [ -n "$_oem" ] && OESDK_OEM="$_oem"; fi;');
 OESDK_BUILD_tasks+=('[ -z "$OESDK_OEM" ] && OESDK_OEM="$OESDK_MACHINE";');
 OESDK_BUILD_tasks+=('echo "OE-SDK: MACHINE=$OESDK_MACHINE OEM=$OESDK_OEM DISTRO=$OESDK_DISTRO LOCATION=@OESDKSOURCE@" | tee -a "@LOGFILE@";');
-OESDK_BUILD_tasks+=('MACHINE="$OESDK_OEM" DISTRO="$OESDK_DISTRO" DISTRO_TYPE=release make init 2>&1 | tee -a "@LOGFILE@";');
+OESDK_BUILD_tasks+=('MACHINE="$OESDK_MACHINE" DISTRO="$OESDK_DISTRO" DISTRO_TYPE=release make init 2>&1 | tee -a "@LOGFILE@";');
 OESDK_BUILD_tasks+=('_builddir="";');
 OESDK_BUILD_tasks+=('for _p in "@OESDKSOURCE@/builds/"*/release/$OESDK_OEM "@OESDKSOURCE@/build/$OESDK_OEM" "@OESDKSOURCE@/build"; do [ -d "$_p/conf" ] && _builddir="$(cd "$_p" && pwd)" && break; done;');
 OESDK_BUILD_tasks+=('[ -z "$_builddir" ] && _builddir=$(grep -r "^TOPDIR" @OESDKSOURCE@/builds/*/release/$OESDK_OEM/conf/*.conf @OESDKSOURCE@/build/*/conf/*.conf @OESDKSOURCE@/build/conf/*.conf 2>/dev/null | head -1 | sed "s/.*= *\"\\{0,1\\}//;s/\".*//");');
