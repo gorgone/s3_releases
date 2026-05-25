@@ -1,0 +1,288 @@
+#!/bin/bash
+
+checkout(){
+	$(USEGIT) && gitcheckout $@ || svncheckout $@
+}
+
+repoclean(){
+	clear
+	echo -en "$c_l"
+	ologo
+	
+	cd "$workdir"
+	wcfolders="$(find . -maxdepth 1 -type d -name "oscam-${REPO}${ID}" | sed 's|./||')"
+	bcount=$(echo "$wcfolders" |wc -w)
+	
+	if [ "$bcount" -gt "0" ]; then
+		echo -e "\n$c_l    ${bcount}$w_l oscam-${REPO}${ID} $txt_wc ${txt_found}\n    ___________________________________$re_\n"
+		for wc in $wcfolders; do
+			rm -rf $wc
+			echo -e "$c_l    --> $w_l$txt_delete $txt_wc $wc"
+		done
+		_nl
+	else
+		echo -e "\n$r_l    ${bcount}$w_l oscam-${REPO}${ID} $txt_wc ${txt_found}\n    ___________________________________$re_\n"
+	fi
+	
+	cd "$brepo"
+	bfiles="$(find . -maxdepth 1 -name "*-${REPO}${ID}.tar.gz" |sed 's|./||')"
+	bcount=$(echo "$bfiles" |wc -w)
+	
+	if [ "$bcount" -gt "0" ]; then
+		echo -e "\n$c_l    ${bcount}$w_l ${REPO}${ID} backup ${txt_found}\n    _______________________$re_\n"
+		for b in $bfiles; do
+			rm -f $b
+			echo -e "$c_l    --> $w_l$txt_delete backup $b"
+		done
+		_nl
+	else
+		echo -e "\n$r_l    ${bcount}$w_l ${REPO}${ID} backup ${txt_found}\n    _______________________$re_\n"
+	fi
+	[ -f "$ispatched" ] && rm -f "$ispatched";
+}
+
+reporestore(){
+	clear
+	echo -en "$c_l"
+	ologo
+
+	if [ "$1" == "list" ]
+	then
+		cd "$brepo"
+		bfiles="$(find . -type f -name "*-${REPO}${ID}.tar.gz" |sed 's|./||' |sed 's|.tar.gz||')"
+		bcount=$(echo "$bfiles" |wc -w)
+
+		if [ "$bcount" -gt "0" ]
+		then
+			echo -e "\n$c_l    $bcount$w_l ${REPO}${ID} backups found\n    ____________________$re_\n"
+			for b in $bfiles
+			do
+				echo -e "$c_l    --> $w_l$b"
+			done
+			_nl
+		else
+			echo -e "\n$r_l    $bcount$w_l ${REPO}${ID} backups found\n    ____________________$re_\n"
+		fi
+
+		exit
+	fi
+
+	if [ -d "${repodir}" ]; then
+		rm -rf "${repodir}"
+		printf "$p_l\n  $txt_delete $txt_existing oscam-${REPO}${ID} $re_\n"
+	else
+		printf "$p_l\n  $txt_no oscam-${REPO}${ID} $txt_found\n$re_"
+	fi
+	_nl
+	untar_repo $1
+	printf "\e[1A\t\t\t\t\t$y_l""restored\n\n$re_"
+	[ -L "$workdir/lastbuild.log" ]&& rm "$workdir/lastbuild.log";
+	[ -L "$workdir/lastpatch.log" ]&& rm "$workdir/lastpatch.log";
+	[ -f "$ispatched" ] && rm -f "$ispatched";
+}
+
+repoup(){
+	$(USEGIT) && gitup $@ || svnup $@
+}
+
+quickreporestore(){
+	printf "$1 \n"
+	untar_repo $1
+}
+
+repopatch(){
+	filter="*"
+	if [ ! -z "$1" ]; then
+		if [ "$1" == "-f" -o "$1" == "--force" ]; then
+			force="$1"
+		else
+			filter="$1"
+		fi
+	fi
+
+	if [ ! -z "$2" ]; then
+		if [ "$2" == "-f" -o "$2" == "--force" ]; then
+			force="$2"
+		else
+			filter="$2"
+		fi
+	fi
+
+	if [ ! -f "$ispatched" -o ! -z "$force" ]
+	then
+		clear
+		printf $C
+		ologo
+		unset patchlist
+		cd "$pdir"
+		patchlist=(${filter}.patch)
+		patchlog="$(mktemp)"
+
+		if [ "$(ls -A "$pdir"/${filter}.patch 2>/dev/null)" ]
+		then
+			for p in "${patchlist[@]}"
+			do
+				PATCHSTYLE=$(_patch_style "$pdir/$p")
+				echo -e "\n$C ${PATCHSTYLE:1}-patch :  $p $force$W"; echo -e "\n$p" >> "$patchlog"
+				sleep .5
+				if grep 'GIT binary patch' "$pdir/$p" &>/dev/null; then
+					cd "${repodir}"
+					echo -e $Y" binary patch detected, using 'git apply' <-"$W
+					export LC_ALL=C; git apply --verbose $PATCHSTYLE < "$pdir/$p" 2>&1 | tee -a "$patchlog" | sed -e "s/^Checking patch/$G checking > $WH/g;s/^Applied patch/$G patching > $WH/g;s/^Hunk/$P Hunk     > $Y/g;s/FAILED/$R FAILED/g; ;s/-- saving/$Y -- saving/g;"
+				else
+					patch -d${repodir}/ $PATCHSTYLE < "$pdir/$p" | tee -a "$patchlog" | sed -e "s/^patching file/$G patching > $WH/g;s/^Hunk/$P Hunk     > $Y/g;s/FAILED/$R FAILED/g; ;s/-- saving/$Y -- saving/g;"
+				fi
+			done
+
+			cat $patchlog >"$ldir/$e.log"
+			ln -frs "$ldir/$e.log" "$workdir/lastpatch.log"
+			rm -rf "$patchlog"
+
+			mark_patched
+		else
+			printf $WH"    $txt_no patch $txt_found"
+		fi
+
+	else
+		clear
+		printf $C
+		ologo
+		printf $WH"    already patched"
+	fi
+	echo -e $W
+}
+
+_dialog_checkout(){
+	upc="$(mktemp)"
+	(printf " $txt_verify_syscheck "
+	[ "$sanity" == "1" ] && printf "ok\n" && sleep 1;
+
+	if [ "${s3cfg_vars[NO_REPO_AUTOUPDATE]}" == "0" ]
+	then
+		printf  " $txt_verify_svn "
+		if [ -f "${repodir}/config.sh" ]
+		then
+			if check_url "$trunkurl" >/dev/null
+			then
+				printf "ok\n"
+				sleep 1
+				printf " $txt_update_svn $txt_wait\n"
+				cd "${repodir}"
+				$(USEGIT) && git pull --quiet || svn -q update
+				echo 1 >"$upc"
+			else
+				printf "not ok\n"
+			fi
+			sleep 1
+		fi
+	fi;) | "$gui" "$st_" "$bt_" "$title_" "$pb_" 5 52
+
+	if [ "${s3cfg_vars[NO_REPO_AUTOUPDATE]}" == "0" ]
+	then
+		upc1=$(cat "$upc" 2>/dev/null)
+		rm -f "$upc"
+		[ ! "$upc1" == "1" ] && check_url "$trunkurl" && _dialog_checkout1
+
+		if [ -f "${repodir}/config.sh" ]
+		then
+			reset_="$("${repodir}/config.sh" -R)"
+		fi
+		_get_config_menu
+	fi
+
+	if [ -n "$1" ]
+	then
+		if [ -f "$tccfgdir/$1" ] && [ -f "${repodir}/config.sh" ]
+		then
+			source "$tccfgdir/$1"
+			if [ ! -f "$tcdir/$_toolchainname/bin/$_compiler""gcc" ]
+			then
+				first="$1"
+				_toolchain_gui_install
+			fi
+			loadprofile="yes"
+			_toolchain_build_menu "$1"
+		else
+			_select_menu
+		fi
+	fi
+	_select_menu
+}
+
+_dialog_checkout1(){
+	$(USEGIT) && _dialog_checkout1_git $@ || _dialog_checkout1_svn $@
+}
+
+REVISION(){
+	if [ -d "${repodir}" ] && cd "${repodir}"; then
+		if grep -q -- '--oscam-revision' "${repodir}/config.sh"; then
+			./config.sh --oscam-revision
+		else
+			./config.sh --oscam-version | cut -d '-' -f 2-
+		fi
+	fi
+};
+
+COMMIT(){
+	if [ -d "${repodir}" ] && cd "${repodir}"; then
+		$(USEGIT) && git log 2>/dev/null | sed -n 1p | cut -d ' ' -f2 | cut -c1-8 || printf ''
+	fi
+};
+
+BRANCH(){
+	if [ -d "${repodir}" ] && cd "${repodir}"; then
+		if $(USEGIT); then
+			ref="$(git name-rev --name-only "$(COMMIT)" 2>/dev/null | awk -F'/' '{ print $NF }' | awk -F'~' '{ print $1 }' | awk -F'^' '{ print $1 }')"
+			if [ "$ref" == "$(REVISION)" ]; then
+				branch=$(git branch | tail -n1 | tr -d ' *')
+				[ "$branch" == "(nobranch)" ] && printf 'master' || printf "$branch"
+			else
+				printf "$ref"
+			fi
+		else
+			printf "$trunkurl" | awk -F'/' '{ print $NF }'
+		fi
+	fi
+};
+
+USEGIT(){
+	echo $trunkurl | grep -qe '^git@\|.git$';
+}
+
+REFTYPE(){
+	if [[ "$1" =~ ^[0-9a-f]{8,40}$ ]]; then
+		printf 'sha'
+	elif [ "$1" -eq "$1" ] 2>/dev/null; then
+		printf 'tag'
+	else
+		printf 'branch'
+	fi
+}
+
+REPOTYPE(){
+	$(USEGIT) && printf 'git' || printf 'svn'
+}
+
+REPOURL(){
+	if [ -d "${repodir}" ] && cd "${repodir}"; then
+		if $(USEGIT); then
+			giturl
+		else
+			svnurl
+		fi
+	else
+		printf "$trunkurl"
+	fi
+}
+
+REPOURLDIRTY(){
+	[ "$(REPOURL)" == "$trunkurl" ] && return 1 || return 0
+}
+
+REPOIDENT(){
+	if [ -v SOURCE ]; then
+		 printf " $SOURCE"
+	else
+		printf ""
+	fi
+}

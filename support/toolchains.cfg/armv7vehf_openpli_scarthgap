@@ -1,0 +1,24 @@
+_toolchainname="armv7vehf_openpli_scarthgap";
+default_use="USE_LIBCRYPTO USE_EXTRA";
+extra_use="";
+extra_cc="-march=armv7ve -mfpu=neon-vfpv4 -mfloat-abi=hard";
+extra_ld="-Wl,--dynamic-linker=/lib/ld-linux-armhf.so.3";
+extra_c="";
+_description="openpli scarthgap armv7vehf-neon-vfpv4";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="arm-oe-linux-gnueabi-";
+_sysroot="sysroots/armv7vehf-neon-vfpv4-oe-linux-gnueabi";
+_libsearchdir="/usr/lib";
+_extract_strip="0";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1hcm12N3ZlaGZfb3BlbnBsaV9zY2FydGhnYXAudGFyLnh6Cg==";
+_md5sum="7579638508317e777aaf42a63ef05c14  Toolchain-armv7vehf_openpli_scarthgap.tar.xz";
+_machines="osmini4k osmio4k osmio4kplus";
+_tc_info="\n
+!!! Open-Embedded-SDK Toolchain !!!\n
+\n
+openpli scarthgap armv7vehf-neon-vfpv4\n
+arm 32-bit LE\n
+gcc 13.4.0, glibc 2.39, binutils 2.42.0, ld 2.42.0\n
+linux 6.6.0\n";
+_tc_infolines="6";

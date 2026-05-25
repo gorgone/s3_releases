@@ -1,5 +1,5 @@
 _toolchainname="dreambox_fpu";
-default_use="USE_UTF8 USE_LIBCRYPTO";
+default_use="USE_LIBCRYPTO";
 _description="Dreambox & VU+ (OE 2.0 FPU)";
 _oscamconfdir_default="/var/tuxbox/config";
 _oscamconfdir_custom=""
@@ -7,7 +7,7 @@ _oscamconfdir_custom=""
 _compiler="mipsel-newnigma2-linux-gnu-";
 _sysroot="mipsel-newnigma2-linux-gnu/sysroot";
 _libsearchdir="/lib";
-_toolchainfilename="RHJlYW1ib3gtSFdfc191X3AudGFyLnh6";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zL2xlZ2FjeS9Ub29sY2hhaW4tRHJlYW1ib3gtSFdfc191X3AudGFyLnh6Cg==";
 _md5sum="fe042292f6c0022c3b474fcd3a9baf18  Toolchain-Dreambox-HW_s_u_p.tar.xz";
 _tc_info="\n
     !!! beware the box must have FPU !!!\n

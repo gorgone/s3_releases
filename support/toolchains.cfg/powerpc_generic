@@ -1,0 +1,26 @@
+_toolchainname="powerpc_generic";
+default_use="USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="";
+extra_c="";
+_description="powerpc stb's (generic)";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="powerpc-buildroot-linux-gnu-";
+_sysroot="powerpc-buildroot-linux-gnu/sysroot";
+_libsearchdir="/usr/lib";
+_extract_strip="1";
+_toolchainfilename="aHR0cHM6Ly90b29sY2hhaW5zLmJvb3RsaW4uY29tL2Rvd25sb2Fkcy9yZWxlYXNlcy90b29sY2hhaW5zL3Bvd2VycGMtZTUwMG1jL3RhcmJhbGxzL3Bvd2VycGMtZTUwMG1jLS1nbGliYy0tc3RhYmxlLTIwMTguMTEtMS50YXIuYnoy";
+_md5sum="23439204ec3952cf122d9f748e966004  powerpc-e500mc--glibc--stable-2018.11-1.tar.bz2";
+_tc_info="!!! Bootlin Stable Toolchain 2018.11-1 !!!\n
+\n
+generic cross toolchain for powerpc devices\n
+\n
+arch powerpc\n
+glibc 2.27\n
+gcc 7.3.0\n
+gdb 7.12.1\n
+linux 4.1.52\n
+binutils 2.29.1\n";
+_tc_infolines="10";

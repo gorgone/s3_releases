@@ -1,0 +1,19 @@
+_toolchainname="dream_mipsel";
+default_use="USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="";
+_description="Dreambox 500 HD|52x|8x0 HD|70x0 HD";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="mipsel-dreambox-linux-gnu-";
+_sysroot="mipsel-dreambox-linux-gnu/sysroot";
+_libsearchdir="/usr/lib";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1kcmVhbV9taXBzZWwudGFyLnh6Cg==";
+_md5sum="731671ac09cbed5910e00b19c243218f  Toolchain-dream_mipsel.tar.xz";
+_tc_info="\n
+!!! crosstool-NG Toolchain !!!\n
+\n
+Dreambox 500 HD|52x|8x0 HD|70x0 HD\n
+mips mips1 32-bit LE, glibc 2.24, gcc 13.2.0, linux 6.5.5\n";
+_tc_infolines="5";

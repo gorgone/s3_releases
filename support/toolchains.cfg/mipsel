@@ -1,5 +1,5 @@
 _toolchainname="mipsel";
-default_use="USE_UTF8 USE_LIBCRYPTO";
+default_use="USE_LIBCRYPTO";
 _description="Dreambox & VU+ (OE 1.6)";
 _oscamconfdir_default="/var/tuxbox/config";
 _oscamconfdir_custom=""
@@ -7,7 +7,7 @@ _oscamconfdir_custom=""
 _compiler="mipsel-unknown-linux-gnu-";
 _sysroot="mipsel-unknown-linux-gnu/sys-root/usr";
 _libsearchdir="/lib";
-_toolchainfilename="TUlQUy1UdXhib3gtT0UxLjZfc191X3AudGFyLnh6";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zL2xlZ2FjeS9Ub29sY2hhaW4tTUlQUy1UdXhib3gtT0UxLjZfc191X3AudGFyLnh6Cg==";
 _md5sum="09cfbf19e4f4e7c1a2c033dd12a09b4a  Toolchain-MIPS-Tuxbox-OE1.6_s_u_p.tar.xz";
 _tc_info="\n
     !!! Dreambox & VU+ (OE 1.6) !!!\n

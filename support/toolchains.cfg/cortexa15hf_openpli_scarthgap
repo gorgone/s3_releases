@@ -1,0 +1,24 @@
+_toolchainname="cortexa15hf_openpli_scarthgap";
+default_use="USE_LIBCRYPTO USE_EXTRA";
+extra_use="";
+extra_cc="-mfpu=neon-vfpv4 -mfloat-abi=hard -mcpu=cortex-a15";
+extra_ld="-Wl,--dynamic-linker=/lib/ld-linux-armhf.so.3";
+extra_c="";
+_description="openpli scarthgap cortexa15hf-neon-vfpv4";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="arm-oe-linux-gnueabi-";
+_sysroot="sysroots/cortexa15hf-neon-vfpv4-oe-linux-gnueabi";
+_libsearchdir="/usr/lib";
+_extract_strip="0";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1jb3J0ZXhhMTVoZl9vcGVucGxpX3NjYXJ0aGdhcC50YXIueHoK";
+_md5sum="796abf399441a31f8e4aa49ada984784  Toolchain-cortexa15hf_openpli_scarthgap.tar.xz";
+_machines="bre2ze4k dual e4hd gbquad4k gbquad4kpro gbtrio4k gbue4k h10 h11 h17 h17twin h7 h9 h9combo h9combose h9se hd51 hd60 hd61 hd66se i55plus i55se multibox multiboxpro multiboxse pulse4k pulse4kmini sf8008 sf8008m sx88v2 ustym4kpro ustym4ks2ottx vs1500";
+_tc_info="\n
+!!! Open-Embedded-SDK Toolchain !!!\n
+\n
+openpli scarthgap cortexa15hf-neon-vfpv4\n
+arm 32-bit LE\n
+gcc 13.4.0, glibc 2.39, binutils 2.42.0, ld 2.42.0\n
+linux 6.6.0\n";
+_tc_infolines="6";

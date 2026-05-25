@@ -1,0 +1,10 @@
+#toolchain template: opendreambox pyro mips32el
+#toolchain template version: 1
+OESDK_MACHINE="dm520"
+OESDK_OEM=""
+OESDK_DISTRO="opendreambox"
+OESDK_REPO_URL="https://github.com/WXbet/opendreambox.git"
+OESDK_REPO_BRANCH="pyro"
+OESDK_REPO_LOCATION="oe-sdk_opendreambox_${OESDK_REPO_BRANCH}"
+OESDK_SDK_EXTRAS="openssl-dev openssl-staticdev libusb1-dev libusb1-staticdev libdvbcsa-dev libdvbcsa-staticdev pcsc-lite-dev curl-dev curl-staticdev"
+OESDK_MACHINES="dm520 dm7080 dm820"

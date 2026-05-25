@@ -1,0 +1,19 @@
+_toolchainname="synology_armv7";
+default_use="USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="";
+_description="Synology DS216play, ZyXEL NAS326|NAS520";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="arm-ds216_play-linux-gnueabi-";
+_sysroot="arm-ds216_play-linux-gnueabi/sysroot";
+_libsearchdir="/usr/lib";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1zeW5vbG9neV9hcm12Ny50YXIueHoK";
+_md5sum="2a79d278f8096b146c045dbd9bf880fc  Toolchain-synology_armv7.tar.xz";
+_tc_info="\n
+!!! crosstool-NG Toolchain !!!\n
+\n
+Synology DS216play, ZyXEL NAS326|NAS520\n
+arm armv7-a+fp 32-bit LE, glibc 2.23, gcc 13.2.0, linux 6.5.5\n";
+_tc_infolines="5";

@@ -1,0 +1,22 @@
+_toolchainname="fritz3490_5490_5491_6890_7430_7490_7560_7580_7583_7583vdsl_7590_7590AX_7690_ssl_multi_mips-freetz";
+default_use="USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="-Wl,-dynamic-linker,/usr/lib/freetz/ld-uClibc.so.0";
+extra_c="";
+_description="FRITZ!Box 3490 5490 5491 6890 7430 7490 7560 7580 7583 7583vdsl 7590 7590AX 7690 SSL multi by MasterSaMMy";
+_oscamconfdir_default="/var/media/ftp/addon/oscam";
+_oscamconfdir_custom="";
+_self_build="yes";
+_compiler="mips-linux-uclibc-";
+_sysroot="usr";
+_libsearchdir="/usr/lib";
+_extract_strip="0";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1mcml0ejM0OTBfNTQ5MF81NDkxXzY4OTBfNzQzMF83NDkwXzc1NjBfNzU4MF83NTgzXzc1ODN2ZHNsXzc1OTBfNzU5MEFYXzc2OTBfc3NsX211bHRpX21pcHMtZnJlZXR6LnRhci54ego=";
+_md5sum="ec054fe07a5d80fda170587a11b4d922  Toolchain-fritz3490_5490_5491_6890_7430_7490_7560_7580_7583_7583vdsl_7590_7590AX_7690_ssl_multi_mips-freetz.tar.xz";
+_tc_info="\n
+!!! freetz toolchains pack15 Toolchain !!!\n
+\n
+FRITZ!Box 3490 5490 5491 6890 7430 7490 7560 7580 7583 7583vdsl 7590 7590AX 7690 SSL multi\n
+\n";
+_tc_infolines="5";

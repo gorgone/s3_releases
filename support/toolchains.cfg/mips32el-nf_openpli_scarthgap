@@ -1,0 +1,24 @@
+_toolchainname="mips32el-nf_openpli_scarthgap";
+default_use="USE_LIBCRYPTO USE_EXTRA";
+extra_use="";
+extra_cc="-mel -mabi=32 -msoft-float -march=mips32";
+extra_ld="";
+extra_c="";
+_description="openpli scarthgap mips32el-nf";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="mipsel-oe-linux-";
+_sysroot="sysroots/mips32el-nf-oe-linux";
+_libsearchdir="/usr/lib";
+_extract_strip="0";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1taXBzMzJlbC1uZl9vcGVucGxpX3NjYXJ0aGdhcC50YXIueHoK";
+_md5sum="a167c731b63902ad2099d4f90c2efbd0  Toolchain-mips32el-nf_openpli_scarthgap.tar.xz";
+_machines="hd1100 hd500c";
+_tc_info="\n
+!!! Open-Embedded-SDK Toolchain !!!\n
+\n
+openpli scarthgap mips32el-nf\n
+mips 32-bit LE\n
+gcc 13.4.0, glibc 2.39, binutils 2.42.0, ld 2.42.0\n
+linux 6.6.0\n";
+_tc_infolines="6";

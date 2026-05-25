@@ -1,0 +1,10 @@
+#toolchain template: opendreambox krogoth mips32el
+#toolchain template version: 1
+OESDK_MACHINE="dm500hdv2"
+OESDK_OEM=""
+OESDK_DISTRO="opendreambox"
+OESDK_REPO_URL="https://github.com/WXbet/opendreambox.git"
+OESDK_REPO_BRANCH="krogoth"
+OESDK_REPO_LOCATION="oe-sdk_opendreambox_${OESDK_REPO_BRANCH}"
+OESDK_SDK_EXTRAS="openssl-dev openssl-staticdev libusb1-dev libusb1-staticdev libdvbcsa-dev libdvbcsa-staticdev pcsc-lite-dev curl-dev curl-staticdev"
+OESDK_MACHINES="dm500hdv2 dm520 dm7020hd dm7020hdv2 dm7080 dm8000 dm800sev2 dm820 qemumipsel"

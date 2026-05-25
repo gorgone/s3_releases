@@ -1,0 +1,19 @@
+_toolchainname="dcube"
+default_use="USE_LIBCRYPTO";
+_description="Dcube-R2"
+_oscamconfdir_default="/etc/tuxbox/config"
+_oscamconfdir_custom="/var/"
+
+_compiler="arm-cortex-linux-gnueabi-"
+_sysroot="arm-cortex-linux-gnueabi/sys-root/usr"
+_libsearchdir="/lib"
+_toolchainfilename="aHR0cHM6Ly9maWxlcy5zdHJlYW1ib2FyZC50di90b29sY2hhaW5zL1Rvb2xjaGFpbi1BUk1fQ29ydGV4X0E5X3NfdV9wMS50YXIueHoK";
+_md5sum="636fd2655e931f23dc7136bbd3851101  Toolchain-ARM_Cortex_A9_s_u_p1.tar.xz";
+_tc_info="\n
+    !!! ARM_Cortex_A9 !!!\n
+       this toolchain is compatible with\n
+	             Dcube-R2\n
+\n
+";
+
+_tc_infolines="6"

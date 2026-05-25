@@ -1,0 +1,30 @@
+#Save this file as oscamsource.url to influence the source(s)
+#from which the oscam-git repository is cloned from
+
+### STANDARD OSCAM REPOSITORY ###
+#   To change the standard oscam repository, uncomment
+#   the line starting with #trunkurl and point it
+#   to a different location.
+#
+#trunkurl="https://domain/own-repo.git"
+
+### CUSTOM OSCAM REPOSITORY IDENTIFIERS ###
+#   To flexible switch the oscam repository, uncomment
+#   the lines starting with #*IDENT, #*FOO, #*BAR and
+#   point it to locations of your choice.
+#
+#   You can change the INDENT part of the trunkurlIDENT
+#   variable according to your needs and it is possible
+#   to configure multiple custom identifiers (see FOO, BAR).
+#
+#   To have s3 use one of the defined identifier URLs,
+#   simply add SOURCE=IDENT before the s3 commands.
+#
+#   command: SOURCE=IDENT ./s3 checkout
+#trunkurlIDENT="https://domain/ident-repo.git"
+#
+#   command: SOURCE=FOO ./s3 menu
+#trunkurlFOO="https://domain/foo-repo.git"
+#
+#   command: SOURCE=BAR ./s3 repoup
+#trunkurlBAR="https://domain/bar-repo.git"

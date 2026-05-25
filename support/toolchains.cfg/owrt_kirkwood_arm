@@ -1,0 +1,19 @@
+_toolchainname="owrt_kirkwood_arm";
+default_use="USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="";
+_description="OpenWrt 19.07|21.02 kirkwood, Pogoplug V2 LE devices";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="arm-kirkwood-linux-musleabi-";
+_sysroot="arm-kirkwood-linux-musleabi/sysroot";
+_libsearchdir="/usr/lib";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1vd3J0X2tpcmt3b29kX2FybS50YXIueHoK";
+_md5sum="573b19f8d477f895e46fcae1d6601e08  Toolchain-owrt_kirkwood_arm.tar.xz";
+_tc_info="\n
+!!! crosstool-NG Toolchain !!!\n
+\n
+OpenWrt 19.07|21.02 kirkwood, Pogoplug V2 LE devices\n
+arm armv5te 32-bit LE, musl 1.1.24, gcc 13.2.0, linux 6.5.5\n";
+_tc_infolines="5";

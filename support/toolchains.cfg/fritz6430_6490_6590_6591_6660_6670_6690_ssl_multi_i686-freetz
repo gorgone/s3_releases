@@ -1,0 +1,22 @@
+_toolchainname="fritz6430_6490_6590_6591_6660_6670_6690_ssl_multi_i686-freetz";
+default_use="USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="-Wl,-dynamic-linker,/usr/lib/freetz/ld-uClibc.so.0";
+extra_c="";
+_description="FRITZ!Box 6430 6490 6590 6591 6660 6670 6690 SSL multi by MasterSaMMy";
+_oscamconfdir_default="/var/media/ftp/addon/oscam";
+_oscamconfdir_custom="";
+_self_build="yes";
+_compiler="i686-linux-uclibc-";
+_sysroot="usr";
+_libsearchdir="/usr/lib";
+_extract_strip="0";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1mcml0ejY0MzBfNjQ5MF82NTkwXzY1OTFfNjY2MF82NjcwXzY2OTBfc3NsX211bHRpX2k2ODYtZnJlZXR6LnRhci54ego=";
+_md5sum="4a7325334c4064a1bae0815b1341a1a4  Toolchain-fritz6430_6490_6590_6591_6660_6670_6690_ssl_multi_i686-freetz.tar.xz";
+_tc_info="\n
+!!! freetz toolchains pack15 Toolchain !!!\n
+\n
+FRITZ!Box 6430 6490 6590 6591 6660 6670 6690 SSL multi\n
+\n";
+_tc_infolines="5";

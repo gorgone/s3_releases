@@ -1,0 +1,24 @@
+_toolchainname="cortexa7thf_openpli_scarthgap";
+default_use="USE_LIBCRYPTO USE_EXTRA";
+extra_use="";
+extra_cc="-mthumb -mfpu=vfp -mfloat-abi=hard -mcpu=cortex-a7";
+extra_ld="-Wl,--dynamic-linker=/lib/ld-linux-armhf.so.3";
+extra_c="";
+_description="openpli scarthgap cortexa7thf";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="arm-oe-linux-gnueabi-";
+_sysroot="sysroots/cortexa7t2hf-vfp-oe-linux-gnueabi";
+_libsearchdir="/usr/lib";
+_extract_strip="0";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1jb3J0ZXhhN3RoZl9vcGVucGxpX3NjYXJ0aGdhcC50YXIueHoK";
+_md5sum="46ca5fa1e7e837776fde7db0cf838572  Toolchain-cortexa7thf_openpli_scarthgap.tar.xz";
+_machines="hzero";
+_tc_info="\n
+!!! Open-Embedded-SDK Toolchain !!!\n
+\n
+openpli scarthgap cortexa7thf\n
+arm 32-bit LE\n
+gcc 13.4.0, glibc 2.39, binutils 2.42.0, ld 2.42.0\n
+linux 6.6.0\n";
+_tc_infolines="6";

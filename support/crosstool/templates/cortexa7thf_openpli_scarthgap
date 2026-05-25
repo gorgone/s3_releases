@@ -1,0 +1,10 @@
+#toolchain template: openpli scarthgap cortexa7thf
+#toolchain template version: 1
+OESDK_MACHINE="hzero"
+OESDK_OEM=""
+OESDK_DISTRO="openpli"
+OESDK_REPO_URL="https://github.com/OpenPLi/openpli-oe-core.git"
+OESDK_REPO_BRANCH="scarthgap"
+OESDK_REPO_LOCATION="oe-sdk_openpli_${OESDK_REPO_BRANCH}"
+OESDK_SDK_EXTRAS="openssl-dev openssl-staticdev libusb1-dev libusb1-staticdev libdvbcsa-dev libdvbcsa-staticdev pcsc-lite-dev curl-dev curl-staticdev"
+OESDK_MACHINES="hzero"

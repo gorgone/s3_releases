@@ -1,5 +1,5 @@
 _toolchainname="rasb_hard"
-default_use="USE_UTF8 USE_LIBCRYPTO";
+default_use="USE_LIBCRYPTO";
 _description="RaspberryPI Hardware FPU"
 _oscamconfdir_default="/usr/local/etc"
 _oscamconfdir_custom=""
@@ -7,7 +7,7 @@ _oscamconfdir_custom=""
 _compiler="arm-bcm2708hardfp-linux-gnueabi-"
 _sysroot="arm-bcm2708hardfp-linux-gnueabi/sysroot/usr"
 _libsearchdir="/lib"
-_toolchainfilename="UmFzcGJlcnJ5cGlfaGFyZF9zX3VfcC50YXIueHo=";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zL2xlZ2FjeS9Ub29sY2hhaW4tUmFzcGJlcnJ5cGlfaGFyZF9zX3VfcC50YXIueHoK";
 _md5sum="7ed1e67eb296a2f06f5cb29903f5eb60  Toolchain-Raspberrypi_hard_s_u_p.tar.xz";
 _tc_info="\n
     !!! RaspberryPI Hardware FPU !!!\n

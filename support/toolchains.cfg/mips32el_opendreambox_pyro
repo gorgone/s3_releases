@@ -1,0 +1,24 @@
+_toolchainname="mips32el_opendreambox_pyro";
+default_use="USE_LIBCRYPTO USE_EXTRA";
+extra_use="";
+extra_cc="-mel -mabi=32 -mhard-float -march=mips32";
+extra_ld="-Wl,--dynamic-linker=/lib/ld-2.25.so";
+extra_c="";
+_description="opendreambox pyro mips32el";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="mipsel-oe-linux-";
+_sysroot="sysroots/mips32el-oe-linux";
+_libsearchdir="/usr/lib";
+_extract_strip="0";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1taXBzMzJlbF9vcGVuZHJlYW1ib3hfcHlyby50YXIueHoK";
+_md5sum="bf88924626d59877ab2bc4ed510d35cf  Toolchain-mips32el_opendreambox_pyro.tar.xz";
+_machines="dm520 dm7080 dm820";
+_tc_info="\n
+!!! Open-Embedded-SDK Toolchain !!!\n
+\n
+opendreambox pyro mips32el\n
+mips 32-bit LE\n
+gcc 6.4.0, glibc 2.25, binutils 2.28.0, ld 2.28.0\n
+linux 4.10.0\n";
+_tc_infolines="6";

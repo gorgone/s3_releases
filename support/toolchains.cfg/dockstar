@@ -1,5 +1,5 @@
 _toolchainname="dockstar";
-default_use="USE_UTF8 USE_LIBCRYPTO";
+default_use="USE_LIBCRYPTO";
 _description="Dockstar";
 _oscamconfdir_default="/var/tuxbox/config";
 _oscamconfdir_custom=""
@@ -7,7 +7,7 @@ _oscamconfdir_custom=""
 _compiler="arm-none-linux-gnueabi-";
 _sysroot="arm-none-linux-gnueabi/libc/usr";
 _libsearchdir="/lib";
-_toolchainfilename="RG9ja3N0YXJfc191X3AudGFyLnh6";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zL2xlZ2FjeS9Ub29sY2hhaW4tRG9ja3N0YXJfc191X3AudGFyLnh6Cg==";
 _md5sum="f259eac25e917a0b9b564d014d171c39  Toolchain-Dockstar_s_u_p.tar.xz";
 _tc_info="\n
     !!! Dockstar !!!\n

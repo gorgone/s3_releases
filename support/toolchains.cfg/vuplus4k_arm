@@ -1,0 +1,19 @@
+_toolchainname="vuplus4k_arm";
+default_use="USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="";
+_description="Vu+ Zero|Uno|Duo|Solo|Ultimo 4K";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="arm-vuplus4k-linux-gnueabihf-";
+_sysroot="arm-vuplus4k-linux-gnueabihf/sysroot";
+_libsearchdir="/usr/lib";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi12dXBsdXM0a19hcm0udGFyLnh6Cg==";
+_md5sum="a3fae776ab543e66c213f548b13a852f  Toolchain-vuplus4k_arm.tar.xz";
+_tc_info="\n
+!!! crosstool-NG Toolchain !!!\n
+\n
+Vu+ Zero|Uno|Duo|Solo|Ultimo 4K\n
+arm 32-bit LE, glibc 2.23, gcc 13.2.0, linux 6.5.5\n";
+_tc_infolines="5";

@@ -1,0 +1,24 @@
+_toolchainname="cortexa9hf_oealliance_6.0";
+default_use="USE_LIBCRYPTO USE_EXTRA";
+extra_use="";
+extra_cc="-mfpu=neon -mfloat-abi=hard -mcpu=cortex-a9";
+extra_ld="-Wl,--dynamic-linker=/lib/ld-linux-armhf.so.3";
+extra_c="";
+_description="oealliance 6.0 cortexa9hf-neon";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="arm-oe-linux-gnueabi-";
+_sysroot="sysroots/cortexa9hf-neon-oe-linux-gnueabi";
+_libsearchdir="/usr/lib";
+_extract_strip="0";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1jb3J0ZXhhOWhmX29lYWxsaWFuY2VfNi4wLnRhci54ego=";
+_md5sum="5ca773b4eda609eea1a32e5ea825f8dd  Toolchain-cortexa9hf_oealliance_6.0.tar.xz";
+_machines="anadolprohd5 axashistwin axashistwinplus dinoboth265 iziboxecohd jdhdduo spycatminiv2 turing vipersingle vipertwin";
+_tc_info="\n
+!!! Open-Embedded-SDK Toolchain !!!\n
+\n
+oealliance 6.0 cortexa9hf-neon\n
+arm 32-bit LE\n
+gcc 15.2.0, glibc 2.43, binutils 2.46, ld 2.46\n
+linux 6.18.0\n";
+_tc_infolines="6";

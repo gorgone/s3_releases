@@ -1,0 +1,74 @@
+#!/bin/bash
+
+#simplebuild_plugin vlmcsd
+#line 3 is absolutely necessary
+#without it no entry is created in the simplebuild
+#the end of the line indicates how to call the module
+
+build_vlmcsd() {
+
+clear
+#load toolchain preset
+source "$tccfgdir/$1"
+
+#vaiables for download
+filename="svn1113.tar.gz"
+sourcedir="vlmcsd-svn1113"
+stable="https://github.com/Wind4/vlmcsd/archive/$filename"
+
+#goto download dir
+cd $dldir
+slogo
+[ -d $sourcedir ] && rm -rf $sourcedir #remove build dir if exist
+[ -f $filename ] && rm -f $filename #remove download if exist
+
+#messages and download source
+echo -en "\nVLMCSD\n=======\ndownload please wait ... "
+wget $stable --progress=dot -q --show-progress 2>&1 |
+awk 'NF>2 && $(NF-2) ~ /%/{printf "\rdownload please wait ... %s",$(NF-2)} END{print "\rdownload please wait ... Done!"}' #download stable package
+echo -e "extracting please wait ... "
+
+#extract source
+tar -zxf $filename
+#enter source directory
+cd $sourcedir
+
+#build software
+# variables
+#example dream_one
+#
+# _compiler="aarch64-dream_one-linux-gnu-";
+# - u can use $_compiler"ar" {strip,ranlib,ld...}
+#
+# _sysroot="aarch64-dream_one-linux-gnu/sysroot/";
+# -if the source needs a sysroot
+#
+# _libsearchdir="/lib";
+# if needet on the target system
+#
+# toolchain directory
+# $tcdir
+#
+# toolchainname
+# $_toolchainname
+
+#build software
+make CC="$tcdir/$_toolchainname/bin/$_compiler""gcc" 2>&1 |grep --line-buffered -v "^make" |awk -F "CC" '{print "compile -> " "\033[32m" $NF "\033[0m" }'
+[ -d bin ] && cd bin
+
+#compress binary
+upx -9 -q vlmcs |grep vlmcs |awk '{print "compress -> " $1" "$3" "$4 }'
+upx -9 -q vlmcsd |grep vlmcsd |awk '{print "compress -> " $1" "$3" "$4 }'
+
+#move binarys & links to source-toolchainname
+[ -d "$sodir/$sourcedir-$_toolchainname" ] && rm -rf "$sodir/$sourcedir-$_toolchainname"
+mkdir -p "$sodir/$sourcedir-$_toolchainname"
+mv {vlmcs,vlmcsd} "$sodir/$sourcedir-$_toolchainname"
+
+}
+
+#check software parameter
+if [ "$1" = "vlmcsd" ]; then
+  build_vlmcsd $2
+  exit
+fi

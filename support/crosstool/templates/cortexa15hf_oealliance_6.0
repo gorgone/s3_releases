@@ -1,0 +1,10 @@
+#toolchain template: oealliance 6.0 cortexa15hf-neon-vfpv4
+#toolchain template version: 1
+OESDK_MACHINE="pulse4k"
+OESDK_OEM=""
+OESDK_DISTRO="openatv"
+OESDK_REPO_URL="https://github.com/oe-alliance/build-enviroment.git"
+OESDK_REPO_BRANCH="6.0"
+OESDK_REPO_LOCATION="oe-sdk_oealliance_${OESDK_REPO_BRANCH}"
+OESDK_SDK_EXTRAS="openssl-dev openssl-staticdev libusb1-dev libusb1-staticdev libdvbcsa-dev libdvbcsa-staticdev pcsc-lite-dev curl-dev curl-staticdev"
+OESDK_MACHINES="anadol4k anadol4kcombo anadol4kv2 anadolmulti anadolmultiboxse anadolmultitwin arivacombo arivatwin ax51 ax60 ax61 axas4kcombo axas4ktwin axashis4kcombo axashis4kcomboplus axashisc4k axmultiboxse axmulticombo axmultitwin axultra beyonwizu4 beyonwizv2 bre2ze4k dinobot4k dinobot4kelite dinobot4kl dinobot4kmini dinobot4kplus dinobot4kpro dinobot4kse dinobot4ktwin dinobotu55 dm900 dm920 dual e4hdultra ferguson4k force3uhd force3uhdplus force4 galaxy4k gbip4k gbquad4k gbquad4kpro gbtrio4k gbtrio4kpro gbue4k gbx34k gi11000 hitube4k hitube4kplus hitube4kpro ip8 iziboxelite4k iziboxone4k iziboxone4kplus iziboxx3 iziboxx4 lunix34k lunix4k maxytecmulti maxytecmultise mediabox4k mutant51 mutant60 mutant66se novaler4k novaler4kpro novaler4kse og2ott4k og2s4k osmini4k osmio4k osmio4kplus protek4k protek4kx1 protek4kx2 pulse4k pulse4kmini revo4k sf4008 sf8008 sf8008m sx88v2 sx988 tm4ksuper tmtwin4k ustym4kottpremium ustym4kpro ustym4ks2ottx vimastec1500 viper4k viper4k51 viper4kv20 viper4kv30 viper4kv40 vuduo4k vuduo4kse vusolo4k vuultimo4k vuuno4k vuuno4kse vuzero4k zgemmah102h zgemmah102s zgemmah10combo zgemmah112h zgemmah11s zgemmah17combo zgemmah17twin zgemmah7 zgemmah92h zgemmah92hse zgemmah92s zgemmah9combo zgemmah9combose zgemmah9s zgemmah9splus zgemmah9sse zgemmah9t zgemmah9twin zgemmah9twinse zgemmai55plus zgemmai55se"

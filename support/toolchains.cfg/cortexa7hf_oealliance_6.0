@@ -1,0 +1,24 @@
+_toolchainname="cortexa7hf_oealliance_6.0";
+default_use="USE_LIBCRYPTO USE_EXTRA";
+extra_use="";
+extra_cc="-mfpu=vfp -mfloat-abi=hard -mcpu=cortex-a7";
+extra_ld="-Wl,--dynamic-linker=/lib/ld-linux-armhf.so.3";
+extra_c="";
+_description="oealliance 6.0 cortexa7hf";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="arm-oe-linux-gnueabi-";
+_sysroot="sysroots/cortexa7hf-vfp-oe-linux-gnueabi";
+_libsearchdir="/usr/lib";
+_extract_strip="0";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1jb3J0ZXhhN2hmX29lYWxsaWFuY2VfNi4wLnRhci54ego=";
+_md5sum="878352d17fa63808a8e33b0b39e1a27d  Toolchain-cortexa7hf_oealliance_6.0.tar.xz";
+_machines="sfx6008 zgemmah82h zgemmah82hplus zgemmahzeros";
+_tc_info="\n
+!!! Open-Embedded-SDK Toolchain !!!\n
+\n
+oealliance 6.0 cortexa7hf\n
+arm 32-bit LE\n
+gcc 15.2.0, glibc 2.43, binutils 2.46, ld 2.46\n
+linux 6.18.0\n";
+_tc_infolines="6";

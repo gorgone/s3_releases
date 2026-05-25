@@ -1,0 +1,24 @@
+_toolchainname="mips32el_opendreambox_krogoth";
+default_use="USE_LIBCRYPTO USE_EXTRA";
+extra_use="";
+extra_cc="-mel -mabi=32 -mhard-float -march=mips32";
+extra_ld="-Wl,--dynamic-linker=/lib/ld-2.23.so";
+extra_c="";
+_description="opendreambox krogoth mips32el";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="mipsel-oe-linux-";
+_sysroot="sysroots/mips32el-oe-linux";
+_libsearchdir="/usr/lib";
+_extract_strip="0";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1taXBzMzJlbF9vcGVuZHJlYW1ib3hfa3JvZ290aC50YXIueHoK";
+_md5sum="2f11232f2110f06ee23ca07ba062cb70  Toolchain-mips32el_opendreambox_krogoth.tar.xz";
+_machines="dm500hdv2 dm520 dm7020hd dm7020hdv2 dm7080 dm8000 dm800sev2 dm820 qemumipsel";
+_tc_info="\n
+!!! Open-Embedded-SDK Toolchain !!!\n
+\n
+opendreambox krogoth mips32el\n
+mips 32-bit LE\n
+gcc 5.3.0, glibc 2.23, binutils 2.26.0, ld 2.26.0\n
+linux 4.4.0\n";
+_tc_infolines="6";

@@ -1,0 +1,19 @@
+_toolchainname="igel_x86";
+default_use="USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="";
+_description="Igel VIA VX855, x86 devices";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="i686-igel-linux-gnu-";
+_sysroot="i686-igel-linux-gnu/sysroot";
+_libsearchdir="/usr/lib";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1pZ2VsX3g4Ni50YXIueHoK";
+_md5sum="ac2e27c58889862ee921653c9164aad1  Toolchain-igel_x86.tar.xz";
+_tc_info="\n
+!!! crosstool-NG Toolchain !!!\n
+\n
+Igel VIA VX855, x86 devices\n
+x86 i686 32-bit LE, glibc 2.28, gcc 13.2.0, linux 6.5.5\n";
+_tc_infolines="5";

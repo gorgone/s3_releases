@@ -1,0 +1,26 @@
+_toolchainname="armv7_generic";
+default_use="USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="";
+extra_c="-mfpu=vfpv3-d16"; #special optimization for HiSilicon MV430 devices
+_description="armv7 stb's (generic)";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="arm-buildroot-linux-gnueabihf-";
+_sysroot="arm-buildroot-linux-gnueabihf/sysroot";
+_libsearchdir="/usr/lib";
+_extract_strip="1";
+_toolchainfilename="aHR0cHM6Ly90b29sY2hhaW5zLmJvb3RsaW4uY29tL2Rvd25sb2Fkcy9yZWxlYXNlcy90b29sY2hhaW5zL2FybXY3LWVhYmloZi90YXJiYWxscy9hcm12Ny1lYWJpaGYtLWdsaWJjLS1zdGFibGUtMjAxOC4xMS0xLnRhci5iejI=";
+_md5sum="cf6286d326c14d6a51ba05c33c8218a0  armv7-eabihf--glibc--stable-2018.11-1.tar.bz2";
+_tc_info="!!! Bootlin Stable Toolchain 2018.11-1 !!!\n
+\n
+generic cross toolchain for armv7eabihf devices\n
+\n
+arch armv7\n
+glibc 2.27\n
+gcc 7.3.0\n
+gdb 7.12.1\n
+linux 4.1.52\n
+binutils 2.29.1\n";
+_tc_infolines="10";

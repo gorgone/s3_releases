@@ -1,0 +1,10 @@
+#toolchain template: openpli scarthgap cortexa15hf-neon-vfpv4
+#toolchain template version: 1
+OESDK_MACHINE="pulse4k"
+OESDK_OEM=""
+OESDK_DISTRO="openpli"
+OESDK_REPO_URL="https://github.com/OpenPLi/openpli-oe-core.git"
+OESDK_REPO_BRANCH="scarthgap"
+OESDK_REPO_LOCATION="oe-sdk_openpli_${OESDK_REPO_BRANCH}"
+OESDK_SDK_EXTRAS="openssl-dev openssl-staticdev libusb1-dev libusb1-staticdev libdvbcsa-dev libdvbcsa-staticdev pcsc-lite-dev curl-dev curl-staticdev"
+OESDK_MACHINES="bre2ze4k dual e4hd gbquad4k gbquad4kpro gbtrio4k gbue4k h10 h11 h17 h17twin h7 h9 h9combo h9combose h9se hd51 hd60 hd61 hd66se i55plus i55se multibox multiboxpro multiboxse pulse4k pulse4kmini sf8008 sf8008m sx88v2 ustym4kpro ustym4ks2ottx vs1500"

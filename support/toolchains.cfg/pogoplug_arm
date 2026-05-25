@@ -1,0 +1,19 @@
+_toolchainname="pogoplug_arm";
+default_use="USE_LIBCRYPTO";
+extra_use="";
+extra_cc="";
+extra_ld="";
+_description="Marvell Kirkwood devices, Pogoplug V2";
+_oscamconfdir_default="/etc/tuxbox/config";
+_oscamconfdir_custom="";
+_compiler="arm-pogoplug-linux-gnueabi-";
+_sysroot="arm-pogoplug-linux-gnueabi/sysroot";
+_libsearchdir="/usr/lib";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zLyR7cHZlcnNpb259L1Rvb2xjaGFpbi1wb2dvcGx1Z19hcm0udGFyLnh6Cg==";
+_md5sum="ab560b964a9d07dadacc2a2d40e7967e  Toolchain-pogoplug_arm.tar.xz";
+_tc_info="\n
+!!! crosstool-NG Toolchain !!!\n
+\n
+Marvell Kirkwood devices, Pogoplug V2\n
+arm armv5te 32-bit LE, glibc 2.24, gcc 13.2.0, linux 6.5.5\n";
+_tc_infolines="5";

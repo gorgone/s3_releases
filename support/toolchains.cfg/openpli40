@@ -1,5 +1,5 @@
 _toolchainname="openpli40"
-default_use="USE_UTF8 USE_LIBCRYPTO";
+default_use="USE_LIBCRYPTO";
 _description="Openpli Dreambox Vu+ and other"
 _oscamconfdir_default="/usr/keys"
 _oscamconfdir_custom=""
@@ -7,7 +7,7 @@ _oscamconfdir_custom=""
 _compiler="mipsel-openpli40-linux-gnu-"
 _sysroot="mipsel-openpli40-linux-gnu/sysroot"
 _libsearchdir="/lib"
-_toolchainfilename="T3BlblBMSV80LjAudGFyLnh6";
+_toolchainfilename="aHR0cHM6Ly9zaW1wbGVidWlsZC5kZWR5bi5pby90b29sY2hhaW5zL2xlZ2FjeS9Ub29sY2hhaW4tT3BlblBMSV80LjAudGFyLnh6Cg==";
 _md5sum="ceae5af8c66867010845e0e4094265ff  Toolchain-OpenPLI_4.0.tar.xz";
 _tc_info="\n
     !!! beware the box must have FPU !!!\n
